@@ -1,7 +1,9 @@
 """ @Mesh_Class
 Module describing a Mesh
 """
-import numpy as np
+from numpy import abs, apply_along_axis, cumsum, diff, divide, expand_dims, float64
+from numpy import minimum, ndim
+from numpy import r_, s_, searchsorted, size, squeeze, sum, take, take_along_axis, where, zeros_like
 from ...classes.core.myObject import myObject
 from ...base.utilities import _log as log_
 from ...base.utilities import _power as power_
@@ -49,9 +51,9 @@ class Mesh(myObject):
         Contains the upper interval along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        percent = 0.5 * np.minimum(percent, 100.0-percent)
-        tmp = self._percentile(values=values, percent=np.r_[50.0, percent, 100.0-percent], axis=axis)
-        return np.take(tmp, 0, axis), np.take(tmp, 1, axis), np.take(tmp, 2, axis)
+        percent = 0.5 * minimum(percent, 100.0-percent)
+        tmp = self._percentile(values=values, percent=r_[50.0, percent, 100.0-percent], axis=axis)
+        return take(tmp, 0, axis), take(tmp, 1, axis), take(tmp, 2, axis)
 
     def _credible_range(self, values, percent=90.0, log=None, axis=0):
         """ Get the range of credibility
@@ -69,29 +71,29 @@ class Mesh(myObject):
             Axis along which to get the marginal histogram.
 
         """
-        percent = 0.5 * np.minimum(percent, 100.0 - percent)
-        tmp = self._percentile(values, np.r_[percent, 100.0 - percent], axis=axis)
+        percent = 0.5 * minimum(percent, 100.0 - percent)
+        tmp = self._percentile(values, r_[percent, 100.0 - percent], axis=axis)
         if self.axis(axis).log is not None:
             tmp, _ = log_(tmp, log=self.axis(axis).log)
-        return np.squeeze(np.abs(np.diff(tmp, axis=axis)))
+        return squeeze(abs(diff(tmp, axis=axis)))
 
     def _mean(self, counts, axis=0):
         ax = self.axis(axis)
-        s = tuple([np.s_[:] if i == axis else None for i in range(self.ndim)])
+        s = tuple([s_[:] if i == axis else None for i in range(self.ndim)])
 
-        t = np.sum(ax.centres[s] * counts, axis = axis)
+        t = sum(ax.centres[s] * counts, axis = axis)
         N = counts.sum(axis = axis)
 
         if t.size == 1:
             out = t / N
         else:
-            i = np.where(N > 0.0)
+            i = where(N > 0.0)
             out = StatArray.StatArray(t.shape)
             out[i] = (t[i] / N[i])
 
 
         if ax._relativeTo is not None:
-            nd = np.ndim(ax.relativeTo)
+            nd = ndim(ax.relativeTo)
             ns = ax.relativeTo.size
             if nd == 2:
                 out[i] += ax.relativeTo[i]
@@ -99,7 +101,7 @@ class Mesh(myObject):
                 if ns == 1:
                     out[i] += ax.relativeTo
                 else:
-                    if np.ndim(i) == 2:
+                    if ndim(i) == 2:
                         out[i] += ax.relativeTo[i[0]]
                     else:
                         out[i] += ax.relativeTo[i]
@@ -159,14 +161,14 @@ class Mesh(myObject):
         # total of the counts
         total = values.sum(axis=axis)
         # Cumulative sum
-        cs = np.cumsum(values, axis=axis)
+        cs = cumsum(values, axis=axis)
         # Cumulative "probability"
-        d = np.expand_dims(total, axis)
-        tmp = np.zeros_like(cs, dtype=np.float64)
-        np.divide(cs, d, out=tmp, where=d > 0.0)
+        d = expand_dims(total, axis)
+        tmp = zeros_like(cs, dtype=float64)
+        divide(cs, d, out=tmp, where=d > 0.0)
 
         # Find the interval
-        i = np.apply_along_axis(np.searchsorted, axis, tmp, percent)
+        i = apply_along_axis(searchsorted, axis, tmp, percent)
         i[i == values.shape[axis]] = values.shape[axis]-1
 
         # Obtain the values at those locations
@@ -174,14 +176,14 @@ class Mesh(myObject):
         if self.ndim == 1:
             return self.centres_absolute[i]
         else:
-            if np.size(percent) == 1:
-                i = np.expand_dims(i, axis)
-            return np.squeeze(np.take_along_axis(self.centres(axis), i, axis=axis))
-            # return np.squeeze(ax.centres_absolute[i])
+            if size(percent) == 1:
+                i = expand_dims(i, axis)
+            return squeeze(take_along_axis(self.centres(axis), i, axis=axis))
+            # return squeeze(ax.centres_absolute[i])
 
 
     def remove_axis(self, axis):
-        tmp = [np.s_[:] for i in range(self.ndim)]
+        tmp = [s_[:] for i in range(self.ndim)]
         tmp[axis] = 0
         tmp = tuple(tmp)
         return self[tmp]

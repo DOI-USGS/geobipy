@@ -2,12 +2,15 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import deepcopy
+from numpy import dot, empty, expand_dims, int32, integer
+from numpy import max,  min, ndim, outer, prod, ravel_multi_index
+from numpy import repeat, s_, size, squeeze, swapaxes, take, unravel_index
+from numpy import where, zeros
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from .RectilinearMesh2D import RectilinearMesh2D
-import numpy as np
 from scipy.stats import binned_statistic
 from ...base import utilities
 from scipy.sparse import kron
@@ -72,19 +75,19 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.z = kwargs if z is None else z
 
         # if self.x._relativeTo is not None:
-        #     assert np.all(self.x.relativeTo.shape == self.shape[1:]), "x axis relative to must have shape {} but has shape {}".format(self.shape[1:], self.x.relativeTo.shape)
+        #     assert all(self.x.relativeTo.shape == self.shape[1:]), "x axis relative to must have shape {} but has shape {}".format(self.shape[1:], self.x.relativeTo.shape)
 
         # if self.y._relativeTo is not None:
-        #     assert np.all(self.y.relativeTo.shape == self.shape[::2]), "y axis relative to must have shape {} but has shape {}".format(self.shape[::2], self.y.relativeTo.shape)
+        #     assert all(self.y.relativeTo.shape == self.shape[::2]), "y axis relative to must have shape {} but has shape {}".format(self.shape[::2], self.y.relativeTo.shape)
 
         # if self.z._relativeTo is not None:
-        #     assert np.all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {} but has shape {}".format(self.shape[:2], self.z.relativeTo.shape)
+        #     assert all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {} but has shape {}".format(self.shape[:2], self.z.relativeTo.shape)
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
         axis = []
         for i, x in enumerate(slic):
-            if isinstance(x, (np.integer, int)):
+            if isinstance(x, (integer, int)):
                 axis.append(i)
 
         assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
@@ -94,8 +97,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
             y = self.y[slic[1]]
             z = self.z[slic[2]]
             if x._relativeTo is not None:
-                nd = np.ndim(x.relativeTo)
-                slc = np.s_[:]
+                nd = ndim(x.relativeTo)
+                slc = s_[:]
                 if nd == 2:
                     slc = slic[1:]
                 elif nd == 1:
@@ -108,8 +111,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
                 x.relativeTo = x.relativeTo[slc]
 
             if y._relativeTo is not None:
-                nd = np.ndim(y.relativeTo)
-                slc = np.s_[:]
+                nd = ndim(y.relativeTo)
+                slc = s_[:]
                 if nd == 2:
                     slc = slic[::2]
                 elif nd == 1:
@@ -122,8 +125,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
                 y.relativeTo = y.relativeTo[slc]
 
             if z._relativeTo is not None:
-                nd = np.ndim(z.relativeTo)
-                slc = np.s_[:]
+                nd = ndim(z.relativeTo)
+                slc = s_[:]
                 if nd == 2:
                     slc = slic[:2]
                 elif nd == 1:
@@ -155,7 +158,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
                             axis = 0
                         if b[0] == 2:
                             axis = 'OOPS'
-                    x.relativeTo = np.take(x.relativeTo, slic[b[0]], axis)
+                    x.relativeTo = take(x.relativeTo, slic[b[0]], axis)
 
             y = deepcopy(self.axis(a[1]))
             if y._relativeTo is not None:
@@ -171,7 +174,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
                         elif b[0] == 1:
                             axis = 1
 
-                    y.relativeTo = np.take(y.relativeTo, slic[b[0]], axis)
+                    y.relativeTo = take(y.relativeTo, slic[b[0]], axis)
 
             x = x[slic[a[0]]]
             x.dimension = 0
@@ -214,47 +217,47 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     @property
     def area(self):
-        return np.outer(self.x.widths, self.y.widths)[:, :, None] * self.z.widths
+        return outer(self.x.widths, self.y.widths)[:, :, None] * self.z.widths
 
     @property
     def x_centres(self):
         out = self.x.centres_absolute
-        nd = np.ndim(out)
+        nd = ndim(out)
         if nd == 3:
             return out
         elif nd == 2:
-            return np.repeat(out[:, :, None], self.z.nCells, 2)
+            return repeat(out[:, :, None], self.z.nCells, 2)
         elif nd == 1:
-            return np.repeat(np.repeat(out[:, None], self.y.nCells, 1)[:, :, None], self.z.nCells, 2)
+            return repeat(repeat(out[:, None], self.y.nCells, 1)[:, :, None], self.z.nCells, 2)
 
     @property
     def y_centres(self):
         out = self.y.centres_absolute
-        nd = np.ndim(out)
+        nd = ndim(out)
         if nd == 3:
             return out
         elif nd == 2:
-            return np.repeat(out[:, :, None], self.z.nCells, 2)
+            return repeat(out[:, :, None], self.z.nCells, 2)
         elif nd == 1:
-            return np.repeat(np.repeat(out[None, :], self.x.nCells, 0)[:, :, None], self.z.nCells, 2)
+            return repeat(repeat(out[None, :], self.x.nCells, 0)[:, :, None], self.z.nCells, 2)
 
     @property
     def z_centres(self):
         out = self.z.centres_absolute
-        nd = np.ndim(out)
+        nd = ndim(out)
         if nd == 3:
             return out
         # elif nd == 2:
-            # return np.repeat(out[:, :, None], self.z.nCells, 2)
+            # return repeat(out[:, :, None], self.z.nCells, 2)
         elif nd == 1:
-            return np.repeat(np.repeat(out[None, :], self.y.nCells, 0)[None, :, :], self.x.nCells, 0)
+            return repeat(repeat(out[None, :], self.y.nCells, 0)[None, :, :], self.x.nCells, 0)
 
     @property
     def x_edges(self):
         re_tmp = None
         if self.x._relativeTo is not None:
             re_tmp = deepcopy(self.x.relativeTo)
-            nd = np.ndim(self.x.relativeTo)
+            nd = ndim(self.x.relativeTo)
             if nd == 2:
                 mesh = self.remove_axis(0)
                 re_nodes = mesh.interpolate_centres_to_nodes(self.x.relativeTo)
@@ -265,13 +268,13 @@ class RectilinearMesh3D(RectilinearMesh2D):
         if re_tmp is not None:
             self.x.relativeTo = re_tmp
 
-        nd = np.ndim(out)
+        nd = ndim(out)
         if nd == 3:
             return out
         elif nd == 2:
-            return np.repeat(out[:, :, None], self.z.nEdges, 2)
+            return repeat(out[:, :, None], self.z.nEdges, 2)
         elif nd == 1:
-            return np.repeat(np.repeat(out[:, None], self.y.nEdges, 1)[:, :, None], self.z.nEdges, 2)
+            return repeat(repeat(out[:, None], self.y.nEdges, 1)[:, :, None], self.z.nEdges, 2)
 
 
     @property
@@ -279,7 +282,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         re_tmp = None
         if self.y._relativeTo is not None:
             re_tmp = deepcopy(self.y.relativeTo)
-            nd = np.ndim(self.y.relativeTo)
+            nd = ndim(self.y.relativeTo)
             if nd == 2:
                 mesh = self.remove_axis(1)
                 re_nodes = mesh.interpolate_centres_to_nodes(self.y.relativeTo)
@@ -290,20 +293,20 @@ class RectilinearMesh3D(RectilinearMesh2D):
         if re_tmp is not None:
             self.y.relativeTo = re_tmp
 
-        nd = np.ndim(out)
+        nd = ndim(out)
         if nd == 3:
             return out
         elif nd == 2:
-            return np.repeat(out[:, :, None], self.z.nEdges, 2)
+            return repeat(out[:, :, None], self.z.nEdges, 2)
         elif nd == 1:
-            return np.repeat(np.repeat(out[None, :], self.x.nEdges, 0)[:, :, None], self.z.nEdges, 2)
+            return repeat(repeat(out[None, :], self.x.nEdges, 0)[:, :, None], self.z.nEdges, 2)
 
     @property
     def z_edges(self):
 
         re_tmp = None
         if self.z._relativeTo is not None:
-            nd = np.ndim(self.z.relativeTo)
+            nd = ndim(self.z.relativeTo)
             if nd == 2:
                 re_tmp = deepcopy(self.z.relativeTo)
                 mesh = self.remove_axis(2)
@@ -315,20 +318,20 @@ class RectilinearMesh3D(RectilinearMesh2D):
         if re_tmp is not None:
             self.z.relativeTo = re_tmp
 
-        if np.ndim(out) == 1:
-            return np.repeat(np.repeat(out[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
+        if ndim(out) == 1:
+            return repeat(repeat(out[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
 
         return out
 
 
         # out = self.z.edges_absolute
-        # nd = np.ndim(out)
+        # nd = ndim(out)
         # if nd == 3:
         #     return out
         # # elif nd == 2:
-        #     # return np.repeat(out[:, :, None], self.z.nCells, 2)
+        #     # return repeat(out[:, :, None], self.z.nCells, 2)
         # elif nd == 1:
-        #     return np.repeat(np.repeat(out[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
+        #     return repeat(repeat(out[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
 
     @property
     def z(self):
@@ -350,7 +353,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self._z = values
 
         # if self.z._relativeTo is not None:
-        #     assert np.all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
+        #     assert all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
 
     def other_axis(self, axis):
 
@@ -397,7 +400,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             Number of cells
 
         """
-        return np.prod(self.shape)
+        return prod(self.shape)
 
     @property
     def ndim(self):
@@ -432,7 +435,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         fig = kwargs.pop('fig', plt.figure(figsize=(9, 9)))
 
         if slic is None:
-            slic = [np.s_[:] for i in range(self.ndim)]
+            slic = [s_[:] for i in range(self.ndim)]
         else:
             slic = list(slic)
 
@@ -446,7 +449,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         ax, pc, cb = sub.pcolor(values=sub_v, **kwargs)
 
         tmp, _ = utilities._log(values, kwargs.get('log', None))
-        pc.set_clim(np.min(tmp), np.max(tmp))
+        pc.set_clim(min(tmp), max(tmp))
 
         kwargs['colorbar'] = False
 
@@ -473,7 +476,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         shp = list(self.shape)
         shp[axis] = distribution.ndim
 
-        probability = np.zeros(shp)
+        probability = zeros(shp)
 
         track = kwargs.pop('track', True)
 
@@ -486,11 +489,11 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         for i in r:
             j = list(mesh_2d.unravelIndex(i))
-            j.insert(axis, np.s_[:])
+            j.insert(axis, s_[:])
             j = tuple(j)
             p = distribution.probability(centres[j], log_probability)
-            probability[j] = np.dot(p, pdf[j])
-        probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
+            probability[j] = dot(p, pdf[j])
+        probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
         return StatArray.StatArray(probability, name='marginal_probability')
 
@@ -525,14 +528,14 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     # def xGradientMatrix(self):
     #     tmp = self.x.gradientMatrix()
-    #     return kron(np.diag(np.sqrt(self.z.cellWidths)), tmp)
+    #     return kron(diag(sqrt(self.z.cellWidths)), tmp)
 
 
     # def zGradientMatrix(self):
     #     nx = self.x.nCells
     #     nz = self.z.nCells
-    #     tmp = 1.0 / np.sqrt(rm2.x.centreTocentre)
-    #     a = np.repeat(tmp, nz) * np.tile(np.sqrt(rm2.z.cellWidths), nx-1)
+    #     tmp = 1.0 / sqrt(rm2.x.centreTocentre)
+    #     a = repeat(tmp, nz) * tile(sqrt(rm2.z.cellWidths), nx-1)
     #     return diags([a, -a], [0, nx], shape=(nz * (nx-1), nz*nz))
 
 
@@ -587,7 +590,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     #     """
 
-    #     assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
+    #     assert size(intervals) > 1, ValueError("intervals must have size > 1")
 
     #     intervals = self._reconcile_intervals(intervals, axis=axis)
 
@@ -603,19 +606,19 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     # def _reconcile_intervals(self, intervals, axis=0):
 
-    #     assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
+    #     assert size(intervals) > 1, ValueError("intervals must have size > 1")
 
     #     ax
 
     #     if (axis == 0):
     #         # Make sure the intervals are within the axis.
-    #         i0 = np.maximum(0, np.searchsorted(intervals, self.z.edges[0]))
-    #         i1 = np.minimum(self.z.nCells, np.searchsorted(intervals, self.z.edges[-1])+1)
+    #         i0 = maximum(0, searchsorted(intervals, self.z.edges[0]))
+    #         i1 = minimum(self.z.nCells, searchsorted(intervals, self.z.edges[-1])+1)
     #         intervals = intervals[i0:i1]
 
     #     else:
-    #         i0 = np.maximum(0, np.searchsorted(intervals, self.x.edges[0]))
-    #         i1 = np.minimum(self.x.nCells, np.searchsorted(intervals, self.x.edges[-1])+1)
+    #         i0 = maximum(0, searchsorted(intervals, self.x.edges[0]))
+    #         i1 = minimum(self.x.nCells, searchsorted(intervals, self.x.edges[-1])+1)
     #         intervals = intervals[i0:i1]
 
     #     return intervals
@@ -641,20 +644,20 @@ class RectilinearMesh3D(RectilinearMesh2D):
             indices for the locations along [axis0, axis1]
 
         """
-        assert (np.size(x) == np.size(y) == np.size(z)), ValueError("x, y, z must have the same size")
+        assert (size(x) == size(y) == size(z)), ValueError("x, y, z must have the same size")
         if trim:
             flag = self.x.inBounds(x) & self.y.inBounds(y) & self.z.inBounds(z)
-            i = np.where(flag)[0]
-            out = np.empty([3, i.size], dtype=np.int32)
+            i = where(flag)[0]
+            out = empty([3, i.size], dtype=int32)
             out[0, :] = self.x.cellIndex(x[i])
             out[1, :] = self.y.cellIndex(y[i])
             out[2, :] = self.z.cellIndex(z[i])
         else:
-            out = np.empty([3, np.size(x)], dtype=np.int32)
+            out = empty([3, size(x)], dtype=int32)
             out[0, :] = self.x.cellIndex(x, clip=clip)
             out[1, :] = self.y.cellIndex(y, clip=clip)
             out[2, :] = self.z.cellIndex(z, clip=clip)
-        return np.squeeze(out)
+        return squeeze(out)
 
     # def _mean(self, values, axis=0):
 
@@ -662,17 +665,17 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #     if a._relativeTo is None:
     #         return super()._mean(values, axis)
 
-    #     s = tuple([np.s_[:] if i == axis else None for i in range(self.ndim)])
+    #     s = tuple([s_[:] if i == axis else None for i in range(self.ndim)])
 
     #     centres = self.centres_absolute(axis)
 
-    #     t = np.sum(centres * values, axis = axis)
+    #     t = sum(centres * values, axis = axis)
     #     s = values.sum(axis = axis)
 
-    #     if np.size(t) == 1:
+    #     if size(t) == 1:
     #         out = t / s
     #     else:
-    #         i = np.where(s > 0.0)
+    #         i = where(s > 0.0)
     #         out = StatArray.StatArray(t.shape)
     #         out[i] = t[i] / s[i]
 
@@ -705,20 +708,20 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #     # total of the counts
     #     total = values.sum(axis=axis)
     #     # Cumulative sum
-    #     cs = np.cumsum(values, axis=axis)
+    #     cs = cumsum(values, axis=axis)
     #     # Cumulative "probability"
-    #     d = np.expand_dims(total, axis)
-    #     tmp = np.zeros_like(cs, dtype=np.float64)
-    #     np.divide(cs, d, out=tmp, where=d > 0.0)
+    #     d = expand_dims(total, axis)
+    #     tmp = zeros_like(cs, dtype=float64)
+    #     divide(cs, d, out=tmp, where=d > 0.0)
     #     # Find the interval
-    #     i = np.apply_along_axis(np.searchsorted, axis, tmp, percent)
+    #     i = apply_along_axis(searchsorted, axis, tmp, percent)
     #     i[i == values.shape[axis]] = values.shape[axis]-1
 
     #     centres = self.centres(axis)
 
-    #     if np.size(percent) == 1:
-    #         i = np.expand_dims(i, axis=axis)
-    #     return np.squeeze(np.take_along_axis(centres, i, axis=axis))
+    #     if size(percent) == 1:
+    #         i = expand_dims(i, axis=axis)
+    #     return squeeze(take_along_axis(centres, i, axis=axis))
 
 
     def plotGrid(self):
@@ -740,7 +743,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             Global index.
 
         """
-        return np.ravel_multi_index(indices, self.shape, order=order)
+        return ravel_multi_index(indices, self.shape, order=order)
 
     def unravelIndex(self, index, order='C'):
         """Return local indices given a global one.
@@ -758,7 +761,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         """
 
-        return np.unravel_index(index, self.shape, order=order)
+        return unravel_index(index, self.shape, order=order)
 
 
     # def pcolor(self, values, x='x', **kwargs):
@@ -811,7 +814,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     #     """
 
-    #     assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+    #     assert all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
 
     #     xtmp = self.axis(x)
 
@@ -831,9 +834,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         import pyvista as pv
 
-        x = np.swapaxes(self.x_edges, 0, 1)
-        y = np.swapaxes(self.y_edges, 0, 1)
-        z = np.swapaxes(self.z_edges, 0, 1)
+        x = swapaxes(self.x_edges, 0, 1)
+        y = swapaxes(self.y_edges, 0, 1)
+        z = swapaxes(self.z_edges, 0, 1)
 
         mesh = pv.StructuredGrid(x, y, z)
 
@@ -894,13 +897,13 @@ class RectilinearMesh3D(RectilinearMesh2D):
             z.dimension = 2
 
             if y._relativeTo is not None:
-                nd = np.ndim(y.relativeTo)
+                nd = ndim(y.relativeTo)
                 if nd == 1:
-                    y.relativeTo = np.repeat(y.relativeTo[:, None], z.nCells, 1)
+                    y.relativeTo = repeat(y.relativeTo[:, None], z.nCells, 1)
             if z._relativeTo is not None:
-                nd = np.ndim(z.relativeTo)
+                nd = ndim(z.relativeTo)
                 if nd == 1:
-                    z.relativeTo = np.repeat(z.relativeTo[:, None], y.nCells, 1)
+                    z.relativeTo = repeat(z.relativeTo[:, None], y.nCells, 1)
 
             out = cls(x=x, y=y, z=z)
         else:
@@ -957,15 +960,15 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #     nNodes = self.x.nEdges * self.z.nEdges
 
     #     # Constuct the node locations for the vtk file
-    #     nodes = np.empty([nNodes, 3])
-    #     nodes[:, 0] = np.tile(x, self.z.nEdges)
-    #     nodes[:, 1] = np.tile(y, self.z.nEdges)
-    #     nodes[:, 2] = np.repeat(z, self.x.nEdges)
+    #     nodes = empty([nNodes, 3])
+    #     nodes[:, 0] = tile(x, self.z.nEdges)
+    #     nodes[:, 1] = tile(y, self.z.nEdges)
+    #     nodes[:, 2] = repeat(z, self.x.nEdges)
 
-    #     tmp = np.int32([0, 1, self.x.nEdges+1, self.x.nEdges])
-    #     a = np.ones(self.x.nCells, dtype=np.int32)
+    #     tmp = int32([0, 1, self.x.nEdges+1, self.x.nEdges])
+    #     a = ones(self.x.nCells, dtype=int32)
     #     a[0] = 2
-    #     index = (np.repeat(tmp[:, np.newaxis], nCells, 1) + np.cumsum(np.tile(a, self.z.nCells))-2).T
+    #     index = (repeat(tmp[:, newaxis], nCells, 1) + cumsum(tile(a, self.z.nCells))-2).T
 
     #     return VtkData(PolyData(points=nodes, polygons=index))
 
@@ -1017,7 +1020,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #         if isinstance(cellData, list):
     #             for p in cellData:
     #                 assert isinstance(p, StatArray.StatArray), TypeError("cellData entries must be a geobipy.StatArray")
-    #                 assert np.all(p.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
+    #                 assert all(p.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
     #                 assert p.hasLabels(), ValueError("StatArray needs a name")
     #                 vtk.cell_data.append(Scalars(p.reshape(self.nCells), p.getNameUnits()))
     #         else:

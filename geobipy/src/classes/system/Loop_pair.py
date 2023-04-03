@@ -86,7 +86,6 @@ class Loop_pair(Point, PointCloud3D):
         self.receiver.perturb()
 
     def set_priors(self, **kwargs):
-
         transmitter_kwargs = {k.replace('transmitter_', ''): kwargs.get(k, False) for k in kwargs.keys() if 'transmitter' in k}
         transmitter_kwargs['prng'] = kwargs.get('prng')
         self.transmitter.set_priors(**transmitter_kwargs)
@@ -150,25 +149,23 @@ class Loop_pair(Point, PointCloud3D):
         ax = []
         i = 0
         if self.transmitter.hasPosteriors:
-            tmp = self.transmitter._init_posterior_plots(splt[i])
+            ax.append(self.transmitter._init_posterior_plots(splt[i]))
             i += 1
-            ax.append(tmp)
 
         if super().hasPosteriors:
-            tmp = super()._init_posterior_plots(splt[i])
+            ax.append(super()._init_posterior_plots(splt[i]))
             i += 1
-            ax.append(tmp)
 
         # Reciever axes
         if self.receiver.hasPosteriors:
-            tmp = self.receiver._init_posterior_plots(splt[i])
-            ax.append(tmp)
+            ax.append(self.receiver._init_posterior_plots(splt[i]))
 
         return ax
 
     def plot_posteriors(self, axes=None, **kwargs):
 
-        if not self.hasPosteriors:
+        n_posteriors = self.transmitter.hasPosteriors + self.hasPosteriors + self.receiver.hasPosteriors
+        if n_posteriors == 0:
             return
 
         if axes is None:

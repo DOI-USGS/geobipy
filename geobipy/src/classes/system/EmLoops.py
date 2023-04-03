@@ -1,5 +1,5 @@
 from copy import deepcopy
-import numpy as np
+from numpy import asarray, int32, size, unique
 from ..pointcloud.PointCloud3D import PointCloud3D
 from ..core import StatArray
 from .EmLoop import EmLoop
@@ -38,8 +38,8 @@ class EmLoops(PointCloud3D, ABC):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("moment must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("moment must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._moment = deepcopy(values)
                 return
@@ -56,8 +56,8 @@ class EmLoops(PointCloud3D, ABC):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("pitch must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("pitch must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._pitch = deepcopy(values)
                 return
@@ -74,8 +74,8 @@ class EmLoops(PointCloud3D, ABC):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("roll must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("roll must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._roll = deepcopy(values)
                 return
@@ -92,8 +92,8 @@ class EmLoops(PointCloud3D, ABC):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("yaw must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("yaw must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._yaw = deepcopy(values)
                 return
@@ -112,11 +112,11 @@ class EmLoops(PointCloud3D, ABC):
         else:
             tmp = {'x': 0, 'y':1, 'z':2}
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("orientation must have size {}".format(self.nPoints))
-            values = np.asarray([tmp[x.replace(" ", "")] for x in values])
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("orientation must have size {}".format(self.nPoints))
+            values = asarray([tmp[x.replace(" ", "")] for x in values])
 
-        self._orientation = StatArray.StatArray(values, "Orientation", dtype=np.int32)
+        self._orientation = StatArray.StatArray(values, "Orientation", dtype=int32)
 
     @property
     def summary(self):
@@ -152,7 +152,7 @@ class EmLoops(PointCloud3D, ABC):
 
         """
         out = super().__getitem__(i)
-        i = np.unique(i)
+        i = unique(i)
 
         out._orientation = self._orientation[i]
         out._moment = self.moment[i]
@@ -211,7 +211,7 @@ class EmLoops(PointCloud3D, ABC):
         return out
 
     def Isend(self, dest, world):
-    
+
         super().Isend(dest, world)
 
         self.pitch.Isend(dest, world)
@@ -231,4 +231,3 @@ class EmLoops(PointCloud3D, ABC):
         out._moment = StatArray.StatArray.Irecv(source, world)
 
         return out
-

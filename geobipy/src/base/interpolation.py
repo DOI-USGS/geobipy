@@ -1,5 +1,8 @@
 import subprocess
-import numpy as np
+
+from numpy import argwhere, column_stack, diff, floor, inf, linspace, meshgrid
+from numpy import nan, nanmax, nanmin, tile, zeros
+
 from .fileIO import deleteFile
 from ..classes.core import StatArray
 from . import utilities as cf
@@ -59,9 +62,9 @@ except:
 #     if y_grid is None:
 #         y_grid = centred_grid_nodes(bounds[2:], dy)
 
-#     values[values == np.inf] = np.nan
-#     mn = np.nanmin(values)
-#     mx = np.nanmax(values)
+#     values[values == inf] = nan
+#     mn = nanmin(values)
+#     mx = nanmax(values)
 
 #     values -= mn
 #     if (mx - mn) != 0.0:
@@ -86,19 +89,19 @@ except:
 
 #     # Use distance masking
 #     if mask:
-#         g = np.meshgrid(xc, yc)
+#         g = meshgrid(xc, yc)
 #         xi = _ndim_coords_from_arrays(tuple(g), ndim=XY.shape[1])
 #         dists, indexes = kdt.query(xi)
-#         vals[dists > mask] = np.nan
+#         vals[dists > mask] = nan
 
 #     # Truncate values to the observed values
 #     if (clip):
-#         minV = np.nanmin(values)
-#         maxV = np.nanmax(values)
-#         mask = ~np.isnan(vals)
+#         minV = nanmin(values)
+#         maxV = nanmax(values)
+#         mask = ~isnan(vals)
 #         mask[mask] &= vals[mask] < minV
 #         vals[mask] = minV
-#         mask = ~np.isnan(vals)
+#         mask = ~isnan(vals)
 #         mask[mask] &= vals[mask] > maxV
 #         vals[mask] = maxV
 
@@ -107,9 +110,9 @@ except:
 #         extrapolate = extrapolate.lower()
 #         if (extrapolate == 'nearest'):
 #             # Get the indices of the nans
-#             iNan = np.argwhere(np.isnan(vals))
+#             iNan = argwhere(isnan(vals))
 #             # Create Query locations from the nans
-#             xi =  np.zeros([iNan.shape[0],2])
+#             xi =  zeros([iNan.shape[0],2])
 #             xi[:,0]=x[iNan[:,1]]
 #             xi[:,1]=y[iNan[:,0]]
 #             # Get the nearest neighbours
@@ -130,9 +133,9 @@ except:
 
 #     from pygmt import surface
 
-#     values[values == np.inf] = np.nan
-#     mn = np.nanmin(values)
-#     mx = np.nanmax(values)
+#     values[values == inf] = nan
+#     mn = nanmin(values)
+#     mx = nanmax(values)
 
 #     values -= mn
 #     if (mx - mn) != 0.0:
@@ -146,13 +149,13 @@ except:
 #     xc = StatArray.StatArray(x_grid, name=cf.getName(x), units=cf.getUnits(x))
 #     yc = StatArray.StatArray(y_grid, name=cf.getName(y), units=cf.getUnits(y))
 
-#     bounds = np.r_[x_grid[0], x_grid[-1], y_grid[0], y_grid[-1]]
-#     dx = np.abs(x_grid[1] - x_grid[0])
-#     dy = np.abs(y_grid[1] - y_grid[0])
+#     bounds = r_[x_grid[0], x_grid[-1], y_grid[0], y_grid[-1]]
+#     dx = abs(x_grid[1] - x_grid[0])
+#     dy = abs(y_grid[1] - y_grid[0])
 
 #     if clip:
-#         clip_min = kwargs.pop('clip_min', np.nanmin(values))
-#         clip_max = kwargs.pop('clip_max', np.nanmax(values))
+#         clip_min = kwargs.pop('clip_min', nanmin(values))
+#         clip_max = kwargs.pop('clip_max', nanmax(values))
 #         xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=bounds, N=iterations, T=tension, C=accuracy, Ll=[clip_min], Lu=[clip_max])
 #     else:
 #         xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=bounds, N=iterations, T=tension, C=accuracy)
@@ -165,10 +168,10 @@ except:
 
 #     # Use distance masking
 #     if mask:
-#         kdt = cKDTree(np.column_stack((x, y)))
-#         xi = _ndim_coords_from_arrays(tuple(np.meshgrid(xc, yc)), ndim=2)
+#         kdt = cKDTree(column_stack((x, y)))
+#         xi = _ndim_coords_from_arrays(tuple(meshgrid(xc, yc)), ndim=2)
 #         dists, indexes = kdt.query(xi)
-#         vals[dists > mask] = np.nan
+#         vals[dists > mask] = nan
 
 #     vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
 #     return xc, yc, vals
@@ -186,10 +189,10 @@ except:
 #     """
 #     # Get the discretization
 #     assert spacing > 0.0, ValueError("spacing must be positive!")
-#     nx = np.int32(np.floor((bounds[1] - bounds[0])/spacing) + 1)
+#     nx = int32(floor((bounds[1] - bounds[0])/spacing) + 1)
 #     mid = 0.5 * (bounds[0] + bounds[1])
 #     sx = 0.5 * nx * spacing
-#     return np.linspace(mid - sx, mid + sx, nx)
+#     return linspace(mid - sx, mid + sx, nx)
 
 # def getGridLocations2D(bounds, dx=None, dy=None, x_grid=None, y_grid=None):
 #     """Discretize a 2D bounding box by increments of dx and return the grid node locations
@@ -217,10 +220,10 @@ except:
 #     if y_grid is None:
 #         y_grid = centred_grid_nodes(bounds[2:], dy)
 
-#     x = x_grid[:-1] + 0.5 * np.diff(x_grid)
-#     y = y_grid[:-1] + 0.5 * np.diff(y_grid)
+#     x = x_grid[:-1] + 0.5 * diff(x_grid)
+#     y = y_grid[:-1] + 0.5 * diff(y_grid)
 #     # Create the unpacked grid locations
-#     intPoints = np.zeros([x.size * y.size, 2], order = 'F')
-#     intPoints[:, 0] = np.tile(x, y.size)
+#     intPoints = zeros([x.size * y.size, 2], order = 'F')
+#     intPoints[:, 0] = tile(x, y.size)
 #     intPoints[:, 1] = y.repeat(x.size)
 #     return x_grid, y_grid, intPoints

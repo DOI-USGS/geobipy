@@ -1,6 +1,10 @@
 import os
-import numpy as np
-import numpy.ma as ma
+from numpy import float64, int32, s_, integer
+from numpy import arange, argmax, argsort, asarray, divide, empty, full, isnan, linspace, logspace
+from numpy import log10, minimum, mean, min,max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
+from numpy import searchsorted, size, shape, squeeze, unique, where, zeros
+from numpy import all as npall
+
 import h5py
 from copy import deepcopy
 from cached_property import cached_property
@@ -57,7 +61,7 @@ class Inference2D(myObject):
 
         self.fName = hdf5_file_path
         self.directory = split(hdf5_file_path)[0]
-        self.line = np.float64(os.path.splitext(split(hdf5_file_path)[1])[0])
+        self.line_number = float64(os.path.splitext(split(hdf5_file_path)[1])[0])
 
         self.hdfFile = None
         if (hdf5_file is None): # Open the file
@@ -171,7 +175,7 @@ class Inference2D(myObject):
         self.relative_error_opacity = self.compute_posterior_opacity(self.relativeErrorPosteriors, percent, log)
 
     # def compute_posterior_opacity(self, posterior, percent=95.0, log=None):
-    #     opacity = StatArray.StatArray(np.zeros(self.nPoints))
+    #     opacity = StatArray.StatArray(zeros(self.nPoints))
 
     #     for i in range(self.nPoints):
     #         h = Histogram1D(edges = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relativeTo[i])
@@ -195,13 +199,13 @@ class Inference2D(myObject):
 
     @cached_property
     def best_halfspace(self, log=None):
-        a = np.log10(np.asarray(self.hdfFile['model/values/posterior/x/x/data'][:, 0]))
-        b = np.log10(np.asarray(self.hdfFile['model/values/posterior/x/x/data'][:, -1]))
+        a = log10(asarray(self.hdfFile['model/values/posterior/x/x/data'][:, 0]))
+        b = log10(asarray(self.hdfFile['model/values/posterior/x/x/data'][:, -1]))
         return 0.5 * (b + a)
 
     @cached_property
     def burned_in(self):
-        return StatArray.StatArray(np.asarray(self.hdfFile['burnedin']))
+        return StatArray.StatArray(asarray(self.hdfFile['burnedin']))
 
     def percentile(self, percent, slic=None):
         # Read in the opacity if present
@@ -220,7 +224,7 @@ class Inference2D(myObject):
             return ci
 
     def credible_interval(self, percent=90.0):
-        percent = 0.5 * np.minimum(percent, 100.0 - percent)
+        percent = 0.5 * minimum(percent, 100.0 - percent)
         return self.percentile(percent), self.percentile(100.0-percent)
 
     def compute_mean_parameter(self, log=None, track=True):
@@ -275,8 +279,8 @@ class Inference2D(myObject):
 
         @jit(**_numba_settings)
         def loop(axis, values, p):
-            shp = np.shape(values)
-            out = np.empty(shp[0])
+            shp = shape(values)
+            out = empty(shp[0])
             for i in range(shp[0]):
                 tmp = values[i, :]
                 j = shp[1] - 1
@@ -341,11 +345,11 @@ class Inference2D(myObject):
 
     def fiducialIndex(self, fiducial):
 
-        if np.size(fiducial) == 1:
-            return np.where(self.fiducials == fiducial)[0]
+        if size(fiducial) == 1:
+            return where(self.fiducials == fiducial)[0]
 
-        fiducial = np.asarray(fiducial)
-        idx = np.searchsorted(self.fiducials, fiducial)
+        fiducial = asarray(fiducial)
+        idx = searchsorted(self.fiducials, fiducial)
 
         # Take care of out of bounds cases
         idx[idx==self.nPoints] = 0
@@ -362,7 +366,7 @@ class Inference2D(myObject):
             if 'posterior' in grp.keys():
                 out.append(grp['posterior'].name)
             if 'nPosteriors' in grp.keys():
-                npost = np.int32(grp['nPosteriors'])
+                npost = int32(grp['nPosteriors'])
                 if npost > 1:
                     for i in range(npost):
                         out.append(grp.name + '/posterior{}'.format(i))
@@ -381,7 +385,7 @@ class Inference2D(myObject):
         if variable == 'mean':
 
             if reciprocateParameter:
-                vals = np.divide(1.0, self.meanParameters(slic))
+                vals = divide(1.0, self.meanParameters(slic))
                 vals.name = 'Resistivity'
                 vals.units = '$Omega m$'
                 return vals
@@ -446,7 +450,7 @@ class Inference2D(myObject):
     #     distributions = []
 
     #     hm = deepcopy(self.hitmap(0))
-    #     counts = np.asarray(self.hdfFile['model/values/posterior/arr/data'])
+    #     counts = asarray(self.hdfFile['model/values/posterior/arr/data'])
 
     #     # Bar = progressbar.ProgressBar()
     #     for i in range(self.nPoints):
@@ -474,7 +478,7 @@ class Inference2D(myObject):
     #     distributions = []
 
     #     hm = deepcopy(self.hitmap(0))
-    #     counts = np.asarray(self.hdfFile['model/values/posterior/arr/data'])
+    #     counts = asarray(self.hdfFile['model/values/posterior/arr/data'])
 
     #     # Bar = progressbar.ProgressBar()
     #     for i in range(self.nPoints):
@@ -513,14 +517,14 @@ class Inference2D(myObject):
         if intervals is None:
             intervals = self.mesh.y.edges
 
-        nIntervals = np.size(intervals) - 1
+        nIntervals = size(intervals) - 1
 
         if external_files:
-            hdfFile = h5py.File("Line_{}_fits.h5".format(self.line), 'w')
+            hdfFile = h5py.File("Line_{}_fits.h5".format(self.line_number), 'w')
         else:
             hdfFile = self.hdfFile
 
-        a = np.zeros(max_distributions)
+        a = zeros(max_distributions)
         mixture = mixPearson(a, a, a, a)
         mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
 
@@ -553,7 +557,7 @@ class Inference2D(myObject):
 
     # def fit_interface_posterior(self, **kwargs):
 
-    #     fit_interfaces = np.zeros(self.interfacePosterior.shape)
+    #     fit_interfaces = zeros(self.interfacePosterior.shape)
     #     for i in progressbar.progressbar(range(self.nPoints)):
     #         h1 = self.interfacePosterior[:, i]
     #         vest = h1.estimateVariance(100000, log=10)
@@ -588,14 +592,14 @@ class Inference2D(myObject):
         if intervals is None:
             intervals = self.hitmap(0).yBins
 
-        nIntervals = np.size(intervals) - 1
+        nIntervals = size(intervals) - 1
 
         if external_files:
-            hdfFile = h5py.File("Line_{}_fits.h5".format(self.line), 'w', driver='mpio', comm=self.world)
+            hdfFile = h5py.File("Line_{}_fits.h5".format(self.line_number), 'w', driver='mpio', comm=self.world)
         else:
             hdfFile = self.hdfFile
 
-        a = np.zeros(max_distributions)
+        a = zeros(max_distributions)
         mixture = mixPearson(a, a, a, a)
         try:
             mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
@@ -616,14 +620,14 @@ class Inference2D(myObject):
 
         nI = intervals.size - 1
 
-        buffer = np.empty((nI, max_distributions))
+        buffer = empty((nI, max_distributions))
 
         for i in range(i0, i1):
 
             hm = self.hitmap(i)
 
             mixtures = None
-            if not np.all(hm.counts == 0):
+            if not npall(hm.counts == 0):
                 mixtures = hm.fit_estimated_pdf(iPoint=i, rank=self.world.rank, **kwargs)
 
             if not mixtures is None:
@@ -634,7 +638,7 @@ class Inference2D(myObject):
             counter += 1
             if self.world.rank == 0:
                 if counter == nUpdate:
-                    print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(self.world.rank, self.line, self.fiducials[i], i-i0+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+                    print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(self.world.rank, self.line_number, self.fiducials[i], i-i0+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
                     t0 = MPI.Wtime()
                     counter = 0
 
@@ -646,19 +650,19 @@ class Inference2D(myObject):
     def _z_slice(self, depth=None):
 
         if depth is None:
-            return np.s_[:]
+            return s_[:]
 
-        if isinstance(depth, (np.integer, int, slice)):
+        if isinstance(depth, (integer, int, slice)):
             return depth
 
-        if np.size(depth) > 1:
-            assert np.size(depth) == 2, ValueError("depth must be a scalar or size 2 array.")
+        if size(depth) > 1:
+            assert size(depth) == 2, ValueError("depth must be a scalar or size 2 array.")
             depth.sort()
-            assert np.all(depth < self.mesh.z.edges[-1]), 'Depths must be lees than max depth {}'.format(self.mesh.z.edges[-1])
+            assert npall(depth < self.mesh.z.edges[-1]), 'Depths must be lees than max depth {}'.format(self.mesh.z.edges[-1])
 
             cell1 = self.mesh.z.cellIndex(depth[0])
             cell2 = self.mesh.z.cellIndex(depth[1])
-            out = np.s_[cell1:cell2+1]
+            out = s_[cell1:cell2+1]
         else:
             assert depth < self.mesh.z.edges[-1], 'Depth must be lees than max depth {}'.format(self.mesh.z.edges[-1])
 
@@ -666,7 +670,7 @@ class Inference2D(myObject):
 
         return out
 
-    def depth_slice(self, depth, variable, stat=np.mean, **kwargs):
+    def depth_slice(self, depth, variable, stat=mean, **kwargs):
         """ Obtain a slice at depth from values
 
         Parameters
@@ -688,9 +692,9 @@ class Inference2D(myObject):
 
         z_slice = self._z_slice(depth=depth)
 
-        out = self._get(variable, slic=(np.s_[:], z_slice), **kwargs)
+        out = self._get(variable, slic=(s_[:], z_slice), **kwargs)
 
-        if np.size(depth) > 1:
+        if size(depth) > 1:
             out = stat(out, axis = 0)
 
         return out
@@ -714,11 +718,11 @@ class Inference2D(myObject):
 
         """
 
-        assert np.all(np.shape(values) == self.mesh.shape), ValueError("values must have shape {}".fomat(self.mesh.shape))
+        assert npall(shape(values) == self.mesh.shape), ValueError("values must have shape {}".fomat(self.mesh.shape))
 
-        out = np.full(self.nPoints, fill_value=np.nan)
+        out = full(self.nPoints, fill_value=nan)
 
-        if np.size(elevation) > 1:
+        if size(elevation) > 1:
 
             for i in range(self.nPoints):
                 tmp = self.elevation[i] - elevation
@@ -726,7 +730,7 @@ class Inference2D(myObject):
                     cell1 = self.mesh.z.cellIndex(tmp[1], clip=True)
                     cell2 = self.mesh.z.cellIndex(tmp[0], clip=True)
 
-                    out[i] = np.mean(values[cell1:cell2+1, i])
+                    out[i] = mean(values[cell1:cell2+1, i])
 
         else:
 
@@ -755,12 +759,12 @@ class Inference2D(myObject):
 
     #     from scipy.signal import find_peaks
 
-    #     assert np.size(depths) > 2, ValueError("Depths must have size > 1.")
+    #     assert size(depths) > 2, ValueError("Depths must have size > 1.")
 
     #     tmp = self.lineHitmap.intervalStatistic(axis=0, intervals = depths, statistic='sum')
 
-    #     depth = np.zeros(0)
-    #     parameter = np.zeros(0)
+    #     depth = zeros(0)
+    #     parameter = zeros(0)
 
     #     # # Bar = progressbar.ProgressBar()
     #     # # for i in Bar(range(self.nPoints)):
@@ -769,10 +773,10 @@ class Inference2D(myObject):
     #         values = tmp.x.centres[peaks]
     #         if not limits is None:
     #             values = values[(values > limits[0]) & (values < limits[1])]
-    #         parameter = np.hstack([parameter, values])
-    #         depth = np.hstack([depth, np.full(values.size, fill_value=0.5*(depths[i]+depths[i+1]))])
+    #         parameter = hstack([parameter, values])
+    #         depth = hstack([depth, full(values.size, fill_value=0.5*(depths[i]+depths[i+1]))])
 
-    #     return np.asarray([depth, parameter]).T
+    #     return asarray([depth, parameter]).T
 
     def interface_probability(self, slic=None):
         """ Get the layer interfaces from the layer depth histograms """
@@ -791,11 +795,11 @@ class Inference2D(myObject):
 
     # def compute_interface_probability(self):
     #     maxCount = self.interfacePosterior.counts.max()
-    #     if np.size(self.interfacePosterior.counts, 0) != (self.mesh.z.nCells):
-    #         values = np.vstack([self.interfacePosterior.counts, self.interfacePosterior.counts[-1, :]])
-    #         out = StatArray.StatArray(values / np.float64(maxCount), "interfaces", "")
+    #     if size(self.interfacePosterior.counts, 0) != (self.mesh.z.nCells):
+    #         values = vstack([self.interfacePosterior.counts, self.interfacePosterior.counts[-1, :]])
+    #         out = StatArray.StatArray(values / float64(maxCount), "interfaces", "")
     #     else:
-    #         out = StatArray.StatArray(self.interfacePosterior.counts / np.float64(maxCount), "interfaces", "")
+    #         out = StatArray.StatArray(self.interfacePosterior.counts / float64(maxCount), "interfaces", "")
 
         # if 'p(interface)' in self.hdfFile.keys():
         #     out.writeHdf(self.hdfFile, 'p(interface)')
@@ -811,7 +815,7 @@ class Inference2D(myObject):
     # @property
     # def maxParameter(self):
     #     """ Get the mean model of the parameters """
-    #     return np.max(np.asarray(self.hdfFile["model/values/posterior/mesh/x/edges/data"][:, -1]))
+    #     return max(asarray(self.hdfFile["model/values/posterior/mesh/x/edges/data"][:, -1]))
 
     def mean_parameters(self, slic=None):
         if not 'mean_parameter' in self.hdfFile:
@@ -826,7 +830,7 @@ class Inference2D(myObject):
     @property
     def longest_coordinate(self):
         # if 0.8 < self.data.x.range / self.data.y.range < 1.2:
-        #     return np.sqrt(self.data.x**2.0 + self.data.y**2.0)
+        #     return sqrt(self.data.x**2.0 + self.data.y**2.0)
         return self.data.x if self.data.x.range > self.data.y.range else self.data.y
 
     @property
@@ -852,7 +856,7 @@ class Inference2D(myObject):
     @property
     def minParameter(self):
         """ Get the mean model of the parameters """
-        return np.min(np.asarray(self.hdfFile["model/values/posterior/x/x/data"][:, 0]))
+        return min(asarray(self.hdfFile["model/values/posterior/x/x/data"][:, 0]))
 
     @cached_property
     def model(self):
@@ -923,11 +927,11 @@ class Inference2D(myObject):
     #             assert depth <= depth2, 'Depth2 must be >= depth'
     #             k = self.mesh.z.cellIndex(depth2)
 
-    #     percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.parameterName, value), units = self.parameterUnits)
+    #     percentage = StatArray.StatArray(empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.parameterName, value), units = self.parameterUnits)
 
     #     if depth:
     #         counts = self.hdfFile['model/values/posterior/arr/data'][:, j:k, :]
-    #         # return StatArray.StatArray(np.sum(counts[:, :, pj:]) / np.sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+    #         # return StatArray.StatArray(sum(counts[:, :, pj:]) / sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
     #     else:
     #         counts = self.hdfFile['model/values/posterior/arr/data']
 
@@ -941,7 +945,7 @@ class Inference2D(myObject):
 
     #         cTmp = counts[i, :, :]
 
-    #         percentage[i] = np.sum(cTmp[:, pj:]) / cTmp.sum()
+    #         percentage[i] = sum(cTmp[:, pj:]) / cTmp.sum()
 
     #     return percentage
 
@@ -971,7 +975,7 @@ class Inference2D(myObject):
 
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
-        out.mesh.z.relativeTo = np.repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
+        out.mesh.z.relativeTo = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
 
         out.mesh.y.relativeTo = self.halfspace
 
@@ -1016,7 +1020,7 @@ class Inference2D(myObject):
 
     def axis(self, axis):
         if axis == 'index':
-            ax = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), 'Index')
+            ax = StatArray.StatArray(arange(self.nPoints, dtype=float64), 'Index')
         elif axis == 'fiducial':
             ax = self.fiducial
         elif axis == 'x':
@@ -1026,17 +1030,17 @@ class Inference2D(myObject):
         elif axis == 'z':
             ax = self.mesh.y
         elif axis == 'distance':
-            ax = StatArray.StatArray(np.sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
+            ax = StatArray.StatArray(sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
         return ax
 
     # def x_axis(self, axis, centres=False):
 
     #     if axis == 'index':
-    #         ax = StatArray.StatArray(np.arange(self.nPoints, dtype=np.float64), 'Index')
+    #         ax = StatArray.StatArray(arange(self.nPoints, dtype=float64), 'Index')
     #     elif axis == 'fiducial':
     #         ax = self.fiducial
     #     elif axis == 'distance':
-    #         ax = StatArray.StatArray(np.sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
+    #         ax = StatArray.StatArray(sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
     #     elif axis == 'x':
     #         ax = self.x
     #     elif axis == 'y':
@@ -1060,26 +1064,26 @@ class Inference2D(myObject):
     #     if abs:
     #         values = values.abs()
 
-    #     cP.pcolor(values, x=xtmp, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+    #     cP.pcolor(values, x=xtmp, y=StatArray.StatArray(arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
     # def pcolorObservedData(self, **kwargs):
     #     """ Plot a channel of data as points """
 
-    #     cP.pcolor(self.bestData.data.T, x=self.mesh.x, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+    #     cP.pcolor(self.bestData.data.T, x=self.mesh.x, y=StatArray.StatArray(arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
     # def pcolorPredictedData(self, **kwargs):
     #     """ Plot a channel of data as points """
 
-    #     cP.pcolor(self.bestData.predictedData.T, x=self.mesh.x, y=StatArray.StatArray(np.arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
+    #     cP.pcolor(self.bestData.predictedData.T, x=self.mesh.x, y=StatArray.StatArray(arange(self.bestData.predictedData.shape[1]), name='Channel'), **kwargs)
 
 
     # def plot_predictedData(self, channel=None, **kwargs):
     #     """ Plot a channel of the best predicted data as points """
 
     #     if channel is None:
-    #         channel = np.s_[:]
+    #         channel = s_[:]
 
     #     cP.plot(self.mesh.x, self.bestData.predictedData[:, channel], **kwargs)
 
@@ -1097,7 +1101,7 @@ class Inference2D(myObject):
         """ Plot a channel of the observed data as points """
 
         if channel is None:
-            channel = np.s_[:]
+            channel = s_[:]
 
         values = self.bestData.deltaD[:, channel]
 
@@ -1276,7 +1280,7 @@ class Inference2D(myObject):
         """ Plot the distributions of relative errors as an image for all data points in the line """
         self.setAlonglineAxis(self.plotAgainst)
 
-        H = Histogram(values=np.log10(self.totalError[:,channel]),nBins=nBins)
+        H = Histogram(values=log10(self.totalError[:,channel]),nBins=nBins)
 
         H.plot(**kwargs)
 
@@ -1286,7 +1290,7 @@ class Inference2D(myObject):
         z_slice = self._z_slice(depth)
 
         # if (depth1 is None):
-        #     depth1 = np.maximum(self.mesh.z.edges[0], 0.0)
+        #     depth1 = maximum(self.mesh.z.edges[0], 0.0)
         # if (depth2 is None):
         #     depth2 = self.mesh.z.edges[-1]
 
@@ -1314,14 +1318,14 @@ class Inference2D(myObject):
 
         log = kwargs.pop('log', None)
 
-        f = np.linspace
+        f = linspace
         vals2 = vals
         if (log):
             vals2, logLabel = cF._log(vals,log)
             # name = logLabel + name
-            f = np.logspace
+            f = logspace
 
-        mesh = RectilinearMesh1D(edges = StatArray.StatArray(f(np.nanmin(vals2), np.nanmax(vals2), nBins+1)), log=log)
+        mesh = RectilinearMesh1D(edges = StatArray.StatArray(f(nanmin(vals2), nanmax(vals2), nBins+1)), log=log)
 
         h = Histogram(mesh=mesh)
         h.update(vals)
@@ -1342,18 +1346,18 @@ class Inference2D(myObject):
                 k = self.mesh.z.cellIndex(depth2)
 
         # First get the min max of the parameter hitmaps
-        x0 = np.log10(self.minParameter)
-        x1 = np.log10(self.maxParameter)
+        x0 = log10(self.minParameter)
+        x1 = log10(self.maxParameter)
 
         if depth:
             counts = self.hdfFile['model/values/posterior/arr/data'][:, j:k, :]
-            # return StatArray.StatArray(np.sum(counts[:, :, pj:]) / np.sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+            # return StatArray.StatArray(sum(counts[:, :, pj:]) / sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
         else:
             counts = self.hdfFile['model/values/posterior/arr/data']
 
         parameters = RectilinearMesh1D.fromHdf(self.hdfFile['model/values/posterior/x'])
 
-        bins = StatArray.StatArray(np.logspace(x0, x1, nBins), self.parameterName, units = self.parameterUnits)
+        bins = StatArray.StatArray(logspace(x0, x1, nBins), self.parameterName, units = self.parameterUnits)
 
         out = Histogram1D(edges=bins, log=log)
 
@@ -1366,7 +1370,7 @@ class Inference2D(myObject):
 
             cTmp = counts[i, :, :]
 
-            out.counts[pj] += np.sum(cTmp, axis=0)
+            out.counts[pj] += sum(cTmp, axis=0)
 
         return out
 
@@ -1389,7 +1393,7 @@ class Inference2D(myObject):
     #     if kwargs.pop('mask_below_doi', False):
     #         opacity = kwargs.get('alpha')
     #         if kwargs.get('alpha') is None:
-    #             opacity = np.ones(mesh.shape)
+    #             opacity = ones(mesh.shape)
 
     #         indices = mesh.y.cellIndex(self.doi + mesh.y.relativeTo)
 
@@ -1457,7 +1461,7 @@ class Inference2D(myObject):
     def doi_mask(self, model, **kwargs):
         opacity = kwargs.get('alpha', None)
         if opacity is None:
-            opacity = np.ones(model.mesh.shape)
+            opacity = ones(model.mesh.shape)
         else:
             opacity = opacity.copy()
 
@@ -1507,13 +1511,13 @@ class Inference2D(myObject):
         degrees = None
         with h5py.File(fit_file, 'r') as f:
             if 'm' in components:
-                means = StatArray.StatArray(np.asarray(f['means/data']), 'Conductivity', '$\\frac{S}{m}$')
+                means = StatArray.StatArray(asarray(f['means/data']), 'Conductivity', '$\\frac{S}{m}$')
             if 'a' in components:
-                amplitudes = StatArray.StatArray(np.asarray(f['amplitudes/data']), 'Amplitude')
+                amplitudes = StatArray.StatArray(asarray(f['amplitudes/data']), 'Amplitude')
             if 'v' in components:
-                variances = StatArray.StatArray(np.asarray(f['variances/data']), 'Variance')
+                variances = StatArray.StatArray(asarray(f['variances/data']), 'Variance')
             if 'd' in components:
-                degrees = StatArray.StatArray(np.asarray(f['degrees/data']), 'Degrees of freedom')
+                degrees = StatArray.StatArray(asarray(f['degrees/data']), 'Degrees of freedom')
 
         intervals = self.mesh.z.centres
 
@@ -1521,18 +1525,18 @@ class Inference2D(myObject):
             indices = intervals.searchsorted(self.doi)
             if 'a' in components:
                 for i in range(self.nPoints):
-                    amplitudes[i, indices[i]:, :] = np.nan
+                    amplitudes[i, indices[i]:, :] = nan
             if 'm' in components:
                 for i in range(self.nPoints):
-                    means[i, indices[i]:, :] = np.nan
+                    means[i, indices[i]:, :] = nan
             if 'v' in components:
                 for i in range(self.nPoints):
-                    variances[i, indices[i]:, :] = np.nan
+                    variances[i, indices[i]:, :] = nan
             if 'd' in components:
                 for i in range(self.nPoints):
-                    degrees[i, indices[i]:, :] = np.nan
+                    degrees[i, indices[i]:, :] = nan
 
-        iWhere = np.argsort(means, axis=-1)
+        iWhere = argsort(means, axis=-1)
         for i in range(means.shape[0]):
             for j in range(means.shape[1]):
                 tmp = iWhere[i, j, :]
@@ -1558,7 +1562,7 @@ class Inference2D(myObject):
     def read_lmfit_distributions(self, fit_file, mask_by_doi=True, components='amse'):
 
         with h5py.File(fit_file, 'r') as f:
-            d = np.asarray(f['fits/params/data'])
+            d = asarray(f['fits/params/data'])
 
         amplitudes = means = stds = exponents = None
         if 'a' in components:
@@ -1577,29 +1581,29 @@ class Inference2D(myObject):
 
     #     amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi=False)
 
-    #     # self.marginal_probability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells, gmm.n_components]), 'Marginal probability')
+    #     # self.marginal_probability = StatArray.StatArray(zeros([self.nPoints, self.mesh.z.nCells, gmm.n_components]), 'Marginal probability')
 
-    #     iSort = np.argsort(np.squeeze(gmm.means_))
+    #     iSort = argsort(squeeze(gmm.means_))
 
     #     print('Computing marginal probability', flush=True)
     #     for i in progressbar.progressbar(range(self.nPoints)):
     #         hm = self.get_hitmap(i)
     #         for j in range(self.mesh.z.nCells):
     #             m = means[i, j, :]
-    #             inan = ~np.isnan(m)
+    #             inan = ~isnan(m)
     #             m = m[inan]
 
-    #             if np.size(m) > 0:
+    #             if size(m) > 0:
     #                 a = amplitudes[i, j, inan]
 
     #                 v = variances[i, j, inan]
     #                 df = degrees[i, j, inan]
-    #                 l = labels[i, j, inan].astype(np.int)
+    #                 l = labels[i, j, inan].astype(int)
 
     #                 fit_mixture = mixStudentT(m, v, df, a, labels=l)
-    #                 fit_pdfs = fit_mixture.probability(np.log10(hm.xBinCentres), log=False)
+    #                 fit_pdfs = fit_mixture.probability(log10(hm.xBinCentres), log=False)
 
-    #                 # gmm_pdfs = np.zeros([gmm.n_components, self.hitmap(0).x.nCells])
+    #                 # gmm_pdfs = zeros([gmm.n_components, self.hitmap(0).x.nCells])
 
     #                 # for k_gmm in range(gmm.n_components):
     #                 #     # Term 1: Get the weight of the labelled fit from the classification
@@ -1607,19 +1611,19 @@ class Inference2D(myObject):
 
     #                 #     for k_mix in range(fit_mixture.n_mixtures):
     #                 #         # Term 2: Get the probability of each mixture given the mean of the student T.
-    #                 #         pMixture = np.squeeze(gmm.predict_proba(m[k_mix].reshape(-1, 1)))[iSort[k_gmm]] / np.float(fit_mixture.n_mixtures)
+    #                 #         pMixture = squeeze(gmm.predict_proba(m[k_mix].reshape(-1, 1)))[iSort[k_gmm]] / float(fit_mixture.n_mixtures)
 
     #                 #         gmm_pdfs[k_gmm, :] += relative_fraction * pMixture * fit_pdfs[:, k_mix]
 
 
     #                 a = gmm.weights_[iSort]
-    #                 b = gmm.predict_proba(m.reshape(-1, 1))[:, iSort] / np.float(fit_mixture.n_mixtures)
-    #                 gmm_pdfs = np.dot(fit_pdfs, a*b).T
+    #                 b = gmm.predict_proba(m.reshape(-1, 1))[:, iSort] / float(fit_mixture.n_mixtures)
+    #                 gmm_pdfs = dot(fit_pdfs, a*b).T
 
     #                 h = hm.marginalize(index = j)
     #                 self.marginal_probability[i, j, :] = h._marginal_probability_pdfs(gmm_pdfs)
     #             else:
-    #                 self.marginal_probability[i, j, :] = np.nan
+    #                 self.marginal_probability[i, j, :] = nan
 
     #     if 'marginal_probability' in self.hdfFile.keys():
     #         self.marginal_probability.writeHdf(self.hdfFile, 'marginal_probability')
@@ -1630,7 +1634,7 @@ class Inference2D(myObject):
     # def compute_marginal_probability_from_fits(self, fit_file, mask_by_doi=True):
 
     #     amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi)
-    #     self.marginal_probability = StatArray.StatArray(np.zeros([self.nPoints, self.mesh.z.nCells, means.shape[-1]]), 'Marginal probability')
+    #     self.marginal_probability = StatArray.StatArray(zeros([self.nPoints, self.mesh.z.nCells, means.shape[-1]]), 'Marginal probability')
 
     #     print('Computing marginal probability', flush=True)
     #     for i in progressbar.progressbar(range(self.nPoints)):
@@ -1642,7 +1646,7 @@ class Inference2D(myObject):
     #             v = variances[i, j, :]
     #             df = degrees[i, j, :]
 
-    #             inan = ~np.isnan(m)
+    #             inan = ~isnan(m)
     #             mixtures.append(mixStudentT(m[inan], v[inan], df[inan], a[inan]))
 
     #         mp = hm.marginal_probability(1.0, distributions=mixtures, log=10, maxDistributions=means.shape[-1])
@@ -1656,7 +1660,7 @@ class Inference2D(myObject):
 
 
     def highestMarginal(self, slic=None):
-        return StatArray.StatArray(np.argmax(self.marginal_probability(slic), axis=-1), name='Highest marginal')
+        return StatArray.StatArray(argmax(self.marginal_probability(slic), axis=-1), name='Highest marginal')
 
     @property
     def probability_of_highest_marginal(self):
@@ -1664,12 +1668,12 @@ class Inference2D(myObject):
         out = StatArray.StatArray(self.mesh.shape, "Probability")
 
         hm = self.highestMarginal
-        classes = np.unique(hm)
+        classes = unique(hm)
 
         mp = self.marginal_probability()
 
         for i, c in enumerate(classes):
-            iWhere = np.where(hm == c)
+            iWhere = where(hm == c)
             out[iWhere[0], iWhere[1]] = mp[i, iWhere[0], iWhere[1]]
 
         return out

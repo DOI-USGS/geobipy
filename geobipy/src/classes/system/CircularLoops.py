@@ -1,5 +1,5 @@
 from copy import deepcopy
-import numpy as np
+from numpy import asarray, float64, pi, size, unique
 
 from .CircularLoop import CircularLoop
 from ...base import MPI as myMPI
@@ -45,7 +45,7 @@ class CircularLoops(EmLoops):
 
     @property
     def area(self):
-        return np.pi * self.radius * self.radius
+        return pi * self.radius * self.radius
 
     @property
     def radius(self):
@@ -57,8 +57,8 @@ class CircularLoops(EmLoops):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("radius must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("radius must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._radius = deepcopy(values)
                 return
@@ -92,7 +92,7 @@ class CircularLoops(EmLoops):
 
         """
         out = super().__getitem__(i)
-        i = np.unique(i)
+        i = unique(i)
         out._radius = self.radius[i]
         return out
 
@@ -116,7 +116,7 @@ class CircularLoops(EmLoops):
         super().writeHdf(parent, name, withPosterior)
 
         grp = parent[name]
-        self.radius.writeHdf(grp, 'radius', withPosterior)        
+        self.radius.writeHdf(grp, 'radius', withPosterior)
 
     @classmethod
     def fromHdf(cls, grp, **kwargs):
@@ -152,7 +152,7 @@ class CircularLoops(EmLoops):
         roll = self.roll.Bcast(world, root)
         yaw = self.yaw.Bcast(world, root)
 
-        data = np.asarray([self._orient, self.moment, self.radius], dtype=np.float64)
+        data = asarray([self._orient, self.moment, self.radius], dtype=float64)
         tData = myMPI.Bcast(data, world, root=root)
 
         return CircularLoop(orient=tData[0], moment=tData[1], x=x, y=y, z=z, pitch=pitch, roll=roll, yaw=yaw, radius=tData[2])

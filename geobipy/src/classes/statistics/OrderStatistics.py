@@ -3,11 +3,11 @@ Module defining modified order statistics as in Malinverno2002Parsimonious Bayes
 in a nonlinear geophysical problem,Geophysical Journal International
 """
 from copy import deepcopy
-import numpy as np
+from numpy import arange, cumprod, int32, size, squeeze
+from numpy import log as nplog
 from scipy.special import factorial
 from ..core import StatArray
 from .baseDistribution import baseDistribution
-
 
 
 class Order(baseDistribution):
@@ -21,9 +21,9 @@ class Order(baseDistribution):
         """
         if (denominator is None): return
 
-        i = np.arange(np.size(denominator))
+        i = arange(size(denominator))
         self.denominator = deepcopy(denominator)
-        tmp = np.cumprod(denominator)
+        tmp = cumprod(denominator)
         self.pdf = factorial(i) / tmp
 
     @property
@@ -43,8 +43,8 @@ class Order(baseDistribution):
 
 
     def probability(self, x, log, **kwargs):
-        tmp = np.squeeze(self.pdf[np.int32(x)])
-        return np.log(tmp) if log else tmp
+        tmp = squeeze(self.pdf[int32(x)])
+        return nplog(tmp) if log else tmp
 
     @property
     def summary(self):
@@ -67,6 +67,6 @@ class Order(baseDistribution):
 
     # def fromHdf(self, h5grp):
     #     """ Reads the Uniform Distribution from an HDF group """
-    #     T = np.array(h5grp.get('pdf'))
+    #     T = array(h5grp.get('pdf'))
     #     self.pdf = T
     #     return self

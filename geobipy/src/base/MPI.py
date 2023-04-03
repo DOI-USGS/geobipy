@@ -1,6 +1,8 @@
 """ Module containing custom MPI functions """
 from numpy.linalg import norm
-from numpy import asarray, prod, unravel_index, s_
+from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
+from numpy import int, int32, int64, ndim, prod, reshape, unravel_index, s_, size
+from numpy.random import RandomState
 import sys
 import numpy as np
 from os import getpid
@@ -56,7 +58,7 @@ class world3D(object):
         index = self.chunksIndex[1]
         i0 = self.yStarts[index]
         i1 = i0 + self.yChunkSizes[index]
-        return np.s_[i0:i1]
+        return s_[i0:i1]
 
 
     @property
@@ -64,7 +66,7 @@ class world3D(object):
         index = self.chunksIndex[0]
         i0 = self.zStarts[index]
         i1 = i0 + self.zChunkSizes[index]
-        return np.s_[i0:i1]
+        return s_[i0:i1]
 
 
 def print(aStr='', end='\n'):
@@ -180,9 +182,9 @@ def getParallelPrng(world, timeFunction):
 
     i = getpid()
     t = timeFunction()
-    seed = np.int64(np.abs(((t*181)*((i-83)*359))%104729))
+    seed = int64(abs(((t*181)*((i-83)*359))%104729))
 
-    prng = np.random.RandomState(seed)
+    prng = RandomState(seed)
 
     return prng
 
@@ -209,11 +211,11 @@ def loadBalance1D_shrinkingArrays(N, nChunks):
         The size of each chunk.
 
     """
-    chunks = np.zeros(nChunks, dtype=np.int32)
+    chunks = zeros(nChunks, dtype=int32)
     chunks[:] = N / nChunks
-    Nmod = np.int32(N % nChunks)
+    Nmod = int32(N % nChunks)
     chunks[:Nmod] += 1
-    starts = np.cumsum(chunks) - chunks[0]
+    starts = cumsum(chunks) - chunks[0]
     if (Nmod > 0):
         starts[Nmod:] += 1
     return starts, chunks
@@ -247,18 +249,18 @@ def loadBalance3D_shrinkingArrays(shape, nChunks):
 
     assert nChunks >= 8, ValueError("Must have at least 8 chunks for 3D load balancing.")
 
-    target = shape / np.linalg.norm(shape)
+    target = shape / norm(shape)
     best = None
     bestFit = 1e20
     for i in range(2, int(nChunks/2)+1):
         for j in range(2, int(nChunks/i)):
             k = int(nChunks/(i*j))
-            nBlocks = np.asarray([i, j, k])
-            total = np.prod(nBlocks)
+            nBlocks = asarray([i, j, k])
+            total = prod(nBlocks)
 
             if total == nChunks:
-                fraction = nBlocks / np.linalg.norm(nBlocks)
-                fit = np.linalg.norm(fraction - target)
+                fraction = nBlocks / norm(nBlocks)
+                fit = norm(fraction - target)
                 if fit < bestFit:
                     best = nBlocks
                     bestFit = fit
@@ -349,20 +351,20 @@ def Isend(self, dest, world, dtype=None, ndim=None, shape=None):
 
     # Broadcast the number of dimensions
     if ndim is None:
-        ndim = Isend_1int(np.ndim(self), dest=dest, world=world)
+        ndim = Isend_1int(ndim(self), dest=dest, world=world)
 
     if (ndim == 0):  # For a single number
-        this = np.full(1, self, dtype=dtype)  # Initialize on each worker
+        this = full(1, self, dtype=dtype)  # Initialize on each worker
         world.Send(this, dest=dest)  # Broadcast
 
     elif (ndim == 1):  # For a 1D array
         if shape is None:
-            shape = Isend_1int(np.size(self), dest=dest, world=world)  # Broadcast the array size
+            shape = Isend_1int(size(self), dest=dest, world=world)  # Broadcast the array size
         world.Send(self, dest=dest)  # Broadcast
 
     elif (ndim > 1):  # nD Array
         if shape is None:
-            world.Send(np.asarray(self.shape), dest=dest)  # Broadcast the shape
+            world.Send(asarray(self.shape), dest=dest)  # Broadcast the shape
         world.Send(self, dest=dest)  # Broadcast
 
 
@@ -380,19 +382,19 @@ def Irecv(source, world, dtype=None, ndim=None, shape=None):
         ndim = Irecv_1int(source, world)
 
     if (ndim == 0):  # For a single number
-        this = np.empty(1, dtype=dtype)  # Initialize on each worker
+        this = empty(1, dtype=dtype)  # Initialize on each worker
         world.Recv(this, source=source)  # Broadcast
         this = this[0]
     elif (ndim == 1): # For a 1D array
         if shape is None:
             shape = Irecv_1int(source=source, world=world)
-        this = np.empty(shape, dtype=dtype)
+        this = empty(shape, dtype=dtype)
         world.Recv(this, source=source)
     elif (ndim > 1): # Nd Array
         if shape is None:
-            shape = np.empty(ndim, dtype=np.int32)
+            shape = empty(ndim, dtype=int32)
             world.Recv(shape, source=source)
-        this = np.empty(shape, dtype=dtype)
+        this = empty(shape, dtype=dtype)
         world.Recv(this, source=source)
 
     return this
@@ -433,7 +435,7 @@ def Isend_1int(self, dest, world):
     #>>> i = myMPI.Bcast(i, world)
 
     #"""
-    this = np.full(1, self, np.int64)
+    this = full(1, self, int64)
     world.Send(this, dest=dest)
     return this[0]
 
@@ -456,7 +458,7 @@ def Irecv_1int(source, world):
         The received integer.
 
     """
-    this = np.empty(1, np.int64)
+    this = empty(1, int64)
     req = world.Recv(this, source=source)
     return this[0]
 
@@ -530,7 +532,7 @@ def Bcast(self, world, root=0, dtype=None, ndim=None, shape=None):
     >>> from geobipy.src.base import MPI as myMPI
     >>> world = MPI.COMM_WORLD
     >>> if world.rank == 0:
-    >>>     x=StatArray(np.arange(10))
+    >>>     x=StatArray(arange(10))
     >>> # Instantiate on all other ranks before broadcasting
     >>> else:
     >>>     x=None
@@ -559,10 +561,10 @@ def Bcast(self, world, root=0, dtype=None, ndim=None, shape=None):
 
     # Broadcast the number of dimensions
     if ndim is None:
-        ndim = Bcast_1int(np.ndim(self), world, root=root)
+        ndim = Bcast_1int(ndim(self), world, root=root)
 
     if (ndim == 0):  # For a single number
-        this = np.empty(1, dtype=dtype)  # Initialize on each worker
+        this = empty(1, dtype=dtype)  # Initialize on each worker
         if (world.rank == root):
             this[0] = self  # Assign on the master
         world.Bcast(this)  # Broadcast
@@ -570,8 +572,8 @@ def Bcast(self, world, root=0, dtype=None, ndim=None, shape=None):
 
     if (ndim == 1):  # For a 1D array
         if shape is None:
-            shape = Bcast_1int(np.size(self), world, root=root)  # Broadcast the array size
-        this = np.empty(shape, dtype=dtype)
+            shape = Bcast_1int(size(self), world, root=root)  # Broadcast the array size
+        this = empty(shape, dtype=dtype)
         if (world.rank == root):  # Assign on the root
             this[:] = self
         world.Bcast(this, root=root)  # Broadcast
@@ -579,8 +581,8 @@ def Bcast(self, world, root=0, dtype=None, ndim=None, shape=None):
 
     if (ndim > 1):  # nD Array
         if shape is None:
-            shape = Bcast(np.asarray(self.shape), world, root=root)  # Broadcast the shape
-        this = np.empty(shape, dtype=dtype)
+            shape = Bcast(asarray(self.shape), world, root=root)  # Broadcast the shape
+        this = empty(shape, dtype=dtype)
         if (world.rank == root):  # Assign on the root
             this[:] = self
         world.Bcast(this, root=root)  # Broadcast
@@ -659,9 +661,9 @@ def Bcast_1int(self, world, root=0):
 
     """
     if (world.rank == root):
-        this = np.full(1, self, np.int64)
+        this = full(1, self, int64)
     else:
-        this = np.empty(1, np.int64)
+        this = empty(1, int64)
     world.Bcast(this, root=root)
     return this[0]
 
@@ -725,7 +727,7 @@ def Scatterv(self, starts, chunks, world, axis=0, root=0):
     >>> starts,chunks=loadBalance_shrinkingArrays(N, world.size)
     >>> # Create an array on the master rank
     >>> if (world.rank == 0):
-    >>>     x = np.arange(N)
+    >>>     x = arange(N)
     >>> else:
     >>>     x = None
     >>> # Scatter the array x among ranks.
@@ -776,11 +778,11 @@ def Scatterv_list(self, starts, chunks, world, root=0):
 def data_type_map(data_type):
     from mpi4py import MPI
 
-    if data_type == np.float32:
+    if data_type == float32:
         return MPI.FLOAT
-    elif data_type == np.float64:
+    elif data_type == float64:
         return MPI.DOUBLE
-    elif data_type == np.int:
+    elif data_type == int:
         return MPI.INT
 
 def Scatterv_numpy(self, starts, chunks, dtype, world, axis=0, root=0):
@@ -812,27 +814,27 @@ def Scatterv_numpy(self, starts, chunks, dtype, world, axis=0, root=0):
 
     """
     # Broadcast the number of dimensions
-    ndim = Bcast_1int(np.ndim(self), world, root=root)
+    ndim = Bcast_1int(ndim(self), world, root=root)
 
     if (ndim == 1):  # For a 1D Array
-        this = np.empty(chunks[world.rank], dtype=dtype)
+        this = empty(chunks[world.rank], dtype=dtype)
         world.Scatterv([self, chunks, starts, data_type_map(dtype)], this, root=root)
         return this
 
     # For a 2D Array
     # MPI cannot send and receive arrays of more than one dimension.  Therefore higher dimensional arrays must be unpacked to 1D, and then repacked on the other side.
     if (ndim == 2):
-        s = Bcast_1int(np.size(self, 1 - axis), world, root=root)
+        s = Bcast_1int(size(self, 1 - axis), world, root=root)
         tmpChunks = chunks * s
         tmpStarts = starts * s
         self_unpk = None
         if (world.rank == root):
             if (axis == 0):
-                self_unpk = np.reshape(self, np.size(self))
+                self_unpk = reshape(self, size(self))
             else:
-                self_unpk = np.reshape(self.T, np.size(self))
-        this_unpk = np.empty(tmpChunks[world.rank], dtype=dtype)
+                self_unpk = reshape(self.T, size(self))
+        this_unpk = empty(tmpChunks[world.rank], dtype=dtype)
         world.Scatterv([self_unpk, tmpChunks, tmpStarts, data_type_map(dtype)], this_unpk, root=root)
-        this = np.reshape(this_unpk, [chunks[world.rank], s])
+        this = reshape(this_unpk, [chunks[world.rank], s])
 
         return this.T if axis == 1 else this

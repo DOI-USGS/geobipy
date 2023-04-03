@@ -1,5 +1,5 @@
 from copy import deepcopy
-import numpy as np
+from numpy import asarray, float64, pi
 from ...base import MPI as myMPI
 from .EmLoop import EmLoop
 from ..core import StatArray
@@ -42,17 +42,17 @@ class CircularLoop(EmLoop):
 
     @property
     def area(self):
-        return np.pi * self.radius * self.radius
+        return pi * self.radius * self.radius
 
     @property
     def radius(self):
-        return self._radius    
+        return self._radius
 
     @radius.setter
     def radius(self, value):
         if not isinstance(value, StatArray.StatArray):
-            value = np.float64(value)
-        # assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("pitch must have type float")
+            value = float64(value)
+        # assert isinstance(value, (StatArray.StatArray, float, float64)), TypeError("pitch must have type float")
         self._radius = StatArray.StatArray(value, 'Radius', 'm')
 
     @property
@@ -77,7 +77,7 @@ class CircularLoop(EmLoop):
         if add_axis is not None:
             grp.attrs['repr'] = 'CircularLoops'
         self.radius.createHdf(grp, 'radius', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        
+
     def writeHdf(self, parent, name, withPosterior=True, index=None):
         """ Write the StatArray to an HDF object
         parent: Upper hdf file or group
@@ -120,7 +120,7 @@ class CircularLoop(EmLoop):
         roll = self.roll.Bcast(world, root)
         yaw = self.yaw.Bcast(world, root)
 
-        data = np.asarray([self._orient, self.moment, self.radius], dtype=np.float64)
+        data = asarray([self._orient, self.moment, self.radius], dtype=float64)
         tData = myMPI.Bcast(data, world, root=root)
 
         return CircularLoop(orient=tData[0], moment=tData[1], x=x, y=y, z=z, pitch=pitch, roll=roll, yaw=yaw, radius=tData[2])

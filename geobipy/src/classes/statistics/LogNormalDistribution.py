@@ -2,7 +2,7 @@
 Module defining a normal distribution with statistical procedures
 """
 #from copy import deepcopy
-import numpy as np
+from numpy import array, exp, linspace, log, size, squeeze, sqrt
 from .NormalDistribution import Normal
 from scipy.stats import norm
 from ...base import plotting as cP
@@ -25,17 +25,17 @@ class LogNormal(Normal):
         """Instantiate a Normal distribution """
 
         if linearSpace:
-            mean = np.log(mean)
+            mean = log(mean)
         super().__init__(mean, variance, prng=prng)
         self.linearSpace = linearSpace
 
     @property
     def mean(self):
-        return np.exp(self._mean) if self.linearSpace else self._mean
+        return exp(self._mean) if self.linearSpace else self._mean
 
     @mean.setter
     def mean(self, value):
-        self._mean = np.log(value) if self.linearSpace else value
+        self._mean = log(value) if self.linearSpace else value
 
     @property
     def ndim(self):
@@ -53,7 +53,7 @@ class LogNormal(Normal):
     def cdf(self, x):
         """ For a realization x, compute the probability """
         if self.linearSpace:
-            x = np.log(x)
+            x = log(x)
         return StatArray.StatArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
 
 
@@ -73,7 +73,7 @@ class LogNormal(Normal):
         assert 0 <= moment <= 1, ValueError("Must have 0 <= moment < 2")
 
         if self.linearSpace:
-            x = np.log(x)
+            x = log(x)
 
         if moment == 0:
             return ((x - self._mean) / self.variance)
@@ -96,10 +96,10 @@ class LogNormal(Normal):
             numpy.ndarray
 
         """
-        size = (size, np.size(self.mean))
-        values = np.squeeze(self.prng.normal(size=size, loc=self._mean, scale=self.variance))
+        size = (size, size(self.mean))
+        values = squeeze(self.prng.normal(size=size, loc=self._mean, scale=self.variance))
 
-        return np.exp(values) if self.linearSpace else values
+        return exp(values) if self.linearSpace else values
 
 
     def plot_pdf(self, log=False, **kwargs):
@@ -115,7 +115,7 @@ class LogNormal(Normal):
         """ For a realization x, compute the probability """
 
         if self.linearSpace:
-            x= np.log(x)
+            x= log(x)
 
         if log:
             return StatArray.StatArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
@@ -155,13 +155,13 @@ class LogNormal(Normal):
 #
 #    def fromHdf(self, h5grp):
 #        """ Reads the Uniform Distribution from an HDF group """
-#        T1 = np.array(h5grp.get('mean'))
-#        T2 = np.array(h5grp.get('variance'))
+#        T1 = array(h5grp.get('mean'))
+#        T2 = array(h5grp.get('variance'))
 #        return MvNormal(T1, T2)
 
     def bins(self, nBins = 99, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
-        tmp = nStd * np.sqrt(self.variance)
-        values = np.linspace(self._mean - tmp, self._mean + tmp, nBins+1)
+        tmp = nStd * sqrt(self.variance)
+        values = linspace(self._mean - tmp, self._mean + tmp, nBins+1)
 
-        return StatArray.StatArray(np.exp(values)) if self.linearSpace else StatArray.StatArray(values)
+        return StatArray.StatArray(exp(values)) if self.linearSpace else StatArray.StatArray(values)

@@ -2,9 +2,14 @@
 Module defining a uniform distribution with statistical procedures
 """
 from copy import deepcopy
+
+from numpy import asarray, empty, exp, linspace, prod, s_, size, squeeze, sum
+from numpy import log as nplog
+from numpy import all as npall
+
 from .baseDistribution import baseDistribution
 from ...base import plotting as cP
-import numpy as np
+
 from scipy.stats import uniform
 from ..core import StatArray
 
@@ -18,7 +23,7 @@ class Uniform(baseDistribution):
         xmax:  :Maximum value
         """
 
-        assert np.all(max > min), ValueError("Maximum must be > minimum")
+        assert npall(max > min), ValueError("Maximum must be > minimum")
         super().__init__(prng)
 
         self.log = log
@@ -40,7 +45,7 @@ class Uniform(baseDistribution):
 
     @property
     def ndim(self):
-        return np.size(self.min)
+        return size(self.min)
 
     @property
     def multivariate(self):
@@ -48,21 +53,21 @@ class Uniform(baseDistribution):
 
     @property
     def min(self):
-        return np.exp(self._min) if self.log else self._min
+        return exp(self._min) if self.log else self._min
 
     @min.setter
     def min(self, values):
-        values = np.asarray(values)
-        self._min = np.log(values) if self.log else deepcopy(values)
+        values = asarray(values)
+        self._min = nplog(values) if self.log else deepcopy(values)
 
     @property
     def max(self):
-        return np.exp(self._max) if self.log else self._max
+        return exp(self._max) if self.log else self._max
 
     @max.setter
     def max(self, values):
-        values = np.asarray(values)
-        self._max = np.log(values) if self.log else deepcopy(values)
+        values = asarray(values)
+        self._max = nplog(values) if self.log else deepcopy(values)
 
     @property
     def mean(self):
@@ -85,7 +90,7 @@ class Uniform(baseDistribution):
     def cdf(self, x, log=False):
         """ Get the value of the cumulative distribution function for a x """
         if self.log:
-            x = np.log(x)
+            x = nplog(x)
         if log:
             return uniform.logcdf(x, self._min, self.scale)
         else:
@@ -98,25 +103,25 @@ class Uniform(baseDistribution):
         cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)
 
 
-    def probability(self, x, log, i=np.s_[:]):
+    def probability(self, x, log, i=s_[:]):
 
         if self.log:
-            x = np.log(x)
+            x = nplog(x)
 
         if log:
-            out = np.squeeze(uniform.logpdf(x, self._min, self.scale))
-            probability = np.sum(out[i]) if self.multivariate else out
+            out = squeeze(uniform.logpdf(x, self._min, self.scale))
+            probability = sum(out[i]) if self.multivariate else out
 
         else:
-            out = np.squeeze(uniform.pdf(x, self._min, self.scale))
-            probability =  np.prod(out[i]) if self.multivariate else out
+            out = squeeze(uniform.pdf(x, self._min, self.scale))
+            probability =  prod(out[i]) if self.multivariate else out
 
         return probability
 
 
     def rng(self, size=1):
         values = self.prng.uniform(self._min, self._max, size=size)
-        return np.exp(values) if self.log else values
+        return exp(values) if self.log else values
 
 
     @property
@@ -148,16 +153,16 @@ class Uniform(baseDistribution):
         nD = self.ndim
         if (nD > 1):
             if dim is None:
-                bins = np.empty([nD, nBins+1])
+                bins = empty([nD, nBins+1])
                 for i in range(nD):
-                    bins[i, :] = np.linspace(self._min[i], self._max[i], nBins+1)
-                values = StatArray.StatArray(np.squeeze(bins))
+                    bins[i, :] = linspace(self._min[i], self._max[i], nBins+1)
+                values = StatArray.StatArray(squeeze(bins))
             else:
-                bins = np.empty(nBins+1)
-                bins[:] = np.linspace(self._min[dim], self._max[dim], nBins+1)
-                values = StatArray.StatArray(np.squeeze(bins))
+                bins = empty(nBins+1)
+                bins[:] = linspace(self._min[dim], self._max[dim], nBins+1)
+                values = StatArray.StatArray(squeeze(bins))
 
         else:
-            values = StatArray.StatArray(np.squeeze(np.linspace(self._min, self._max, nBins+1)))
+            values = StatArray.StatArray(squeeze(linspace(self._min, self._max, nBins+1)))
 
-        return np.exp(values) if self.log else values
+        return exp(values) if self.log else values

@@ -1,10 +1,12 @@
 """ @FdemSystem_Class
 Module describing a frequency domain EM acquisition system
 """
+from numpy import arange, asarray, empty, float64, vstack, zeros
+from numpy.linalg import norm
 from cached_property import cached_property
 from copy import deepcopy
 from pandas import read_csv
-import numpy as np
+
 
 from .CircularLoops import CircularLoops
 from ...classes.core.myObject import myObject
@@ -20,7 +22,7 @@ class FdemSystem(myObject):
         # StatArray of frequencies
 
         if not n_frequencies is None:
-            frequencies = np.zeros(n_frequencies)
+            frequencies = zeros(n_frequencies)
 
         self.frequencies = frequencies
         self.transmitter = transmitter
@@ -43,20 +45,20 @@ class FdemSystem(myObject):
     @frequencies.setter
     def frequencies(self, values):
         if values is None:
-            self._frequencies = StatArray.StatArray(0, "Frequencies", "Hz", dtype=np.float64)
+            self._frequencies = StatArray.StatArray(0, "Frequencies", "Hz", dtype=float64)
             return
-        self._frequencies = StatArray.StatArray(values, "Frequencies", "Hz", dtype=np.float64)
+        self._frequencies = StatArray.StatArray(values, "Frequencies", "Hz", dtype=float64)
 
     @property
     def loop_offsets(self):
-        return StatArray.StatArray(np.vstack([self.receiver.x - self.transmitter.x,
+        return StatArray.StatArray(vstack([self.receiver.x - self.transmitter.x,
                                               self.receiver.y - self.transmitter.y,
-                                              self.receiver.z - self.transmitter.z]), 
-                                   "loop_offsets", "m", dtype=np.float64)
+                                              self.receiver.z - self.transmitter.z]),
+                                   "loop_offsets", "m", dtype=float64)
 
     @property
     def loop_separation(self):
-        return np.linalg.norm(self.loop_offsets, axis=0)
+        return norm(self.loop_offsets, axis=0)
 
     @property
     def nFrequencies(self):
@@ -64,14 +66,14 @@ class FdemSystem(myObject):
 
     @cached_property
     def lamda0(self):
-        a0 = np.float64(-8.3885)
-        s0 = np.float64(9.04226468670e-2)
+        a0 = float64(-8.3885)
+        s0 = float64(9.04226468670e-2)
 
-        tmp = np.arange(120, dtype = np.float64)
+        tmp = arange(120, dtype = float64)
 
         r = 1.0 / self.loop_separation
 
-        lamda0 = np.empty([self.nFrequencies, 120], dtype=np.float64)
+        lamda0 = empty([self.nFrequencies, 120], dtype=float64)
 
         l0 = (10.0 ** ((tmp * s0) + a0))
 
@@ -82,14 +84,14 @@ class FdemSystem(myObject):
 
     @cached_property
     def lamda1(self):
-        a1 = np.float64(-7.91001919)
-        s1 = np.float64(8.7967143957e-2)
+        a1 = float64(-7.91001919)
+        s1 = float64(8.7967143957e-2)
 
-        tmp = np.arange(140, dtype = np.float64)
+        tmp = arange(140, dtype = float64)
 
         r = 1.0 / self.loop_separation
 
-        lamda1 = np.empty([self.nFrequencies, 140], dtype=np.float64)
+        lamda1 = empty([self.nFrequencies, 140], dtype=float64)
 
         l1 = (10.0 ** ((tmp * s1) + a1))
 
@@ -118,7 +120,7 @@ class FdemSystem(myObject):
 
         assert isinstance(values, CircularLoops), ValueError('receiver must have type geobipy.CircularLoops, not {}'.format(type(values)))
         assert values.nPoints == self.nFrequencies, ValueError("Must have {} receivers, one for each frequency".format(self.nFrequencies))
-        
+
         self._receiver = values
 
     @property
@@ -133,7 +135,7 @@ class FdemSystem(myObject):
 
         assert isinstance(values, CircularLoops), ValueError('transmitter must have type geobipy.CircularLoops, not {}'.format(type(values)))
         assert values.nPoints == self.nFrequencies, ValueError("Must have {} transmitters, one for each frequency".format(self.nFrequencies))
-        
+
         self._transmitter = values
 
     def __deepcopy__(self, memo={}):
@@ -161,18 +163,18 @@ class FdemSystem(myObject):
 
         values = df.values
 
-        frequencies = np.asarray(values[:, 0], dtype=np.float64)
+        frequencies = asarray(values[:, 0], dtype=float64)
 
         transmitters = CircularLoops(orientation = values[:, 1],
-                                    moment = np.asarray(values[:, 2], dtype=np.float64), 
-                                    x = np.asarray(values[:, 3], dtype=np.float64), 
-                                    y = np.asarray(values[:, 4], dtype=np.float64),
-                                    z = np.asarray(values[:, 5], dtype=np.float64))
+                                    moment = asarray(values[:, 2], dtype=float64),
+                                    x = asarray(values[:, 3], dtype=float64),
+                                    y = asarray(values[:, 4], dtype=float64),
+                                    z = asarray(values[:, 5], dtype=float64))
         receivers = CircularLoops(orientation = values[:, 6],
-                                    moment = np.asarray(values[:, 7], dtype=np.float64), 
-                                    x = np.asarray(values[:, 8], dtype=np.float64), 
-                                    y = np.asarray(values[:, 9], dtype=np.float64),
-                                    z = np.asarray(values[:, 10], dtype=np.float64))
+                                    moment = asarray(values[:, 7], dtype=float64),
+                                    x = asarray(values[:, 8], dtype=float64),
+                                    y = asarray(values[:, 9], dtype=float64),
+                                    z = asarray(values[:, 10], dtype=float64))
 
         self = cls(frequencies, transmitters, receivers)
         self._filename = filename
@@ -224,7 +226,7 @@ class FdemSystem(myObject):
                 zy.append(i)
             if ((self.transmitter.orientation[i] == 'z') and self.receiver.orientation[i] == 'z'):
                 zz.append(i)
-        return np.asarray(xx), np.asarray(xy), np.asarray(xz), np.asarray(yx), np.asarray(yy), np.asarray(yz), np.asarray(zx), np.asarray(zy), np.asarray(zz)
+        return asarray(xx), asarray(xy), asarray(xz), asarray(yx), asarray(yy), asarray(yz), asarray(zx), asarray(zy), asarray(zz)
 
     @property
     def summary(self):
@@ -276,7 +278,7 @@ class FdemSystem(myObject):
 
     @cached_property
     def w0(self):
-        return np.asarray([
+        return asarray([
         9.62801364263e-07, -5.02069203805e-06, 1.25268783953e-05, -1.99324417376e-05, 2.29149033546e-05,
         -2.04737583809e-05, 1.49952002937e-05, -9.37502840980e-06, 5.20156955323e-06, -2.62939890538e-06,
         1.26550848081e-06, -5.73156151923e-07, 2.76281274155e-07, -1.09963734387e-07, 7.38038330280e-08,
@@ -300,11 +302,11 @@ class FdemSystem(myObject):
         -2.97674373379e-01, 7.93541259524e-03, 4.26273267393e-01, 1.00032384844e-01, -4.94117404043e-01,
         3.92604878741e-01, -1.90111691178e-01, 7.43654896362e-02, -2.78508428343e-02, 1.09992061155e-02,
         -4.69798719697e-03, 2.12587632706e-03, -9.81986734159e-04, 4.44992546836e-04, -1.89983519162e-04,
-        7.31024164292e-05, -2.40057837293e-05, 6.23096824846e-06, -1.12363896552e-06, 1.04470606055e-07], dtype=np.float64)
+        7.31024164292e-05, -2.40057837293e-05, 6.23096824846e-06, -1.12363896552e-06, 1.04470606055e-07], dtype=float64)
 
     @cached_property
     def w1(self):
-        return np.asarray([
+        return asarray([
         -6.76671159511e-14, 3.39808396836e-13, -7.43411889153e-13, 8.93613024469e-13, -5.47341591896e-13,
         -5.84920181906e-14, 5.20780672883e-13, -6.92656254606e-13, 6.88908045074e-13, -6.39910528298e-13,
         5.82098912530e-13, -4.84912700478e-13, 3.54684337858e-13, -2.10855291368e-13, 1.00452749275e-13,
@@ -332,4 +334,4 @@ class FdemSystem(myObject):
         -8.71623576811e-07, 3.61028200288e-07, -1.05847108097e-07, -1.51569361490e-08, 6.67633241420e-08,
         -8.33741579804e-08, 8.31065906136e-08, -7.53457009758e-08, 6.48057680299e-08, -5.37558016587e-08,
         4.32436265303e-08, -3.37262648712e-08, 2.53558687098e-08, -1.81287021528e-08, 1.20228328586e-08,
-        -7.10898040664e-09, 3.53667004588e-09, -1.36030600198e-09, 3.52544249042e-10, -4.53719284366e-11], dtype=np.float64)
+        -7.10898040664e-09, 3.53667004588e-09, -1.36030600198e-09, 3.52544249042e-10, -4.53719284366e-11], dtype=float64)

@@ -1,11 +1,12 @@
 """ @fileIO
 Module with custom file handling operations
 """
-import re
-from pandas import read_csv
-import numpy as np
 import os
 from subprocess import Popen, PIPE, STDOUT
+from numpy import asfarray, atleast_1d, float64, zeros
+import re
+from pandas import read_csv
+
 
 def filesExist(fNames):
     """Check if all files in fNames exist on disk
@@ -251,14 +252,14 @@ def getNcolumns(fName, nHeaders=0):
 
 #     assert fileExists(fName), 'Cannot find file '+fName
 
-#     indices = np.atleast_1d(indices)
+#     indices = atleast_1d(indices)
 #     if (nLines == 0):
 #         # Get the number of lines in the file
 #         nLines = getNlines(fName, nHeaders)
 
 #     nCols = getNcolumns(fName, nHeaders) if indices is None else indices.size
 
-#     values = np.zeros([nLines, nCols], dtype='float64', order='F')  # Initialize output
+#     values = zeros([nLines, nCols], dtype='float64', order='F')  # Initialize output
 
 #     with open(fName) as f:  # Open the file
 #         skipLines(f, nHeaders)  # Skip header lines
@@ -292,10 +293,10 @@ def get_real_numbers_from_line(line, indices=None, delimiters=','):
     line = parseString(line, delimiters)
 
     if not indices is None:
-        indices = np.atleast_1d(indices)
-        values = np.asfarray([i for i in indices], np.float64)
+        indices = atleast_1d(indices)
+        values = asfarray([i for i in indices], float64)
     else:
-        values = np.asfarray(line, np.float64)
+        values = asfarray(line, float64)
 
     return values
 

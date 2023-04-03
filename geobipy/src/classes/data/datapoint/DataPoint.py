@@ -1,6 +1,14 @@
 from abc import abstractmethod
 from cached_property import cached_property
 from copy import copy, deepcopy
+
+from numpy import arange, argwhere, atleast_2d, diag_indices
+from numpy import dot, float64, full, hstack, isnan
+from numpy import s_, size, squeeze, sqrt, sum
+from numpy import all as npall
+
+from numpy.random import randn
+
 from ...pointcloud.Point import Point
 from ....classes.core import StatArray
 from ....base import utilities as cf
@@ -9,7 +17,7 @@ from ....base import MPI as myMPI
 from ...statistics.Distribution import Distribution
 from ...statistics.Histogram import Histogram
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
-import numpy as np
+
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -89,11 +97,11 @@ class DataPoint(Point):
             Indices into the observed data that are not NaN
 
         """
-        return ~np.isnan(self.data)
+        return ~isnan(self.data)
 
     @cached_property
     def active_system_indices(self):
-        out =  np.squeeze(np.argwhere([np.any(self.active[i]) for i in self.system_indices]))
+        out =  squeeze(argwhere([any(self.active[i]) for i in self.system_indices]))
         return out
 
     @property
@@ -109,9 +117,9 @@ class DataPoint(Point):
         if values is None:
             values = self.nSystems
         else:
-            assert np.size(values) == self.nSystems, ValueError("additive_error must have size 1")
-            # assert (np.all(np.asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
-            # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], np.ndarray)), TypeError(
+            assert size(values) == self.nSystems, ValueError("additive_error must have size 1")
+            # assert (npall(asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
+            # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
         self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
@@ -156,7 +164,7 @@ class DataPoint(Point):
 
     @lineNumber.setter
     def lineNumber(self, value):
-        self._lineNumber = StatArray.StatArray(np.float64(value), 'Line number')
+        self._lineNumber = StatArray.StatArray(float64(value), 'Line number')
 
     @property
     def n_posteriors(self):
@@ -167,7 +175,7 @@ class DataPoint(Point):
         # if not self.errorPosterior is None:
         #     return len(self.errorPosterior)
         # else:
-        return self.nSystems * np.sum([x.hasPosterior for x in [self.relative_error, self.additive_error]])
+        return self.nSystems * sum([x.hasPosterior for x in [self.relative_error, self.additive_error]])
 
     @property
     def data(self):
@@ -227,8 +235,8 @@ class DataPoint(Point):
         else:
             if isinstance(values, list):
                 assert len(values) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
-                values = np.hstack(values)
-            assert np.size(values) == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
+                values = hstack(values)
+            assert size(values) == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
 
         self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
 
@@ -240,14 +248,14 @@ class DataPoint(Point):
     def relative_error(self, values):
 
         if values is None:
-            values = np.full(self.nSystems, fill_value=0.01)
+            values = full(self.nSystems, fill_value=0.01)
         else:
-            assert np.size(values) == self.nSystems, ValueError("relative_error must be a list of size equal to the number of systems {}".format(self.nSystems))
-            # assert (np.all(np.asarray(values) > 0.0)), ValueError("relative_error must be > 0.0.")
-            # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], np.ndarray)), TypeError(
+            assert size(values) == self.nSystems, ValueError("relative_error must be a list of size equal to the number of systems {}".format(self.nSystems))
+            # assert (npall(asarray(values) > 0.0)), ValueError("relative_error must be > 0.0.")
+            # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], ndarray)), TypeError(
             #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        assert np.all(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
+        assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
         self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
 
@@ -263,11 +271,11 @@ class DataPoint(Point):
 
         # For each system assign error levels using the user inputs
         variance = ((self.relative_error * self.data)**2.0) + (self.additive_error**2.0)
-        self._std[:] = np.sqrt(variance)
+        self._std[:] = sqrt(variance)
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = variance[self.active]
+            self.predictedData.prior.variance[diag_indices(sum(self.active))] = variance[self.active]
 
         return self._std
 
@@ -275,12 +283,12 @@ class DataPoint(Point):
     def std(self, value):
 
         if value is None:
-            value = np.full(self.nChannels, fill_value=0.01)
+            value = full(self.nChannels, fill_value=0.01)
         else:
             if isinstance(value, list):
                 assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
-                value = np.hstack(value)
-            assert np.size(value) == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
+                value = hstack(value)
+            assert size(value) == self.nChannels, ValueError("Size of std {} must equal total number of time channels {}".format(size(value), self.nChannels))
 
         self._std = StatArray.StatArray(value, "Standard deviation", self.units)
 
@@ -324,19 +332,19 @@ class DataPoint(Point):
 
     def generate_noise(self, additive_error, relative_error):
 
-        std = np.sqrt(additive_error**2.0 + (relative_error * self.predictedData)**2.0)
-        return np.random.randn(self.nChannels) * std
+        std = sqrt(additive_error**2.0 + (relative_error * self.predictedData)**2.0)
+        return randn(self.nChannels) * std
 
     def prior_derivative(self, order):
 
         J = self.sensitivity_matrix[self.active, :]
 
         if order == 1:
-            return np.dot(J.T, self.predictedData.priorDerivative(order=1, i=self.active))
+            return dot(J.T, self.predictedData.priorDerivative(order=1, i=self.active))
 
         elif order == 2:
             WdT_Wd = self.predictedData.priorDerivative(order=2)
-            return np.dot(J.T, np.dot(WdT_Wd, J))
+            return dot(J.T, dot(WdT_Wd, J))
 
     @property
     def probability(self):
@@ -357,7 +365,7 @@ class DataPoint(Point):
 
         Returns
         -------
-        out : np.float64
+        out : float64
             The evaluation of the probability using all assigned priors
 
         Notes
@@ -378,7 +386,7 @@ class DataPoint(Point):
         if self.additive_error.hasPrior:  # Additive Errors
             probability += self.additive_error.probability(log=True, active=self.active_system_indices)
 
-        # P_calibration = np.float64(0.0)
+        # P_calibration = float64(0.0)
         # if calibration:  # Calibration parameters
         #     P_calibration = self.calibration.probability(log=True)
         #     probability += P_calibration
@@ -448,7 +456,7 @@ class DataPoint(Point):
 
     @property
     def system_indices(self):
-        return tuple([np.s_[self.systemOffset[system]:self.systemOffset[system+1]] for system in np.arange(self.nSystems)])
+        return tuple([s_[self.systemOffset[system]:self.systemOffset[system+1]] for system in arange(self.nSystems)])
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
@@ -474,7 +482,7 @@ class DataPoint(Point):
 
         Returns
         -------
-        out : np.float64
+        out : float64
             Likelihood of the data point
 
         """
@@ -495,14 +503,14 @@ class DataPoint(Point):
 
         Returns
         -------
-        out : np.float64
+        out : float64
             The misfit value.
 
         """
         # The data misfit is the mahalanobis distance of the multivariate distribution.
         # assert not any(self.std[self.active] <= 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
         tmp2 = 1.0 / self.std[self.active]
-        misfit = np.float64(np.sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=np.float64))
+        misfit = float64(sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=float64))
         return misfit
 
     def initialize(self, **kwargs):
@@ -650,7 +658,7 @@ class DataPoint(Point):
 
         """
         if self.relative_error.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
+            bins = StatArray.StatArray(atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
@@ -663,7 +671,7 @@ class DataPoint(Point):
 
         """
         if self.additive_error.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.additive_error.prior.bins()), name=self.additive_error.name, units=self.data.units)
+            bins = StatArray.StatArray(atleast_2d(self.additive_error.prior.bins()), name=self.additive_error.name, units=self.data.units)
 
             posterior = []
             for i in range(self.nSystems):
@@ -697,8 +705,8 @@ class DataPoint(Point):
     #     """
     #     assert Jin.shape[0] == self.nActiveChannels, ValueError("Number of rows of Jin must match the number of active channels in the datapoint {}".format(self.nActiveChannels))
 
-    #     Jout = np.zeros(Jin.shape)
-    #     Jout[:, :] = Jin * (np.repeat(self.std[self.active, np.newaxis]**-power, Jout.shape[1], 1))
+    #     Jout = zeros(Jin.shape)
+    #     Jout[:, :] = Jin * (repeat(self.std[self.active, newaxis]**-power, Jout.shape[1], 1))
     #     return Jout
 
     @property
@@ -706,7 +714,7 @@ class DataPoint(Point):
         """ Print a summary of the EMdataPoint """
         msg = super().summary
         names = copy(self.channelNames)
-        j = np.arange(5, self.nChannels, 5)
+        j = arange(5, self.nChannels, 5)
         for i in range(j.size):
             names.insert(j[i]+i, '\n')
 

@@ -4,7 +4,7 @@ Leon Foks
 June 2020
 """
 from copy import deepcopy
-import numpy as np
+from numpy import hstack, size, zeros
 from ....system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from .empymod_walktem import empymod_walktem
 
@@ -62,9 +62,9 @@ def empymod_tdem1dsen(datapoint, model1d, ix=None):
 
     if (ix is None):  # Generate a full matrix if the layers are not specified
         ix = range(model1d.mesh.nCells[0])
-        J = np.zeros((datapoint.nWindows, model1d.mesh.nCells[0]))
+        J = zeros((datapoint.nWindows, model1d.mesh.nCells[0]))
     else:  # Partial matrix for specified layers
-        J = np.zeros((datapoint.nWindows, np.size(ix)))
+        J = zeros((datapoint.nWindows, size(ix)))
 
     for j in range(datapoint.nSystems):  # For each system
         iSys = datapoint._systemIndices(j)
@@ -72,7 +72,7 @@ def empymod_tdem1dsen(datapoint, model1d, ix=None):
         d0 = empymod_walktem(datapoint.system[j], model1d)
         m1 = deepcopy(model1d)
 
-        for i in range(np.size(ix)):  # For the specified layers
+        for i in range(size(ix)):  # For the specified layers
             iLayer = ix[i]
             dSigma = 0.02 * model1d.values[iLayer]
             m1.values[:] = model1d.values[:]
@@ -114,13 +114,13 @@ def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
 
     if (ix is None):  # Generate a full matrix if the layers are not specified
         ix = range(model1d.mesh.nCells.item())
-        J = np.zeros((datapoint.nChannels, model1d.mesh.nCells.item()))
+        J = zeros((datapoint.nChannels, model1d.mesh.nCells.item()))
     else:  # Partial matrix for specified layers
-        J = np.zeros((datapoint.nChannels, np.size(ix)))
+        J = zeros((datapoint.nChannels, size(ix)))
 
     for j in range(datapoint.nSystems):  # For each system
         iSys = datapoint._systemIndices(j)
-        for i in range(np.size(ix)):  # For the specified layers
+        for i in range(size(ix)):  # For the specified layers
             tmp = datapoint.system[j].derivative(datapoint.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
 
             # Store the necessary component
@@ -131,7 +131,7 @@ def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
                 comps.append(tmp.SY)
             if 'z' in datapoint.components:
                 comps.append(-tmp.SZ)
-            J[iSys, i] = model1d.values[ix[i]] * np.hstack(comps)
+            J[iSys, i] = model1d.values[ix[i]] * hstack(comps)
 
     return J
 

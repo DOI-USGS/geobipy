@@ -615,12 +615,12 @@ class Histogram2D(RectilinearMesh2D):
             self._counts, intervals, axis, statistic)
 
         if axis == 0:
-            out = Histogram2D(xEdges=self.x.edges, yEdges=StatArray.StatArray(
-                np.asarray(intervals), name=self.y.name, units=self.y.units))
+            out = Histogram2D(xEdges=self.x.edges,
+                              yEdges=StatArray.StatArray(np.asarray(intervals), name=self.y.name, units=self.y.units))
             out._counts[:] = counts
         else:
-            out = Histogram2D(xEdges=StatArray.StatArray(np.asarray(
-                intervals), name=self.x.name, units=self.x.units), yEdges=self.y.edges)
+            out = Histogram2D(xEdges=StatArray.StatArray(np.asarray(intervals), name=self.x.name, units=self.x.units),
+                              yEdges=self.y.edges)
             out._counts[:] = counts
         return out
 

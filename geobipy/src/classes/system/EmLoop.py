@@ -1,4 +1,4 @@
-import numpy as np
+from numpy import ceil, float64, int8, int32, minimum, unravel_index
 from copy import deepcopy
 from matplotlib.figure import Figure
 from matplotlib.pyplot import gcf
@@ -53,8 +53,8 @@ class EmLoop(Point, ABC):
     @moment.setter
     def moment(self, value):
         if not isinstance(value, StatArray.StatArray):
-            value = np.float64(value)
-        # assert isinstance(value, (StatArray.StatArray, float, np.float64)), TypeError("pitch must have type float")
+            value = float64(value)
+        # assert isinstance(value, (StatArray.StatArray, float, float64)), TypeError("pitch must have type float")
         self._moment = StatArray.StatArray(value, 'Moment')
 
     @property
@@ -68,7 +68,7 @@ class EmLoop(Point, ABC):
     @pitch.setter
     def pitch(self, value):
         if not isinstance(value, StatArray.StatArray):
-            value = np.float64(value)
+            value = float64(value)
 
         if '_pitch' in self.__dict__:
             self._pitch[0] = value
@@ -82,7 +82,7 @@ class EmLoop(Point, ABC):
     @roll.setter
     def roll(self, value):
         if not isinstance(value, StatArray.StatArray):
-            value = np.float64(value)
+            value = float64(value)
         if '_roll' in self.__dict__:
             self._roll[0] = value
         else:
@@ -95,7 +95,7 @@ class EmLoop(Point, ABC):
     @yaw.setter
     def yaw(self, value):
         if not isinstance(value, StatArray.StatArray):
-            value = np.float64(value)
+            value = float64(value)
 
         if '_yaw' in self.__dict__:
             self._yaw[0] = value
@@ -123,7 +123,7 @@ class EmLoop(Point, ABC):
                 value = 2
 
         assert 0 <= value <= 2, ValueError("orientation must be 0, 1, or 2")
-        self._orientation = StatArray.StatArray(1, dtype=np.int8) + value
+        self._orientation = StatArray.StatArray(1, dtype=int8) + value
 
     @property
     def summary(self):
@@ -289,7 +289,7 @@ class EmLoop(Point, ABC):
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        shp = (np.minimum(3, self.n_posteriors), np.ceil(self.n_posteriors / 3).astype(np.int32))
+        shp = (minimum(3, self.n_posteriors), ceil(self.n_posteriors / 3).astype(int32))
         splt = gs.subgridspec(*shp, wspace=0.3, hspace=1.0)
 
         ax = []
@@ -300,7 +300,7 @@ class EmLoop(Point, ABC):
         for c in [self.pitch, self.roll, self.yaw]:
             if c.hasPosterior:
                 j = super().n_posteriors + k
-                s = np.unravel_index(j, shp, order='F')
+                s = unravel_index(j, shp, order='F')
                 ax.append(c._init_posterior_plots(splt[s[0], s[1]]))
                 k += 1
 

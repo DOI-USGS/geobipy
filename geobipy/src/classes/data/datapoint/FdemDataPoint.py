@@ -3,17 +3,20 @@ Module describing a frequency domain EMData Point that contains a single measure
 """
 from copy import copy, deepcopy
 
+from numpy import asarray, exp
+from numpy import int32, isinf, log10, logspace, s_, squeeze, tile
+from numpy import all as npall
+
 from ....classes.core import StatArray
 from ...forwardmodelling.Electromagnetic.FD.fdem1d import fdem1dfwd, fdem1dsen
 from .EmDataPoint import EmDataPoint
 from ...model.Model import Model
-from...mesh.RectilinearMesh1D import RectilinearMesh1D
 from...mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...statistics.Histogram import Histogram
 from ...statistics.Distribution import Distribution
 from ...system.FdemSystem import FdemSystem
 import matplotlib.pyplot as plt
-import numpy as np
+
 #from ....base import Error as Err
 from ....base import utilities as cf
 from ....base import MPI as myMPI
@@ -143,11 +146,11 @@ class FdemDataPoint(EmDataPoint):
 
     @property
     def nFrequencies(self):
-        return (self.channels_per_system / 2).astype(np.int32)
+        return (self.channels_per_system / 2).astype(int32)
 
     @property
     def channels(self):
-        return np.squeeze(np.asarray([np.tile(self.frequencies(i), 2) for i in range(self.nSystems)]))
+        return squeeze(asarray([tile(self.frequencies(i), 2) for i in range(self.nSystems)]))
 
 
     def _inphaseIndices(self, system=0):
@@ -167,7 +170,7 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
 
-        return np.s_[self.systemOffset[system]:self.systemOffset[system] + self.nFrequencies[system]]
+        return s_[self.systemOffset[system]:self.systemOffset[system] + self.nFrequencies[system]]
 
 
     def _quadratureIndices(self, system=0):
@@ -187,7 +190,7 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
 
-        return np.s_[self.systemOffset[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
+        return s_[self.systemOffset[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
 
 
     def frequencies(self, system=0):
@@ -204,7 +207,7 @@ class FdemDataPoint(EmDataPoint):
 
     # @property
     # def nFrequencies(self):
-    #     return np.int32(0.5*self.nChannelsPerSystem)
+    #     return int32(0.5*self.nChannelsPerSystem)
 
     def predictedInphase(self, system=0):
         return self.predictedData[self._inphaseIndices(system)]
@@ -261,15 +264,15 @@ class FdemDataPoint(EmDataPoint):
 
     def set_predicted_data_posterior(self):
         if self.predictedData.hasPrior:
-            freqs = np.log10(self.frequencies())
+            freqs = log10(self.frequencies())
             xbuf = 0.05*(freqs[-1] - freqs[0])
-            xbins = StatArray.StatArray(np.logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
+            xbins = StatArray.StatArray(logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
 
-            data = np.log10(self.data[self.active])
+            data = log10(self.data[self.active])
             a = data.min()
             b = data.max()
             buf = 0.5*(b - a)
-            ybins = StatArray.StatArray(np.logspace(a-buf, b+buf, 200), data.name, data.units)
+            ybins = StatArray.StatArray(logspace(a-buf, b+buf, 200), data.name, data.units)
 
             mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
             self.predictedData.posterior = Histogram(mesh=mesh)
@@ -328,7 +331,7 @@ class FdemDataPoint(EmDataPoint):
         Bq = self.calibration[i1:i2]
 
         # Calibrate the data
-        tmp[:] = G * np.exp(1j * Phi) * tmp + Bi + (1j * Bq)
+        tmp[:] = G * exp(1j * Phi) * tmp + Bi + (1j * Bq)
 
         # Split the complex numbers back out
         if (Predicted):
@@ -393,10 +396,10 @@ class FdemDataPoint(EmDataPoint):
             plt.errorbar(f, self.quadrature(system), yerr=self.quadratureStd(system),
                 marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
         else:
-            plt.plot(f, np.log10(self.inphase(system)),
+            plt.plot(f, log10(self.inphase(system)),
                 marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
 
-            plt.plot(f, np.log10(self.quadrature(system)),
+            plt.plot(f, log10(self.quadrature(system)),
                 marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
 
         plt.xscale(xscale)
@@ -490,12 +493,12 @@ class FdemDataPoint(EmDataPoint):
 
     #     """
     #     percentThreshold = 0.01 * percentThreshold
-    #     c0 = np.log10(minConductivity)
-    #     c1 = np.log10(maxConductivity)
+    #     c0 = log10(minConductivity)
+    #     c1 = log10(maxConductivity)
     #     cnew = 0.5 * (c0 + c1)
     #     # Initialize a single layer model
     #     p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
-    #     model = Model(mesh=RectilinearMesh1D(edges=np.asarray([0.0, np.inf])), values=p)
+    #     model = Model(mesh=RectilinearMesh1D(edges=asarray([0.0, inf])), values=p)
     #     # Initialize the first conductivity
     #     model._values[0] = 10.0**c0
     #     self.forward(model)  # Forward model the EM data
@@ -541,7 +544,7 @@ class FdemDataPoint(EmDataPoint):
 
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
-        assert np.isinf(mod.mesh.edges[-1]), ValueError('mod.edges must have last entry be infinity for forward modelling.')
+        assert isinf(mod.mesh.edges[-1]), ValueError('mod.edges must have last entry be infinity for forward modelling.')
         for i, s in enumerate(self.system):
             tmp = fdem1dfwd(s, mod, self.z[0])
             self._predictedData[:self.nFrequencies[i]] = tmp.real

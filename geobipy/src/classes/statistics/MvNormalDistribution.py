@@ -2,7 +2,11 @@
 Module defining a multivariate normal distribution with statistical procedures
 """
 from copy import deepcopy
-import numpy as np
+from numpy import all, atleast_1d, diag, diag_indices, dot, empty, exp, float64, full
+from numpy import int32, linspace, maximum, pi, prod, repeat, size, squeeze, sqrt, zeros
+from numpy import ndim as npndim
+from numpy import log as nplog
+from numpy.linalg import inv, slogdet
 from ...base import utilities as cf
 from .baseDistribution import baseDistribution
 from .NormalDistribution import Normal
@@ -45,12 +49,12 @@ class MvNormal(baseDistribution):
         """
 
         if (type(variance) is float):
-            variance = np.float64(variance)
+            variance = float64(variance)
 
         baseDistribution.__init__(self, prng)
 
         if ndim is None:
-            self._mean = deepcopy(np.atleast_1d(mean))
+            self._mean = atleast_1d(mean).copy()
 
             self.variance = variance
 
@@ -58,13 +62,13 @@ class MvNormal(baseDistribution):
 
         else:
 
-            assert np.size(mean) == 1, ValueError("When specifying ndim, mean must be a scalar.")
-            assert np.size(variance) == 1, ValueError("When specifying ndim, variance must be a scalar.")
+            assert size(mean) == 1, ValueError("When specifying ndim, mean must be a scalar.")
+            assert size(variance) == 1, ValueError("When specifying ndim, variance must be a scalar.")
 
-            ndim = np.int32(np.maximum(1, ndim))
+            ndim = int32(maximum(1, ndim))
             self._constant = True
-            self._mean = np.full(ndim, fill_value=mean)
-            self._variance = np.diag(np.full(ndim, fill_value=variance))
+            self._mean = full(ndim, fill_value=mean)
+            self._variance = diag(full(ndim, fill_value=variance))
 
     @property
     def addressof(self):
@@ -87,31 +91,31 @@ class MvNormal(baseDistribution):
 
     @property
     def ndim(self):
-        return np.size(self.mean)
+        return size(self.mean)
 
     @ndim.setter
     def ndim(self, newDimension):
-        newDimension = np.int32(newDimension)
+        newDimension = int32(newDimension)
         if newDimension == self.ndim:
             return
         assert newDimension > 0, ValueError("Cannot have zero dimensions.")
         assert self._constant, ValueError("Cannot change the dimension of a non-constant multivariate distribution.")
-        if np.ndim(self.mean) == 0:
+        if npndim(self.mean) == 0:
             mean = self._mean
         else:
             mean = self._mean[0]
 
-        # if np.ndim(self.variance) == 0:
+        # if ndim(self.variance) == 0:
         #     variance = self.variance
         # else:
         variance = self.variance[0, 0]
 
-        self._mean = np.full(newDimension, fill_value=mean)
-        self._variance = np.diag(np.full(newDimension, fill_value=variance))
+        self._mean = full(newDimension, fill_value=mean)
+        self._variance = diag(full(newDimension, fill_value=variance))
 
     @property
     def std(self):
-        return np.sqrt(self.variance)
+        return sqrt(self.variance)
 
     @property
     def variance(self):
@@ -119,23 +123,24 @@ class MvNormal(baseDistribution):
 
     @variance.setter
     def variance(self, values):
+
+        self._variance = zeros((self.ndim, self.ndim))
+
         # Variance
-        ndim = np.ndim(values)
-        if ndim == 0:
-            self._variance = np.diag(np.full(self.ndim, fill_value=values))
+        nd = npndim(values)
+        if nd == 0:
+            self._variance[diag_indices(self.ndim)] = values
 
-        elif ndim == 1:
-            assert np.size(values) == self.ndim, Exception('Mismatch in size of mean and variance')
-            self._variance = np.diag(values)
+        elif nd == 1:
+            assert size(values) == self.ndim, Exception('Mismatch in size of mean and variance')
+            self._variance[diag_indices(self.ndim)] = values
 
-        elif ndim == 2:
-            # assert np.all(np.equal(variance.shape,  np.size(mean))), ValueError(
-            #     'Covariance must have same dimensions as the mean')
-            self._variance = deepcopy(values)
+        elif nd == 2:
+            self._variance[:, :] = values
 
     @property
     def precision(self):
-        return np.linalg.inv(self.variance)
+        return inv(self.variance)
 
     def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
@@ -166,11 +171,11 @@ class MvNormal(baseDistribution):
 
     def mahalanobis(self, x):
         tmp = x - self.mean
-        return np.sqrt(np.dot(tmp, np.dot(self.precision, tmp)))
+        return sqrt(dot(tmp, dot(self.precision, tmp)))
 
     def rng(self, size=1):
         """  """
-        return np.atleast_1d(np.squeeze(self.prng.multivariate_normal(self._mean, self.variance, size)))
+        return atleast_1d(squeeze(self.prng.multivariate_normal(self._mean, self.variance, size)))
 
     def probability(self, x, log, axis=None, **kwargs):
         """ For a realization x, compute the probability """
@@ -179,11 +184,11 @@ class MvNormal(baseDistribution):
             d = Normal(mean=self._mean[axis], variance=self.variance[axis, axis])
             return d.probability(x, log)
 
-        N = np.size(x)
-        nD = np.size(self.mean)
+        N = size(x)
+        nD = size(self.mean)
 
         if N != nD:
-            probability = np.empty((nD, *x.shape))
+            probability = empty((nD, *x.shape))
             for i in range(nD):
                 d = Normal(mean=self._mean[i], variance=self.variance[i, i])
 
@@ -196,21 +201,21 @@ class MvNormal(baseDistribution):
 
             mean = self._mean
             if (nD == 1):
-                mean = np.repeat(self._mean, N)
+                mean = repeat(self._mean, N)
 
-            dv = 0.5 * np.prod(np.linalg.slogdet(self.variance))
+            dv = 0.5 * prod(slogdet(self.variance))
             # subtract the mean from the samples
             xMu = x - mean
             # Start computing the exponent term
             # e^(-0.5*(x-mu)'*inv(cov)*(x-mu))                        (1)
             # Compute the multiplication on the right of equation 1
             # Probability Density Function
-            return -(0.5 * N) * np.log(2.0 * np.pi) - dv - 0.5 * np.dot(xMu, np.dot(self.precision, xMu))
+            return -(0.5 * N) * nplog(2.0 * pi) - dv - 0.5 * dot(xMu, dot(self.precision, xMu))
 
         else:
 
             if N != nD:
-                probability = np.empty((nD, *x.shape))
+                probability = empty((nD, *x.shape))
                 for i in range(nD):
                     probability[i, :] = self.probability(x, log, axis=i)
                 return probability
@@ -223,9 +228,9 @@ class MvNormal(baseDistribution):
             # subtract the mean from the samples.
             xMu = x - self._mean
             # Take the inverse of the variance
-            exp = np.exp(-0.5 * np.dot(xMu, np.dot(self.precision, xMu)))
+            expo = exp(-0.5 * dot(xMu, dot(self.precision, xMu)))
             # Probability Density Function
-            prob = (1.0 / np.sqrt(((2.0 * np.pi)**N) * cf.Det(self.variance))) * exp
+            prob = (1.0 / sqrt(((2.0 * pi)**N) * cf.Det(self.variance))) * expo
             return prob
 
     @property
@@ -240,9 +245,9 @@ class MvNormal(baseDistribution):
         N: Padded size
         """
         if (self.variance.ndim == 1):
-            return MvNormal(np.zeros(N, dtype=self.mean.dtype), np.zeros(N, dtype=self.variance.dtype), prng=self.prng)
+            return MvNormal(zeros(N, dtype=self.mean.dtype), zeros(N, dtype=self.variance.dtype), prng=self.prng)
         if (self.variance.ndim == 2):
-            return MvNormal(np.zeros(N, dtype=self.mean.dtype), np.zeros([N, N], dtype=self.variance.dtype), prng=self.prng)
+            return MvNormal(zeros(N, dtype=self.mean.dtype), zeros([N, N], dtype=self.variance.dtype), prng=self.prng)
 
     def bins(self, nBins=99, nStd=4.0, axis=None, relative=False):
         """Discretizes a range given the mean and variance of the distribution
@@ -262,28 +267,28 @@ class MvNormal(baseDistribution):
             The bin edges.
 
         """
-        nStd = np.float64(nStd)
+        nStd = float64(nStd)
         nD = self.ndim
         if (nD > 1):
             if axis is None:
-                bins = np.empty([nD, nBins+1])
+                bins = empty([nD, nBins+1])
                 for i in range(nD):
-                    tmp = np.squeeze(nStd * self.std[axis, axis])
-                    t = np.linspace(-tmp, tmp, nBins+1)
+                    tmp = squeeze(nStd * self.std[axis, axis])
+                    t = linspace(-tmp, tmp, nBins+1)
                     if not relative:
                         t += self._mean[i]
                     bins[i, :] = t
             else:
-                bins = np.empty(nBins+1)
-                tmp = np.squeeze(nStd * self.std[axis, axis])
-                t = np.linspace(-tmp, tmp, nBins+1)
+                bins = empty(nBins+1)
+                tmp = squeeze(nStd * self.std[axis, axis])
+                t = linspace(-tmp, tmp, nBins+1)
                 if not relative:
                     t += self._mean[axis]
                 bins[:] = t
 
         else:
             tmp = nStd * self.std
-            bins = np.squeeze(np.linspace(-tmp, tmp, nBins+1))
+            bins = squeeze(linspace(-tmp, tmp, nBins+1))
             if not relative:
                 bins += self._mean
 

@@ -1,7 +1,13 @@
 from copy import deepcopy
+
+from numpy import any, atleast_2d, diag_indices, dot
+from numpy import full, linspace, log10, logspace
+from numpy import ones, s_, size, sqrt, sum
+from numpy import all as npall
+
 from matplotlib.figure import Figure
 from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
-import numpy as np
+
 
 from ....classes.core import StatArray
 from .TdemDataPoint import TdemDataPoint
@@ -23,13 +29,13 @@ class Tempest_datapoint(TdemDataPoint):
 
     Parameters
     ----------
-    x : np.float64
+    x : float64
         The easting co-ordinate of the data point
-    y : np.float64
+    y : float64
         The northing co-ordinate of the data point
-    z : np.float64
+    z : float64
         The height of the data point above ground
-    elevation : np.float64, optional
+    elevation : float64, optional
         The elevation of the data point, default is 0.0
     data : list of arrays, optional
         A list of 1D arrays, where each array contains the data in each system.
@@ -72,11 +78,11 @@ class Tempest_datapoint(TdemDataPoint):
         if values is None:
             values = self.nChannels
         else:
-            assert np.size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
+            assert size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
                                                                   "additive_error must have size {}").format(self.nChannels))
 
         self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}$', self.units)
-        self._additive_error_multiplier = StatArray.StatArray(np.ones(self.nSystems * self.n_components), 'Multiplier')
+        self._additive_error_multiplier = StatArray.StatArray(ones(self.nSystems * self.n_components), 'Multiplier')
 
     @property
     def additive_error_multiplier(self):
@@ -102,12 +108,12 @@ class Tempest_datapoint(TdemDataPoint):
     @TdemDataPoint.relative_error.setter
     def relative_error(self, values):
         if values is None:
-            values = np.full(self.n_components * self.nSystems, fill_value=0.01)
+            values = full(self.n_components * self.nSystems, fill_value=0.01)
         else:
-            assert np.size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
+            assert size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
                                "relative_error must have size {}").format(self.n_components * self.nSystems))
 
-        assert np.all(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
+        assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
         self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}$', '%')
 
@@ -137,7 +143,7 @@ class Tempest_datapoint(TdemDataPoint):
             If any relative or additive errors are <= 0.0
         """
 
-        assert np.all(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
+        assert npall(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
 
         # For each system assign error levels using the user inputs
         # for i in range(self.nSystems):
@@ -146,11 +152,11 @@ class Tempest_datapoint(TdemDataPoint):
             # relative_error = self.relative_error[j] * self.secondary_field[ic]
             relative_error = self.relative_error[j] * self.data[ic]
             variance = relative_error**2.0 + (self._additive_error_multiplier[j] * self.additive_error[ic])**2.0
-            self._std[ic] = np.sqrt(variance)
+            self._std[ic] = sqrt(variance)
 
         # Update the variance of the predicted data prior
         if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[np.diag_indices(np.sum(self.active))] = self._std[self.active]**2.0
+            self.predictedData.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
 
         return self._std
 
@@ -165,7 +171,7 @@ class Tempest_datapoint(TdemDataPoint):
 
     def halfspace_misfit(self, conductivity_range, n_samples=100, pitch_range=None):
         assert conductivity_range[1] > conductivity_range[0], ValueError("Maximum conductivity must be greater than the minimum")
-        conductivity = RectilinearMesh1D(centres = np.logspace(*(np.log10(conductivity_range)), n_samples+1), log=10)
+        conductivity = RectilinearMesh1D(centres = logspace(*(log10(conductivity_range)), n_samples+1), log=10)
 
         if pitch_range is None:
             misfit = Model(mesh=conductivity)
@@ -177,7 +183,7 @@ class Tempest_datapoint(TdemDataPoint):
                 misfit.values[i] = self.dataMisfit()
 
         else:
-            pitch = RectilinearMesh1D(centres = np.linspace(*pitch_range, n_samples))
+            pitch = RectilinearMesh1D(centres = linspace(*pitch_range, n_samples))
             misfit = Model(mesh = RectilinearMesh2D(x=conductivity, y=pitch))
 
             model = self.new_model
@@ -208,7 +214,7 @@ class Tempest_datapoint(TdemDataPoint):
 
     #     Returns
     #     -------
-    #     out : np.float64
+    #     out : float64
     #         The best fitting log10 conductivity for the half space
 
     #     """
@@ -226,18 +232,18 @@ class Tempest_datapoint(TdemDataPoint):
     #         dp.forward(model)
     #         return dp.dataMisfit()
 
-    #     conductivities = np.logspace(-8, 5, 12)
-    #     pitch = np.linspace(-20.0, 20.0, 12)
+    #     conductivities = logspace(-8, 5, 12)
+    #     pitch = linspace(-20.0, 20.0, 12)
 
-    #     out = np.empty((conductivities.size, 3))
+    #     out = empty((conductivities.size, 3))
 
     #     for i in range(conductivities.size):
-    #         tmp = minimize(minimize_me, [conductivities[i], pitch[i]], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)), options={'maxiter':10000, 'fatol':1e-6})
+    #         tmp = minimize(minimize_me, [conductivities[i], pitch[i]], method='Nelder-Mead', bounds=((0.0, inf),(-90.0, 90.0)), options={'maxiter':10000, 'fatol':1e-6})
     #         out[i, :] = tmp.x[0], tmp.x[1], tmp.fun
 
-    #     j = np.argmin(out[:, 2])
+    #     j = argmin(out[:, 2])
 
-    #     # tmp = minimize(minimize_me, [out[j, 0], out[j, 1]], method='Nelder-Mead', bounds=((0.0, np.inf),(-90.0, 90.0)), options={'maxiter':10000, 'fatol':1e-12, 'xatol':1e-6})
+    #     # tmp = minimize(minimize_me, [out[j, 0], out[j, 1]], method='Nelder-Mead', bounds=((0.0, inf),(-90.0, 90.0)), options={'maxiter':10000, 'fatol':1e-12, 'xatol':1e-6})
     #     # print(tmp)
 
     #     model.values[0] = out[j, 0]
@@ -297,7 +303,7 @@ class Tempest_datapoint(TdemDataPoint):
             ax.append(tmp)
 
         ## Bottom row of plot
-        n_cols = np.sum([self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior, self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
+        n_cols = sum([self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior, self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
 
         if n_cols > 0:
             splt_bottom = splt[1].subgridspec(1, n_cols)
@@ -310,7 +316,7 @@ class Tempest_datapoint(TdemDataPoint):
                 if tmp is not None:
                     i += 1
                     for j in range(self.nSystems):
-                        others = np.s_[(j * self.n_components):(j * self.n_components)+self.n_components]
+                        others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
                         tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
                 ax.append(tmp)
 
@@ -441,11 +447,11 @@ class Tempest_datapoint(TdemDataPoint):
         J = self.sensitivity_matrix[self.active, :]
 
         if order == 1:
-            return np.dot(J.T, self.predictedData.priorDerivative(order=1, i=self.active))
+            return dot(J.T, self.predictedData.priorDerivative(order=1, i=self.active))
 
         elif order == 2:
             WdT_Wd = self.predictedData.priorDerivative(order=2)
-            return np.dot(J.T, np.dot(WdT_Wd, J))
+            return dot(J.T, dot(WdT_Wd, J))
 
     @property
     def probability(self):
@@ -490,7 +496,7 @@ class Tempest_datapoint(TdemDataPoint):
     def set_relative_error_posterior(self):
 
         if self.relative_error.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
+            bins = StatArray.StatArray(atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
             posterior = []
             for i in range(self.n_components):
                 b = bins[i, :]
@@ -514,7 +520,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         """
         if self.additive_error_multiplier.hasPrior:
-            bins = StatArray.StatArray(np.atleast_2d(self.additive_error_multiplier.prior.bins()), name=self.additive_error_multiplier.name)
+            bins = StatArray.StatArray(atleast_2d(self.additive_error_multiplier.prior.bins()), name=self.additive_error_multiplier.name)
 
             posterior = []
             for i in range(self.n_components):

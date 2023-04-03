@@ -6,6 +6,9 @@
 .. moduleauthor:: Leon Foks
 
 """
+from numpy import allclose, asarray, atleast_1d, float64, full, hstack
+from numpy import nan, ones
+from numpy import s_, shape, size, vstack
 from pandas import read_csv
 from matplotlib.figure import Figure
 
@@ -17,7 +20,6 @@ from ...system.CircularLoop import CircularLoop
 from ...system.CircularLoops import CircularLoops
 from ....base import plotting as cP
 
-import numpy as np
 import matplotlib.pyplot as plt
 from os.path import join
 import h5py
@@ -61,7 +63,7 @@ class TempestData(TdemData):
     @property
     def additive_error(self):
         """The data. """
-        if np.size(self._additive_error, 0) == 0:
+        if size(self._additive_error, 0) == 0:
             self._additive_error = StatArray.StatArray((self.nPoints, self.nChannels), "Additive error", "%")
         return self._additive_error
 
@@ -69,12 +71,12 @@ class TempestData(TdemData):
     def additive_error(self, values):
         shp = (self.nPoints, self.nChannels)
         if values is None:
-            self._additive_error = StatArray.StatArray(np.ones(shp), "Additive error", "%")
+            self._additive_error = StatArray.StatArray(ones(shp), "Additive error", "%")
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
+                self.nPoints = size(values, 0)
                 shp = (self.nPoints, self.nChannels)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
+            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
             self._additive_error = StatArray.StatArray(values)
 
     @property
@@ -85,7 +87,7 @@ class TempestData(TdemData):
     @property
     def relative_error(self):
         """The data. """
-        if np.size(self._relative_error, 0) == 0:
+        if size(self._relative_error, 0) == 0:
             self._relative_error = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
         return self._relative_error
 
@@ -93,12 +95,12 @@ class TempestData(TdemData):
     def relative_error(self, values):
         shp = (self.nPoints, self.n_components * self.nSystems)
         if values is None:
-            self._relative_error = StatArray.StatArray(np.ones(shp), "Relative error", "%")
+            self._relative_error = StatArray.StatArray(ones(shp), "Relative error", "%")
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values, 0)
+                self.nPoints = size(values, 0)
                 shp = (self.nPoints, self.n_components * self.nSystems)
-            assert np.allclose(np.shape(values), shp) or np.size(values) == self.nPoints, ValueError("relative_error must have shape {}".format(shp))
+            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("relative_error must have shape {}".format(shp))
             self._relative_error = StatArray.StatArray(values)
 
     def _as_dict(self):
@@ -208,7 +210,7 @@ class TempestData(TdemData):
             df = read_csv(data_filename, usecols=channels, skipinitialspace = True)
         except:
             df = read_csv(data_filename, usecols=channels, delim_whitespace=True, skipinitialspace = True)
-        df = df.replace('NaN', np.nan)
+        df = df.replace('NaN', nan)
 
         # Assign columns to variables
         self.lineNumber = df[iC[0]].values
@@ -222,7 +224,7 @@ class TempestData(TdemData):
                                          y=self.y,
                                          z=self.z,
                                          pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
-                                         radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                         radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
         loopOffset = df[iOffset].values
 
@@ -231,7 +233,7 @@ class TempestData(TdemData):
                                       y = self.transmitter.y + loopOffset[:, 1],
                                       z = self.transmitter.z + loopOffset[:, 2],
                                       pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
-                                      radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                      radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
 
         self.primary_field[:, :] = df[iPrimary].values
@@ -268,7 +270,7 @@ class TempestData(TdemData):
             ax = cP.plot(x, self.data[:, i],
                          label=self.channelNames[i], **kwargs)
         else:
-            channels = np.atleast_1d(channels)
+            channels = atleast_1d(channels)
             for j, i in enumerate(channels):
                 ax = cP.plot(x, self.data[:, i],
                              label=self.channelNames[i], **kwargs)
@@ -306,7 +308,7 @@ class TempestData(TdemData):
             ax = cP.plot(x, self.predictedData[:, i],
                          label=self.channelNames[i], **kwargs)
         else:
-            channels = np.atleast_1d(channels)
+            channels = atleast_1d(channels)
             for j, i in enumerate(channels):
                 ax = cP.plot(x, self.predictedData[:, i],
                              label=self.channelNames[i], **kwargs)
@@ -473,42 +475,42 @@ class TempestData(TdemData):
         """
 
         if indices is None:
-            indices = np.s_[:]
+            indices = s_[:]
 
         with h5py.File(dataFilename, 'r') as f:
             gdf = f['linedata']
 
-            self = cls(lineNumber=np.asarray(gdf['Line'][indices]),
-                        fiducial=np.asarray(gdf['Fiducial'][indices]),
-                        x=np.asarray(gdf['Easting_Albers'][indices]),
-                        y=np.asarray(gdf['Northing_Albers'][indices]),
-                        z=np.asarray(gdf['Tx_Height'][indices]),
-                        elevation=np.asarray(gdf['DTM'][indices]),
+            self = cls(lineNumber=asarray(gdf['Line'][indices]),
+                        fiducial=asarray(gdf['Fiducial'][indices]),
+                        x=asarray(gdf['Easting_Albers'][indices]),
+                        y=asarray(gdf['Northing_Albers'][indices]),
+                        z=asarray(gdf['Tx_Height'][indices]),
+                        elevation=asarray(gdf['DTM'][indices]),
                         system=systemFilename)
 
             # Assign the orientations of the acquisistion loops
-            pitch = np.asarray(gdf['Tx_Pitch'][indices])
-            roll = np.asarray(gdf['Tx_Roll'][indices])
-            yaw = np.asarray(gdf['Tx_Yaw'][indices])
+            pitch = asarray(gdf['Tx_Pitch'][indices])
+            roll = asarray(gdf['Tx_Roll'][indices])
+            yaw = asarray(gdf['Tx_Yaw'][indices])
 
             self.transmitter = CircularLoops(x=self.x, y=self.y, z=self.z,
                                              pitch=pitch, roll=roll, yaw=yaw,
-                                             radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                             radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
-            pitch = np.asarray(gdf['Rx_Pitch'][indices])
-            roll = np.asarray(gdf['Rx_Roll'][indices])
-            yaw = np.asarray(gdf['Rx_Yaw'][indices])
+            pitch = asarray(gdf['Rx_Pitch'][indices])
+            roll = asarray(gdf['Rx_Roll'][indices])
+            yaw = asarray(gdf['Rx_Yaw'][indices])
 
-            loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][indices]), np.asarray(gdf['TSep_GPS'][indices]), np.asarray(gdf['VSep_GPS'][indices])]).T
+            loopOffset = vstack([asarray(gdf['HSep_GPS'][indices]), asarray(gdf['TSep_GPS'][indices]), asarray(gdf['VSep_GPS'][indices])]).T
 
             self.receiver = CircularLoops(x=self.transmitter.x + loopOffset[:, 0],
                                           y=self.transmitter.y + loopOffset[:, 1],
                                           z=self.transmitter.z + loopOffset[:, 2],
                                           pitch=pitch, roll=roll, yaw=yaw,
-                                          radius=np.full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                          radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
-            self.primary_field = np.vstack([np.asarray(gdf['X_PrimaryField'][indices]), np.asarray(gdf['Z_PrimaryField'][indices])]).T
-            self.secondary_field = np.hstack([np.asarray(gdf['EMX_NonHPRG'][:, indices]).T, np.asarray(gdf['EMZ_NonHPRG'][:, indices]).T])
+            self.primary_field = vstack([asarray(gdf['X_PrimaryField'][indices]), asarray(gdf['Z_PrimaryField'][indices])]).T
+            self.secondary_field = hstack([asarray(gdf['EMX_NonHPRG'][:, indices]).T, asarray(gdf['EMZ_NonHPRG'][:, indices]).T])
 
             self.std = 0.1 * self.data
 
@@ -547,35 +549,35 @@ class TempestData(TdemData):
         assert record is not None, ValueError("Need to provide a record index for netcdf files")
 
         gdf = self._file['survey/tabular/0']
-        x = np.float64(gdf['Easting'][record])
-        y = np.float64(gdf['Northing'][record])
-        z = np.float64(gdf['Tx_Height'][record])
-        primary_field = np.asarray([np.float64(gdf['X_PrimaryField'][record]), np.float64(gdf['Z_PrimaryField'][record])])
-        secondary_field = np.hstack([gdf['EMX_NonHPRG'][record, :], gdf['EMZ_NonHPRG'][record, :]])
+        x = float64(gdf['Easting'][record])
+        y = float64(gdf['Northing'][record])
+        z = float64(gdf['Tx_Height'][record])
+        primary_field = asarray([float64(gdf['X_PrimaryField'][record]), float64(gdf['Z_PrimaryField'][record])])
+        secondary_field = hstack([gdf['EMX_NonHPRG'][record, :], gdf['EMZ_NonHPRG'][record, :]])
 
         transmitter_loop = CircularLoop(x=x, y=y, z=z,
-                                        pitch=np.float64(gdf['Tx_Pitch'][record]),
-                                        roll=np.float64(gdf['Tx_Roll'][record]),
-                                        yaw=np.float64(gdf['Tx_Yaw'][record]),
+                                        pitch=float64(gdf['Tx_Pitch'][record]),
+                                        roll=float64(gdf['Tx_Roll'][record]),
+                                        yaw=float64(gdf['Tx_Yaw'][record]),
                                         radius=self.system[0].loopRadius())
 
-        loopOffset = np.vstack([np.asarray(gdf['HSep_GPS'][record]), np.asarray(gdf['TSep_GPS'][record]), np.asarray(gdf['VSep_GPS'][record])])
+        loopOffset = vstack([asarray(gdf['HSep_GPS'][record]), asarray(gdf['TSep_GPS'][record]), asarray(gdf['VSep_GPS'][record])])
 
         receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
                                       y=transmitter_loop.y + loopOffset[1],
                                       z=transmitter_loop.z + loopOffset[2],
-                                      pitch=np.float64(gdf['Rx_Pitch'][record]),
-                                      roll=np.float64(gdf['Rx_Roll'][record]),
-                                      yaw=np.float64(gdf['Rx_Yaw'][record]),
+                                      pitch=float64(gdf['Rx_Pitch'][record]),
+                                      roll=float64(gdf['Rx_Roll'][record]),
+                                      yaw=float64(gdf['Rx_Yaw'][record]),
                                       radius=self.system[0].loopRadius())
 
         out = self.single(
-                lineNumber = np.float64(gdf['Line'][record]),
-                fiducial = np.float64(gdf['Fiducial'][record]),
+                lineNumber = float64(gdf['Line'][record]),
+                fiducial = float64(gdf['Fiducial'][record]),
                 x = x,
                 y = y,
                 z = z,
-                elevation = np.float64(gdf['DTM'][record]),
+                elevation = float64(gdf['DTM'][record]),
                 transmitter_loop = transmitter_loop,
                 receiver_loop = receiver_loop,
                 primary_field = primary_field,
@@ -596,7 +598,7 @@ class TempestData(TdemData):
         if isinstance(variable, str):
             variable = [variable]
 
-        return [np.asarray(gdf[var]) for var in variable]
+        return [asarray(gdf[var]) for var in variable]
 
     def _open_data_files(self, filename):
 

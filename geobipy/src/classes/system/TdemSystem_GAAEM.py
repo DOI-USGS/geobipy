@@ -1,4 +1,5 @@
-import numpy as np
+from numpy import float64
+from numpy import asarray, diff, min
 from ...classes.core.myObject import myObject
 from ...base import fileIO as fIO
 from ...classes.core import StatArray
@@ -45,7 +46,7 @@ try:
         def read(cls, system_filename):
             # Read in the System file
             self = super(TdemSystem_GAAEM, cls).__init__(system_filename)
-            assert np.min(np.diff(self.windows.centre)) > 0.0, ValueError(
+            assert min(diff(self.windows.centre)) > 0.0, ValueError(
                 "Receiver window times must monotonically increase for system "+system_filename)
 
             self.read_components(system_filename)
@@ -57,15 +58,15 @@ try:
             with open(system_filename, 'r') as f:
                 for i, line in enumerate(f):
                     if 'XOutputScaling' in line:
-                        value = np.float64(line.strip().split()[-1])
+                        value = float64(line.strip().split()[-1])
                         if value != 0.0:
                             self._components.append('x')
                     elif 'YOutputScaling' in line:
-                        value = np.float64(line.strip().split()[-1])
+                        value = float64(line.strip().split()[-1])
                         if value != 0.0:
                             self._components.append('y')
                     elif 'ZOutputScaling' in line:
-                        value = np.float64(line.strip().split()[-1])
+                        value = float64(line.strip().split()[-1])
                         if value != 0.0:
                             self._components.append('z')
 
@@ -78,8 +79,8 @@ try:
                 for i, line in enumerate(f):
 
                     if ('WaveFormCurrent End' in line):
-                        self.waveform.transmitterTime = np.asarray(time[:-1])
-                        self.waveform.transmitterCurrent = np.asarray(
+                        self.waveform.transmitterTime = asarray(time[:-1])
+                        self.waveform.transmitterCurrent = asarray(
                             current[:-1])
                         return
 

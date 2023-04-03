@@ -2,7 +2,9 @@
 Module defining a multivariate normal distribution with statistical procedures
 """
 #from copy import deepcopy
-import numpy as np
+from numpy import empty, exp, float64, linspace, squeeze
+from numpy import log as nplog
+
 from ...base  import utilities
 from .baseDistribution import baseDistribution
 from ..core import StatArray
@@ -42,17 +44,17 @@ class MvLogNormal(MvNormal):
     def __init__(self, mean, variance, ndim=None, linearSpace=False, prng=None):
         """ Initialize a multivariate lognormal distribution. """
         if linearSpace:
-            mean = np.log(mean)
+            mean = nplog(mean)
         self.linearSpace = linearSpace
         super().__init__(mean, variance, ndim, prng=prng)
 
     @property
     def mean(self):
-        return np.exp(self._mean) if self.linearSpace else self._mean
+        return exp(self._mean) if self.linearSpace else self._mean
 
     @mean.setter
     def mean(self, values):
-        self._mean[:] = np.log(values) if self.linearSpace else values
+        self._mean[:] = nplog(values) if self.linearSpace else values
 
     def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
@@ -63,20 +65,20 @@ class MvLogNormal(MvNormal):
 
     def derivative(self, x, order):
         if self.linearSpace:
-            x = np.log(x)
+            x = nplog(x)
         return super().derivative(x, order)
 
     def deviation(self, x):
         if self.linearSpace:
-            x = np.log(x)
+            x = nplog(x)
         return super().deviation(x)
 
     def rng(self, size = 1):
-        return np.exp(super().rng(size)) if self.linearSpace else super().rng(size)
+        return exp(super().rng(size)) if self.linearSpace else super().rng(size)
 
     def probability(self, x, log, axis=None, **kwargs):
         if self.linearSpace:
-            x = np.log(x)
+            x = nplog(x)
 
         return super().probability(x=x, log=log, axis=axis)
 
@@ -101,32 +103,32 @@ class MvLogNormal(MvNormal):
         # if not self.linearSpace:
         #     return super().bins(nBins, nStd, axis)
 
-        nStd = np.float64(nStd)
+        nStd = float64(nStd)
         nD = self.ndim
         if (nD > 1):
             if axis is None:
-                bins = StatArray.StatArray(np.empty([nD, nBins+1]), name=utilities.getName(self.mean), units=utilities.getUnits(self.mean))
+                bins = StatArray.StatArray(empty([nD, nBins+1]), name=utilities.getName(self.mean), units=utilities.getUnits(self.mean))
                 for i in range(nD):
-                    tmp = np.squeeze(nStd * self.std[i, i])
-                    t = np.linspace(-tmp, tmp, nBins+1)
+                    tmp = squeeze(nStd * self.std[i, i])
+                    t = linspace(-tmp, tmp, nBins+1)
                     if not relative:
                         t += self._mean[i]
                     bins[i, :] = t
             else:
-                bins = np.empty(nBins+1)
-                tmp = np.squeeze(nStd * self.std[axis, axis])
-                t = np.linspace(-tmp, tmp, nBins+1)
+                bins = empty(nBins+1)
+                tmp = squeeze(nStd * self.std[axis, axis])
+                t = linspace(-tmp, tmp, nBins+1)
                 if not relative:
                     t += self._mean[axis]
                 bins[:] = t
 
         else:
             tmp = nStd * self.std
-            bins = np.squeeze(np.linspace(-tmp, tmp, nBins+1))
+            bins = squeeze(linspace(-tmp, tmp, nBins+1))
             if not relative:
                 bins += self._mean
 
-        return (np.exp(bins)) if self.linearSpace else StatArray.StatArray(bins)
+        return (exp(bins)) if self.linearSpace else StatArray.StatArray(bins)
 
     @property
     def summary(self):

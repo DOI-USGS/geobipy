@@ -1,12 +1,20 @@
 # import matplotlib as mpl
 #mpl.use('TkAgg')
+
+from numpy import abs, arange, arctan, arctan2, asarray, atleast_2d, concatenate, cos, diff
+from numpy import float32, float64, gradient, hstack, isnan, linspace, log10, meshgrid, nanmax
+from numpy import nanmin, ndim, ones, ones_like, pi, unique, s_, sin, size, sqrt, where, zeros
+from numpy import all as npall
+
+from numpy.ma import masked_invalid
+
 from matplotlib.cm import get_cmap
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.colors import ListedColormap, Colormap
 
 import matplotlib.gridspec as gridspec
-import numpy as np
+
 from ..base import utilities
 from copy import copy
 
@@ -50,10 +58,10 @@ def make_colourmap(seq, cname):
 
 def white_to_colour(rgba, N=256):
     rgba = mcolors.to_rgba(rgba)
-    vals = np.ones((N, 4))
-    vals[:, 0] = np.linspace(1, rgba[0], N)
-    vals[:, 1] = np.linspace(1, rgba[1], N)
-    vals[:, 2] = np.linspace(1, rgba[2], N)
+    vals = ones((N, 4))
+    vals[:, 0] = linspace(1, rgba[0], N)
+    vals[:, 1] = linspace(1, rgba[1], N)
+    vals[:, 2] = linspace(1, rgba[2], N)
     return ListedColormap(vals)
 
 # Define our own colour maps in hex. Gets better range and nicer visuals.
@@ -266,29 +274,29 @@ def hillshade(arr, azimuth=30, altitude=30):
         <matplotlib.image.AxesImage object at 0x...>
     """
     try:
-        x, y = np.gradient(arr)
+        x, y = gradient(arr)
     except:
         raise ValueError("Input array should be two-dimensional")
 
     if azimuth <= 360.0:
         azimuth = 360.0 - azimuth
-        azimuthrad = azimuth * np.pi / 180.0
+        azimuthrad = azimuth * pi / 180.0
     else:
         raise ValueError(
             "Azimuth value should be less than or equal to 360 degrees"
         )
 
     if altitude <= 90.0:
-        altituderad = altitude * np.pi / 180.0
+        altituderad = altitude * pi / 180.0
     else:
         raise ValueError(
             "Altitude value should be less than or equal to 90 degrees"
         )
 
-    slope = np.pi / 2.0 - np.arctan(np.sqrt(x * x + y * y))
-    aspect = np.arctan2(-x, y)
+    slope = pi / 2.0 - arctan(sqrt(x * x + y * y))
+    aspect = arctan2(-x, y)
 
-    shaded = np.sin(altituderad) * np.sin(slope) + np.cos(altituderad) * np.cos(slope) * np.cos((azimuthrad - np.pi / 2.0) - aspect)
+    shaded = sin(altituderad) * sin(slope) + cos(altituderad) * cos(slope) * cos((azimuthrad - pi / 2.0) - aspect)
 
     return 255 * (shaded + 1) / 2
 
@@ -364,10 +372,10 @@ def bar(values, edges, line=None, **kwargs):
         label = utilities.getNameUnits(edges)
 
     i0 = 0
-    i1 = np.size(values) - 1
+    i1 = size(values) - 1
     trim = geobipy_kwargs['trim']
 
-    if all(values == 0):
+    if npall(values == 0):
         trim = None
 
     if (trim is not None):
@@ -380,8 +388,8 @@ def bar(values, edges, line=None, **kwargs):
         values = values[i0:i1+1]
         edges = edges[i0:i1+2]
 
-    width = np.abs(np.diff(edges))
-    centres = edges[:-1] + 0.5 * (np.diff(edges))
+    width = abs(diff(edges))
+    centres = edges[:-1] + 0.5 * (diff(edges))
 
     if (geobipy_kwargs['transpose']):
         plt.barh(centres, values, height=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
@@ -473,20 +481,20 @@ def pcolor(values, x=None, y=None, **kwargs):
     geobipy_kwargs, _ = filter_plotting_kwargs(kwargs)
 
     if (x is None):
-        mx = np.arange(np.size(values,1)+1)
+        mx = arange(size(values,1)+1)
     else:
-        mx = np.asarray(x)
-        if np.ndim(x) < 2:
+        mx = asarray(x)
+        if ndim(x) < 2:
             if (x.size == values.shape[1]):
                 mx = x.edges()
             else:
                 assert x.size == values.shape[1]+1, ValueError('x must be size {}. Not {}'.format(values.shape[1]+1, x.size))
 
     if (y is None):
-        my = np.arange(np.size(values,0)+1)
+        my = arange(size(values,0)+1)
     else:
-        my = np.asarray(y)
-        if np.ndim(y) < 2:
+        my = asarray(y)
+        if ndim(y) < 2:
             if (y.size == values.shape[0]):
                 my = y.edges()
             else:
@@ -505,8 +513,8 @@ def pcolor(values, x=None, y=None, **kwargs):
     mx, _ = utilities._log(mx, geobipy_kwargs['logX'])
     my, _ = utilities._log(my, geobipy_kwargs['logY'])
 
-    if np.ndim(mx) == 1 and np.ndim(my) == 1:
-        mx, my = np.meshgrid(mx, my)
+    if ndim(mx) == 1 and ndim(my) == 1:
+        mx, my = meshgrid(mx, my)
 
     ax, pm, cb = pcolormesh(X=mx, Y=my, values=values, **kwargs)
 
@@ -532,7 +540,7 @@ def pcolormesh(X, Y, values, **kwargs):
         classId = classes['id']
         cmaps = classes['cmaps']
         labels = classes['labels']
-        classNumber = np.unique(classId)
+        classNumber = unique(classId)
         nClasses = classNumber.size
 
         assert len(cmaps) == nClasses, Exception("Number of colour maps must be {}".format(nClasses))
@@ -558,7 +566,7 @@ def pcolormesh(X, Y, values, **kwargs):
             label = labels[i]
 
             # Set max transparency for pixels not belonging to the current class.
-            alpha = np.ones_like(values)
+            alpha = ones_like(values)
             alpha[classId != cn] = 0.0
 
             if not originalAlpha is None:
@@ -633,7 +641,7 @@ def _pcolormesh(X, Y, values, **kwargs):
 
     """
 
-    assert np.ndim(values) == 2, ValueError('Number of dimensions must be 2')
+    assert ndim(values) == 2, ValueError('Number of dimensions must be 2')
 
     geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
@@ -659,7 +667,7 @@ def _pcolormesh(X, Y, values, **kwargs):
 
     rang = values.max() - values.min()
     if not geobipy_kwargs['trim'] is None and rang > 0.0:
-        assert isinstance(geobipy_kwargs['trim'], (float, np.float32, np.float64)), TypeError("trim must be a float")
+        assert isinstance(geobipy_kwargs['trim'], (float, float32, float64)), TypeError("trim must be a float")
         bounds = utilities.findFirstLastNotValue(values, geobipy_kwargs['trim'])
         X = X[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
@@ -679,7 +687,7 @@ def _pcolormesh(X, Y, values, **kwargs):
         kw = geobipy_kwargs['hillshade'] if isinstance(geobipy_kwargs['hillshade'], dict) else {}
         values = hillshade(values, azimuth=kw.pop('azimuth', 30), altitude=kw.pop('altitude', 30))
 
-    Zm = np.ma.masked_invalid(values, copy=False)
+    Zm = masked_invalid(values, copy=False)
     pm = ax.pcolormesh(X, Y, values, alpha = color_kwargs['alpha'], **kwargs)
 
     plt.xscale(geobipy_kwargs['xscale'])
@@ -775,7 +783,7 @@ def pcolor_as_bar(X, Y, values, **kwargs):
 
     """
 
-    assert np.ndim(values) == 2, ValueError('Number of dimensions must be 2')
+    assert ndim(values) == 2, ValueError('Number of dimensions must be 2')
 
     ax = kwargs.pop('ax', None)
     if ax is None:
@@ -834,7 +842,7 @@ def pcolor_as_bar(X, Y, values, **kwargs):
     if not clim_scaling is None:
         values = utilities.trim_by_percentile(values, clim_scaling)
 
-    Zm = np.ma.masked_invalid(values, copy=False)
+    Zm = masked_invalid(values, copy=False)
 
     pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
 
@@ -932,34 +940,34 @@ def pcolor_1D(values, y=None, **kwargs):
 
     # Set the x and y axes before meshgridding them
     if (y is None):
-        mx = np.arange(np.size(values)+1)
-        my = np.asarray([0.0, 0.1*(np.nanmax(mx)-np.nanmin(mx))])
+        mx = arange(size(values)+1)
+        my = asarray([0.0, 0.1*(nanmax(mx)-nanmin(mx))])
     else:
         assert y.size == values.size+1, ValueError('y must be size '+str(values.size+1))
         mx = y
         key = 'yscale' if geobipy_kwargs['transpose'] else 'xscale'
         if geobipy_kwargs[key] == 'log':
-            tmp = np.log10(y)
-            my = np.asarray([0.0, 0.1*(np.nanmax(tmp)-np.nanmin(tmp))])
+            tmp = log10(y)
+            my = asarray([0.0, 0.1*(nanmax(tmp)-nanmin(tmp))])
         else:
-            my = np.asarray([0.0, 0.1*(np.nanmax(y)-np.nanmin(y))])
+            my = asarray([0.0, 0.1*(nanmax(y)-nanmin(y))])
 
     if not geobipy_kwargs['width'] is None:
         assert geobipy_kwargs['width'] > 0.0, ValueError("width must be positive")
         my[1] = geobipy_kwargs['width']
 
-    v = np.ma.masked_invalid(values)
+    v = masked_invalid(values)
     if (geobipy_kwargs['log']):
         v,logLabel = utilities._log(v, geobipy_kwargs['log'])
 
     # Append with null values to correctly use pcolormesh
-    # v = np.concatenate([np.atleast_2d(np.hstack([np.asarray(v),0])), np.atleast_2d(np.zeros(v.size+1))], axis=0)
-    v = np.atleast_2d(v)
+    # v = concatenate([atleast_2d(hstack([asarray(v),0])), atleast_2d(zeros(v.size+1))], axis=0)
+    v = atleast_2d(v)
 
     if color_kwargs['equalize']:
         v, dummy = utilities.histogramEqualize(v, nBins=color_kwargs['nBins'])
 
-    X, Y = np.meshgrid(mx, my)
+    X, Y = meshgrid(mx, my)
 
     if geobipy_kwargs['transpose']:
         X, Y = Y, X
@@ -1000,7 +1008,7 @@ def pcolor_1D(values, y=None, **kwargs):
         else:
             clabel(cbar, color_kwargs['clabel'])
 
-    if np.size(color_kwargs['alpha']) > 1:
+    if size(color_kwargs['alpha']) > 1:
         setAlphaPerPcolormeshPixel(pm, color_kwargs['alpha'])
 
     return ax
@@ -1244,16 +1252,16 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
     if (i is None):
-        i = np.s_[:]
+        i = s_[:]
 
     standardColour = isinstance(c, (str, tuple))
 
     xt = x[i]
 
-    iNaN = np.s_[:]
+    iNaN = s_[:]
     if not standardColour:
         c = c[i]
-        iNaN = np.where(~np.isnan(c))[0]
+        iNaN = where(~isnan(c))[0]
         c = c[iNaN]
         xt = xt[iNaN]
 
@@ -1306,9 +1314,9 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     if ('s' in kwargs and not geobipy_kwargs['legend_size'] is None):
         assert (not isinstance(geobipy_kwargs['legend_size'], bool)), TypeError('sizeLegend must have type int, or array_like')
         if (isinstance(geobipy_kwargs['legend_size'], int)):
-            tmp0 = np.nanmin(kwargs['s'])
-            tmp1 = np.nanmax(kwargs['s'])
-            a = np.linspace(tmp0, tmp1, geobipy_kwargs['legend_size'])
+            tmp0 = nanmin(kwargs['s'])
+            tmp1 = nanmax(kwargs['s'])
+            a = linspace(tmp0, tmp1, geobipy_kwargs['legend_size'])
         else:
             a = geobipy_kwargs['legend_size']
         sizeLegend(kwargs['s'], a)

@@ -2,7 +2,7 @@
 Module defining a gamma distribution with statistical procedures
 """
 from copy import deepcopy
-import numpy as np
+from numpy import exp
 import scipy.special as sp
 
 
@@ -36,7 +36,7 @@ class Gamma(object):
 
     def pdf(self, x):
         """ set the PDF, for a gamma distribution """
-        self.pdf = x**self._a * np.exp(x * self._b) * self._c
+        self.pdf = x**self._a * exp(x * self._b) * self._c
         return self.pdf
 
     @property

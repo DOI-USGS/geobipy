@@ -2,10 +2,19 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import copy, deepcopy
+
+from numpy import argwhere
+from numpy import inf, int32, integer, isfinite
+from numpy import isinf, isnan, max, min, nan, nanmax, nanmin, ndim, outer, ravel_multi_index
+from numpy import shape, size, unravel_index
+from numpy import where, zeros
+from numpy import all as npall
+from numpy import any as npany
+
 from matplotlib.figure import Figure
 from ...classes.core import StatArray
 from .RectilinearMesh2D import RectilinearMesh2D
-import numpy as np
+
 import matplotlib.cm as mplcm
 import matplotlib.pyplot as plt
 from scipy.stats import binned_statistic
@@ -21,7 +30,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
     def __init__(self, max_cells, x=None, relativeTo=None, nCells=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
-        self._max_cells = np.int32(max_cells)
+        self._max_cells = int32(max_cells)
         self.x = kwargs if x is None else x
         self.nCells = nCells
         self.y_edges = None
@@ -41,9 +50,9 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         if values is None:
             values = self.x.nCells
         else:
-            assert np.size(values) == self.x.nCells, ValueError("Size of nCells must be {}".format(self.x.nCells))
+            assert size(values) == self.x.nCells, ValueError("Size of nCells must be {}".format(self.x.nCells))
 
-        self._nCells = StatArray.StatArray(values, 'Number of cells', dtype=np.int32)
+        self._nCells = StatArray.StatArray(values, 'Number of cells', dtype=int32)
 
     @property
     def shape(self):
@@ -71,36 +80,36 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             values = (self.x.nCells, self.max_cells+1)
         else:
 
-            assert np.ndim(values) == 2, ValueError("y_edges must have 2 dimensions")
-            assert np.shape(values)[0] == self.x.nCells, ValueError("First dimension of y_edges must have size {}".format(self.x.nCells))
+            assert ndim(values) == 2, ValueError("y_edges must have 2 dimensions")
+            assert shape(values)[0] == self.x.nCells, ValueError("First dimension of y_edges must have size {}".format(self.x.nCells))
 
             values, dum = utilities._log(values, log=self.y_log)
 
             for i in range(self.x.nCells):
-                values[i, self.nCells[i]+1:] = np.nan
+                values[i, self.nCells[i]+1:] = nan
 
         self._y_edges = StatArray.StatArray(values)
 
     @property
     def plotting_edges(self):
         out = copy(self.y_edges)
-        if np.any(self.y_edges[:, -1] == np.inf):
-            i = np.argwhere(self.y_edges[:, -1] == np.inf)
-            out[i, -1] = 1.1 * np.max(out[i, -2])
+        if npany(self.y_edges[:, -1] == inf):
+            i = argwhere(self.y_edges[:, -1] == inf)
+            out[i, -1] = 1.1 * max(out[i, -2])
         return out
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram."""
         from .RectilinearMesh1D import RectilinearMesh1D
-        # assert np.shape(slic) == (1,), ValueError("slic must be over 1 dimensions.")
+        # assert shape(slic) == (1,), ValueError("slic must be over 1 dimensions.")
 
-        if isinstance(slic, (int, np.integer)):
+        if isinstance(slic, (int, integer)):
             relativeTo = self.x._relativeTo[slic] if not self.x._relativeTo is None else None
             return RectilinearMesh1D(edges=self.y_edges[slic, :self.nCells[slic]+2], relativeTo=relativeTo)
 
         else:
             slic0 = slic
-            if isinstance(slic.stop, (int, np.integer)):
+            if isinstance(slic.stop, (int, integer)):
                 # If a slice, add one to the end for bins.
                 slic0 = slice(slic.start, slic.stop+1, slic.step)
 
@@ -113,11 +122,11 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             return out
 
     def n_posteriors(self):
-        return np.sum([self.nCells.hasPosterior, self.y.edges.hasPosterior])
+        return sum([self.nCells.hasPosterior, self.y.edges.hasPosterior])
 
     def pcolor(self, values, **kwargs):
 
-        assert np.all(np.shape(values) == self.shape), ValueError("values must have shape {}".format(self.shape))
+        assert npall(shape(values) == self.shape), ValueError("values must have shape {}".format(self.shape))
 
         ax = kwargs.pop('ax', None)
         if ax is None:
@@ -169,29 +178,29 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             assert nBins > 0, ValueError('nBins must be greater than zero')
             values, dummy = utilities.histogramEqualize(values, nBins=nBins)
 
-        rescale = lambda y: (y - np.nanmin(y)) / (np.nanmax(y) - np.nanmin(y))
+        rescale = lambda y: (y - nanmin(y)) / (nanmax(y) - nanmin(y))
         v = rescale(values)
 
         y_edges = self.y_edges
 
         y_edges = utilities._power(y_edges, self.y_log)
 
-        max_edge = np.max(y_edges[np.isfinite(y_edges)])
-        if np.any(np.isinf(y_edges)):
-            if np.nanmin(y_edges) == -np.inf:
-                max_edge = 2.0 * np.min(y_edges[np.isfinite(y_edges)])
-            elif np.nanmax(y_edges) == np.inf:
-                max_edge = 2.0 * np.max(y_edges[np.isfinite(y_edges)])
+        max_edge = max(y_edges[isfinite(y_edges)])
+        if npany(isinf(y_edges)):
+            if nanmin(y_edges) == -inf:
+                max_edge = 2.0 * min(y_edges[isfinite(y_edges)])
+            elif nanmax(y_edges) == inf:
+                max_edge = 2.0 * max(y_edges[isfinite(y_edges)])
 
         relativeTo = 0.0 if self.relativeTo is None else self.relativeTo
-        for i in range(np.max(self.nCells)):
+        for i in range(max(self.nCells)):
             bottom = y_edges[:, i] + relativeTo
             top = y_edges[:, i+1] + relativeTo
 
-            active = np.where(self.nCells > i)
-            top[np.isinf(top)] = max_edge
+            active = where(self.nCells > i)
+            top[isinf(top)] = max_edge
 
-            width = np.zeros(self.x.nCells)
+            width = zeros(self.x.nCells)
             width[active] = top[active] - bottom[active]
 
             pm = plt.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=cmap(v[:, i]), **kwargs)
@@ -211,7 +220,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         cbar = None
         if (colorbar):
 
-            sm = mplcm.ScalarMappable(cmap=cmap, norm=plt.Normalize(np.nanmin(values), np.nanmax(values)))
+            sm = mplcm.ScalarMappable(cmap=cmap, norm=plt.Normalize(nanmin(values), nanmax(values)))
             sm.set_array([])
 
             if (equalize):
@@ -253,7 +262,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         sharey = ax[1] if sharey is None else sharey
 
         if values is not None:
-            ax += [plt.subplot(splt[np.unravel_index(i, shape)], sharex=sharex, sharey=sharey) for i in range(2, 8)]
+            ax += [plt.subplot(splt[unravel_index(i, shape)], sharex=sharex, sharey=sharey) for i in range(2, 8)]
 
         for a in ax:
             cP.pretty(a)
@@ -338,7 +347,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             relativeTo = None
             if 'y/relativeTo' in grp:
                 relativeTo = StatArray.StatArray.fromHdf(grp['y/relativeTo'], skip_posterior=skip_posterior)
-                if np.all(np.isnan(relativeTo)):
+                if npall(isnan(relativeTo)):
                     relativeTo = None
 
             out = cls(max_cells=edges.shape[1]-1,  x=x, relativeTo=relativeTo, nCells=nCells)

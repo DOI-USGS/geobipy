@@ -28,7 +28,7 @@ def write_nd_nonindexed(arr, h5obj, myName):
     # Pull the group
     ds = h5obj[myName]
 
-    # assert np.size(ds.shape) == nd, ValueError("arr is being written to a dataset of different shape")
+    # assert size(ds.shape) == nd, ValueError("arr is being written to a dataset of different shape")
 
     # If the value is a scalar, write and return
     if (nd == 0):
@@ -62,7 +62,7 @@ def write_nd_indexed(arr, h5obj, myName, index):
     # Pull the group
     ds = h5obj[myName]
 
-    # assert np.size(ds.shape) == nd, ValueError("arr is being written to a dataset of different shape")
+    # assert size(ds.shape) == nd, ValueError("arr is being written to a dataset of different shape")
     ndi = size(index)
     s = arr.size
     nda = ndim(arr)

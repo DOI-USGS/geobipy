@@ -1,4 +1,5 @@
-import numpy as np
+from numpy import log10, logspace, max, maximum, min, size
+
 from ...classes.core.myObject import myObject
 from ...base import fileIO as fIO
 from ...classes.core import StatArray
@@ -58,12 +59,12 @@ class TdemSystem(TdemSystem_GAAEM):
 
     @property
     def n_components(self):
-        return np.size(self.components)
+        return size(self.components)
 
     @property
     def n_channels(self):
         return self.nTimes * self.n_components
-    
+
     @property
     def nTimes(self):
         return self.off_time.size
@@ -78,7 +79,7 @@ class TdemSystem(TdemSystem_GAAEM):
         # if values is None:
         #     values = self.nTimes
         # else:
-        #     assert np.size(values) == self.nTimes, ValueError("off_time must have size {}".format(self.nTimes))
+        #     assert size(values) == self.nTimes, ValueError("off_time must have size {}".format(self.nTimes))
         self._off_time = StatArray.StatArray(values, "Time", "s")
 
     @property
@@ -94,13 +95,13 @@ class TdemSystem(TdemSystem_GAAEM):
     #     if values is None:
     #         self._loopOffset = StatArray.StatArray(3, "Loop Offset", "m")
     #     else:
-    #         assert np.size(values) == 3, ValueError(
+    #         assert size(values) == 3, ValueError(
     #             "loopOffset must have size 3 for offset in x, y, z.")
     #         self._loopOffset = StatArray.StatArray(values, "Loop Offset", "m")
 
     # @property
     # def nTimes(self):
-    #     return np.size(self.off_times)
+    #     return size(self.off_times)
 
     # @property
     # def receiverLoop(self):
@@ -160,6 +161,6 @@ class TdemSystem(TdemSystem_GAAEM):
 
         """
 
-        tmin = np.log10(np.maximum(np.min(self.off_time) - np.max(self.waveform.time-self.delayTime), 1e-10))
-        tmax = np.log10(np.max(self.off_time) - np.min(self.waveform.time-self.delayTime))
-        return np.logspace(tmin, tmax, self.nTimes+2)
+        tmin = log10(maximum(min(self.off_time) - max(self.waveform.time-self.delayTime), 1e-10))
+        tmax = log10(max(self.off_time) - min(self.waveform.time-self.delayTime))
+        return logspace(tmin, tmax, self.nTimes+2)

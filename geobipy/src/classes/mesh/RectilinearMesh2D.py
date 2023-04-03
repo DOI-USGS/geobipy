@@ -3,13 +3,20 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import deepcopy
 
+from numpy import abs, arange, asarray
+from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float64, full, int_, int32, integer, interp
+from numpy import max, maximum, meshgrid, min, minimum, nan, ndim, outer, r_, ravel_multi_index
+from numpy import repeat, s_, searchsorted, shape, size, sqrt, squeeze, tile, unravel_index
+from numpy import where, zeros
+from numpy import all as npall
+
 from .Mesh import Mesh
 from ...classes.core import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
-import numpy as np
 from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
 from scipy.stats import binned_statistic
 from ...base import plotting as cP
 from ...base import utilities
@@ -84,21 +91,21 @@ class RectilinearMesh2D(Mesh):
         self.y = kwargs if y is None else y
 
         # if self.x._relativeTo is not None:
-        #     assert np.any([s == self.shape[1] for s in self.x.relativeTo.shape]), "x axis relative to must have shape {}".format(self.shape[1])
+        #     assert any([s == self.shape[1] for s in self.x.relativeTo.shape]), "x axis relative to must have shape {}".format(self.shape[1])
 
         # if self.y._relativeTo is not None:
-        #     assert np.any([s == self.shape[0] for s in self.y.relativeTo.shape]), "y axis relative to must have shape {}".format(self.shape[0])
+        #     assert any([s == self.shape[0] for s in self.y.relativeTo.shape]), "y axis relative to must have shape {}".format(self.shape[0])
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
 
         """
-        assert np.shape(slic) == (2,), ValueError("slic must be over 2 dimensions.")
+        assert shape(slic) == (2,), ValueError("slic must be over 2 dimensions.")
 
         # slic = []
         axis = -1
         for i, x in enumerate(slic):
-            if isinstance(x, (int, np.integer)):
+            if isinstance(x, (int, integer)):
                 axis = i
 
         if axis == -1:
@@ -127,7 +134,7 @@ class RectilinearMesh2D(Mesh):
 
     @property
     def area(self):
-        return np.outer(self.x.widths, self.y.widths)
+        return outer(self.x.widths, self.y.widths)
 
     def centres(self, axis=0):
         """Ravelled cell centres
@@ -145,14 +152,14 @@ class RectilinearMesh2D(Mesh):
         """The distance along the top of the mesh using the x and y co-ordinates. """
         if self._distance is None:
 
-            if ~self.xyz:
+            if not self.xyz:
                 self._distance = self.x
             else:
-                dx = np.diff(self.x.edges)
-                dy = np.diff(self.y.edges)
+                dx = diff(self.x.edges)
+                dy = diff(self.y.edges)
 
-                distance = StatArray.StatArray(np.zeros(self.x.nEdges), 'Distance', self.x.centres.units)
-                distance[1:] = np.cumsum(np.sqrt(dx**2.0 + dy**2.0))
+                distance = StatArray.StatArray(zeros(self.x.nEdges), 'Distance', self.x.centres.units)
+                distance[1:] = cumsum(sqrt(dx**2.0 + dy**2.0))
 
                 self._distance = RectilinearMesh1D(edges = distance)
         return self._distance
@@ -212,8 +219,8 @@ class RectilinearMesh2D(Mesh):
             ravelled cell node locations.
 
         """
-        out = np.zeros((self.nNodes.item(), 2))
-        out[:, 0] = np.tile(self.x.edges, self.y.nNodes.value)
+        out = zeros((self.nNodes.item(), 2))
+        out[:, 0] = tile(self.x.edges, self.y.nNodes.value)
         out[:, 1] = self.y.edges.repeat(self.x.nNodes.value)
         return out
 
@@ -272,7 +279,7 @@ class RectilinearMesh2D(Mesh):
         fig = kwargs.pop('fig', plt.figure(figsize=(9, 9)))
 
         if slic is None:
-            slic = [np.s_[:] for i in range(self.ndim)]
+            slic = [s_[:] for i in range(self.ndim)]
         else:
             slic = list(slic)
 
@@ -284,10 +291,10 @@ class RectilinearMesh2D(Mesh):
 
         sub.bar(values=sub_v, **kwargs)
         plt.xlim(sub.displayLimits)
-        plt.ylim([np.min(values), np.max(values)])
+        plt.ylim([min(values), max(values)])
 
         # tmp, _ = utilities._log(values, kwargs.get('log', None))
-        # plt.set_clim(np.min(tmp), np.max(tmp))
+        # plt.set_clim(min(tmp), max(tmp))
 
         def animate(i):
             ax = self.axis(axis).centres
@@ -297,7 +304,7 @@ class RectilinearMesh2D(Mesh):
             # tmp, _ = utilities._log(values[tuple(slic)].flatten(), kwargs.get('log', None))
             sub.bar(values=values[tuple(slic)], **kwargs)
             plt.xlim(sub.displayLimits)
-            plt.ylim([np.min(values), np.max(values)])
+            plt.ylim([min(values), max(values)])
 
         anim = FuncAnimation(fig, animate, interval=300, frames=self.axis(axis).nCells.item())
 
@@ -316,7 +323,7 @@ class RectilinearMesh2D(Mesh):
         shp = list(self.shape)
         shp[axis] = distribution.ndim
 
-        probability = np.zeros(shp)
+        probability = zeros(shp)
 
         track = kwargs.pop('track', True)
 
@@ -329,11 +336,11 @@ class RectilinearMesh2D(Mesh):
 
         for i in r:
             j = [i]
-            j.insert(axis, np.s_[:])
+            j.insert(axis, s_[:])
             j = tuple(j)
             p = distribution.probability(centres[j], log_probability)
-            probability[j] = np.dot(p, pdf[j])
-        probability = probability / np.expand_dims(np.sum(probability, axis), axis=axis)
+            probability[j] = dot(p, pdf[j])
+        probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
         return StatArray.StatArray(probability, name='marginal_probability')
 
@@ -372,11 +379,11 @@ class RectilinearMesh2D(Mesh):
 
     @property
     def centres_bounds(self):
-        return np.r_[self.x.centres[0], self.x.centres[-1], self.y.centres[0], self.y.centres[-1]]
+        return r_[self.x.centres[0], self.x.centres[-1], self.y.centres[0], self.y.centres[-1]]
 
     @property
     def bounds(self):
-        return np.r_[self.x.bounds[0], self.x.bounds[1], self.y.bounds[0], self.y.bounds[1]]
+        return r_[self.x.bounds[0], self.x.bounds[1], self.y.bounds[0], self.y.bounds[1]]
 
     def in_bounds(self, x, y):
         """Return whether values are inside the cell edges
@@ -404,14 +411,14 @@ class RectilinearMesh2D(Mesh):
 
     def xGradientMatrix(self):
         tmp = self.x.gradientMatrix()
-        return kron(diags(np.sqrt(self.y.widths)), tmp)
+        return kron(diags(sqrt(self.y.widths)), tmp)
 
 
     def yGradientMatrix(self):
         nx = self.x.nCells.item()
         nz = self.y.nCells.item()
-        tmp = 1.0 / np.sqrt(self.x.centreTocentre)
-        a = np.repeat(tmp, nz) * np.tile(np.sqrt(self.y.widths), nx-1)
+        tmp = 1.0 / sqrt(self.x.centreTocentre)
+        a = repeat(tmp, nz) * tile(sqrt(self.y.widths), nx-1)
         return diags([a, -a], [0, nx], shape=(nz * (nx-1), nz*nz))
 
 
@@ -451,15 +458,15 @@ class RectilinearMesh2D(Mesh):
     def resample(self, dx, dy, values, kind='cubic'):
 
         x = deepcopy(self.x)
-        x.edges = np.arange(self.x.edges[0], self.x.edges[-1]+dx, dx)
+        x.edges = arange(self.x.edges[0], self.x.edges[-1]+dx, dx)
         y = deepcopy(self.y)
-        y.edges = np.arange(self.y.edges[0], self.y.edges[-1]+dy, dy)
+        y.edges = arange(self.y.edges[0], self.y.edges[-1]+dy, dy)
 
         z = None
         if self.xyz:
             z = y
             y = deepcopy(self.y)
-            y.edges = np.arange(self.y.edges[0], self.y.edges[-1]+dx, dx)
+            y.edges = arange(self.y.edges[0], self.y.edges[-1]+dx, dx)
 
         mesh = RectilinearMesh2D(x=x, y=y)
 
@@ -517,7 +524,7 @@ class RectilinearMesh2D(Mesh):
 
         """
 
-        assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
+        assert size(intervals) > 1, ValueError("intervals must have size > 1")
 
         intervals = self._reconcile_intervals(intervals, axis=axis)
 
@@ -572,7 +579,7 @@ class RectilinearMesh2D(Mesh):
         if not x_distance is None:
             x, x_indices = self.x.mask_cells(x_distance)
             if not values is None:
-                out_values = np.full((x.nCells.item(), self.y.nCells.item()), fill_value=np.nan)
+                out_values = full((x.nCells.item(), self.y.nCells.item()), fill_value=nan)
                 for i in range(self.x.nCells.item()):
                     out_values[x_indices[i], :] = values[i, :]
 
@@ -581,7 +588,7 @@ class RectilinearMesh2D(Mesh):
         if not y_distance is None:
             y, y_indices = self.y.mask_cells(y_distance)
             if not values is None:
-                out_values2 = np.full((out_values.shape[0], y.nCells.item()), fill_value=np.nan)
+                out_values2 = full((out_values.shape[0], y.nCells.item()), fill_value=nan)
                 for i in range(self.y.nCells.item()):
                     out_values2[:, y_indices[i]] = out_values[:, i]
                 out_values = out_values2
@@ -590,31 +597,31 @@ class RectilinearMesh2D(Mesh):
 
         if self.x._relativeTo is not None:
             re = self.y.interpolate_centres_to_nodes(self.x.relativeTo)
-            if np.all(np.diff(self.y.edges) < 0.0):
-                vals = np.interp(x=y.centres[::-1], xp=self.y.edges[::-1], fp=re[::-1])[::-1]
+            if npall(diff(self.y.edges) < 0.0):
+                vals = interp(x=y.centres[::-1], xp=self.y.edges[::-1], fp=re[::-1])[::-1]
             else:
-                vals = np.interp(x=y.centres, xp=self.y.edges, fp=re)
+                vals = interp(x=y.centres, xp=self.y.edges, fp=re)
 
             out.x._relativeTo = vals
 
         if self.y._relativeTo is not None:
             re = self.x.interpolate_centres_to_nodes(self.y.relativeTo)
-            if np.all(np.diff(self.x.edges) < 0.0):
-                vals = np.interp(x=x.centres[::-1], xp=self.x.edges[::-1], fp=re[::-1])[::-1]
+            if npall(diff(self.x.edges) < 0.0):
+                vals = interp(x=x.centres[::-1], xp=self.x.edges[::-1], fp=re[::-1])[::-1]
             else:
-                vals = np.interp(x=x.centres, xp=self.x.edges, fp=re)
+                vals = interp(x=x.centres, xp=self.x.edges, fp=re)
             out.y._relativeTo = vals
 
         return out, x_indices, y_indices, out_values
 
     def _reconcile_intervals(self, intervals, axis=0):
 
-        assert np.size(intervals) > 1, ValueError("intervals must have size > 1")
+        assert size(intervals) > 1, ValueError("intervals must have size > 1")
 
         ax = self.other_axis(axis)
 
-        i0 = np.maximum(0, np.searchsorted(intervals, ax.edges[0]))
-        i1 = np.minimum(ax.nCells.item(), np.searchsorted(intervals, ax.edges[-1])+1)
+        i0 = maximum(0, searchsorted(intervals, ax.edges[0]))
+        i1 = minimum(ax.nCells.item(), searchsorted(intervals, ax.edges[-1])+1)
 
         intervals = intervals[i0:i1]
 
@@ -665,22 +672,22 @@ class RectilinearMesh2D(Mesh):
             indices for the locations along [axis0, axis1]
 
         """
-        if np.ndim(x) == 2:
+        if ndim(x) == 2:
             x = x[:, 0]
             y = x[:, 1]
 
-        assert (np.size(x) == np.size(y)), ValueError("x and y must have the same size")
+        assert (size(x) == size(y)), ValueError("x and y must have the same size")
         if trim:
             flag = self.x.inBounds(x) & self.y.inBounds(y)
-            i = np.where(flag)[0]
-            out = np.empty([2, i.size], dtype=np.int32)
+            i = where(flag)[0]
+            out = empty([2, i.size], dtype=int32)
             out[0, :] = self.x.cellIndex(x[i])
             out[1, :] = self.y.cellIndex(y[i])
         else:
-            out = np.empty([2, np.size(x)], dtype=np.int32)
+            out = empty([2, size(x)], dtype=int32)
             out[0, :] = self.x.cellIndex(x, clip=clip)
             out[1, :] = self.y.cellIndex(y, clip=clip)
-        return np.squeeze(out)
+        return squeeze(out)
 
     def line_indices(self, x, y):
         i = self.cellIndices(x, y)
@@ -701,7 +708,7 @@ class RectilinearMesh2D(Mesh):
 
         """
 
-        return np.ravel_multi_index(ixy, self.shape, order=order)
+        return ravel_multi_index(ixy, self.shape, order=order)
 
 
     def unravelIndex(self, indices, order='C'):
@@ -720,7 +727,7 @@ class RectilinearMesh2D(Mesh):
 
         """
 
-        return np.unravel_index(indices, self.shape, order=order)
+        return unravel_index(indices, self.shape, order=order)
 
     def pcolor(self, values, axis=None, yAxis='absolute', **kwargs):
         """Create a pseudocolour plot of a 2D array using the mesh.
@@ -775,14 +782,14 @@ class RectilinearMesh2D(Mesh):
 
         """
         # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
-        assert np.all(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
+        assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
 
         x_mask = kwargs.pop('x_mask', None)
         y_mask = kwargs.pop('y_mask', None)
 
         if (self.x._relativeTo is None) and (self.y._relativeTo is None):
             masked = self
-            if np.sum([x is None for x in [x_mask, y_mask]]) < 2:
+            if sum([x is None for x in [x_mask, y_mask]]) < 2:
                 masked, x_indices, z_indices, values = self.mask_cells(axis, x_mask, y_mask, values)
                 xAxis='x'
 
@@ -816,7 +823,7 @@ class RectilinearMesh2D(Mesh):
                 if y.shape[0] != x.shape[0]:
                     x = x.T
 
-                if np.all(values.shape == np.asarray(x.shape[::-1]) - 1):
+                if npall(values.shape == asarray(x.shape[::-1]) - 1):
                     values = values.T
 
                 ax, pm, cb = cP.pcolor(x=x, y=y, values=values, **kwargs)
@@ -841,7 +848,7 @@ class RectilinearMesh2D(Mesh):
         kwargs['yscale'] = kwargs.pop('yscale', 'linear' if self.y.log is None else 'log')
 
         if (self.x._relativeTo is None) and (self.y._relativeTo is None):
-            tmp = StatArray.StatArray(np.full(self.shape, fill_value=np.nan)).T
+            tmp = StatArray.StatArray(full(self.shape, fill_value=nan)).T
             tmp.pcolor(x=self.x.edges_absolute, y=self.y.edges_absolute, grid=True, colorbar=False, **kwargs)
 
         else:
@@ -857,8 +864,8 @@ class RectilinearMesh2D(Mesh):
             x_mesh = self.x_edges
             y_mesh = self.y_edges
 
-            a = np.dstack([x_mesh, y_mesh])
-            b = np.dstack([x_mesh.T, y_mesh.T])
+            a = dstack([x_mesh, y_mesh])
+            b = dstack([x_mesh.T, y_mesh.T])
 
             ls = LineCollection(a, color='k', linestyle='solid', **kwargs)
             ax.add_collection(ls)
@@ -866,9 +873,9 @@ class RectilinearMesh2D(Mesh):
             ls = LineCollection(b, color='k', linestyle='solid', **kwargs)
             ax.add_collection(ls)
 
-            dz = 0.02 * np.abs(x_mesh.max() - x_mesh.min())
+            dz = 0.02 * abs(x_mesh.max() - x_mesh.min())
             ax.set_xlim(x_mesh.min() - dz, x_mesh.max() + dz)
-            dz = 0.02 * np.abs(y_mesh.max() - y_mesh.min())
+            dz = 0.02 * abs(y_mesh.max() - y_mesh.min())
             ax.set_ylim(y_mesh.min() - dz, y_mesh.max() + dz)
 
             plt.xscale(xscale)
@@ -898,7 +905,7 @@ class RectilinearMesh2D(Mesh):
         if self.y.log is not None:
             kwargs['yscale'] = 'log'
 
-        if np.size(values) == ax.nCells:
+        if size(values) == ax.nCells:
             self.plot_line_centres(values, **kwargs)
         elif values.size == ax.nEdges:
             self.plot_line_edges(values, **kwargs)
@@ -969,8 +976,8 @@ class RectilinearMesh2D(Mesh):
         # Create the spatial reference
         import pyvista as pv
 
-        z = np.minimum(0.001 * np.minimum(self.x.range, self.y.range), 1.0)
-        x, y, z = np.meshgrid(self.x.edges, self.y.edges, np.r_[0.0, z])
+        z = minimum(0.001 * minimum(self.x.range, self.y.range), 1.0)
+        x, y, z = meshgrid(self.x.edges, self.y.edges, r_[0.0, z])
 
         return pv.StructuredGrid(x, y, z)
 
@@ -993,8 +1000,8 @@ class RectilinearMesh2D(Mesh):
 
     def _create_hdf_3d(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         from .RectilinearMesh3D import RectilinearMesh3D
-        if isinstance(add_axis, (int, np.int_)):
-            x = np.arange(add_axis, dtype=np.float64)
+        if isinstance(add_axis, (int, int_)):
+            x = arange(add_axis, dtype=float64)
         else:
             x = add_axis
         if not isinstance(x, RectilinearMesh1D):
@@ -1078,10 +1085,10 @@ class RectilinearMesh2D(Mesh):
 
         """
         if self.x._relativeTo is None:
-            out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
+            out = repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
         else:
             if self.x.relativeTo.size == 1:
-                out = np.repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
+                out = repeat(self.x.centres_absolute[:, None], self.y.nCells, 1)
             else:
                 edges = self.x.relativeTo + self.x.centres[:, None]
                 out = utilities._power(edges, self.x.log)
@@ -1093,7 +1100,7 @@ class RectilinearMesh2D(Mesh):
         """Creates an array suitable for plt.pcolormesh for the ordinate """
         re_tmp = None
         if self.x._relativeTo is not None:
-            nd = np.ndim(self.x.relativeTo)
+            nd = ndim(self.x.relativeTo)
             if nd == 1:
                 if self.x.relativeTo.size > 1:
                     re_tmp = deepcopy(self.x.relativeTo)
@@ -1101,8 +1108,8 @@ class RectilinearMesh2D(Mesh):
 
         x_edges = self.x.edges_absolute
 
-        if np.ndim(x_edges) == 1:
-            x_edges = np.repeat(x_edges[:, None], self.y.nEdges, 1)
+        if ndim(x_edges) == 1:
+            x_edges = repeat(x_edges[:, None], self.y.nEdges, 1)
 
         if re_tmp is not None:
             self.x.relativeTo = re_tmp
@@ -1122,12 +1129,12 @@ class RectilinearMesh2D(Mesh):
 
         """
         if self.y._relativeTo is None:
-            out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
+            out = repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
         else:
             if self.y.relativeTo.size == 1:
-                out = np.repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
+                out = repeat(self.y.centres_absolute[None, :], self.x.nCells, 0)
             else:
-                out = np.repeat(self.y.relativeTo[:, None], self.y.nCells, 1) + self.y.centres
+                out = repeat(self.y.relativeTo[:, None], self.y.nCells, 1) + self.y.centres
                 out = utilities._power(out, self.y.log)
 
         return out
@@ -1137,7 +1144,7 @@ class RectilinearMesh2D(Mesh):
         """Creates an array suitable for plt.pcolormesh for the ordinate """
         re_tmp = None
         if self.y._relativeTo is not None:
-            nd = np.ndim(self.y.relativeTo)
+            nd = ndim(self.y.relativeTo)
             if nd == 1:
                 if self.y.relativeTo.size > 1:
                     re_tmp = deepcopy(self.y.relativeTo)
@@ -1145,8 +1152,8 @@ class RectilinearMesh2D(Mesh):
 
         y_edges = self.y.edges_absolute
 
-        if np.ndim(y_edges) == 1:
-            y_edges = np.repeat(y_edges[None, :], self.x.nEdges, 0)
+        if ndim(y_edges) == 1:
+            y_edges = repeat(y_edges[None, :], self.x.nEdges, 0)
 
         if re_tmp is not None:
             self.y.relativeTo = re_tmp

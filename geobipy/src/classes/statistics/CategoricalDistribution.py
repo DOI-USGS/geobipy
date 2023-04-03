@@ -4,7 +4,7 @@
 Module defining a categorical distribution with statistical procedures
 """
 #from copy import deepcopy
-import numpy as np
+from numpy import cumsum, empty, searchsorted, size, sum
 from .baseDistribution import baseDistribution
 from scipy.stats import norm
 from ...base import plotting as cP
@@ -25,11 +25,11 @@ class Categorical(baseDistribution):
     """
     def __init__(self, probabilities, events, prng=None):
         """Instantiate a Normal distribution """
-        assert np.size(probabilities) == len(events), ValueError("Number of probabilities must equal number of events {}".format(len(events)))
+        assert size(probabilities) == len(events), ValueError("Number of probabilities must equal number of events {}".format(len(events)))
 
         baseDistribution.__init__(self, prng)
-        self._probabilities = probabilities/np.sum(probabilities)
-        self._probabilityMassFunction = np.cumsum(self._probabilities)
+        self._probabilities = probabilities/sum(probabilities)
+        self._probabilityMassFunction = cumsum(self._probabilities)
         self._events = events
 
 
@@ -63,8 +63,8 @@ class Categorical(baseDistribution):
 
 
     def probability(self, x):
-        out = np.empty(x)
-        n = np.size(x)
+        out = empty(x)
+        n = size(x)
         for i in range(n):
             out[i] = self._probabilities[i]
 
@@ -98,9 +98,8 @@ class Categorical(baseDistribution):
 
         """
         r = self.prng.rand(size)
-        return np.searchsorted(self._probabilityMassFunction, r)
+        return searchsorted(self._probabilityMassFunction, r)
 
 
     def bins(self):
         raise NotImplementedError("bins is not implemented")
-

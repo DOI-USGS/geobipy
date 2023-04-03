@@ -2,10 +2,16 @@
 Class to handle the HDF5 result files for a full data set.
  """
 import time
+from numpy import atleast_1d, arange, argsort, argwhere, asarray, column_stack, cumsum, divide, empty, exp, full, hstack
+from numpy import int32, log10, logical_not, linspace, load, max, nan,  nanmin, nanmax, newaxis
+from numpy import repeat, s_, save, size, sort, squeeze, std, sum, tile, unique, vstack, where, zeros
+from numpy import all as npall
+
+from numpy.random import RandomState
 from datetime import timedelta
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import numpy as np
+
 import h5py
 from datetime import timedelta
 
@@ -87,12 +93,12 @@ class Inference3D(myObject):
 
     def _set_inference2d(self, system_file_path, mode='r+', world=None):
         lines = []
-        lineNumber = np.empty(self.nLines)
+        lineNumber = empty(self.nLines)
 
         for i, file in enumerate(self.h5files):
             LR = Inference2D(file, mode=mode, world=world)
             lines.append(LR)
-            lineNumber[i] = LR.line
+            lineNumber[i] = LR.line_number
 
         self.lines = lines
         self.lineNumber = lineNumber
@@ -120,7 +126,7 @@ class Inference3D(myObject):
         if self.parallel_access:
             _, _point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
         else:
-            _point_chunks = np.full(1, fill_value=self.nPoints, dtype=np.int32)
+            _point_chunks = full(1, fill_value=self.nPoints, dtype=int32)
         return _point_chunks
 
     @property
@@ -134,7 +140,7 @@ class Inference3D(myObject):
         if self.parallel_access:
             _point_starts, _ = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
         else:
-            _point_starts = np.zeros(1, dtype=np.int32)
+            _point_starts = zeros(1, dtype=int32)
         return _point_starts
 
     @cached_property
@@ -143,7 +149,7 @@ class Inference3D(myObject):
         if self.parallel_access:
             _, _line_chunks = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
         else:
-            _line_chunks = np.full(1, fill_value=self.nLines, dtype=np.int32)
+            _line_chunks = full(1, fill_value=self.nLines, dtype=int32)
         return _line_chunks
 
     @property
@@ -157,7 +163,7 @@ class Inference3D(myObject):
         if self.parallel_access:
             _line_starts, _ = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
         else:
-            _line_starts = np.zeros(1, dtype=np.int32)
+            _line_starts = zeros(1, dtype=int32)
         return _line_starts
 
     @property
@@ -227,7 +233,7 @@ class Inference3D(myObject):
         datapoint = dataset._read_record(record=0)
 
         # Get the line numbers in the data
-        self._lineNumber = np.sort(np.unique(dataset.lineNumber))
+        self._lineNumber = sort(unique(dataset.lineNumber))
 
         # Initialize the user parameters
         # options = options.userParameters(datapoint)
@@ -242,7 +248,7 @@ class Inference3D(myObject):
         # No need to create and close the files like in parallel, so create and keep them open
         s = 0
         for line in self.lineNumber:
-            line_sorted_fiducials = dataset.fiducial[np.where(dataset.lineNumber == line)[0]]
+            line_sorted_fiducials = dataset.fiducial[where(dataset.lineNumber == line)[0]]
 
             kwargs = {}
             if self.parallel_access:
@@ -308,12 +314,12 @@ class Inference3D(myObject):
 
     @lineNumber.setter
     def lineNumber(self, values):
-        assert np.unique(values).size == values.size, ValueError("Must assign unique line numbers")
+        assert unique(values).size == values.size, ValueError("Must assign unique line numbers")
         self._lineNumber = values
 
     @property
     def nLines(self):
-        return np.size(self.h5files)
+        return size(self.h5files)
 
     def _get(self, variable, reciprocateParameter=False, **kwargs):
 
@@ -322,7 +328,7 @@ class Inference3D(myObject):
 
         if variable == 'mean':
             if reciprocateParameter:
-                vals = np.divide(1.0, self.meanParameters)
+                vals = divide(1.0, self.meanParameters)
                 vals.name = 'Resistivity'
                 vals.units = '$\Omega m$'
                 return vals
@@ -352,7 +358,7 @@ class Inference3D(myObject):
             return self.marginalProbability[:, :, kwargs["index"]].T
 
     def additiveError(self, slic=None):
-        op = np.vstack if self.nSystems > 1 else np.hstack
+        op = vstack if self.nSystems > 1 else hstack
         out = StatArray.StatArray(op([line.additiveError for line in self.lines]), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units)
         for line in self.lines:
             line.uncache('additiveError')
@@ -372,18 +378,18 @@ class Inference3D(myObject):
 
         if seed is not None:
             if isinstance(seed, str):
-                prng = np.random.RandomState()
-                prng.set_state(tuple(np.load(seed, allow_pickle=True)))
+                prng = RandomState()
+                prng.set_state(tuple(load(seed, allow_pickle=True)))
             else:
-                prng = np.random.RandomState(seed)
+                prng = RandomState(seed)
         else:
-            prng = np.random.RandomState()
-            np.save('seed', prng.get_state())
+            prng = RandomState()
+            save('seed', prng.get_state())
 
         if index is None:
 
             if fiducial is not None:
-                index = np.squeeze(np.argwhere((dataset.lineNumber == line_number) & (dataset.fiducial == fiducial)))
+                index = squeeze(argwhere((dataset.lineNumber == line_number) & (dataset.fiducial == fiducial)))
 
                 nPoints = 1
                 r = range(index, index+1)
@@ -407,7 +413,7 @@ class Inference3D(myObject):
             e = time.time() - t0
             elapsed = str(timedelta(seconds=e))
 
-            eta = str(timedelta(seconds=(np.float64(nPoints) / np.float64(i+1)) * e))
+            eta = str(timedelta(seconds=(float64(nPoints) / float64(i+1)) * e))
             print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-i-1, nPoints, elapsed, eta))
 
 
@@ -533,7 +539,7 @@ class Inference3D(myObject):
 
             if failed:
                 myMPI.print("datapoint {} {} failed to converge".format(datapoint.lineNumber, datapoint.fiducial))
-                # np.save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)
+                # save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)
 
             # Ping the Master to request a new index
             world.send('requesting', dest=0)
@@ -579,7 +585,7 @@ class Inference3D(myObject):
         return bestData
 
     def bestParameters(self, slic=None):
-        return StatArray.StatArray(np.vstack([line.bestParameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
+        return StatArray.StatArray(vstack([line.bestParameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
 
     def load_marginal_probability(self, filename):
 
@@ -588,7 +594,7 @@ class Inference3D(myObject):
 
         return values
             # for i in range(self.nLines):
-            #     self.lines[i].marginal_probability = StatArray.StatArray.fromHdf(f['probabilities'], index=np.s_[self.lineIndices[i], :, :])
+            #     self.lines[i].marginal_probability = StatArray.StatArray.fromHdf(f['probabilities'], index=s_[self.lineIndices[i], :, :])
             #     self.lines[i].uncache('highest_marginal')
 
         # self.uncache('marginalProbability')
@@ -618,13 +624,13 @@ class Inference3D(myObject):
         import pandas as pd
         self.pointcloud.setKdTree(nDims=2)
 
-        x_grid = np.linspace(x[0], x[1], n_test_points)
-        y_grid = np.linspace(y[0], y[1], n_test_points)
+        x_grid = linspace(x[0], x[1], n_test_points)
+        y_grid = linspace(y[0], y[1], n_test_points)
 
-        query = np.vstack([x_grid, y_grid]).T
+        query = vstack([x_grid, y_grid]).T
 
         r, i = self.pointcloud.nearest(query)
-        j = np.squeeze(np.argwhere(r < distance_cutoff))
+        j = squeeze(argwhere(r < distance_cutoff))
         i = i[j]
         i = pd.unique(i)
 
@@ -640,12 +646,12 @@ class Inference3D(myObject):
         for line in self.lines:
             key = 'credible_lower'
             if not key in line.hdfFile.keys():
-                credibleLower = StatArray.StatArray(np.zeros(line.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), line.parameterUnits)
+                credibleLower = StatArray.StatArray(zeros(line.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), line.parameterUnits)
                 credibleLower.createHdf(line.hdfFile, key)
 
             key = 'credible_upper'
             if not key in line.hdfFile.keys():
-                credibleUpper = StatArray.StatArray(np.zeros(line.mesh.shape), '{}% Credible Interval'.format(percent), line.parameterUnits)
+                credibleUpper = StatArray.StatArray(zeros(line.mesh.shape), '{}% Credible Interval'.format(percent), line.parameterUnits)
                 credibleUpper.createHdf(line.hdfFile, key)
 
         if self.parallel_access:
@@ -752,7 +758,7 @@ class Inference3D(myObject):
 
             hdfFile = h5py.File(filename, 'w', driver='mpio', comm=self.world)
 
-            StatArray.StatArray().createHdf(hdfFile, 'probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=np.nan)
+            StatArray.StatArray().createHdf(hdfFile, 'probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=nan)
 
             r = range(self.line_starts[self.rank], self.line_ends[self.rank])
             self.world.barrier()
@@ -764,23 +770,23 @@ class Inference3D(myObject):
             for i in r:
                 p_local = self.lines[i].compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, track=False, **kwargs)
 
-                p_local.writeHdf(hdfFile, 'probabilities', index=(self.lineIndices[i], np.s_[:], np.s_[:]))
+                p_local.writeHdf(hdfFile, 'probabilities', index=(self.lineIndices[i], s_[:], s_[:]))
 
             self.world.barrier()
             hdfFile.close()
 
         else:
-            return StatArray.StatArray(np.vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
+            return StatArray.StatArray(vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
 
     def cluster_fits_gmm(self, n_clusters, plot=False):
 
-        std = np.std(self.fits[2], axis=0)
+        std = std(self.fits[2], axis=0)
         whitened = (self.fits[2] / std).reshape(-1, 1)
 
         gmm = GaussianMixture(n_components=n_clusters, covariance_type='full').fit(whitened)
         gmm.means_ *= std
 
-        order = np.argsort(gmm.means_[:, 0])
+        order = argsort(gmm.means_[:, 0])
         weights = gmm.weights_[order]
         means = gmm.means_[order, :]
         covariances = gmm.covariances_[order, :, :]
@@ -789,20 +795,20 @@ class Inference3D(myObject):
         cF.save_gmm(gmm, "gmm_{}_clusters.h5".format(gmm.n_components))
 
         if plot:
-            bins = StatArray.StatArray(np.linspace(self.fits[2].min(), self.fits[2].max(), 200))
+            bins = StatArray.StatArray(linspace(self.fits[2].min(), self.fits[2].max(), 200))
             binCentres = bins.internalEdges()
             x_predict = binCentres
             x_predict = x_predict.reshape(-1, 1)
 
             logprob = gmm.score_samples(x_predict)
             responsibilities = gmm.predict_proba(x_predict)
-            pdf = np.exp(logprob)
-            pdf_individual = responsibilities * pdf[:, np.newaxis]
+            pdf = exp(logprob)
+            pdf_individual = responsibilities * pdf[:, newaxis]
 
             h = Histogram1D(edges = bins)
             h.update(self.fits[2])
 
-            h._counts = h._counts / np.max(h._counts)
+            h._counts = h._counts / max(h._counts)
             h.plot(alpha=0.4, linewidth=0)
 
             for i in range(gmm.n_components):
@@ -813,13 +819,13 @@ class Inference3D(myObject):
 
     def cluster_fits_smm(self, n_clusters, plot=False, **kwargs):
 
-        std = np.std(self.fits[2], axis=0)
+        std = std(self.fits[2], axis=0)
         whitened = (self.fits[2] / std).reshape(-1, 1)
 
         model = SMM(n_components=n_clusters, **kwargs).fit(whitened)
         model.means_ *= std
 
-        order = np.argsort(model.means_[:, 0])
+        order = argsort(model.means_[:, 0])
         model.weights_ = model.weights_[order]
         model.means_ = model.means_[order, :]
         if model.covariance_type == 'diag':
@@ -830,18 +836,18 @@ class Inference3D(myObject):
         model.degrees_ = model.degrees[order]
 
         if plot:
-            bins = StatArray.StatArray(np.linspace(self.fits[2].min(), self.fits[2].max(), 200))
+            bins = StatArray.StatArray(linspace(self.fits[2].min(), self.fits[2].max(), 200))
             binCentres = bins.internalEdges()
             x_predict = binCentres
             x_predict = x_predict.reshape(-1, 1)
 
             pdf, responsibilities = model.score_samples(x_predict)
-            pdf_individual = responsibilities * pdf[:, np.newaxis]
+            pdf_individual = responsibilities * pdf[:, newaxis]
 
             h = Histogram1D(edges = bins)
             h.update(self.fits[2])
 
-            h._counts = h._counts / np.max(h._counts)
+            h._counts = h._counts / max(h._counts)
             h.plot(alpha=0.4, linewidth=0)
 
             for i in range(model.n_components):
@@ -851,7 +857,7 @@ class Inference3D(myObject):
 
     @cached_property
     def doi(self):
-        return np.hstack([line.doi for line in self.lines])
+        return hstack([line.doi for line in self.lines])
 
     def compute_doi(self, *args, **kwargs):
 
@@ -902,7 +908,7 @@ class Inference3D(myObject):
     def hitmapCounts(self):
         if (self._counts is None):
             mesh = self.lines[0].mesh
-            self._counts = np.empty([])
+            self._counts = empty([])
 
 
     @property
@@ -938,7 +944,7 @@ class Inference3D(myObject):
 
         out = self.lines[0].identifyPeaks(depths, nBins, width, limits)
         for line in self.lines[1:]:
-            out = np.vstack([out, line.identifyPeaks(depths, nBins, width, limits)])
+            out = vstack([out, line.identifyPeaks(depths, nBins, width, limits)])
 
         return out
 
@@ -961,13 +967,13 @@ class Inference3D(myObject):
         i0 = 0
         for i in range(self.nLines):
             i1 = i0 + self.lines[i].nPoints
-            lineIndices.append(np.s_[i0:i1])
+            lineIndices.append(s_[i0:i1])
             i0 = i1
 
         return lineIndices
 
     def meanParameters(self, slic=None):
-        return StatArray.StatArray(np.vstack([line.mean_parameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
+        return StatArray.StatArray(vstack([line.mean_parameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
 
     def mesh2d(self, dx, dy, **kwargs):
         return self.pointcloud.centred_mesh(dx, dy, **kwargs)
@@ -994,7 +1000,7 @@ class Inference3D(myObject):
 
     @cached_property
     def nActive(self):
-        nActive = np.empty(self.nPoint, dtype=np.int32)
+        nActive = empty(self.nPoint, dtype=int32)
         Bar = progressbar.ProgressBar()
         for i in Bar(range(self.nLines)):
             nActive[self.lineIndices[i]] = self.lines[i].bestData.nActiveChannels
@@ -1005,9 +1011,9 @@ class Inference3D(myObject):
     @property
     def nPoints(self):
         """ Get the total number of data points """
-        tmp = np.asarray([line.nPoints for line in self.lines])
-        self._cumNpoints = np.cumsum(tmp)
-        return np.sum(tmp)
+        tmp = asarray([line.nPoints for line in self.lines])
+        self._cumNpoints = cumsum(tmp)
+        return sum(tmp)
 
     @property
     def nSystems(self):
@@ -1064,25 +1070,25 @@ class Inference3D(myObject):
 
     def read_fit_distributions(self, fit_file, mask_by_doi=False, skip=None, components='mve', mean_limits=None, flatten=True):
         if skip is None:
-            s = np.s_[:]
+            s = s_[:]
             skip = 1
         else:
-            s = np.s_[::skip]
+            s = s_[::skip]
 
         with h5py.File(fit_file, 'r') as f:
-            amp_3D = np.asarray(f['/fits/params/data'][s, :, 0::4])
+            amp_3D = asarray(f['/fits/params/data'][s, :, 0::4])
             if 'm' in components:
-                mean_3D = np.asarray(f['/fits/params/data'][s, :, 1::4])
+                mean_3D = asarray(f['/fits/params/data'][s, :, 1::4])
             if 'v' in components:
-                var_3D = np.asarray(f['/fits/params/data'][s, :, 2::4])**2.0
+                var_3D = asarray(f['/fits/params/data'][s, :, 2::4])**2.0
             if 'e' in components:
-                exp_3D = np.asarray(f['/fits/params/data'][s, :, 3::4])
+                exp_3D = asarray(f['/fits/params/data'][s, :, 3::4])
 
         assert amp_3D.shape[0] == self.nPoints, Exception("fit file {} has {} fits, but the dataset has {} points".format(fit_file, amp_3D.shape[0], self.nPoints))
 
         z = self.zGrid.centres
-        # d2D = np.repeat(d1D[None, :], mean_3D.shape[0], axis=0)
-        z3D = np.repeat(np.repeat(z[None, :], mean_3D.shape[0], axis=0)[:, :, None], mean_3D.shape[2], axis=2)
+        # d2D = repeat(d1D[None, :], mean_3D.shape[0], axis=0)
+        z3D = repeat(repeat(z[None, :], mean_3D.shape[0], axis=0)[:, :, None], mean_3D.shape[2], axis=2)
 
         if not mean_limits is None:
             if 'm' in components:
@@ -1127,7 +1133,7 @@ class Inference3D(myObject):
         return self.fits
 
     def relativeError(self):
-        op = np.vstack if self.nSystems > 1 else np.hstack
+        op = vstack if self.nSystems > 1 else hstack
         out = StatArray.StatArray(op([line.relativeError for line in self.lines]), name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units)
         for line in self.lines:
             line.uncache('relativeError')
@@ -1157,34 +1163,34 @@ class Inference3D(myObject):
 
         """
         lineIndex, fidIndex = self.lineIndex(fiducial=fiducial, index=index)
-        if np.size(fidIndex) > 1:
+        if size(fidIndex) > 1:
             assert line_index is not None, ValueError("Multiple fiducials found, please specify which line_index out of {}".format(lineIndex))
             lineIndex = line_index
         return self.lines[lineIndex].inference_1d(fidIndex)
 
     def lineIndex(self, lineNumber=None, fiducial=None, index=None):
         """Get the line index """
-        tmp = np.sum([not x is None for x in [lineNumber, fiducial, index]])
+        tmp = sum([not x is None for x in [lineNumber, fiducial, index]])
         assert tmp == 1, Exception("Please specify one argument, lineNumber, fiducial, or index")
 
-        index = np.atleast_1d(index)
+        index = atleast_1d(index)
 
         if lineNumber is not None:
             assert lineNumber in self.lineNumber, ValueError("line {} not found in data set".format(lineNumber))
-            return np.squeeze(np.where(self.lineNumber == lineNumber)[0])
+            return squeeze(where(self.lineNumber == lineNumber)[0])
 
         if fiducial is not None:
-            return np.squeeze(self.fiducialIndex(fiducial))
+            return squeeze(self.fiducialIndex(fiducial))
 
-        assert np.all(index <= self.nPoints-1), IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
+        assert npall(index <= self.nPoints-1), IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
 
         cumPoints = self._cumNpoints - 1
 
         iLine = cumPoints.searchsorted(index)
-        i = np.squeeze(np.where(iLine > 0))
+        i = squeeze(where(iLine > 0))
         index[i] -= self._cumNpoints[iLine[i]-1]
 
-        return np.squeeze(iLine), np.squeeze(index)
+        return squeeze(iLine), squeeze(index)
 
     def loop_over(self, *args, **kwargs):
         """Generate a loop range.
@@ -1211,16 +1217,16 @@ class Inference3D(myObject):
 
     @property
     def fiducials(self):
-        return StatArray.StatArray(np.hstack([line.fiducials for line in self.lines]), name='fiducials')
+        return StatArray.StatArray(hstack([line.fiducials for line in self.lines]), name='fiducials')
 
     def fiducial(self, index):
         """ Get the fiducial of the given data point """
         iLine, index = self.lineIndex(index=index)
-        iLine = np.atleast_1d(iLine)
-        index = np.atleast_1d(index)
+        iLine = atleast_1d(iLine)
+        index = atleast_1d(index)
 
-        out = np.empty(np.size(index))
-        for i in range(np.size(index)):
+        out = empty(size(index))
+        for i in range(size(index)):
             out[i] = self.lines[iLine[i]].fiducials[index[i]]
 
         return out
@@ -1248,13 +1254,13 @@ class Inference3D(myObject):
 
         for i, line in enumerate(self.lines):
             ids = line.fiducialIndex(fiducial)
-            nIds = np.size(ids)
+            nIds = size(ids)
             if nIds > 0:
-                lineIndex.append(np.full(nIds, fill_value=i))
+                lineIndex.append(full(nIds, fill_value=i))
                 index.append(ids)
 
-        if np.size(index) > 0:
-            return np.squeeze(np.hstack(lineIndex)), np.squeeze(np.hstack(index))
+        if size(index) > 0:
+            return squeeze(hstack(lineIndex)), squeeze(hstack(index))
 
         assert False, ValueError("fiducial not present in this data set")
 
@@ -1270,7 +1276,7 @@ class Inference3D(myObject):
 
         hdfFile = h5py.File("fits.h5", 'w', driver='mpio', comm=self.world)
 
-        a = np.zeros(kwargs['max_distributions'])
+        a = zeros(kwargs['max_distributions'])
         mixture = mixPearson(a, a, a, a)
         mixture.createHdf(hdfFile, 'fits', add_axis=(self.nPoints, self.lines[0].mesh.y.nCells))
 
@@ -1340,7 +1346,7 @@ class Inference3D(myObject):
             while Go:
                 hm = self.parameter_posterior(index=index)
 
-                if not np.all(hm.counts == 0):
+                if not npall(hm.counts == 0):
 
                     try:
                         mixtures = hm.fit_mixture_to_pdf(mixture=mixPearson, **kwargs)
@@ -1422,7 +1428,7 @@ class Inference3D(myObject):
     #     k = kwargs['k']
 
     #     maxClusters = (k[1] - k[0]) + 1
-    #     nIntervals = np.size(intervals) - 1
+    #     nIntervals = size(intervals) - 1
 
     #     tmp = locals()
     #     for key in ['self', 'MPI', 'world', 'k']:
@@ -1453,12 +1459,12 @@ class Inference3D(myObject):
     #     i0 = starts[self.rank]
     #     i1 = i0 + chunk
 
-    #     iLine, index = self.lineIndex(index=np.arange(i0, i1))
+    #     iLine, index = self.lineIndex(index=arange(i0, i1))
 
     #     tBase = MPI.Wtime()
     #     t0 = tBase
 
-    #     nUpdate = np.int(0.1 * chunk)
+    #     nUpdate = int(0.1 * chunk)
     #     counter = 0
 
     #     for i in range(chunk):
@@ -1473,10 +1479,10 @@ class Inference3D(myObject):
     #         d, a = hm.fit_mixture(intervals, track=False, **kwargs)
 
     #         for j in range(nIntervals):
-    #             dm = np.squeeze(d[j].means_[a[j]])
-    #             dv = np.squeeze(d[j].covariances_[a[j]])
+    #             dm = squeeze(d[j].means_[a[j]])
+    #             dv = squeeze(d[j].covariances_[a[j]])
 
-    #             nD = np.size(dm)
+    #             nD = size(dm)
 
     #             line.hdfFile['/mixture_fits/means/data'][ind, j, :nD] = dm
     #             line.hdfFile['/mixture_fits/variances/data'][ind, j, :nD] = dv
@@ -1491,7 +1497,7 @@ class Inference3D(myObject):
 
     @cached_property
     def highest_marginal(self):
-        return StatArray.StatArray(np.argmax(self.marginalProbability, axis=-1), name='Highest marginal').T
+        return StatArray.StatArray(argmax(self.marginalProbability, axis=-1), name='Highest marginal').T
 
     def histogram(self, nBins, **kwargs):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
@@ -1506,7 +1512,7 @@ class Inference3D(myObject):
 
         values = StatArray.StatArray(values, values.name, values.units)
 
-        h = Histogram1D(np.linspace(np.nanmin(values), np.nanmax(values), nBins))
+        h = Histogram1D(linspace(nanmin(values), nanmax(values), nBins))
         h.update(values)
 
         h.plot()
@@ -1563,7 +1569,7 @@ class Inference3D(myObject):
     #     x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
 
     #     # Initialize 3D volume
-    #     mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+    #     mean3D = StatArray.StatArray(zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
     #     mean3D[0, :, :] = vals
 
     #     # Interpolate for each depth
@@ -1589,7 +1595,7 @@ class Inference3D(myObject):
     #     x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
 
     #     # Initialize 3D volume
-    #     mean3D = StatArray.StatArray(np.zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+    #     mean3D = StatArray.StatArray(zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
     #     mean3D[0, :, :] = vals
 
     #     # Interpolate for each depth
@@ -1634,7 +1640,7 @@ class Inference3D(myObject):
 
     def percentageParameter(self, value, depth, depth2=None):
 
-        percentage = StatArray.StatArray(np.empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+        percentage = StatArray.StatArray(empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
 
         print('Calculating percentages', flush = True)
         bar = self.loop_over(self.nLines)
@@ -1645,7 +1651,7 @@ class Inference3D(myObject):
 
     def depth_slice(self, depth, variable, reciprocateParameter=False, **kwargs):
 
-        out = np.empty(self.nPoints)
+        out = empty(self.nPoints)
 
         for i, line in enumerate(self.lines):
             values = line.depth_slice(depth, variable, reciprocateParameter=reciprocateParameter, **kwargs)
@@ -1834,7 +1840,7 @@ class Inference3D(myObject):
         if useVariance:
             for line in self.lines:
                 line.compute_additive_error_opacity()
-            alpha = np.hstack([line.additive_error_opacity for line in self.lines])
+            alpha = hstack([line.additive_error_opacity for line in self.lines])
             kwargs['alpha'] = alpha
 
         return self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.additiveError[system, :], **kwargs)
@@ -1876,9 +1882,9 @@ class Inference3D(myObject):
 
         interpolated_marginal, values, dum = self.interpolate_marginal(dx, dy, depth, **kwargs)
 
-        highest = StatArray.StatArray((np.argmax(interpolated_marginal, axis=-1)).astype(np.float32))
-        msk = np.all(np.isnan(interpolated_marginal), axis=-1)
-        highest[msk] = np.nan
+        highest = StatArray.StatArray((argmax(interpolated_marginal, axis=-1)).astype(float32))
+        msk = npall(isnan(interpolated_marginal), axis=-1)
+        highest[msk] = nan
         values.values = highest
 
         return values, dum
@@ -1892,8 +1898,8 @@ class Inference3D(myObject):
         ax, pc, cb = highest.pcolor(vmin=0, vmax=nClusters-1, cmapIntervals=nClusters, **dum)
 
         offset = (nClusters-1) / (2*nClusters)
-        ticks = np.arange(offset, nClusters-offset, 2.0*offset)
-        tick_labels = np.arange(nClusters)+1
+        ticks = arange(offset, nClusters-offset, 2.0*offset)
+        tick_labels = arange(nClusters)+1
         if not cb is None:
             cb.set_ticks(ticks)
             cb.set_ticklabels(tick_labels)
@@ -1906,7 +1912,7 @@ class Inference3D(myObject):
         if useVariance:
             for line in self.lines:
                 line.compute_relative_error_opacity()
-            alpha = np.hstack([line.relative_error_opacity for line in self.lines])
+            alpha = hstack([line.relative_error_opacity for line in self.lines])
             kwargs['alpha'] = alpha
 
         return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
@@ -1958,7 +1964,7 @@ class Inference3D(myObject):
     #     values = self.interfaces[:, cell1]
     #     if lowerThreshold > 0.0:
     #         values = self.interfaces[:, cell1].deepcopy()
-    #         values[values < lowerThreshold] = np.nan
+    #         values[values < lowerThreshold] = nan
     #     return values
 
 
@@ -1969,7 +1975,7 @@ class Inference3D(myObject):
         slce = self.interfaces[:, cell1]
         if lowerThreshold > 0.0:
             slce = deepcopy(self.interfaces[:, cell1])
-            slce[slce < lowerThreshold] = np.nan
+            slce[slce < lowerThreshold] = nan
 
         return self.scatter2D(c = slce, **kwargs)
 
@@ -2011,20 +2017,20 @@ class Inference3D(myObject):
     def getParVsZ(self, bestModel=False, withDoi=True, reciprocateParameter=True, log10=True, clipNan=True):
         """ Get the depth and parameters, optionally within the doi """
         # Get the depths
-        z = np.tile(self.zGrid,self.nPoints)
+        z = tile(self.zGrid,self.nPoints)
 
         if (bestModel):
             self.getAttribute(best=True, doi=withDoi)
-            model = np.zeros(self.best.shape)
+            model = zeros(self.best.shape)
             model[:,:] = self.best
         else:
             self.getAttribute(mean=True, doi=withDoi)
-            model = np.zeros(self.best.shape)
+            model = zeros(self.best.shape)
             model[:,:] = self.mean
 
         if (withDoi):
-            zTmp = np.repeat(self.zGrid[:,np.newaxis],self.nPoints,axis=1)
-            model[zTmp > self.doi] = np.nan
+            zTmp = repeat(self.zGrid[:,newaxis],self.nPoints,axis=1)
+            model[zTmp > self.doi] = nan
 
         model = model.reshape(model.size, order='F')
 
@@ -2032,12 +2038,12 @@ class Inference3D(myObject):
             model = 1.0/model.reshape(model.size, order='F')
 
         if log10:
-            model = np.log10(model)
+            model = log10(model)
 
-        res = StatArray.StatArray(np.column_stack((model,z)))
+        res = StatArray.StatArray(column_stack((model,z)))
 
         if (clipNan):
-            res = res[np.logical_not(np.isnan(res[:,0]))]
+            res = res[logical_not(isnan(res[:,0]))]
 
         return res
 
@@ -2052,7 +2058,7 @@ class Inference3D(myObject):
         assert isinstance(ParVsZ, StatArray.StatArray), "precomputedParVsZ must be an StatArray"
 
         if (log10Depth):
-            ParVsZ[:,1] = np.log10(ParVsZ[:,1])
+            ParVsZ[:,1] = log10(ParVsZ[:,1])
 
         return ParVsZ.kMeans(nClusters, standardize=standardize, nIterations=10, plot=plot, **kwargs)
 
@@ -2100,14 +2106,14 @@ class Inference3D(myObject):
 #         vals = vals.reshape(mx*my)
 
 #         # Set up the nodes and voxel indices
-#         points = np.zeros([nPoints,3], order='F')
-#         points[:,0] = np.tile(x, my*mz)
-#         points[:,1] = np.tile(y.repeat(mx), mz)
-#         points[:,2] = np.tile(vals, mz) - z.centres.repeat(mx*my)
+#         points = zeros([nPoints,3], order='F')
+#         points[:,0] = tile(x, my*mz)
+#         points[:,1] = tile(y.repeat(mx), mz)
+#         points[:,2] = tile(vals, mz) - z.centres.repeat(mx*my)
 
 #         # Create the cell indices into the points
-#         p = np.arange(nPoints).reshape((mz, my, mx))
-#         voxels = np.zeros([nCells, 8], dtype=np.int)
+#         p = arange(nPoints).reshape((mz, my, mx))
+#         voxels = zeros([nCells, 8], dtype=int)
 #         iCell = 0
 #         for k in range(mz-1):
 #             k1 = k + 1
@@ -2119,25 +2125,25 @@ class Inference3D(myObject):
 #                     iCell += 1
 
 #         # Create the various point data
-#         pointID = Scalars(np.arange(nPoints), name='Point iD')
+#         pointID = Scalars(arange(nPoints), name='Point iD')
 #         pointElev = Scalars(points[:,2], name='Point Elevation (m)')
 
-#         tmp = self.mean3D.reshape(np.size(self.mean3D))
-#         tmp[tmp == 0.0] = np.nan
+#         tmp = self.mean3D.reshape(size(self.mean3D))
+#         tmp[tmp == 0.0] = nan
 
-#         print(np.nanmin(tmp), np.nanmax(tmp))
+#         print(nanmin(tmp), nanmax(tmp))
 #         tmp1 = 1.0 / tmp
 
-#         print(np.nanmin(tmp), np.nanmax(tmp))
+#         print(nanmin(tmp), nanmax(tmp))
 #         pointRes = Scalars(tmp1, name = 'log10(Resistivity) (Ohm m)')
-#         tmp1 = np.log10(tmp)
+#         tmp1 = log10(tmp)
 
 #         pointCon = Scalars(tmp1, name = 'log10(Conductivity) (S/m)')
 
 #         print(nPoints, tmp.size)
 
 #         PData = PointData(pointID, pointElev, pointRes)#, pointCon)
-#         CData = CellData(Scalars(np.arange(nCells),name='Cell iD'))
+#         CData = CellData(Scalars(arange(nCells),name='Cell iD'))
 #         vtk = VtkData(
 #               UnstructuredGrid(points,
 #                                hexahedron=voxels),

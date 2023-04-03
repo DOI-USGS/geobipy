@@ -1,7 +1,16 @@
-import numpy as np
 from copy import deepcopy
-from numpy import issubdtype
-from math import exp as mExp
+
+from numpy import abs, arange, argsort, argwhere, asarray, atleast_1d, complex128, cos, diag, diff, divide, dot, empty
+from numpy import exp, flip, float128, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
+from numpy import log, log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
+from numpy import real, s_, shape, sin, size, where, zeros
+from numpy import all as npall
+
+from numpy.linalg import cholesky, det, inv, slogdet
+from numpy.lib.stride_tricks import as_strided
+
+from numpy.ma import masked_array
+
 from ..classes.core import StatArray
 import h5py
 from sklearn.mixture import GaussianMixture
@@ -18,18 +27,18 @@ cc.verbose = True
 @njit(**_njit_settings)
 @cc.export('bresenham', 'f8[:, :](f8[:], f8[:])')
 def bresenham(x, y):
-    n_segments = np.int32(len(x) - 1)
-    nTmp = np.int32(0)
+    n_segments = int32(len(x) - 1)
+    nTmp = int32(0)
     for i in range(n_segments):
-        nx = np.abs(x[i+1] - x[i])
-        ny = np.abs(y[i+1] - y[i])
+        nx = abs(x[i+1] - x[i])
+        ny = abs(y[i+1] - y[i])
         if nx == 0:
             nx = 1
         if ny == 0:
             ny = 1
         nTmp += nx * ny
 
-    points = np.zeros((2*nTmp, 2), dtype=np.int32)
+    points = zeros((2*nTmp, 2), dtype=int32)
     j = 0
     for i in range(n_segments):
         # Setup initial conditions
@@ -43,7 +52,7 @@ def bresenham(x, y):
         if dx == 0:
             if y1 > y2:
                 y1, y2 = y2, y1
-            arr = np.arange(y1, y2+1, dtype=np.int32)
+            arr = arange(y1, y2+1, dtype=int32)
             n = arr.size
             points[j:j+n, 0] = x1
             points[j:j+n, 1] = arr
@@ -52,7 +61,7 @@ def bresenham(x, y):
         elif dy == 0:
             if x1 > x2:
                 x1, x2 = x2, x1
-            arr = np.arange(x1, x2+1, dtype=np.int32)
+            arr = arange(x1, x2+1, dtype=int32)
             n = arr.size
             points[j:j+n, 0] = arr
             points[j:j+n, 1] = y1
@@ -61,7 +70,7 @@ def bresenham(x, y):
         if dx != 0 and dy != 0:
 
             # Determine how steep the line is
-            is_steep = np.abs(dy) > np.abs(dx)
+            is_steep = abs(dy) > abs(dx)
 
             # Rotate line
             if is_steep:
@@ -80,7 +89,7 @@ def bresenham(x, y):
             dy = y2 - y1
 
             # Calculate error
-            error = np.int32(dx / 2.0)
+            error = int32(dx / 2.0)
             ystep = 1 if y1 < y2 else -1
 
             # Iterate over bounding box generating points between start and end
@@ -89,7 +98,7 @@ def bresenham(x, y):
                 coord = (iy, ix) if is_steep else (ix, iy)
                 points[j, :] = coord
                 j += 1
-                error -= np.abs(dy)
+                error -= abs(dy)
                 if error < 0:
                     iy += ystep
                     error += dx
@@ -112,8 +121,8 @@ def interleave(a, b):
             Interleaved arrays
 
         """
-        assert np.size(a) == np.size(b), ValueError("other must have size {}".format(np.size(a)))
-        out = np.empty((np.size(a) + np.size(b)), dtype=a.dtype)
+        assert size(a) == size(b), ValueError("other must have size {}".format(size(a)))
+        out = empty((size(a) + size(b)), dtype=a.dtype)
         out[0::2] = a
         out[1::2] = b
         return out
@@ -133,7 +142,7 @@ def isInt(this):
         Is or is not an int
 
     """
-    return isinstance(this, (int, np.integer))
+    return isinstance(this, (int, integer))
 
 
 def isIntorSlice(this):
@@ -204,9 +213,9 @@ def findNotNans(this):
         Integer array to locations of non nans.
 
     """
-    i = np.isnan(this)
+    i = isnan(this)
     i ^= True
-    return(np.argwhere(i).squeeze())
+    return(argwhere(i).squeeze())
 
 
 def findNans(this):
@@ -223,8 +232,8 @@ def findNans(this):
         Integer array to locations of nans.
 
     """
-    i = np.isnan(this)
-    return(np.argwhere(i).squeeze())
+    i = isnan(this)
+    return(argwhere(i).squeeze())
 
 
 def findFirstNonZeros(this, axis, invalid_val=-1):
@@ -247,7 +256,7 @@ def findFirstNonZeros(this, axis, invalid_val=-1):
     """
 
     mask = this != 0
-    return np.where(mask.any(axis=axis), mask.argmax(axis=axis), invalid_val)
+    return where(mask.any(axis=axis), mask.argmax(axis=axis), invalid_val)
 
 
 def findLastNonZeros(this, axis, invalid_val=-1):
@@ -270,8 +279,8 @@ def findLastNonZeros(this, axis, invalid_val=-1):
     """
 
     mask = this != 0
-    val = this.shape[axis] - np.flip(mask, axis=axis).argmax(axis=axis) - 1
-    return np.where(mask.any(axis=axis), val, invalid_val)
+    val = this.shape[axis] - flip(mask, axis=axis).argmax(axis=axis) - 1
+    return where(mask.any(axis=axis), val, invalid_val)
 
 
 def findFirstLastNotValue(this, values, invalid_val=-1):
@@ -288,19 +297,19 @@ def findFirstLastNotValue(this, values, invalid_val=-1):
         Indices of the first and last non zero values along each axisgg
 
     """
-    values = np.atleast_1d(values)
-    out = np.empty([np.ndim(this), 2], dtype=np.int32)
+    values = atleast_1d(values)
+    out = empty([ndim(this), 2], dtype=int32)
     mask = this != values[0]
     if values.size > 1:
         for i in range(1, values.size):
             mask = mask & (this != values[i])
-    for i in range(np.ndim(this)):
-        x = np.where(mask.any(axis=i), mask.argmax(axis=i), 1e9)
-        out[i, 0] = np.min(x[x != invalid_val])
-    for i in range(np.ndim(this)):
-        val = this.shape[i] - np.flip(mask, axis=i).argmax(axis=i) - 1
-        x = np.where(mask.any(axis=i), val, invalid_val)
-        out[i, 1] = np.max(x[x != invalid_val])
+    for i in range(ndim(this)):
+        x = where(mask.any(axis=i), mask.argmax(axis=i), 1e9)
+        out[i, 0] = min(x[x != invalid_val])
+    for i in range(ndim(this)):
+        val = this.shape[i] - flip(mask, axis=i).argmax(axis=i) - 1
+        x = where(mask.any(axis=i), val, invalid_val)
+        out[i, 1] = max(x[x != invalid_val])
 
     return out
 
@@ -386,12 +395,12 @@ def getNameUnits(self, defaultName = '', defaultUnits = ''):
 
 def cosSin1(x, y, a, p):
     """Simple function for creating tests. """
-    return x * (1.0 - x) * np.cos(a * np.pi * x) * np.sin(a * np.pi * y**p)**p
+    return x * (1.0 - x) * cos(a * pi * x) * sin(a * pi * y**p)**p
 
 @njit(**_njit_settings)
 def reorder_3d_for_pyvista(values):
-    shp = np.shape(values)
-    arr = np.zeros(shp[0] * shp[1] * shp[2], dtype=float64)
+    shp = shape(values)
+    arr = zeros(shp[0] * shp[1] * shp[2], dtype=float64)
     ii = 0
     for i in range(shp[2]): #z
         for k in range(shp[0]): #x
@@ -423,12 +432,12 @@ def Inv(A):
 
     """
 
-    ndim = np.ndim(A)
+    ndim = ndim(A)
 
     assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
 
     if (ndim == 2):
-        return np.linalg.inv(A)
+        return inv(A)
 
     return 1.0 / A
 
@@ -473,12 +482,12 @@ def Ax(A, x):
         Resultant matrix vector multiplication.
     """
 
-    ndim = np.ndim(A)
+    nd = ndim(A)
 
-    assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
+    assert nd <= 2, TypeError('The number of dimesions of A must be <= 2')
 
-    if (ndim == 2):
-        return np.dot(A, x)
+    if (nd == 2):
+        return dot(A, x)
 
     return A * x
 
@@ -503,17 +512,17 @@ def Det(A, N=1.0):
 
     """
 
-    ndim = np.ndim(A)
+    ndim = ndim(A)
     assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
 
     if (ndim == 0):
         return A**N
 
     if (ndim == 1):
-        return np.prod(A)
+        return prod(A)
 
     if (ndim == 2):
-        return np.linalg.det(A)
+        return det(A)
 
 
 def LogDet(A, N=1.0):
@@ -536,17 +545,17 @@ def LogDet(A, N=1.0):
 
     """
 
-    ndim = np.ndim(A)
+    ndim = ndim(A)
     assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
 
     if (ndim == 0):
-        return np.log(A**N)
+        return log(A**N)
 
     if (ndim == 1):
-        return np.float64(np.linalg.slogdet(np.diag(A))[1])
+        return float64(slogdet(diag(A))[1])
 
     if (ndim == 2):
-        d = np.linalg.slogdet(A)
+        d = slogdet(A)
         return d[0] * d[1]
 
 @njit(**_njit_settings)
@@ -564,7 +573,7 @@ def set_columns_at(values, indices, out):
 def rolling_window(a, window):
     shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
     strides = a.strides + (a.strides[-1],)
-    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+    return as_strided(a, shape=shape, strides=strides)
 
 @njit(**_njit_settings)
 def smooth(x, a):
@@ -587,7 +596,7 @@ def smooth(x, a):
     sx = 1.0
     sy = a
     yi = 0.0
-    y = np.zeros(n)
+    y = zeros(n)
     yi = (sy * yi) + (sx * x[0])
     y[0] = yi
     for i in range(1, n-1):
@@ -619,9 +628,9 @@ def splitComplex(this):
     """
     n2 = this.size
     N = 2*n2
-    out = np.ndarray(N, dtype=np.float64)
-    out[:n2] = np.real(this)
-    out[n2:] = np.imag(this)
+    out = ndarray(N, dtype=float64)
+    out[:n2] = real(this)
+    out[n2:] = imag(this)
     return out
 
 
@@ -641,7 +650,7 @@ def mergeComplex(this):
     """
     N = this.size
     n2 = (N / 2)
-    out = np.ndarray(n2, dtype=np.complex128)
+    out = ndarray(n2, dtype=complex128)
     out = this[:n2] + 1j * this[n2:]
     return out
 
@@ -664,16 +673,16 @@ def expReal(this):
     #     return 0.0
 
     if this > 709.0:
-        return np.inf
+        return inf
 
-    return np.float128(np.exp(this))
+    return float128(exp(this))
 
 
 def tanh(this):
     """ Custom hyperbolic tangent, return correct overflow. """
-#    return np.tanh(this)
-    tmp = np.exp(-2.0 * this)
-    return (np.divide((1.0 - tmp), (1.0 + tmp)))
+#    return tanh(this)
+    tmp = exp(-2.0 * this)
+    return (divide((1.0 - tmp), (1.0 + tmp)))
 
 
 def _logLabel(log=None):
@@ -735,7 +744,7 @@ def _log(values, log=None):
 
     """
 
-    if np.size(values) == 1:
+    if size(values) == 1:
         return _logScalar(values, log)
     else:
         return _logArray(values, log)
@@ -772,24 +781,24 @@ def _logScalar(value, log=None):
         print(Warning('Value <= 0.0 have been masked before taking their log'))
 
     if (log == 'e'):
-        tmp = np.log(value)
+        tmp = log(value)
         label = 'ln'
         return tmp, label
 
     assert log > 0, ValueError('logBase must be a positive number')
 
     if (log == 10):
-        tmp = np.log10(value)
+        tmp = log10(value)
         label = 'log$_{10}$'
         return tmp, label
 
     if (log == 2):
-        tmp = np.log2(value)
+        tmp = log2(value)
         label = 'log$_{2}$'
         return tmp, label
 
     if (log > 2):
-        tmp = np.log10(value)/np.log10(log)
+        tmp = log10(value)/log10(log)
         label = 'log$_{'+str(log)+'}$'
         return tmp, label
 
@@ -823,37 +832,38 @@ def _logArray(values, log=None):
     assert not isinstance(log, bool), TypeError('log must be either "e" or a number')
 
     # Let the user know that values were masked in order to take the log
-    i = np.s_[:]
+    i = s_[:]
 
-    if np.all(np.isnan(values)):
+    from numpy import all as npall
+    if npall(isnan(values)):
         raise Exception("Entire array is nan")
 
-    if (np.nanmin(values) <= 0.0):
-        i = np.where(values > 0.0)
+    if (nanmin(values) <= 0.0):
+        i = where(values > 0.0)
         # print(Warning('Values <= 0.0 have been masked before taking their log'))
 
     tmp = deepcopy(values)
-    tmp[:] = np.nan
+    tmp[:] = nan
 
     if (log == 'e'):
-        tmp[i] = np.log(values[i])
+        tmp[i] = log(values[i])
         label = 'ln'
         return tmp, label
 
     assert log > 0, ValueError('logBase must be a positive number')
 
     if (log == 10):
-        tmp[i] = np.log10(values[i])
+        tmp[i] = log10(values[i])
         label = 'log$_{10}$'
         return tmp, label
 
     if (log == 2):
-        tmp[i] = np.log2(values[i])
+        tmp[i] = log2(values[i])
         label = 'log$_{2}$'
         return tmp, label
 
     if (log > 2):
-        tmp[i] = np.log10(values[i])/np.log10(log)
+        tmp[i] = log10(values[i])/log10(log)
         label = 'log$_{'+str(log)+'}$'
         return tmp, label
 
@@ -880,28 +890,28 @@ def histogramEqualize(values, nBins=256):
     """
     # get image histogram
     tmp = values.flatten()
-    i = np.isfinite(tmp)
+    i = isfinite(tmp)
     flat = tmp[i]
-    H, bins = np.histogram(flat, nBins, density=True)
+    H, bins = histogram(flat, nBins, density=True)
     cdf = H.cumsum() # cumulative distribution function
     cdf = (nBins - 1) * cdf / cdf[-1] # normalize
 
     # use linear interpolation of cdf to find new pixel values
-    equalized = np.interp(tmp, bins[:-1], cdf)
+    equalized = interp(tmp, bins[:-1], cdf)
     # Reapply any nans
-    equalized[~i] = np.nan
+    equalized[~i] = nan
     # Apply any masks from isfinite
     try:
-        equalized = np.ma.masked_array(equalized, i.mask)
+        equalized = masked_array(equalized, i.mask)
     except:
         pass
 
     # Get the centers of the bins
-    tmp = bins[:-1] + 0.5 * np.diff(bins)
+    tmp = bins[:-1] + 0.5 * diff(bins)
 
     # Scale back the equalized image to the bounds of the histogram
-    a1 = np.nanmin(equalized)
-    a2 = np.nanmax(equalized)
+    a1 = nanmin(equalized)
+    a2 = nanmax(equalized)
     b1 = tmp.min()
     b2 = tmp.max()
 
@@ -935,14 +945,14 @@ def trim_by_percentile(values, percent):
 
     """
 
-    low = np.nanpercentile(values, percent)
-    high = np.nanpercentile(values, 100 - percent)
+    low = nanpercentile(values, percent)
+    high = nanpercentile(values, 100 - percent)
 
     tmp = values.copy()
 
-    i = np.where(tmp > high)
+    i = where(tmp > high)
     tmp[i] = high
-    i = np.where(tmp < low)
+    i = where(tmp < low)
     tmp[i] = low
 
     return tmp
@@ -959,8 +969,8 @@ def _power(values, exponent=None):
     values : scalar or array_like
         Take the log of these values.
     exponent : 'e' or float, optional
-        * If exponent = 'e': use np.exp(values)
-        * If exponent is float: use np.power(values)
+        * If exponent = 'e': use exp(values)
+        * If exponent is float: use power(values)
 
     Returns
     -------
@@ -971,9 +981,9 @@ def _power(values, exponent=None):
     if exponent is None:
         return values
     if exponent == 'e':
-        return np.exp(values)
+        return exp(values)
     else:
-        return np.power(exponent, values)
+        return power(exponent, values)
 
 
 def safeEval(string):
@@ -1019,19 +1029,19 @@ def save_gmm(gmm, filename):
 def set_gmm(weights, means, covariances):
     out = GaussianMixture(n_components = len(means), covariance_type='full')
     out.means_ = means
-    out.precisions_cholesky_ = np.linalg.cholesky(np.linalg.inv(covariances))
+    out.precisions_cholesky_ = cholesky(inv(covariances))
     out.weights_ = weights
     out.covariances_ = covariances
     return out
 
 def load_gmm(filename, sort_by_means=True):
     with h5py.File(filename, 'r') as f:
-        weights = np.asarray(f['weights'])
-        means = np.asarray(f['means'])
-        covariances = np.asarray(f['covariances'])
+        weights = asarray(f['weights'])
+        means = asarray(f['means'])
+        covariances = asarray(f['covariances'])
 
     if sort_by_means:
-        order = np.argsort(means[:, 0])
+        order = argsort(means[:, 0])
         weights = weights[order]
         means = means[order, :]
         covariances = covariances[order, :, :]
@@ -1055,13 +1065,13 @@ def set_smm(weights, means, covariances, degrees):
 
 def load_smm(filename, sort_by_means=True):
     with h5py.File(filename, 'r') as f:
-        weights = np.asarray(f['weights'])
-        means = np.asarray(f['means'])
-        covariances = np.asarray(f['covariances'])
-        degrees = np.asarray(f['degrees'])
+        weights = asarray(f['weights'])
+        means = asarray(f['means'])
+        covariances = asarray(f['covariances'])
+        degrees = asarray(f['degrees'])
 
     if sort_by_means:
-        order = np.argsort(means[:, 0])
+        order = argsort(means[:, 0])
         weights = weights[order]
         means = means[order, :]
         covariances = covariances[order, :, :]
@@ -1070,7 +1080,7 @@ def load_smm(filename, sort_by_means=True):
     return set_smm(weights, means, covariances, degrees)
 
 def reslice(slic, start=None, stop=None, step=None):
-    if all(x is None for x in [start, stop, step]):
+    if npall(x is None for x in [start, stop, step]):
         return slic
 
     sta = slic.start

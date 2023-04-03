@@ -1,6 +1,12 @@
-from copy import copy, deepcopy
+from copy import deepcopy
+
+from numpy import abs, allclose, arange, argmax, array, asarray, atleast_1d, concatenate, delete
+from numpy import diff, divide, expand_dims, flip, float32, float64, histogram, inf, insert, int32, int64, isnan
+from numpy import mean, nan, nanmax, nanmin, ndarray, ndim, ones, r_, resize, s_, size, squeeze, sum, unique, where, zeros
+from numpy import shape as npshape
+
+from numpy import set_printoptions
 from matplotlib.axes import SubplotBase
-import numpy as np
 import h5py
 import scipy.stats as st
 
@@ -17,7 +23,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib.figure import Figure
 
 
-class StatArray(np.ndarray, myObject):
+class StatArray(ndarray, myObject):
     """Class extension to numpy.ndarray
 
     This subclass to a numpy array contains extra attributes that can describe the parameters it represents.
@@ -80,18 +86,18 @@ class StatArray(np.ndarray, myObject):
 
     >>> from geobipy import StatArray
     >>> import numpy as np
-    >>> x = StatArray(np.arange(10), name='test', units='units')
+    >>> x = StatArray(arange(10), name='test', units='units')
     >>> print(x.mean())
     4.5
 
     If the StatArray is passed to a numpy function that does not return a new instantiation, a StatArray will be returned (as opposed to a numpy array)
 
-    >>> np.delete(x, 5)
+    >>> delete(x, 5)
     StatArray([0, 1, 2, 3, 4, 6, 7, 8, 9])
 
     However, if you pass a StatArray to a numpy function that is not in-place, i.e. creates new memory, the return type will be a numpy array and NOT a StatArray subclass
 
-    >>> np.append(x,[3,4,5])
+    >>> append(x,[3,4,5])
     array([0, 1, 2, ..., 3, 4, 5])
 
     See Also
@@ -122,15 +128,15 @@ class StatArray(np.ndarray, myObject):
             shape = 0
 
         if isinstance(shape, list):
-            shape = np.asarray(shape)
+            shape = asarray(shape)
 
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
-            if np.ndim(shape) == 0:
-                self = np.ndarray.__new__(subtype, 1, **kwargs)
+            if ndim(shape) == 0:
+                self = ndarray.__new__(subtype, 1, **kwargs)
                 self[:] = shape
             else:
-                shp = np.shape(shape)
+                shp = npshape(shape)
                 self = StatArray(shp, **kwargs) + shape
 
             if (shape.hasPrior):
@@ -145,15 +151,16 @@ class StatArray(np.ndarray, myObject):
                 units = shape._units
 
         # Can pass in a numpy function call like arange(10) as the first argument
-        elif isinstance(shape, np.ndarray):
+        elif isinstance(shape, ndarray):
+            # shape = deepcopy(shape)
             self = shape.view(StatArray)
 
-        elif isinstance(shape, (float, np.float32, np.float64)):
-            self = np.ndarray.__new__(subtype, 1, **kwargs)
+        elif isinstance(shape, (float, float32, float64)):
+            self = ndarray.__new__(subtype, 1, **kwargs)
             self[:] = shape
 
         else:
-            self = np.ndarray.__new__(subtype, np.asarray(shape), **kwargs)
+            self = ndarray.__new__(subtype, asarray(shape), **kwargs)
             self[:] = 0
 
         # Set the name of the StatArray
@@ -175,13 +182,13 @@ class StatArray(np.ndarray, myObject):
             self._units = None
 
     def __array_wrap__(self, out_arr, context=None):
-        return np.ndarray.__array_wrap__(self, out_arr, context)
+        return ndarray.__array_wrap__(self, out_arr, context)
 
     # Properties
 
     @property
     def bounds(self):
-        return np.r_[np.nanmin(self), np.nanmax(self)]
+        return r_[nanmin(self), nanmax(self)]
 
     @property
     def name(self):
@@ -198,7 +205,7 @@ class StatArray(np.ndarray, myObject):
     @property
     def n_posteriors(self):
         if self.hasPosterior:
-            return np.size(self._posterior)
+            return size(self._posterior)
         return 0
 
     @property
@@ -215,7 +222,7 @@ class StatArray(np.ndarray, myObject):
             self._posterior = None
             return
 
-        nP = np.size(value)
+        nP = size(value)
         if nP > 1:
             assert nP == self.shape[-1] or (self.shape[-1]%nP == 0), ValueError("Number of posteriors must match size of StatArray's first dimension")
 
@@ -299,7 +306,7 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        out = np.abs(self)
+        out = abs(self)
         out.name = "|{}|".format(out.name)
 
         return out
@@ -339,9 +346,9 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        mx = np.argmax(self, axis=axis).astype(np.float)
-        x = np.sum((self == np.max(self, axis=axis)), axis=axis)
-        mx[x > 1.0] = np.nan
+        mx = argmax(self, axis=axis).astype(float)
+        x = sum((self == max(self, axis=axis)), axis=axis)
+        mx[x > 1.0] = nan
 
         return mx
 
@@ -359,11 +366,11 @@ class StatArray(np.ndarray, myObject):
         # Get the discretization
         assert spacing > 0.0, ValueError("spacing must be positive!")
         sp = 0.5 * spacing
-        return StatArray(np.arange(self.bounds[0] - sp, self.bounds[1] + (2*sp), spacing), self.name, self.units)
+        return StatArray(arange(self.bounds[0] - sp, self.bounds[1] + (2*sp), spacing), self.name, self.units)
 
     def confidence_interval(self, interval):
         values = self.flatten()
-        return st.t.interval(interval, self.size - 1, loc=np.mean(values), scale=st.sem(values))
+        return st.t.interval(interval, self.size - 1, loc=mean(values), scale=st.sem(values))
 
     def copy(self, order='F'):
         return StatArray(self)
@@ -418,7 +425,7 @@ class StatArray(np.ndarray, myObject):
             Deepcopy of StatArray with deleted entry(ies).
 
         """
-        tmp = np.delete(self, i, axis=axis)
+        tmp = delete(self, i, axis=axis)
         out = self.resize(tmp.shape)
         out[:] = tmp[:]
 
@@ -450,25 +457,25 @@ class StatArray(np.ndarray, myObject):
 
         """
         if self.size == 1:
-            d = np.squeeze(np.asarray([self - 1, self + 1]))
+            d = squeeze(asarray([self - 1, self + 1]))
             return StatArray(d, self.name, self.units)
         else:
-            d = 0.5 * np.diff(self, axis=axis)
+            d = 0.5 * diff(self, axis=axis)
 
         x0 = self.take(indices=0, axis=axis)
         x1 = self.take(indices=-1, axis=axis)
-        x2 = self.take(indices=np.arange(self.shape[axis]-1), axis=axis)
+        x2 = self.take(indices=arange(self.shape[axis]-1), axis=axis)
 
-        e0 = np.expand_dims(x0 - d.take(indices=0, axis=axis), axis)
+        e0 = expand_dims(x0 - d.take(indices=0, axis=axis), axis)
         e1 = x2 + d
-        e2 = np.expand_dims(x1 + d.take(indices=-1, axis=axis), axis)
+        e2 = expand_dims(x1 + d.take(indices=-1, axis=axis), axis)
 
         if not min is None:
             e0[:] = min
         if not max is None:
             e2[:] = max
 
-        edges = np.concatenate([e0, e1, e2], axis=axis)
+        edges = concatenate([e0, e1, e2], axis=axis)
 
         return StatArray(edges, self.name, self.units)
 
@@ -490,7 +497,7 @@ class StatArray(np.ndarray, myObject):
         """
 
         msk = self != 0.0
-        return np.where(msk.any(axis=axis), msk.argmax(axis=axis), invalid_val)
+        return where(msk.any(axis=axis), msk.argmax(axis=axis), invalid_val)
 
     @property
     def label(self):
@@ -557,8 +564,8 @@ class StatArray(np.ndarray, myObject):
             StatArray after inserting a value.
 
         """
-        tmp = np.insert(arr=self, obj=i, values=values, axis=axis)
-        # tmp = np.insert(self, i, values, axis)
+        tmp = insert(arr=self, obj=i, values=values, axis=axis)
+        # tmp = insert(self, i, values, axis)
         out = self.resize(tmp.shape)  # Keeps the prior and proposal if set.
         out[:] = tmp[:]
 
@@ -598,9 +605,9 @@ class StatArray(np.ndarray, myObject):
 
         """
         assert (self.size > 1), ValueError("Size of StatArray must be > 1")
-        d = 0.5 * np.diff(self, axis=axis)
+        d = 0.5 * diff(self, axis=axis)
 
-        x2 = self.take(indices=np.arange(self.shape[axis]-1), axis=axis)
+        x2 = self.take(indices=arange(self.shape[axis]-1), axis=axis)
         edges = x2 + d
 
         return StatArray(edges, self.name, self.units)
@@ -608,7 +615,7 @@ class StatArray(np.ndarray, myObject):
     def diff(self, axis=-1):
         assert (self.size > 1), ValueError("Size of StatArray must be > 1")
 
-        return StatArray(np.diff(self, axis=axis), self.name, self.units)
+        return StatArray(diff(self, axis=axis), self.name, self.units)
 
     @property
     def hasPosterior(self):
@@ -688,7 +695,7 @@ class StatArray(np.ndarray, myObject):
         """
         assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
         if i is None:
-            i = np.s_[:]
+            i = s_[:]
         out = self.prior.derivative(self[i], order)
         return out
 
@@ -703,7 +710,7 @@ class StatArray(np.ndarray, myObject):
         """
         assert self.hasProposal, TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
         if i is None:
-            i = np.s_[:]
+            i = s_[:]
         return self.proposal.derivative(self[i], order)
 
     def lastNonZero(self, axis=0, invalid_val=-1):
@@ -722,26 +729,26 @@ class StatArray(np.ndarray, myObject):
         """
 
         msk = self != 0.0
-        val = self.shape[axis] - np.flip(msk, axis=axis).argmax(axis=axis)
-        return np.where(msk.any(axis=axis), val, invalid_val)
+        val = self.shape[axis] - flip(msk, axis=axis).argmax(axis=axis)
+        return where(msk.any(axis=axis), val, invalid_val)
 
     def mahalanobis(self):
         assert self.hasPrior, ValueError("No prior attached")
         return self.prior.mahalanobis(self)
 
     def nanmin(self):
-        return np.nanmin(self)
+        return nanmin(self)
 
     def nanmax(self):
-        return np.nanmax(self)
+        return nanmax(self)
 
     def normalize(self, axis=None):
         """Normalize to range 0 - 1. """
-        mn = np.nanmin(self, axis=axis)
-        mx = np.nanmax(self, axis=axis)
+        mn = nanmin(self, axis=axis)
+        mx = nanmax(self, axis=axis)
 
         t = mx - mn
-        return np.divide((self - mn), t)
+        return divide((self - mn), t)
 
     def prepend(self, values, axis=0):
         """Prepend to a StatArray
@@ -759,12 +766,12 @@ class StatArray(np.ndarray, myObject):
             StatArray with prepended values.
 
         """
-        i = np.zeros(np.size(values), dtype=np.int32)
+        i = zeros(size(values), dtype=int32)
         return self.insert(i, values, axis=axis)
 
     @property
     def range(self):
-        return np.nanmax(self) - np.nanmin(self)
+        return nanmax(self) - nanmin(self)
 
     def rescale(self, a, b):
         """Rescale to the interval (a, b)
@@ -813,7 +820,7 @@ class StatArray(np.ndarray, myObject):
         numpy.resize : For more information.
 
         """
-        out = StatArray(np.resize(self, new_shape), self.name, self.units)
+        out = StatArray(resize(self, new_shape), self.name, self.units)
         out.copyStats(self)
         return out
 
@@ -823,13 +830,13 @@ class StatArray(np.ndarray, myObject):
     def standardize(self, axis=None):
         """Standardize by subtracting the mean and dividing by the standard deviation. """
 
-        mn = np.mean(self, axis=axis)
-        std = np.std(self, axis=axis)
+        mn = mean(self, axis=axis)
+        std = std(self, axis=axis)
 
         return (self - mn) / std
 
     def strip_nan(self):
-        i = ~np.isnan(self)
+        i = ~isnan(self)
         return self[i]
 
     @property
@@ -847,7 +854,7 @@ class StatArray(np.ndarray, myObject):
             Summary of StatArray
 
         """
-        np.set_printoptions(threshold=5)
+        set_printoptions(threshold=5)
 
         if self.size == 0:
             return "None"
@@ -901,9 +908,9 @@ class StatArray(np.ndarray, myObject):
 
     def verbose(self):
         """Explicit print of every element """
-        np.set_printoptions(threshold=self.size)
+        set_printoptions(threshold=self.size)
         print(self[:])
-        np.set_printoptions(threshold=5)
+        set_printoptions(threshold=5)
 
     def isRegular(self, axis=-1):
         """Checks that the values change regularly
@@ -914,10 +921,10 @@ class StatArray(np.ndarray, myObject):
             Is regularly changing.
 
         """
-        if np.size(self) == 1:
+        if size(self) == 1:
             return True
-        tmp = np.diff(self, axis=axis)
-        return np.allclose(tmp, tmp[0])
+        tmp = diff(self, axis=axis)
+        return allclose(tmp, tmp[0])
 
     # Statistical Routines
 
@@ -936,13 +943,13 @@ class StatArray(np.ndarray, myObject):
         >>> from geobipy import StatArray
         >>> import numpy as np
         >>> import matplotlib.pyplot as plt
-        >>> x = StatArray(np.random.randn(1000), name='name', units='units')
+        >>> x = StatArray(random.randn(1000), name='name', units='units')
         >>> plt.figure()
         >>> x.hist()
         >>> plt.show()
 
         """
-        cnts, bins = np.histogram(
+        cnts, bins = histogram(
             self, bins=bins, range=range, normed=normed, weights=weights, density=density)
         bins = StatArray(bins, name=self.name, units=self.units)
         cP.bar(cnts, bins, **kwargs)
@@ -977,7 +984,7 @@ class StatArray(np.ndarray, myObject):
             out.posterior = deepcopy(self.posterior)
         return out
 
-    def perturb(self, i=np.s_[:], relative=False, imposePrior=False, log=False):
+    def perturb(self, i=s_[:], relative=False, imposePrior=False, log=False):
         """Perturb the values of the StatArray using the attached proposal
 
         The StatArray must have had a proposal set using StatArray.setProposal()
@@ -1031,7 +1038,7 @@ class StatArray(np.ndarray, myObject):
 
         return self.prior.probability(x=samples, log=log, i=active)
 
-    def propose(self, i=np.s_[:], relative=False, imposePrior=False, log=False):
+    def propose(self, i=s_[:], relative=False, imposePrior=False, log=False):
         """Propose new values using the attached proposal distribution
 
         Parameters
@@ -1077,7 +1084,7 @@ class StatArray(np.ndarray, myObject):
 
         p = self.probability(x=proposed, log=log, active=i)
 
-        num = -np.inf if log else 0.0
+        num = -inf if log else 0.0
         tries = 0
         while p == num:
             proposed = self.proposal.rng(nSamples)
@@ -1089,7 +1096,7 @@ class StatArray(np.ndarray, myObject):
             tries += 1
             if tries == 10:
                 # print("Could not propose values for {}. Continually produced P(X)={}".format(self.summary, num), flush=True)
-                return np.asarray(self[i]) if mv else self.item()
+                return asarray(self[i]) if mv else self.item()
 
         return proposed[i] if mv else proposed
 
@@ -1103,12 +1110,12 @@ class StatArray(np.ndarray, myObject):
             return
 
         if self.n_posteriors > 1:
-            active = np.atleast_1d(kwargs.get('active', range(self.n_posteriors)))
+            active = atleast_1d(kwargs.get('active', range(self.n_posteriors)))
             for i in active:
                 self._posterior[i].update(self.take(indices=i, axis=0), **kwargs)
 
         else:
-            self.posterior.update(np.squeeze(self), **kwargs)
+            self.posterior.update(squeeze(self), **kwargs)
 
     # Plotting Routines
 
@@ -1135,7 +1142,7 @@ class StatArray(np.ndarray, myObject):
 
         """
         if (x is None):
-            x = StatArray(np.arange(np.size(self)+1), name="Array index")
+            x = StatArray(arange(size(self)+1), name="Array index")
         # if i is not None:
         #     x = x[i]
 
@@ -1202,7 +1209,7 @@ class StatArray(np.ndarray, myObject):
         if (not y is None):
             assert (isinstance(y, StatArray)), TypeError(
                 "y must be a StatArray")
-            if np.size(y) == self.size:
+            if size(y) == self.size:
                 try:
                     my = y.edges()
                 except:
@@ -1215,7 +1222,7 @@ class StatArray(np.ndarray, myObject):
             if (not x is None):
                 assert (isinstance(x, StatArray)), TypeError(
                     "x must be a StatArray")
-                if np.size(x) == self.size:
+                if size(x) == self.size:
                     try:
                         mx = x.edges()
                     except:
@@ -1266,19 +1273,19 @@ class StatArray(np.ndarray, myObject):
 
         if (not i is None):
             assert (isinstance(i, (slice, tuple))), TypeError(
-                "i must be a slice, use np.s_[]")
+                "i must be a slice, use s_[]")
 
         if (self.ndim == 1):
             if (x is None):
-                x = StatArray(np.arange(self.size), 'Array Index')
+                x = StatArray(arange(self.size), 'Array Index')
             if (i is None):
-                i = np.s_[:self.size]
+                i = s_[:self.size]
             j = i
         else:
             if (x is None):
-                x = StatArray(np.arange(self.shape[axis]), 'Array Index')
+                x = StatArray(arange(self.shape[axis]), 'Array Index')
             if (i is None):
-                i = np.s_[:self.shape[0], :self.shape[1]]
+                i = s_[:self.shape[0], :self.shape[1]]
             j = i[axis]
 
         return cP.plot(x[j], self[i], **kwargs)
@@ -1334,11 +1341,11 @@ class StatArray(np.ndarray, myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
         kwargs['normalize'] = kwargs.get('normalize', True)
 
-        if np.size(ax) > 1:
-            assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(np.size(ax), self.n_posteriors))
+        if size(ax) > 1:
+            assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(size(ax), self.n_posteriors))
             if 'overlay' in kwargs:
                 assert len(kwargs['overlay']) == len(ax), ValueError("line in kwargs must have size {}".format(len(ax)))
-            overlay = kwargs.pop('overlay', np.asarray([None for i in range(len(ax))]))
+            overlay = kwargs.pop('overlay', asarray([None for i in range(len(ax))]))
 
             for i in range(self.n_posteriors):
                 plt.sca(ax[i])
@@ -1376,13 +1383,13 @@ class StatArray(np.ndarray, myObject):
 
         """
 
-        assert np.ndim(self) == 1, TypeError(
+        assert ndim(self) == 1, TypeError(
             'scatter only works with a 1D array')
 
         if (x is None):
-            x = StatArray(np.arange(self.size), 'Array Index')
+            x = StatArray(arange(self.size), 'Array Index')
         else:
-            assert np.size(x) == self.size, ValueError(
+            assert size(x) == self.size, ValueError(
                 'x must be size '+str(self.size))
 
         if (y is None):
@@ -1430,16 +1437,16 @@ class StatArray(np.ndarray, myObject):
             'stackedAreaPlot only works with 2D arrays')
         if (not i is None):
             assert (isinstance(i, (slice, tuple))), TypeError(
-                "i must be a slice, use np.s_[]")
+                "i must be a slice, use s_[]")
 
         if (x is None):
-            x = StatArray(np.arange(self.shape[axis]), 'Array Index')
+            x = StatArray(arange(self.shape[axis]), 'Array Index')
         else:
-            assert np.size(x) == self.shape[axis], ValueError(
+            assert size(x) == self.shape[axis], ValueError(
                 'x must be size '+str(self.shape[axis]))
 
         if (i is None):
-            i = np.s_[:self.shape[0], :self.shape[1]]
+            i = s_[:self.shape[0], :self.shape[1]]
         j = i[axis]
 
         if (axis == 0):
@@ -1548,8 +1555,8 @@ class StatArray(np.ndarray, myObject):
             shape = self.shape if shape is None else shape
             grp.create_dataset('data', shape, dtype=self.dtype, fillvalue=fillvalue)
         else:
-            if isinstance(add_axis, (int, np.int32, np.int64)):
-                shap = np.atleast_1d(add_axis)
+            if isinstance(add_axis, (int, int32, int64)):
+                shap = atleast_1d(add_axis).copy()
             elif isinstance(add_axis, tuple):
                 shap = add_axis
             else:
@@ -1558,7 +1565,7 @@ class StatArray(np.ndarray, myObject):
             if (self.size == 1):
                 grp.create_dataset('data', [*shap], dtype=self.dtype, fillvalue=fillvalue)
             else:
-                shape = shape = self.shape if shape is None else shape
+                shape = self.shape if shape is None else shape
                 grp.create_dataset('data', [*shap, *shape], dtype=self.dtype, fillvalue=fillvalue)
 
         if withPosterior:
@@ -1635,7 +1642,7 @@ class StatArray(np.ndarray, myObject):
 
     def write_posterior_hdf(self, grp, index=None):
         if self.hasPosterior:
-            if np.ndim(index) > 0:
+            if ndim(index) > 0:
                 index = index[0]
             if self.n_posteriors > 1:
                 for i in range(self.n_posteriors):
@@ -1667,15 +1674,15 @@ class StatArray(np.ndarray, myObject):
             grp = grp[name]
 
         if (index is None):
-            d = np.asarray(grp['data'])
+            d = asarray(grp['data'])
         else:
             if isinstance(index, slice):
-                d = np.asarray(grp['data'][index])
+                d = asarray(grp['data'][index])
             else:
-                d = np.asarray(grp['data'][np.s_[index]])
+                d = asarray(grp['data'][s_[index]])
 
-        if np.ndim(d) >= 2:
-            d = np.squeeze(d)
+        if ndim(d) >= 2:
+            d = squeeze(d)
 
         # Do not use self, return self here.  You tried it, it doesnt work.
         name = None
@@ -1709,12 +1716,11 @@ class StatArray(np.ndarray, myObject):
 
     def posteriors_from_hdf(self, grp, index):
         from ..statistics.Histogram import Histogram
-
         n_posteriors = 0
         if 'n_posteriors' in grp:
-            n_posteriors = np.asarray(grp['n_posteriors'])
+            n_posteriors = asarray(grp['n_posteriors'])
         if 'nPosteriors' in grp:
-            n_posteriors = np.asarray(grp['nPosteriors'])
+            n_posteriors = asarray(grp['nPosteriors'])
 
         if n_posteriors == 0:
             self.posterior = None
@@ -1723,7 +1729,7 @@ class StatArray(np.ndarray, myObject):
         posterior = None
         iTmp = index
         if index is not None:
-            if np.ndim(index) > 0:
+            if ndim(index) > 0:
                 iTmp = index[0]
 
         if n_posteriors == 1:
@@ -1812,7 +1818,7 @@ class StatArray(np.ndarray, myObject):
             BIC1 = model.bic(X)
             all_models.append(model)
 
-            percent_reduction = np.abs((BIC1 - BIC0)/BIC0)
+            percent_reduction = abs((BIC1 - BIC0)/BIC0)
 
             go = True
             if BIC1 < BIC0:
@@ -1828,13 +1834,13 @@ class StatArray(np.ndarray, myObject):
             k_ += 1
             go = go & (k_ <= k[1])
 
-        active = np.ones(best.n_components, dtype=bool)
+        active = ones(best.n_components, dtype=bool)
 
-        means = np.squeeze(best.means_)
+        means = squeeze(best.means_)
         try:
-            variances = np.squeeze(best.covariances_)
+            variances = squeeze(best.covariances_)
         except:
-            variances = np.squeeze(best.covariances)
+            variances = squeeze(best.covariances)
 
         if not mean_bounds is None:
             active = (mean_bounds[0] <= means) & (means <= mean_bounds[1])
@@ -1843,7 +1849,7 @@ class StatArray(np.ndarray, myObject):
             active = (variance_bounds[0] <= variances) & (
                 variances <= variance_bounds[1]) & active
 
-        return best, np.atleast_1d(active), all_models
+        return best, atleast_1d(active), all_models
 
     def gaussianMixture(self, clusterID, trainPercent=75.0, covType=['spherical'], plot=True):
         """ Use a Gaussian Mixing Model to classify the data.
@@ -1866,7 +1872,7 @@ class StatArray(np.ndarray, myObject):
         yTrain = clusterID[trainIndex]
         yTest = clusterID[testIndex]
 
-        nClusters = np.unique(clusterID).size
+        nClusters = unique(clusterID).size
 
         # Try GMMs using different types of covariances.
         models = dict((cov_type, GaussianMixture(n_components=nClusters,
@@ -1883,7 +1889,7 @@ class StatArray(np.ndarray, myObject):
         for index, (name, estimator) in enumerate(models.items()):
             # Since we have class labels for the training data, we can
             # initialize the GMM parameters in a supervised manner.
-            estimator.means_init = np.array(
+            estimator.means_init = array(
                 [xTrain[yTrain == i].mean(axis=0) for i in range(nClusters)])
 
             # Train the other parameters using the EM algorithm.
@@ -1894,7 +1900,7 @@ class StatArray(np.ndarray, myObject):
             #make_ellipses(estimator, h)
 
             #    tmp = x[z == n]
-            #    c=np.zeros(tmp.shape[0])+n
+            #    c=zeros(tmp.shape[0])+n
                 #cP.myscatter2D(tmp[:, 0], tmp[:, 1], s=0.8, c=c)
             #    plt.scatter(data[:, 0], data[:, 1], s=0.8, color=color)#,label=ris.target_names[n])
 
@@ -1908,14 +1914,14 @@ class StatArray(np.ndarray, myObject):
             if (plot):
                 cP.myscatter2D(self[:, 0], self[:, 1], c=z)
 
-            train_accuracy = np.mean(
+            train_accuracy = mean(
                 y_train_pred.ravel() == yTrain.ravel()) * 100
             if (plot):
                 plt.text(0.05, 0.9, 'Train accuracy: %.1f' %
                          train_accuracy, transform=h.transAxes)
 
             y_test_pred = estimator.predict(xTest)
-            test_accuracy = np.mean(y_test_pred.ravel() == yTest.ravel()) * 100
+            test_accuracy = mean(y_test_pred.ravel() == yTest.ravel()) * 100
             if (plot):
                 plt.text(0.05, 0.8, 'Test accuracy: %.1f' %
                          test_accuracy, transform=h.transAxes)

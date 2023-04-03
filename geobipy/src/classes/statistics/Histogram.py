@@ -1,5 +1,8 @@
 from copy import deepcopy
-import numpy as np
+from numpy import cumsum, hstack, int32, int64, interp, isnan, minimum
+from numpy import nanmin, nanmax, ndim, s_, size, sqrt, sum, unique, var
+from numpy import all as npall
+from numpy.random import rand
 import matplotlib as mpl
 
 from .mixPearson import mixPearson
@@ -30,7 +33,7 @@ class Histogram(Model):
     def pdf(self):
         out = Model(self.mesh)
         if self.values.max() > 0:
-            out.values = StatArray(self.values / np.sum(self.mesh.area * self.values), name='Density')
+            out.values = StatArray(self.values / sum(self.mesh.area * self.values), name='Density')
         else:
             out.values = StatArray(out.mesh.shape, name='Density')
         return out
@@ -39,7 +42,7 @@ class Histogram(Model):
     def pmf(self):
         out = Model(self.mesh)
         if self.values.max() > 0:
-            out.values = StatArray(self.values / np.sum(self.values), name='mass')
+            out.values = StatArray(self.values / sum(self.values), name='mass')
         else:
             out.values = StatArray(out.mesh.shape, name='mass')
         return out
@@ -47,10 +50,10 @@ class Histogram(Model):
     @Model.values.setter
     def values(self, values):
         if values is None:
-            self._values = StatArray(self.shape, name='Frequency', dtype=np.int32)
+            self._values = StatArray(self.shape, name='Frequency', dtype=int32)
             return
 
-        # assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+        # assert all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
         self._values = StatArray(values, name='Frequency')
 
     def __getitem__(self, slic):
@@ -63,18 +66,18 @@ class Histogram(Model):
         return self.mesh._animate(self.values, axis, filename, slic, **kwargs)
 
     def bar(self, **kwargs):
-        if np.all(self.values == 0):
+        if npall(self.values == 0):
             return
         return super().bar(**kwargs)
 
     def cdf(self, axis=None):
 
         if axis is None:
-            cdf = np.cumsum(self.values, axis=0)
+            cdf = cumsum(self.values, axis=0)
             for i in range(1, self.ndim):
-                cdf = np.cumsum(cdf, axis=i)
+                cdf = cumsum(cdf, axis=i)
         else:
-            cdf = np.cumsum(self.values, axis=axis)
+            cdf = cumsum(self.values, axis=axis)
         cdf = cdf / cdf.max()
 
         return Model(self.mesh, StatArray(cdf, name='Cumulative Density Function'))
@@ -128,7 +131,7 @@ class Histogram(Model):
         pdf = self.pdf
         logged, _ = utilities._log(pdf.values, log=log)
         entropy = pdf.values * logged
-        entropy[np.isnan(entropy)] = 0.0
+        entropy[isnan(entropy)] = 0.0
 
         entropy = -entropy.sum(axis=axis)
 
@@ -144,11 +147,11 @@ class Histogram(Model):
         return Model(mesh=self.mesh.remove_axis(axis), values=entropy)
 
     def estimate_std(self, n_samples, **kwargs):
-        return np.sqrt(self.estimate_variance(n_samples, **kwargs))
+        return sqrt(self.estimate_variance(n_samples, **kwargs))
 
     def estimate_variance(self, n_samples, **kwargs):
         X = self.sample(n_samples, **kwargs)
-        return np.var(X)
+        return var(X)
 
     def fit_mixture_to_pdf(self, mixture=mixPearson, axis=0, **kwargs):
         if self.ndim == 1:
@@ -165,7 +168,7 @@ class Histogram(Model):
         b = [x for x in (0, 1, 2) if x == axis]
 
         mixtures = [None] * ax.nCells * bx.nCells
-        if np.all(self.values == 0):
+        if npall(self.values == 0):
             return mixtures
 
         track = kwargs.pop('track', True)
@@ -175,11 +178,11 @@ class Histogram(Model):
             Bar = progressbar.ProgressBar()
             r = Bar(r)
 
-        slic = [np.s_[:] for i in range(3)]
+        slic = [s_[:] for i in range(3)]
         mixtures = []
         for i in r:
             j = list(self.mesh.unravelIndex(i))
-            j[axis] = np.s_[:]
+            j[axis] = s_[:]
             h = self[tuple(j)]
             mixtures.append(h.fit_mixture_to_pdf(mixture=mixture, **kwargs))
 
@@ -189,7 +192,7 @@ class Histogram(Model):
 
         ax = self.axis(axis)
         mixtures = [None] * ax.nCells
-        if np.all(self.values == 0):
+        if npall(self.values == 0):
             return mixtures
 
         track = kwargs.pop('track', True)
@@ -219,7 +222,7 @@ class Histogram(Model):
             Axis along which to find peaks.
 
         """
-        if np.all(self.values == 0):
+        if npall(self.values == 0):
             return None
 
         values = self.pdf.values
@@ -252,7 +255,7 @@ class Histogram(Model):
         mesh = self.mesh.remove_axis(axis)
 
         out = Histogram(mesh=mesh)
-        out.values = np.sum(self.counts, axis=axis)
+        out.values = sum(self.counts, axis=axis)
         return out
 
     def mean(self, axis=0):
@@ -362,7 +365,7 @@ class Histogram(Model):
         """
         percentile = self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis)
 
-        if np.size(percent) == 1:
+        if size(percent) == 1:
             return Model(self.mesh.remove_axis(axis), values=percentile)
         else:
             mesh = deepcopy(self.mesh)
@@ -420,7 +423,7 @@ class Histogram(Model):
         kwargs['linewidth'] = 1
         kwargs['alpha'] = 0.6
 
-        p = 0.5 * np.minimum(percent, 100.0-percent)
+        p = 0.5 * minimum(percent, 100.0-percent)
         kwargs['label'] = '{}%'.format(p)
         self.mesh.plot_line(low, axis=axis, **kwargs)
         kwargs['label'] = '{}%'.format(100.0 - p)
@@ -461,8 +464,8 @@ class Histogram(Model):
 
         """
         cdf = self.cdf()
-        values = np.random.rand(np.int64(n_samples))
-        values = np.interp(values, np.hstack([0, cdf.values]), self.mesh.edges_absolute)
+        values = rand(int64(n_samples))
+        values = interp(values, hstack([0, cdf.values]), self.mesh.edges_absolute)
         values, dum = utilities._log(values, log)
         return values
 
@@ -489,8 +492,8 @@ class Histogram(Model):
         """
 
         out = StatArray(self.credible_range(percent=percent, log=log, axis=axis), 'Transparency')
-        mn = np.nanmin(out)
-        mx = np.nanmax(out)
+        mn = nanmin(out)
+        mx = nanmax(out)
         t = mx - mn
         if t > 0.0:
             out = (out - mn) / t
@@ -502,12 +505,12 @@ class Histogram(Model):
     def update(self, *args, **kwargs):
         iBin = self.mesh.cellIndices(*args, clip=True, **kwargs)
 
-        axis = None if iBin.size == 1 else np.ndim(iBin)-1
+        axis = None if iBin.size == 1 else ndim(iBin)-1
 
-        unique, counts = np.unique(iBin, axis=axis, return_counts=True)
-        if np.ndim(unique) > 1:
-            unique = tuple(unique)
-        self.values[unique] += counts
+        uniq, counts = unique(iBin, axis=axis, return_counts=True)
+        if ndim(uniq) > 1:
+            uniq = tuple(uniq)
+        self.values[uniq] += counts
 
     def update_with_line(self, x, y):
         j = self.mesh.line_indices(x, y)

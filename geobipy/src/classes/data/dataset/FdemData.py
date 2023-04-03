@@ -2,6 +2,13 @@
 Module describing an EMData Set where channels are associated with an xyz co-ordinate
 """
 from copy import deepcopy
+
+from numpy import any, arange, asarray, atleast_1d, float64
+from numpy import hstack, int32, isnan, nan, nanmin
+from numpy import size, sqrt, squeeze, sum, unique
+from numpy import zeros
+from numpy import all as npall
+
 from pandas import read_csv
 from .Data import Data
 from ..datapoint.FdemDataPoint import FdemDataPoint
@@ -10,7 +17,6 @@ from ....base import plotting as cP
 from ....classes.core import StatArray
 from ...system.FdemSystem import FdemSystem
 from ...system.CircularLoop import CircularLoop
-import numpy as np
 from ....base import fileIO as fIO
 #from ....base import Error as Err
 from ....base import MPI as myMPI
@@ -88,7 +94,7 @@ class FdemData(Data):
 
     @property
     def nFrequencies(self):
-        return np.atleast_1d(self.system[0].nFrequencies)
+        return atleast_1d(self.system[0].nFrequencies)
 
     @property
     def channels_per_system(self):
@@ -96,7 +102,7 @@ class FdemData(Data):
 
     @property
     def nSystems(self):
-        return np.size(self.channels_per_system)
+        return size(self.channels_per_system)
 
     @property
     def magnetic(self):
@@ -108,8 +114,8 @@ class FdemData(Data):
             self._magnetic = StatArray.StatArray(self.nPoints, "Magnetic", "nT")
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("magnetic must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("magnetic must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._magnetic = deepcopy(values)
             else:
@@ -127,8 +133,8 @@ class FdemData(Data):
             self._powerline = StatArray.StatArray(self.nPoints, "Powerline")
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("powerline must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("powerline must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._powerline = deepcopy(values)
             else:
@@ -136,11 +142,11 @@ class FdemData(Data):
 
     @Data.std.getter
     def std(self):
-        if np.size(self._std, 0) == 0:
+        if size(self._std, 0) == 0:
             self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
-            self._std[:, :] = np.sqrt((self.relative_error * self.data)**2 + (self.additive_error**2.0))
+            self._std[:, :] = sqrt((self.relative_error * self.data)**2 + (self.additive_error**2.0))
 
         return self._std
 
@@ -188,7 +194,7 @@ class FdemData(Data):
             self._channelNames = values
 
     def check(self):
-        if (np.nanmin(self.data) <= 0.0):
+        if (nanmin(self.data) <= 0.0):
             print("Warning: Your data contains values that are <= 0.0")
 
 
@@ -244,15 +250,15 @@ class FdemData(Data):
 
         """
 
-        return np.sum(~np.isnan(self._data, 1))
+        return sum(~isnan(self._data, 1))
 
 
     def append(self, other):
 
         super().append(other)
 
-        self.powerline = np.hstack([self.powerline, other.powerline])
-        self.magnetic = np.hstack([self.magnetic, other.magnetic])
+        self.powerline = hstack([self.powerline, other.powerline])
+        self.magnetic = hstack([self.magnetic, other.magnetic])
 
 
     # def getChannel(self, channel):
@@ -333,7 +339,7 @@ class FdemData(Data):
     #         A data class containing only the data in the line
 
     #     """
-    #     i = np.where(self.line == line)[0]
+    #     i = where(self.line == line)[0]
     #     assert (i.size > 0), 'Could not get line with number {}'.format(line)
     #     return self[i]
 
@@ -346,7 +352,7 @@ class FdemData(Data):
         """
 
         if not isinstance(i, slice):
-            i = np.unique(i)
+            i = unique(i)
 
         return FdemData(self.system,
                        x=self.x[i],
@@ -545,7 +551,7 @@ class FdemData(Data):
             df = read_csv(dataFilename, index_col=False, usecols=channels, skipinitialspace = True)
         except:
             df = read_csv(dataFilename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
-        df = df.replace('NaN',np.nan)
+        df = df.replace('NaN',nan)
 
         # Assign columns to variables
         self.lineNumber = df[iC[0]].values
@@ -629,6 +635,7 @@ class FdemData(Data):
         magnetic = None
 
         nPoints, location_channels = Data._csv_channels(data_filename)
+        print(nPoints, location_channels)
 
         # Get the column headers of the data file
         channels = fIO.get_column_name(data_filename)
@@ -640,6 +647,10 @@ class FdemData(Data):
         quadrature = []
         in_err = []
         quad_err = []
+
+        import numpy as np
+
+        print(inPhase)
         for j, channel in enumerate(channels):
             cTmp = channel.lower()
             if cTmp in ['powerline']:
@@ -648,18 +659,18 @@ class FdemData(Data):
             elif cTmp in ['magnetic']:
                 magnetic = 'magnetic'
 
-            elif any(label in cTmp for label in ('i_', 'in_phase')):
+            elif any([label in cTmp for label in ('i_', 'in_phase')]):
+
                 if 'err' in cTmp:
                     in_err.append(channel)
                 else:
                     inPhase.append(channel)
 
-            elif any(label in cTmp for label in ('q_', 'quad')):
+            elif any([label in cTmp for label in ('q_', 'quad')]):
                 if 'err' in cTmp:
                     quad_err.append(channel)
                 else:
                     quadrature.append(channel)
-
 
         data_channels = inPhase + quadrature
 
@@ -712,7 +723,7 @@ class FdemData(Data):
     #     except:
     #         df = read_csv(data_filename[0], index_col=False, usecols=self._iC[0][:2], delim_whitespace=True, skipinitialspace = True)
 
-    #     df = df.replace('NaN',np.nan)
+    #     df = df.replace('NaN',nan)
     #     return df[self._iC[0][0]].values, df[self._iC[0][1]].values
 
     def _read_record(self, record=None, mpi_enabled=False):
@@ -732,7 +743,7 @@ class FdemData(Data):
                         df = self._file.get_chunk()
                         i += 1
 
-            df = df.replace('NaN',np.nan)
+            df = df.replace('NaN',nan)
             endOfFile = False
         except:
             self._file.close()
@@ -741,10 +752,12 @@ class FdemData(Data):
         if endOfFile:
             return None
 
-        D = np.squeeze(df[self._iData].values)
+        print(self._iData)
+
+        D = squeeze(df[self._iData].values)
 
         if len(self._iStd) > 0:
-            S = np.squeeze(df[self._iStd].values)
+            S = squeeze(df[self._iStd].values)
         else:
             S = 0.1 * D
 
@@ -789,7 +802,7 @@ class FdemData(Data):
         if not iM is None:
             tmp.append(iM)
 
-        indicesForFile = np.hstack(tmp)
+        indicesForFile = hstack(tmp)
 
 
         # Initialize the EMData Class
@@ -836,11 +849,11 @@ class FdemData(Data):
                 if "number of channels" in line:
                     line = f.readline().strip('/')
                     nHeaderLines += 1
-                    nFrequencies = np.int32(line)
+                    nFrequencies = int32(line)
                 if "frequencies" in line:
                     line = f.readline().strip('/').split()
                     nHeaderLines += 1
-                    frequencies = np.asarray([np.float64(x) for x in line])
+                    frequencies = asarray([float64(x) for x in line])
                 if "coil configurations" in line:
                     pairs = f.readline().strip('/').split(')  (')
                     nHeaderLines += 1
@@ -861,7 +874,7 @@ class FdemData(Data):
                 if "coil separations" in line:
                     line = f.readline().strip('/').split()
                     nHeaderLines += 1
-                    loopSeparation = np.asarray([np.float64(x) for x in line])
+                    loopSeparation = asarray([float64(x) for x in line])
                     go = False
                     channels = f.readline().strip('/')
                     nHeaderLines += 1
@@ -872,7 +885,7 @@ class FdemData(Data):
 
         _powerline = None
         _magnetic = None
-        _columnIndex = np.zeros(6, dtype=np.int32)
+        _columnIndex = zeros(6, dtype=int32)
         for j, channel in enumerate(channels.split()):
             channel = channel.lower()
             if(channel in ['line_no']):
@@ -888,8 +901,8 @@ class FdemData(Data):
             elif(channel in ['elevation']):
                 _columnIndex[5] = j
             elif(channel == 'imag1'):
-                tmp = np.arange(j, j + 2 * nFrequencies)
-                _dataIndices = np.hstack((tmp[1::2], tmp[::2]))
+                tmp = arange(j, j + 2 * nFrequencies)
+                _dataIndices = hstack((tmp[1::2], tmp[::2]))
             elif channel == 'powerline':
                 _powerline = j
             elif channel == 'magnetic':
@@ -1001,8 +1014,8 @@ class FdemData(Data):
         >>>     D = FdemData() # Must instantiate an empty object to Bcast
 
         >>> # In this example, assume there are 10 data and 4 cores
-        >>> start = np.asarray([0, 2, 4, 6])
-        >>> chunks = np.asarray([2, 2, 2, 4])
+        >>> start = asarray([0, 2, 4, 6])
+        >>> chunks = asarray([2, 2, 2, 4])
 
         >>> D2 = D.Scatterv(start, chunks, world)
 
@@ -1050,19 +1063,19 @@ class FdemData(Data):
         #     if not self.magnetic is None:
         #         header += 'Magnetic'
 
-        #     d = np.empty(2*sys.nFrequencies)
+        #     d = empty(2*sys.nFrequencies)
 
         #     if std:
         #         for x in sys.frequencies:
         #             header += "I_{0}_Err Q_{0}_Err ".format(x)
-        #         s = np.empty(2*sys.nFrequencies)
+        #         s = empty(2*sys.nFrequencies)
 
         #     with open(fileNames[i], 'w') as f:
         #         f.write(header+"\n")
-        #         with np.printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
+        #         with printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
         #             for j in range(self.nPoints):
 
-        #                 x = np.asarray([self.lineNumber[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
+        #                 x = asarray([self.lineNumber[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
 
         #                 if predictedData:
         #                     d[0::2] = self.predictedData[j, :sys.nFrequencies]
@@ -1074,14 +1087,14 @@ class FdemData(Data):
         #                 if std:
         #                     s[0::2] = self.std[j, :sys.nFrequencies]
         #                     s[1::2] = self.std[j, sys.nFrequencies:]
-        #                     x = np.hstack([x, d, s])
+        #                     x = hstack([x, d, s])
         #                 else:
-        #                     x = np.hstack([x, d])
+        #                     x = hstack([x, d])
 
         #                 if not self.powerline is None:
-        #                     x = np.hstack([x, self.powerline[j]])
+        #                     x = hstack([x, self.powerline[j]])
         #                 if not self.magnetic is None:
-        #                     x = np.hstack([x, self.magnetic[j]])
+        #                     x = hstack([x, self.magnetic[j]])
 
         #                 y = ""
         #                 for a in x:

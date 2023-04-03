@@ -3,7 +3,7 @@ Module for forward modeling Frequency domain electro magnetic data.
 Leon Foks
 June 2015
 """
-import numpy as np
+from numpy import complex128, float64, zeros
 from .fdem1d_numba import (nbFdem1dfwd, nbFdem1dsen)
 # from ...ipforward1d_fortran import ipforward1d
 
@@ -31,24 +31,24 @@ def fdem1dfwd(system, model1d, altitude):
     transmitter_height = altitude + system.transmitter.z
     receiver_height = -transmitter_height + system.receiver.z
     scl = system.transmitter.moment * system.receiver.moment
-    x_separation = system.loop_offsets[0, :]    
+    x_separation = system.loop_offsets[0, :]
 
-    kappa = np.zeros(model1d.values.size, dtype=np.float64)
-    perm = np.zeros(model1d.values.size, dtype=np.float64)
-    
-    return nbFdem1dfwd(system.tensor_id, 
-                       system.frequencies, 
-                       transmitter_height, 
-                       receiver_height, 
-                       system.transmitter.moment, 
-                       x_separation, 
-                       system.loop_separation, 
-                       system.w0, system.lamda0, system.lamda02, 
+    kappa = zeros(model1d.values.size, dtype=float64)
+    perm = zeros(model1d.values.size, dtype=float64)
+
+    return nbFdem1dfwd(system.tensor_id,
+                       system.frequencies,
+                       transmitter_height,
+                       receiver_height,
+                       system.transmitter.moment,
+                       x_separation,
+                       system.loop_separation,
+                       system.w0, system.lamda0, system.lamda02,
                        system.w1, system.lamda1, system.lamda12,
-                       scl, 
-                       model1d.values, 
-                       kappa, 
-                       perm, 
+                       scl,
+                       model1d.values,
+                       kappa,
+                       perm,
                        model1d.mesh.widths)
 
 
@@ -64,11 +64,11 @@ def fdem1dfwd(system, model1d, altitude):
 #     # Create the indices of the coil orientations for the frequencies.
 #     tid = system.getTensorID()
 
-#     tHeight = np.zeros(system.nFrequencies)
-#     rHeight = np.zeros(system.nFrequencies)
-#     tMom = np.zeros(system.nFrequencies)
-#     rMom = np.zeros(system.nFrequencies)
-#     rx = np.zeros(system.nFrequencies)
+#     tHeight = zeros(system.nFrequencies)
+#     rHeight = zeros(system.nFrequencies)
+#     tMom = zeros(system.nFrequencies)
+#     rMom = zeros(system.nFrequencies)
+#     rx = zeros(system.nFrequencies)
 #     for i in range(system.nFrequencies):
 #         tHeight[i] = -z0 + system.T[i].z
 #         rHeight[i] = z0 + system.R[i].z
@@ -77,7 +77,7 @@ def fdem1dfwd(system, model1d, altitude):
 #         rx[i] = system.R[i].x
 #     scl = tMom * rMom
 
-#     prd = np.zeros(system.nFrequencies, dtype=np.complex128)
+#     prd = zeros(system.nFrequencies, dtype=complex128)
 
 #     ipforward1d.forward1d(tid, system.frequencies, tHeight, rHeight, tMom, rx, system.loopSeparation, scl, model1d.par, model1d.thk, prd, system.nFrequencies,  model1d.nCells[0])
 
@@ -108,23 +108,22 @@ def fdem1dsen(system, model1d, altitude):
     transmitter_height = altitude + system.transmitter.z
     receiver_height = -transmitter_height + system.receiver.z
     scl = system.transmitter.moment * system.receiver.moment
-    x_separation = system.loop_offsets[0, :]    
+    x_separation = system.loop_offsets[0, :]
 
-    kappa = np.zeros(model1d.values.size, dtype=np.float64)
-    perm = np.zeros(model1d.values.size, dtype=np.float64)
+    kappa = zeros(model1d.values.size, dtype=float64)
+    perm = zeros(model1d.values.size, dtype=float64)
 
-    return nbFdem1dsen(system.tensor_id, 
+    return nbFdem1dsen(system.tensor_id,
                        system.frequencies,
-                       transmitter_height, 
-                       receiver_height, 
-                       system.transmitter.moment, 
-                       x_separation, 
-                       system.loop_separation, 
-                       system.w0, system.lamda0, system.lamda02, 
+                       transmitter_height,
+                       receiver_height,
+                       system.transmitter.moment,
+                       x_separation,
+                       system.loop_separation,
+                       system.w0, system.lamda0, system.lamda02,
                        system.w1, system.lamda1, system.lamda12,
-                       scl, 
-                       model1d.values, 
-                       kappa, 
-                       perm, 
+                       scl,
+                       model1d.values,
+                       kappa,
+                       perm,
                        model1d.mesh.widths)
-

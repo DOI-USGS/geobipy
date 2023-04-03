@@ -1,6 +1,8 @@
 from copy import deepcopy
+from numpy import arange, argpartition, argsort, argwhere, asarray, column_stack, cumsum, diff, empty
+from numpy import float64, hstack, inf, int32, int64, isnan, mean, meshgrid, nan, nanmin, nanmax
+from numpy import ravel_multi_index, size, sqrt, squeeze, unique, vstack, zeros
 from ...classes.core.myObject import myObject
-import numpy as np
 from pandas import DataFrame, read_csv
 from ...classes.core import StatArray
 from ...base import fileIO as fIO
@@ -89,9 +91,9 @@ class PointCloud3D(myObject):
             The potentially smaller point cloud
 
         """
-        i = np.unique(i)
+        i = unique(i)
 
-        if np.size(i) == 1:
+        if size(i) == 1:
             cls = self.single
         else:
             cls = type(self)
@@ -118,13 +120,13 @@ class PointCloud3D(myObject):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("x must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("x must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._x = deepcopy(values)
                 return
 
-        self._x = StatArray.StatArray(values, "Easting", "m", dtype=np.float64)
+        self._x = StatArray.StatArray(values, "Easting", "m", dtype=float64)
 
     @property
     def y(self):
@@ -136,13 +138,13 @@ class PointCloud3D(myObject):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("y must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("y must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._y = deepcopy(values)
                 return
 
-        self._y = StatArray.StatArray(values, "Northing", "m", dtype=np.float64)
+        self._y = StatArray.StatArray(values, "Northing", "m", dtype=float64)
 
     @property
     def z(self):
@@ -154,13 +156,13 @@ class PointCloud3D(myObject):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("z must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("z must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._z = deepcopy(values)
                 return
 
-        self._z = StatArray.StatArray(values, "Height", "m", dtype=np.float64)
+        self._z = StatArray.StatArray(values, "Height", "m", dtype=float64)
 
     @property
     def elevation(self):
@@ -172,13 +174,13 @@ class PointCloud3D(myObject):
             values = self.nPoints
         else:
             if self.nPoints == 0:
-                self.nPoints = np.size(values)
-            assert np.size(values) == self.nPoints, ValueError("elevation must have size {}".format(self.nPoints))
+                self.nPoints = size(values)
+            assert size(values) == self.nPoints, ValueError("elevation must have size {}".format(self.nPoints))
             if (isinstance(values, StatArray.StatArray)):
                 self._elevation = deepcopy(values)
                 return
 
-        self._elevation = StatArray.StatArray(values, "Elevation", "m", dtype=np.float64)
+        self._elevation = StatArray.StatArray(values, "Elevation", "m", dtype=float64)
 
     @property
     def nPoints(self):
@@ -187,7 +189,7 @@ class PointCloud3D(myObject):
 
     @nPoints.setter
     def nPoints(self, value):
-        assert isinstance(value, (int, np.int32, np.int64)), TypeError("nPoints must be an integer")
+        assert isinstance(value, (int, int32, int64)), TypeError("nPoints must be an integer")
         self._nPoints = value
 
     @property
@@ -226,16 +228,16 @@ class PointCloud3D(myObject):
         """
 
         self.nPoints = self.nPoints + other.nPoints
-        self.x = np.hstack([self.x, other.x])
-        self.y = np.hstack([self.y, other.y])
-        self.z = np.hstack([self.z, other.z])
-        self.elevation = np.hstack([self.elevation, other.elevation])
+        self.x = hstack([self.x, other.x])
+        self.y = hstack([self.y, other.y])
+        self.z = hstack([self.z, other.z])
+        self.elevation = hstack([self.elevation, other.elevation])
 
 
     @property
     def bounds(self):
         """Gets the bounding box of the data set """
-        return np.asarray(self.x.bounds, self.y.bounds)
+        return asarray(self.x.bounds, self.y.bounds)
 
     def block_indices(self, dx=None, dy=None, x_grid=None, y_grid=None):
         """Returns the indices of the points lying in blocks across the domain..
@@ -264,31 +266,31 @@ class PointCloud3D(myObject):
         ay = RectilinearMesh1D(edges=y_grid)
         iy = ay.cellIndex(self.y)
 
-        return np.ravel_multi_index([ix, iy], (ax.nCells.item(), ay.nCells.item()))
+        return ravel_multi_index([ix, iy], (ax.nCells.item(), ay.nCells.item()))
 
 
     def block_mean(self, dx, dy, values=None):
 
         i_cell = self.block_indices(dx, dy)
 
-        isort = np.argsort(i_cell)
-        n_new = np.unique(i_cell).size
-        cuts = np.hstack([0, np.squeeze(np.argwhere(np.diff(i_cell[isort]) > 0)), i_cell.size])
+        isort = argsort(i_cell)
+        n_new = unique(i_cell).size
+        cuts = hstack([0, squeeze(argwhere(diff(i_cell[isort]) > 0)), i_cell.size])
 
         if values is None:
             values = self.z
 
-        x_new = np.empty(n_new)
-        y_new = np.empty(n_new)
-        z_new = np.empty(n_new)
-        e_new = np.empty(n_new)
+        x_new = empty(n_new)
+        y_new = empty(n_new)
+        z_new = empty(n_new)
+        e_new = empty(n_new)
 
         for i in range(cuts.size-1):
             i_cut = isort[cuts[i]:cuts[i+1]]
-            x_new[i] = np.mean(self.x[i_cut])
-            y_new[i] = np.mean(self.y[i_cut])
-            z_new[i] = np.mean(self.z[i_cut])
-            e_new[i] = np.mean(self.elevation[i_cut])
+            x_new[i] = mean(self.x[i_cut])
+            y_new[i] = mean(self.y[i_cut])
+            z_new[i] = mean(self.z[i_cut])
+            e_new[i] = mean(self.elevation[i_cut])
 
         return PointCloud3D(x=x_new, y=y_new, z=z_new, elevation=e_new)
 
@@ -312,23 +314,23 @@ class PointCloud3D(myObject):
         """
         i_cell = self.block_indices(dx, dy, x_grid, y_grid)
 
-        isort = np.argsort(i_cell)
-        n_new = np.unique(i_cell).size
+        isort = argsort(i_cell)
+        n_new = unique(i_cell).size
 
-        cuts = np.squeeze(np.argwhere(np.diff(i_cell[isort]) > 0))
+        cuts = squeeze(argwhere(diff(i_cell[isort]) > 0))
         if cuts[0] != 0:
-            cuts = np.hstack([0, cuts])
+            cuts = hstack([0, cuts])
         if cuts[-1] != i_cell.size:
-            cuts = np.hstack([cuts, i_cell.size])
+            cuts = hstack([cuts, i_cell.size])
 
         if values is None:
             values = self.z
 
-        i_new = np.empty(cuts.size-1, dtype=np.int64)
+        i_new = empty(cuts.size-1, dtype=int64)
         for i in range(cuts.size-1):
             i_cut = isort[cuts[i]:cuts[i+1]]
             tmp = values[i_cut]
-            i_new[i] = i_cut[np.argpartition(tmp, tmp.size // 2)[tmp.size // 2]]
+            i_new[i] = i_cut[argpartition(tmp, tmp.size // 2)[tmp.size // 2]]
 
         return i_new
 
@@ -379,7 +381,7 @@ class PointCloud3D(myObject):
         """
         assert axis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("axis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
         if axis == 'index':
-            return StatArray.StatArray(np.arange(self.x.size), name="Index")
+            return StatArray.StatArray(arange(self.x.size), name="Index")
         elif axis == 'x':
             return self.x
         elif axis == 'y':
@@ -387,17 +389,17 @@ class PointCloud3D(myObject):
         elif axis == 'z':
             return self.z
         elif axis == 'r2d':
-            r = np.diff(self.x)**2.0
-            r += np.diff(self.y)**2.0
-            distance = StatArray.StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
-            distance[1:] = np.cumsum(np.sqrt(r))
+            r = diff(self.x)**2.0
+            r += diff(self.y)**2.0
+            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+            distance[1:] = cumsum(sqrt(r))
             return distance
         elif axis == 'r3d':
-            r = np.diff(self.x)**2.0
-            r += np.diff(self.y)**2.0
-            r += np.diff(self.z)**2.0
-            distance = StatArray.StatArray(np.zeros(self.x.size), 'Distance', self.x.units)
-            distance[1:] = np.cumsum(np.sqrt(r))
+            r = diff(self.x)**2.0
+            r += diff(self.y)**2.0
+            r += diff(self.z)**2.0
+            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+            distance[1:] = cumsum(sqrt(r))
             return distance
 
 
@@ -453,9 +455,9 @@ class PointCloud3D(myObject):
         extrapolate = kwargs.pop('extrapolate', None)
         # Get the bounding box
 
-        values[values == np.inf] = np.nan
-        mn = np.nanmin(values)
-        mx = np.nanmax(values)
+        values[values == inf] = nan
+        mn = nanmin(values)
+        mx = nanmax(values)
 
         values -= mn
         if (mx - mn) != 0.0:
@@ -466,11 +468,11 @@ class PointCloud3D(myObject):
             xTmp = self.x[i]
             yTmp = self.y[i]
             vTmp = values[i]
-            XY = np.column_stack((xTmp, yTmp))
+            XY = column_stack((xTmp, yTmp))
             if (mask or extrapolate):
                 kdtree = cKDTree(XY)
         else:
-            XY = np.column_stack((self.x, self.y))
+            XY = column_stack((self.x, self.y))
             vTmp = values
             if (mask or extrapolate):
                 self.setKdTree(nDims = 2)
@@ -479,7 +481,7 @@ class PointCloud3D(myObject):
         # Create the CT function for interpolation
         f = CloughTocher2DInterpolator(XY, vTmp)
 
-        query = np.hstack([mesh.x_centres.flatten(), mesh.y_centres.flatten()])
+        query = hstack([mesh.x_centres.flatten(), mesh.y_centres.flatten()])
 
         # Interpolate to the grid
         vals = f(query).reshape(*mesh.shape)
@@ -495,19 +497,19 @@ class PointCloud3D(myObject):
 
         # Use distance masking
         if mask:
-            g = np.meshgrid(mesh.x.centres, mesh.y.centres)
+            g = meshgrid(mesh.x.centres, mesh.y.centres)
             xi = _ndim_coords_from_arrays(tuple(g), ndim=XY.shape[1])
             dists, indexes = kdt.query(xi)
-            vals[dists > mask] = np.nan
+            vals[dists > mask] = nan
 
         # Truncate values to the observed values
         if (clip):
-            minV = np.nanmin(values)
-            maxV = np.nanmax(values)
-            mask = ~np.isnan(vals)
+            minV = nanmin(values)
+            maxV = nanmax(values)
+            mask = ~isnan(vals)
             mask[mask] &= vals[mask] < minV
             vals[mask] = minV
-            mask = ~np.isnan(vals)
+            mask = ~isnan(vals)
             mask[mask] &= vals[mask] > maxV
             vals[mask] = maxV
 
@@ -516,9 +518,9 @@ class PointCloud3D(myObject):
             extrapolate = extrapolate.lower()
             if (extrapolate == 'nearest'):
                 # Get the indices of the nans
-                iNan = np.argwhere(np.isnan(vals))
+                iNan = argwhere(isnan(vals))
                 # Create Query locations from the nans
-                xi =  np.zeros([iNan.shape[0],2])
+                xi =  zeros([iNan.shape[0],2])
                 xi[:, 0] = x[iNan[:, 1]]
                 xi[:, 1] = y[iNan[:, 0]]
                 # Get the nearest neighbours
@@ -564,9 +566,9 @@ class PointCloud3D(myObject):
             y = y[i]
             values = values[i]
 
-        values[values == np.inf] = np.nan
-        mn = np.nanmin(values)
-        mx = np.nanmax(values)
+        values[values == inf] = nan
+        mn = nanmin(values)
+        mx = nanmax(values)
 
         values -= mn
         if (mx - mn) != 0.0:
@@ -576,8 +578,8 @@ class PointCloud3D(myObject):
         dy = mesh.x.widths[1]
 
         if clip:
-            clip_min = kwargs.pop('clip_min', np.nanmin(values))
-            clip_max = kwargs.pop('clip_max', np.nanmax(values))
+            clip_min = kwargs.pop('clip_min', nanmin(values))
+            clip_max = kwargs.pop('clip_max', nanmax(values))
             xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=mesh.centres_bounds, N=iterations, T=tension, C=accuracy, Ll=[clip_min], Lu=[clip_max])
         else:
             xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=mesh.centres_bounds, N=iterations, T=tension, C=accuracy)
@@ -590,10 +592,10 @@ class PointCloud3D(myObject):
 
         # Use distance masking
         if mask:
-            kdt = cKDTree(np.column_stack((x, y)))
-            xi = _ndim_coords_from_arrays(tuple(np.meshgrid(mesh.x.centres, mesh.y.centres)), ndim=2)
+            kdt = cKDTree(column_stack((x, y)))
+            xi = _ndim_coords_from_arrays(tuple(meshgrid(mesh.x.centres, mesh.y.centres)), ndim=2)
             dists, indexes = kdt.query(xi)
-            vals[dists > mask] = np.nan
+            vals[dists > mask] = nan
 
         vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
 
@@ -613,7 +615,7 @@ class PointCloud3D(myObject):
 
         return values.pcolor(**kwargs)
 
-    def nearest(self, x, k=1, eps=0, p=2, radius=np.inf):
+    def nearest(self, x, k=1, eps=0, p=2, radius=inf):
         """Obtain the k nearest neighbours
 
         See Also
@@ -661,7 +663,7 @@ class PointCloud3D(myObject):
     def pyvista_mesh(self):
         import pyvista as pv
 
-        out = pv.PolyData(np.vstack([self.x, self.y, self.z]).T)
+        out = pv.PolyData(vstack([self.x, self.y, self.z]).T)
         out['height'] = self.z
         out["elevation"] = self.elevation
 
@@ -697,7 +699,7 @@ class PointCloud3D(myObject):
         if isinstance(filename, str):
             filename = (filename)
         nSystems = len(filename)
-        nPoints = np.empty(nSystems, dtype=np.int64)
+        nPoints = empty(nSystems, dtype=int64)
         for i in range(nSystems):
             nPoints[i] = fIO.getNlines(filename[i], 1)
         for i in range(1, nSystems):
@@ -722,15 +724,15 @@ class PointCloud3D(myObject):
         # if isinstance(filename, str):
         #     filename = [filename]
 
-        # nPoints = np.asarray([fIO.getNlines(df, 1) for df in filename])
+        # nPoints = asarray([fIO.getNlines(df, 1) for df in filename])
 
         # if nPoints.size > 1:
-        #     assert np.all(np.diff(nPoints) == 0), Exception('Number of data points must match in all data files')
+        #     assert all(diff(nPoints) == 0), Exception('Number of data points must match in all data files')
         # return nPoints[0]
         nPoints = fIO.getNlines(filename, 1)
 
         # if nPoints.size > 1:
-            # assert np.all(np.diff(nPoints) == 0), Exception('Number of data points must match in all data files')
+            # assert all(diff(nPoints) == 0), Exception('Number of data points must match in all data files')
         return nPoints
 
     @staticmethod
@@ -779,8 +781,8 @@ class PointCloud3D(myObject):
             elif(cTmp in e_names):
                 labels.append(channel)
 
-        assert not any([x is None for x in labels[:3]]), Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
-        assert n == 3 and len(labels) <= 4, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(self.fileInformation()))
+        assert not any([x is None for x in labels[:3]]), Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(PointCloud3D.fileInformation()))
+        assert n == 3 and len(labels) <= 4, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(PointCloud3D.fileInformation()))
         return PointCloud3D._csv_n_points(filename), labels
 
     @classmethod
@@ -799,13 +801,13 @@ class PointCloud3D(myObject):
             df = read_csv(filename, index_col=False, usecols=channels, skipinitialspace = True)
         except:
             df = read_csv(filename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
-        df = df.replace('NaN',np.nan)
+        df = df.replace('NaN',nan)
 
         self = cls(**kwargs)
         self.x = df[channels[0]].values
         self.y = df[channels[1]].values
         self.z = df[channels[2]].values
-        if np.size(channels) > 3:
+        if size(channels) > 3:
             self.elevation = df[channels[3]].values
 
         return self
@@ -863,9 +865,9 @@ class PointCloud3D(myObject):
         """
         self.kdtree = None
         if (nDims == 2):
-            tmp = np.column_stack((self.x, self.y))
+            tmp = column_stack((self.x, self.y))
         elif (nDims == 3):
-            tmp = np.column_stack((self.x, self.y, self.z))
+            tmp = column_stack((self.x, self.y, self.z))
         self.kdtree = cKDTree(tmp)
 
 
@@ -885,12 +887,12 @@ class PointCloud3D(myObject):
 #        self.getBounds()
 #        # Get the discretization
 #        if (dx is None):
-#            tmp = np.min((self.bounds[1]-self.bounds[0], self.bounds[3]-self.bounds[2]))
+#            tmp = min((self.bounds[1]-self.bounds[0], self.bounds[3]-self.bounds[2]))
 #            dx = 0.01 * tmp
 #        assert dx > 0.0, ValueError("Interpolation cell size must be positive!")
 #
 #        if (nDims == 2):
-#            z = np.ones(self.N)
+#            z = ones(self.N)
 #        elif (nDims == 3):
 #            z = self.z
 #
@@ -910,9 +912,9 @@ class PointCloud3D(myObject):
 
        """
 
-        nodes = np.vstack([self.x, self.y, self.z]).T
+        nodes = vstack([self.x, self.y, self.z]).T
 
-        vtk = VtkData(UnstructuredGrid(nodes, vertex=np.arange(self._nPoints)))
+        vtk = VtkData(UnstructuredGrid(nodes, vertex=arange(self._nPoints)))
         vtk.point_data.append(Scalars(self.z, self.z.getNameUnits()))
         return vtk
 
@@ -948,7 +950,7 @@ class PointCloud3D(myObject):
             if isinstance(pointData, list):
                 for p in pointData:
                     assert isinstance(p, StatArray.StatArray), TypeError("pointData entries must be a geobipy.StatArray")
-                    assert np.size(p) == self.nPoints, ValueError("pointData entries must have size {}".format(self.nPoints))
+                    assert size(p) == self.nPoints, ValueError("pointData entries must have size {}".format(self.nPoints))
                     assert p.hasLabels(), ValueError("StatArray needs a name")
                     vtk.point_data.append(Scalars(p, p.getNameUnits()))
             else:

@@ -3,6 +3,8 @@ Parent handler for user defined parameters. Checks that the input user parameter
 This provides a bit more robust checking when the user is new to the codes, and must modify an input parameter class file.
 """
 #from ..base import Error as Err
+from numpy import float64, asarray
+
 from ..classes.core.myObject import myObject
 from copy import deepcopy
 from ..classes.core import StatArray
@@ -39,12 +41,12 @@ class user_parameters(dict):
 
         self._data_filename = [value] if isinstance(value, str) else value
 
-        self['multiplier'] = kwargs.get('multiplier', np.float64(1.0))
+        self['multiplier'] = kwargs.get('multiplier', float64(1.0))
         if self['multiplier'] is None:
-            self['multiplier'] = np.float64(1.0)
+            self['multiplier'] = float64(1.0)
 
-        self['stochastic_newton'] = ~kwargs.get('ignore_likelihood', False)
-        self['factor'] = kwargs.get('factor', np.float64(10.0))
+        self['stochastic_newton'] = not kwargs.get('ignore_likelihood', False)
+        self['factor'] = kwargs.get('factor', float64(10.0))
         if self['factor'] is None:
             del self['factor']
 
@@ -85,6 +87,6 @@ class user_parameters(dict):
         for key, value in options.items():
             if isinstance(value, list):
                 if not isinstance(value[0], str):
-                    options[key] = np.asarray(value)
+                    options[key] = asarray(value)
 
         return cls(**options)

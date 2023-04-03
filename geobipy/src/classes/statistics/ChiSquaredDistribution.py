@@ -1,7 +1,7 @@
 """ @NormalDistribution
 Module defining a normal distribution with statistical procedures
 """
-import numpy as np
+from numpy import array, exp, linspace, log, size, squeeze
 from .baseDistribution import baseDistribution
 from scipy.stats import chi2
 from ...base import plotting as cP
@@ -22,8 +22,8 @@ class ChiSquared(baseDistribution):
     """
     def __init__(self, df, prng=None, **kwargs):
         """Instantiate a Normal distribution """
-        # assert np.size(mean) == 1, 'Univariate Normal mean must have size = 1'
-        # assert np.size(variance) == 1, 'Univariate Normal variance must have size = 1'
+        # assert size(mean) == 1, 'Univariate Normal mean must have size = 1'
+        # assert size(variance) == 1, 'Univariate Normal variance must have size = 1'
         super().__init__(prng)
         self.df = df
 
@@ -93,8 +93,8 @@ class ChiSquared(baseDistribution):
 
         """
         size = (size, self.ndim)
-        values = np.squeeze(self.prng.chisquare(size=size, df=self.df))
-        return np.exp(values) if self.log else values
+        values = squeeze(self.prng.chisquare(size=size, df=self.df))
+        return exp(values) if self.log else values
 
     def plot_pdf(self, log=False, **kwargs):
         bins = self.bins()
@@ -109,7 +109,7 @@ class ChiSquared(baseDistribution):
         """ For a realization x, compute the probability """
 
         if self.log:
-            x= np.log(x)
+            x= log(x)
 
         if log:
             return StatArray.StatArray(chi2.logpdf(df=self.df, x=x), "Probability Density")
@@ -155,10 +155,10 @@ class ChiSquared(baseDistribution):
 #
 #    def fromHdf(self, h5grp):
 #        """ Reads the Uniform Distribution from an HDF group """
-#        T1 = np.array(h5grp.get('mean'))
-#        T2 = np.array(h5grp.get('variance'))
+#        T1 = array(h5grp.get('mean'))
+#        T2 = array(h5grp.get('variance'))
 #        return MvNormal(T1, T2)
 
     def bins(self, nBins = 99, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
-        return StatArray.StatArray(np.linspace(1, nStd*self.df, nBins+1))
+        return StatArray.StatArray(linspace(1, nStd*self.df, nBins+1))

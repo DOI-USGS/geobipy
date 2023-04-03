@@ -1,4 +1,8 @@
-from numpy.lib.function_base import meshgrid
+from numpy import argmin, asarray, atleast_1d, cumsum
+from numpy import hstack, inf, int32, isnan, log10, logspace, nan
+from numpy import r_, size, sum, zeros
+from numpy import all as npall
+
 from .DataPoint import DataPoint
 from ....classes.core import StatArray
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
@@ -9,7 +13,7 @@ from ...statistics.Distribution import Distribution
 from ....base import utilities as cf
 from ....base import plotting as cP
 from copy import deepcopy
-import numpy as np
+
 import matplotlib.pyplot as plt
 
 
@@ -46,8 +50,8 @@ class EmDataPoint(DataPoint):
 
         """
         d = self.data.copy()
-        d[d <= 0.0] = np.nan
-        return ~np.isnan(d)
+        d[d <= 0.0] = nan
+        return ~isnan(d)
 
     @property
     def channels_per_system(self):
@@ -56,9 +60,9 @@ class EmDataPoint(DataPoint):
     @channels_per_system.setter
     def channels_per_system(self, values):
         if values is None:
-            values = np.zeros(1, dtype=np.int32)
+            values = zeros(1, dtype=int32)
         else:
-            values = np.atleast_1d(np.asarray(values, dtype=np.int32)).copy()
+            values = atleast_1d(asarray(values, dtype=int32)).copy()
 
         self._channels_per_system = values
 
@@ -81,9 +85,9 @@ class EmDataPoint(DataPoint):
             if isinstance(values, str):
                 values = [values]
 
-            assert np.all([isinstance(x, str) for x in values]), TypeError('components must be list of str')
+            assert all([isinstance(x, str) for x in values]), TypeError('components must be list of str')
 
-        self._components = np.asarray([m[x] for x in values], dtype=np.int32)
+        self._components = asarray([m[x] for x in values], dtype=int32)
 
     @DataPoint.data.setter
     def data(self, values):
@@ -91,21 +95,21 @@ class EmDataPoint(DataPoint):
         if values is None:
             values = self.nChannels
         else:
-            assert np.size(values) == self.nChannels, ValueError("data must have size {} not {}".format(self.nChannels, np.size(values)))
+            assert size(values) == self.nChannels, ValueError("data must have size {} not {}".format(self.nChannels, size(values)))
 
         self._data = StatArray.StatArray(values, "Data", self.units)
 
     @property
     def n_components(self):
-        return np.size(self.components)
+        return size(self.components)
 
     @property
     def nChannels(self):
-        return np.sum(self.channels_per_system)
+        return sum(self.channels_per_system)
 
     @property
     def nSystems(self):
-        return np.size(self.channels_per_system)
+        return size(self.channels_per_system)
 
     @DataPoint.predictedData.setter
     def predictedData(self, values):
@@ -114,8 +118,8 @@ class EmDataPoint(DataPoint):
         else:
             if isinstance(values, list):
                 assert len(values) == self.nSystems, ValueError("predictedData as a list must have {} elements".format(self.nSystems))
-                values = np.hstack(values)
-            assert np.size(values) == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
+                values = hstack(values)
+            assert size(values) == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
         self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
 
     @property
@@ -124,11 +128,11 @@ class EmDataPoint(DataPoint):
 
     @property
     def systemOffset(self):
-        return np.hstack([0, np.cumsum(self.channels_per_system)])
+        return hstack([0, cumsum(self.channels_per_system)])
 
     @property
     def new_model(self):
-        mesh = RectilinearMesh1D(edges=StatArray.StatArray(np.asarray([0.0, np.inf]), 'Depth', 'm'))
+        mesh = RectilinearMesh1D(edges=StatArray.StatArray(asarray([0.0, inf]), 'Depth', 'm'))
         conductivity = StatArray.StatArray(mesh.nCells.item(), 'Conductivity', r'$\frac{S}{m}$')
         magnetic_susceptibility = StatArray.StatArray(mesh.nCells.item(), "Magnetic Susceptibility", r"$\kappa$")
         magnetic_permeability = StatArray.StatArray(mesh.nCells.item(), "Magnetic Permeability", "$\frac{H}{m}$")
@@ -156,17 +160,17 @@ class EmDataPoint(DataPoint):
 
         Returns
         -------
-        out : np.float64
+        out : float64
             The best fitting log10 conductivity for the half space
 
         """
         assert maxConductivity > minConductivity, ValueError("Maximum conductivity must be greater than the minimum")
-        minConductivity = np.log10(minConductivity)
-        maxConductivity = np.log10(maxConductivity)
+        minConductivity = log10(minConductivity)
+        maxConductivity = log10(maxConductivity)
 
-        c = np.logspace(minConductivity, maxConductivity, nSamples)
+        c = logspace(minConductivity, maxConductivity, nSamples)
 
-        PhiD = np.zeros(nSamples)
+        PhiD = zeros(nSamples)
 
         model = self.new_model
 
@@ -175,7 +179,7 @@ class EmDataPoint(DataPoint):
             self.forward(model)
             PhiD[i] = self.dataMisfit()
 
-        i = np.argmin(PhiD)
+        i = argmin(PhiD)
         model.values[0] = c[i]
         return model
 
@@ -202,12 +206,12 @@ class EmDataPoint(DataPoint):
         """
 
         # tmp = deepcopy(self)
-        c = StatArray.StatArray(np.logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
-        PhiD = StatArray.StatArray(np.size(c), 'Normalized Data Misfit', '')
+        c = StatArray.StatArray(logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
+        PhiD = StatArray.StatArray(size(c), 'Normalized Data Misfit', '')
 
         model = self.new_model
 
-        for i in range(np.size(c)):
+        for i in range(size(c)):
             model.values[0] = c[i]
             self.forward(model)
             PhiD[i] = self.dataMisfit()

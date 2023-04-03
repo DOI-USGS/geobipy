@@ -1,9 +1,13 @@
 """ @Model_Class
 Module describing a Model
 """
-import numpy as np
 from copy import deepcopy
 
+from numpy import abs, any, arange, argpartition, argsort, argwhere, asarray, column_stack
+from numpy import cumsum, diff, dot, empty, exp, hstack, inf, isinf, maximum, mean, meshgrid
+from numpy import ravel_multi_index, s_, sign, size, squeeze, unique, vstack, zeros
+from numpy import log as nplog
+from numpy.linalg import inv
 from ...base.utilities import reslice
 from ...base import plotting
 from ..core.myObject import myObject
@@ -147,7 +151,7 @@ class Model(myObject):
             self._values = StatArray.StatArray(self.shape)
             return
 
-        # assert np.all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+        # assert all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
         self._values = StatArray.StatArray(values)
 
     @property
@@ -266,7 +270,7 @@ class Model(myObject):
         #     return 0.0 if log else 1.0
 
         if self.nCells.item() == 1:
-            tmp = self.insert_edge(np.log(self.mesh.min_edge) + (0.5 * (self.mesh.max_edge - self.mesh.min_edge)))
+            tmp = self.insert_edge(nplog(self.mesh.min_edge) + (0.5 * (self.mesh.max_edge - self.mesh.min_edge)))
             return tmp.gradient.probability(log=log)
         else:
             return self.gradient.probability(log=log)
@@ -325,7 +329,7 @@ class Model(myObject):
             Inverse Hessian matrix
 
         """
-        return np.linalg.inv(self.local_precision(observation))
+        return inv(self.local_precision(observation))
 
     def pad(self, shape):
         """Copies the properties of a model including all priors or proposals, but pads memory to the given size
@@ -411,19 +415,21 @@ class Model(myObject):
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        dSigma = 0.5 * np.dot(inverse_hessian, gradient)
+        dSigma = 0.5 * dot(inverse_hessian, gradient)
+        # bounded = abs(dSigma) > 6.0
+        # dSigma[bounded] = sign(dSigma[bounded]) * 6.0
 
-        mean = np.log(remapped_model.values) - dSigma
+        mean = exp(nplog(remapped_model.values) - dSigma)
+
+        # mean = remapped_model.values.copy()
 
         perturbed_model = deepcopy(remapped_model)
 
         # Assign a proposal distribution for the parameter using the mean and variance.
-        perturbed_model.values.proposal = Distribution('MvLogNormal', mean=np.exp(mean),
-                                                      variance=inverse_hessian,
-                                                      linearSpace=True,
-                                                      prng=perturbed_model.values.proposal.prng)
-
-
+        perturbed_model.values.proposal = Distribution('MvLogNormal', mean=mean,
+                                                       variance=inverse_hessian,
+                                                       linearSpace=True,
+                                                       prng=perturbed_model.values.proposal.prng)
 
         # Generate new conductivities
         perturbed_model.values.perturb()#imposePrior=True)
@@ -432,15 +438,15 @@ class Model(myObject):
 
     def prior_derivative(self, order):
         if order == 1:
-            gradient = np.dot(self.mesh.cell_weights, self.values.prior.deviation(self.values)) + self.values.priorDerivative(order=1)
+            gradient = dot(self.mesh.cell_weights, self.values.prior.deviation(self.values)) + self.values.priorDerivative(order=1)
             if self.gradient.hasPrior:
                 Wz = self.mesh.gradient_operator
-                gradient +=  np.dot(np.dot(Wz.T, Wz), self.values.prior.deviation(self.values))
+                gradient +=  dot(dot(Wz.T, Wz), self.values.prior.deviation(self.values))
         elif order == 2:
             gradient = self.mesh.cell_weights + self.values.priorDerivative(order=2)
             if self.gradient.hasPrior:
                 Wz = self.mesh.gradient_operator
-                gradient += np.dot(Wz.T, Wz)
+                gradient += dot(Wz.T, Wz)
 
         return gradient
 
@@ -457,7 +463,7 @@ class Model(myObject):
         if remapped_model.values.hasPrior:
             remapped_model.values.prior.ndim = remapped_model.nCells.item()
         if remapped_model.gradient.hasPrior:
-            remapped_model.gradient.prior.ndim = np.maximum(1, remapped_model.nCells-1)
+            remapped_model.gradient.prior.ndim = maximum(1, remapped_model.nCells-1)
 
         return remapped_model
 
@@ -622,8 +628,8 @@ class Model(myObject):
         # Check that the parameters are within the limits if they are bound
         if not self.value_bounds is None:
             pInBounds = self.value_bounds.probability(x=self.values, log=True)
-            if np.any(np.isinf(pInBounds)):
-                return -np.inf
+            if any(isinf(pInBounds)):
+                return -inf
 
         # Get the structural prior probability
         probability = self.mesh.probability
@@ -696,14 +702,18 @@ class Model(myObject):
 
         # Compute the stochastic newton offset.
         # The negative sign because we want to move downhill
-        SN_step_from_perturbed = 0.5 * np.dot(self.values.proposal.variance, gradient)
+        SN_step_from_perturbed = 0.5 * dot(self.values.proposal.variance, gradient)
+        # bounded = abs(SN_step_from_perturbed) > 6.0
+        # SN_step_from_perturbed[bounded] = sign(SN_step_from_perturbed[bounded]) * 6.0
 
         prng = self.values.proposal.prng
 
-        # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
-        # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
-        # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvLogNormal', np.exp(np.log(self.values) - SN_step_from_perturbed), self.values.proposal.variance, linearSpace=True, prng=prng)
+        # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
+        # # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
+        # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
+        # #
+        tmp = Distribution('MvLogNormal', exp(nplog(self.values) - SN_step_from_perturbed), self.values.proposal.variance, linearSpace=True, prng=prng)
+        # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
         proposal = tmp.probability(x=remappedModel.values, log=True)
 
@@ -793,14 +803,14 @@ class Model(myObject):
 
         self.value_bounds = None
         if kwargs.get('parameterLimits') is not None:
-            # assert np.size(kwargs['parameterLimits']) == 2, ValueError("parameterLimits must have size 2.")
+            # assert size(kwargs['parameterLimits']) == 2, ValueError("parameterLimits must have size 2.")
             self.value_bounds = Distribution('Uniform', *kwargs['parameterLimits'], log=True)
 
         if values_prior is None:
             if kwargs.get('solve_value', False):
                 assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
                 # Assign the initial prior to the parameters
-                variance = np.log(11.0)**2.0 #self.mesh.cell_weights /
+                variance = nplog(11.0)**2.0 #self.mesh.cell_weights /
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
                                                 variance=variance,
                                                 ndim=self.mesh.nCells,
@@ -811,7 +821,7 @@ class Model(myObject):
             if kwargs.get('solve_gradient', False):
                 self.gradient.prior = Distribution('MvNormal', mean=0.0,
                                             variance=kwargs.get('gradient_variance', 1.5),
-                                            ndim=np.maximum(1, self.mesh.nCells-1),
+                                            ndim=maximum(1, self.mesh.nCells-1),
                                             prng=kwargs.get('prng'))
 
         self.set_values_prior(values_prior)
@@ -857,7 +867,7 @@ class Model(myObject):
         self.values.proposal = proposal
 
     def take_along_axis(self, i, axis):
-        s = [np.s_[:] for j in range(self.ndim)]
+        s = [s_[:] for j in range(self.ndim)]
         s[axis] = i
         return self[tuple(s)]
 
@@ -901,7 +911,7 @@ class Model(myObject):
             mx = ax.nCells
         else:
             mx = ax.cellIndex(self.mesh.edges[-1], clip=True)
-        i1 = np.arange(mx)
+        i1 = arange(mx)
 
         histogram.counts[i0, i1] += 1
 
