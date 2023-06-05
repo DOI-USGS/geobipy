@@ -191,7 +191,7 @@ class EmLoop(Point, ABC):
                 pitch_prior = Distribution('Uniform',
                                             self.pitch - kwargs['maximum_pitch_change'],
                                             self.pitch + kwargs['maximum_pitch_change'],
-                                            prng=kwargs['prng'])
+                                            prng=kwargs.get('prng'))
         self.pitch.prior = pitch_prior
 
         if roll_prior is None:
@@ -199,7 +199,7 @@ class EmLoop(Point, ABC):
                 roll_prior = Distribution('Uniform',
                                             self.roll - kwargs['maximum_roll_change'],
                                             self.roll + kwargs['maximum_roll_change'],
-                                            prng=kwargs['prng'])
+                                            prng=kwargs.get('prng'))
         self.roll.prior = roll_prior
 
         if yaw_prior is None:
@@ -207,7 +207,7 @@ class EmLoop(Point, ABC):
                 yaw_prior = Distribution('Uniform',
                                             self.yaw - kwargs['maximum_yaw_change'],
                                             self.yaw + kwargs['maximum_yaw_change'],
-                                            prng=kwargs['prng'])
+                                            prng=kwargs.get('prng'))
         self.yaw.prior = yaw_prior
 
     def set_proposals(self, x_proposal=None, y_proposal=None, z_proposal=None, pitch_proposal=None, roll_proposal=None, yaw_proposal=None, **kwargs):
@@ -216,19 +216,19 @@ class EmLoop(Point, ABC):
 
         if pitch_proposal is None:
             if kwargs.get('solve_pitch', False):
-                pitch_proposal = Distribution('Normal', self.pitch.item(), kwargs['pitch_proposal_variance'], prng=kwargs['prng'])
+                pitch_proposal = Distribution('Normal', self.pitch.item(), kwargs['pitch_proposal_variance'], prng=kwargs.get('prng'))
 
         self.pitch.proposal = pitch_proposal
 
         if roll_proposal is None:
             if kwargs.get('solve_roll', False):
-                roll_proposal = Distribution('Normal', self.roll.item(), kwargs['roll_proposal_variance'], prng=kwargs['prng'])
+                roll_proposal = Distribution('Normal', self.roll.item(), kwargs['roll_proposal_variance'], prng=kwargs.get('prng'))
 
         self.roll.proposal = roll_proposal
 
         if yaw_proposal is None:
             if kwargs.get('solve_yaw', False):
-                yaw_proposal = Distribution('Normal', self.yaw.item(), kwargs['yaw_proposal_variance'], prng=kwargs['prng'])
+                yaw_proposal = Distribution('Normal', self.yaw.item(), kwargs['yaw_proposal_variance'], prng=kwargs.get('prng'))
 
         self.yaw.proposal = yaw_proposal
 

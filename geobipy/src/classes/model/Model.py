@@ -802,9 +802,11 @@ class Model(myObject):
         self.mesh.set_priors(**kwargs)
 
         self.value_bounds = None
-        if kwargs.get('parameterLimits') is not None:
-            # assert size(kwargs['parameterLimits']) == 2, ValueError("parameterLimits must have size 2.")
-            self.value_bounds = Distribution('Uniform', *kwargs['parameterLimits'], log=True)
+        if kwargs.get('parameter_limits') is not None:
+            self.value_bounds = Distribution('Uniform',
+                                             *kwargs['parameter_limits'],
+                                             log=True,
+                                             prng=kwargs.get('prng'))
 
         if values_prior is None:
             if kwargs.get('solve_value', False):

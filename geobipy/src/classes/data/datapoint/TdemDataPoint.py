@@ -920,7 +920,7 @@ class TdemDataPoint(EmDataPoint):
 
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
-                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=True, prng=kwargs['prng'])
+                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=True, prng=kwargs.get('prng'))
 
         if data_prior is None:
             data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))
@@ -938,7 +938,7 @@ class TdemDataPoint(EmDataPoint):
     def set_additive_error_proposal(self, proposal, **kwargs):
         if proposal is None:
             if kwargs.get('solve_additive_error', False):
-                proposal = Distribution('MvLogNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs['prng'])
+                proposal = Distribution('MvLogNormal', self.additive_error, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs.get('prng'))
 
         self.additive_error.proposal = proposal
 

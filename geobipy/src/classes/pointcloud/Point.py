@@ -820,15 +820,15 @@ class Point(myObject):
 
         if x_proposal is None:
             if kwargs.get('solve_x', False):
-                x_proposal = Distribution('Normal', self.x.item(), kwargs['x_proposal_variance'], prng=kwargs['prng'])
+                x_proposal = Distribution('Normal', self.x.item(), kwargs['x_proposal_variance'], prng=kwargs.get('prng'))
 
         if y_proposal is None:
             if kwargs.get('solve_y', False):
-                y_proposal = Distribution('Normal', self.y.item(), kwargs['y_proposal_variance'], prng=kwargs['prng'])
+                y_proposal = Distribution('Normal', self.y.item(), kwargs['y_proposal_variance'], prng=kwargs.get('prng'))
 
         if z_proposal is None:
             if kwargs.get('solve_z', False):
-                z_proposal = Distribution('Normal', self.z.item(), kwargs['z_proposal_variance'], prng=kwargs['prng'])
+                z_proposal = Distribution('Normal', self.z.item(), kwargs['z_proposal_variance'], prng=kwargs.get('prng'))
 
         self.x.proposal = x_proposal
         self.y.proposal = y_proposal
