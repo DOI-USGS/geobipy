@@ -2,8 +2,8 @@
 Class to handle the HDF5 result files for a full data set.
  """
 import time
-from numpy import atleast_1d, arange, argsort, argwhere, asarray, column_stack, cumsum, divide, empty, exp, full, hstack
-from numpy import int32, log10, logical_not, linspace, load, max, nan,  nanmin, nanmax, newaxis
+from numpy import atleast_1d, arange, argsort, argwhere, asarray, column_stack, cumsum, divide, empty, exp, float64
+from numpy import full, hstack, int32, log10, logical_not, linspace, load, max, nan,  nanmin, nanmax, newaxis
 from numpy import repeat, s_, save, size, sort, squeeze, std, sum, tile, unique, vstack, where, zeros
 from numpy import all as npall
 

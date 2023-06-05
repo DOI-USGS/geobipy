@@ -83,7 +83,7 @@ class Inference1D(myObject):
         if not 'n_markov_chains' in kwargs:
             return
 
-        self.n_markov_chains = self.kwargs['n_markov_chains']
+        self.n_markov_chains = self.kwargs.get('n_markov_chains', 100000)
         # Get the initial best fitting halfspace and set up
         # priors and posteriors using user parameters
 
@@ -125,7 +125,7 @@ class Inference1D(myObject):
 
         # Add the likelihood function to the prior
         self.likelihood = 1.0
-        if not self.kwargs['ignore_likelihood']:
+        if not self.kwargs.get('ignore_likelihood', False):
             self.likelihood = self.datapoint.likelihood(log=True)
             self.burned_in = False
             self.burned_in_iteration = int64(0)
@@ -157,9 +157,9 @@ class Inference1D(myObject):
         self.invTime = float64(0.0)
 
         # Logicals of whether to plot or save
-        self.save_hdf5 = self.kwargs['save_hdf5']  # pop('save', True)
+        self.save_hdf5 = self.kwargs.get('save_hdf5', True)  # pop('save', True)
         self.interactive_plot = self.kwargs.get('interactive_plot', False)
-        self.save_png = self.kwargs['save_png']  # .pop('savePNG', False)
+        self.save_png = self.kwargs.get('save_png', False)  # .pop('savePNG', False)
 
         # Return none if important parameters are not used (used for hdf 5)
         if datapoint is None:
@@ -168,9 +168,9 @@ class Inference1D(myObject):
         assert self.interactive_plot or self.save_hdf5, Exception(
             'You have chosen to neither view or save the inversion results!')
 
-        self._update_plot_every = self.kwargs['update_plot_every']
-        self.limits = self.kwargs['parameter_limits']
-        self.reciprocateParameter = self.kwargs['reciprocate_parameters']
+        self._update_plot_every = self.kwargs.get('update_plot_every', 5000)
+        self.limits = self.kwargs.get('parameter_limits', None)
+        self.reciprocateParameter = self.kwargs.get('reciprocate_parameters', None)
 
         # Set the ID for the data point the results pertain to
 
@@ -301,7 +301,7 @@ class Inference1D(myObject):
         self.datapoint.forward(self.model)
 
         observation = self.datapoint
-        if self.kwargs['ignore_likelihood']:
+        if self.kwargs.get('ignore_likelihood', False):
             observation = None
         else:
             observation.sensitivity(self.model)
@@ -422,7 +422,7 @@ class Inference1D(myObject):
                 self.plot_posteriors(axes=self.ax,
                                      fig=self.fig,
                                      title="Fiducial {}".format(self.datapoint.fiducial),
-                                     increment=self.kwargs['update_plot_every'])
+                                     increment=self.kwargs.get('update_plot_every', 5000))
 
             Go = not failed and (self.iteration <= self.n_markov_chains + self.burned_in_iteration)
 
@@ -434,12 +434,12 @@ class Inference1D(myObject):
         self.clk.stop()
         # self.invTime = float64(self.clk.timeinSeconds())
         # Does the user want to save the HDF5 results?
-        if (self.kwargs['save_hdf5']):
+        if (self.kwargs.get('save_hdf5', True)):
             # No parallel write is being used, so write a single file for the data point
             self.write_inference1d(hdf_file_handle)
 
         # Does the user want to save the plot as a png?
-        if (self.kwargs['save_png']):# and not failed):
+        if (self.kwargs.get('save_png', False)):# and not failed):
             # To save any thing the Results must be plot
             self.plot_posteriors(axes = self.ax, fig=self.fig)
             self.toPNG('.', self.datapoint.fiducial)
@@ -497,7 +497,8 @@ class Inference1D(myObject):
 
         if (mod(self.iteration, self.update_plot_every) == 0):
             time_per_model = self.clk.lap() / self.update_plot_every
-            tmp = "i=%i, k=%i, acc=%4.3f, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, float64(self.model.nCells[0]), acceptance_percent, time_per_model, self.clk.timeinSeconds())
+            bi = "" if self.burned_in else "*"
+            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, float64(self.model.nCells[0]), bi, acceptance_percent, time_per_model, self.clk.timeinSeconds())
             if (self.rank == 1):
                 print(tmp, flush=True)
 
