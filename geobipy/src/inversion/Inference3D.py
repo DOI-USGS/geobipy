@@ -533,7 +533,7 @@ class Inference3D(myObject):
 
             # Pass through the line results file object if a parallel file system is in use.
             iLine = lineNumber.searchsorted(datapoint.lineNumber)[0]
-            inference = Inference1D(datapoint, prng, world=world, **options)
+            inference = Inference1D(datapoint, prng=prng, world=world, **options)
 
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdfFile)
 
@@ -570,7 +570,6 @@ class Inference3D(myObject):
 
     @cached_property
     def bestData(self):
-
 
         bestData = self.lines[0].bestData
         lines[0].uncache('bestData')
