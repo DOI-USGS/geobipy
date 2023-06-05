@@ -4,7 +4,7 @@ Class to store inversion results. Contains plotting and writing to file procedur
 from copy import deepcopy
 from os.path import join
 
-from numpy import argwhere, reshape, size, int64, sum, linspace, float64, int32
+from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
 from numpy import max, min, log, array, full, float128
 
@@ -71,26 +71,56 @@ class Inference1D(myObject):
 
     """
 
-    def __init__(self, datapoint, prng=None, world=None, **kwargs):
+    def __init__(self,
+                 datapoint,
+                 ignore_likelihood:bool = False,
+                 interactive_plot:bool = True,
+                 multiplier = 1.0,
+                 n_markov_chains = 100000,
+                 parameter_limits = None,
+                 prng=None,
+                 reciprocate_parameters:bool = False,
+                 save_hdf5:bool = True,
+                 save_png:bool = False,
+                 solve_gradient:bool = True,
+                 solve_parameter:bool = False,
+                 update_plot_every = 5000,
+                 world=None,
+                 dont_initialize = False,
+                 **kwargs):
         """ Initialize the results of the inversion """
 
         self.fig = None
-        self.kwargs = kwargs
+
+        self.world = world
 
         self.prng = prng
-        self.rank = 1 if world is None else world.rank
+        kwargs['prng'] = self.prng
 
-        if not 'n_markov_chains' in kwargs:
+        self.datapoint = datapoint
+
+        self.ignore_likelihood = ignore_likelihood
+        self.n_markov_chains = n_markov_chains
+        self.solve_gradient = solve_gradient
+        self.solve_parameter = solve_parameter
+        self.save_hdf5 = save_hdf5
+        self.interactive_plot = interactive_plot
+        self.save_png = save_png
+        self.update_plot_every = update_plot_every
+        self.limits = parameter_limits
+        self.reciprocate_parameter = reciprocate_parameters
+
+        if dont_initialize:
             return
 
-        self.n_markov_chains = self.kwargs.get('n_markov_chains', 100000)
+        assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
+
         # Get the initial best fitting halfspace and set up
         # priors and posteriors using user parameters
-
         # ------------------------------------------------
         # Intialize the datapoint with the user parameters
         # ------------------------------------------------
-        self.initialize_datapoint(datapoint)
+        self.initialize_datapoint(datapoint, **kwargs)
 
         # # Initialize the calibration parameters
         # if (kwargs.solveCalibration):
@@ -104,7 +134,7 @@ class Inference1D(myObject):
         # ---------------------------------
         # Set the earth model properties
         # ---------------------------------
-        self.initialize_model()
+        self.initialize_model(**kwargs)
 
         # Compute the data misfit
         self.data_misfit = datapoint.dataMisfit()
@@ -114,18 +144,18 @@ class Inference1D(myObject):
         #     self.datapoint.calibrate()
 
         # Evaluate the prior for the current model
-        self.prior = self.model.probability(self.kwargs['solve_parameter'],
-                                            self.kwargs['solve_gradient'])
+        self.prior = self.model.probability(self.solve_parameter,
+                                            self.solve_gradient)
 
         self.prior += self.datapoint.probability
 
         # Initialize the burned in state
-        self.burned_in_iteration = self._n_markov_chains
+        self.burned_in_iteration = self.n_markov_chains
         self.burned_in = True
 
         # Add the likelihood function to the prior
         self.likelihood = 1.0
-        if not self.kwargs.get('ignore_likelihood', False):
+        if not self.ignore_likelihood:
             self.likelihood = self.datapoint.likelihood(log=True)
             self.burned_in = False
             self.burned_in_iteration = int64(0)
@@ -139,7 +169,7 @@ class Inference1D(myObject):
         # Initialize the vectors to save results
         # StatArray of the data misfit
 
-        self.data_misfit_v = StatArray.StatArray(2 * self._n_markov_chains, name='Data Misfit')
+        self.data_misfit_v = StatArray.StatArray(2 * self.n_markov_chains, name='Data Misfit')
         self.data_misfit_v[0] = self.data_misfit
 
         target = sum(self.datapoint.active)
@@ -156,21 +186,12 @@ class Inference1D(myObject):
         self.clk = Stopwatch()
         self.invTime = float64(0.0)
 
-        # Logicals of whether to plot or save
-        self.save_hdf5 = self.kwargs.get('save_hdf5', True)  # pop('save', True)
-        self.interactive_plot = self.kwargs.get('interactive_plot', False)
-        self.save_png = self.kwargs.get('save_png', False)  # .pop('savePNG', False)
-
         # Return none if important parameters are not used (used for hdf 5)
         if datapoint is None:
             return
 
         assert self.interactive_plot or self.save_hdf5, Exception(
             'You have chosen to neither view or save the inversion results!')
-
-        self._update_plot_every = self.kwargs.get('update_plot_every', 5000)
-        self.limits = self.kwargs.get('parameter_limits', None)
-        self.reciprocateParameter = self.kwargs.get('reciprocate_parameters', None)
 
         # Set the ID for the data point the results pertain to
 
@@ -189,8 +210,8 @@ class Inference1D(myObject):
         # Model acceptance rate
         self.accepted = 0
 
-        n = 2 * int32(self.n_markov_chains / self._update_plot_every)
-        self.acceptance_x = StatArray.StatArray(arange(1, n + 1) * self._update_plot_every, name='Iteration #')
+        n = 2 * int32(self.n_markov_chains / self.update_plot_every)
+        self.acceptance_x = StatArray.StatArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
         self.acceptance_rate = StatArray.StatArray(full(n, fill_value=nan), name='% Acceptance')
 
 
@@ -215,13 +236,51 @@ class Inference1D(myObject):
         self.best_posterior = self.posterior
         self.best_iteration = int64(0)
 
-    # @cached_property
-    # def iteration(self):
-    #     return StatArray.StatArray(arange(2 * self._n_markov_chains), name="Iteration #", dtype=int64)
 
     @cached_property
     def iz(self):
         return arange(self.model.values.posterior.y.nCells.item())
+
+    @property
+    def limits(self):
+        return self._limits
+
+    @limits.setter
+    def limits(self, values):
+        assert size(values) == 2, ValueError("Limits must have length 2")
+        self._limits = sort(asarray(values, dtype=float64))
+
+    @property
+    def ignore_likelihood(self):
+        return self._ignore_likelihood
+
+    @ignore_likelihood.setter
+    def ignore_likelihood(self, value:bool):
+        assert isinstance(value, bool), ValueError('ignore_likelihood must have type bool')
+        self._ignore_likelihood = value
+
+    @property
+    def interactive_plot(self):
+        return self._interactive_plot
+
+    @interactive_plot.setter
+    def interactive_plot(self, value:bool):
+        assert isinstance(value, bool), ValueError('interactive_plot must have type bool')
+        if self.mpi_enabled:
+            value = False
+        self._interactive_plot = value
+
+    @property
+    def mpi_enabled(self):
+        return not (self.world is None)
+
+    @property
+    def multiplier(self):
+        return self._multiplier
+
+    @multiplier.setter
+    def multiplier(self, value):
+        self._multiplier = float64(value)
 
     @property
     def n_markov_chains(self):
@@ -238,22 +297,84 @@ class Inference1D(myObject):
     @prng.setter
     def prng(self, value):
         if value is None:
+            assert not self.mpi_enabled, TypeError("Must specify a prng when running in parallel")
             self._prng = RandomState()
         else:
             self._prng = value
 
         self.seed = self.prng.get_state()
-        self.kwargs['prng'] = self.prng
+
+    @property
+    def rank(self):
+        if self.mpi_enabled:
+            return self.world.rank
+        else:
+            return 1
+
+    @property
+    def reciprocate_parameters(self):
+        return self._reciprocate_parameters
+
+    @reciprocate_parameters.setter
+    def reciprocate_parameters(self, value:bool):
+        assert isinstance(value, bool), ValueError('reciprocate_parameters must have type bool')
+        self._reciprocate_parameters = value
+
+    @property
+    def save_hdf5(self):
+        return self._save_hdf5
+
+    @save_hdf5.setter
+    def save_hdf5(self, value:bool):
+        assert isinstance(value, bool), ValueError('save_hdf5 must have type bool')
+        self._save_hdf5 = value
+
+    @property
+    def save_png(self):
+        return self._save_png
+
+    @save_png.setter
+    def save_png(self, value:bool):
+        assert isinstance(value, bool), ValueError('save_png must have type bool')
+        if self.mpi_enabled:
+            value = False
+        self._save_png = value
+
+    @property
+    def solve_parameter(self):
+        return self._solve_parameter
+
+    @solve_parameter.setter
+    def solve_parameter(self, value:bool):
+        assert isinstance(value, bool), ValueError('solve_parameter must have type bool')
+        self._solve_parameter = value
+
+    @property
+    def solve_gradient(self):
+        return self._solve_gradient
+
+    @solve_gradient.setter
+    def solve_gradient(self, value:bool):
+        assert isinstance(value, bool), ValueError('solve_gradient must have type bool')
+        self._solve_gradient = value
 
     @property
     def update_plot_every(self):
         return self._update_plot_every
 
-    @property
-    def user_options(self):
-        return self._user_options
+    @update_plot_every.setter
+    def update_plot_every(self, value):
+        self._update_plot_every = int32(value)
 
-    def initialize_datapoint(self, datapoint):
+    @property
+    def world(self):
+        return self._world
+
+    @world.setter
+    def world(self, value):
+        self._world = value
+
+    def initialize_datapoint(self, datapoint, **kwargs):
 
         self.datapoint = datapoint
 
@@ -263,13 +384,13 @@ class Inference1D(myObject):
         # Set the statistical properties of the datapoint
         # ---------------------------------------
         # Set the prior on the data
-        self.datapoint.initialize(**self.kwargs)
+        self.datapoint.initialize(**kwargs)
         # Set the priors, proposals, and posteriors.
-        self.datapoint.set_priors(**self.kwargs)
-        self.datapoint.set_proposals(**self.kwargs)
+        self.datapoint.set_priors(**kwargs)
+        self.datapoint.set_proposals(**kwargs)
         self.datapoint.set_posteriors()
 
-    def initialize_model(self):
+    def initialize_model(self, **kwargs):
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
         self.halfspace = StatArray.StatArray(halfspace.values, 'halfspace')
@@ -277,20 +398,19 @@ class Inference1D(myObject):
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
         # Assign the depth to the interface as half the bounds
-        # self.model = halfspace.insert_edge(0.5 * (self.kwargs['maximum_depth'] + self.kwargs['minimum_depth']))
         self.model = deepcopy(halfspace)
 
         # Setup the model for perturbation
         self.model.set_priors(
             value_mean=halfspace.values.item(),
-            min_edge=self.kwargs['minimum_depth'],
-            max_edge=self.kwargs['maximum_depth'],
-            max_cells=self.kwargs['maximum_number_of_layers'],
-            solve_value=True, #self.kwargs['solve_parameter'],
-            solve_gradient=self.kwargs['solve_gradient'],
-            parameterLimits=self.kwargs.get('parameter_limits', None),
-            min_width=self.kwargs.get('minimum_thickness', None),
-            factor=self.kwargs.get('factor', 10.0), prng=self.prng
+            min_edge=kwargs['minimum_depth'],
+            max_edge=kwargs['maximum_depth'],
+            max_cells=kwargs['maximum_number_of_layers'],
+            solve_value=True, #self.solve_parameter,
+            solve_gradient=self.solve_gradient,
+            parameter_limits=self.limits,
+            min_width=kwargs.get('minimum_thickness', None),
+            factor=kwargs.get('factor', 10.0), prng=self.prng
         )
 
         # Assign a Hitmap as a prior if one is given
@@ -301,7 +421,7 @@ class Inference1D(myObject):
         self.datapoint.forward(self.model)
 
         observation = self.datapoint
-        if self.kwargs.get('ignore_likelihood', False):
+        if self.ignore_likelihood:
             observation = None
         else:
             observation.sensitivity(self.model)
@@ -311,10 +431,10 @@ class Inference1D(myObject):
         # Instantiate the proposal for the parameters.
         parameterProposal = Distribution('MvLogNormal', mean=self.model.values, variance=local_variance, linearSpace=True, prng=self.prng)
 
-        probabilities = [self.kwargs['probability_of_birth'],
-                         self.kwargs['probability_of_death'],
-                         self.kwargs['probability_of_perturb'],
-                         self.kwargs['probability_of_no_change']]
+        probabilities = [kwargs['probability_of_birth'],
+                         kwargs['probability_of_death'],
+                         kwargs['probability_of_perturb'],
+                         kwargs['probability_of_no_change']]
         self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, prng=self.prng)
 
         self.model.set_posteriors()
@@ -325,7 +445,7 @@ class Inference1D(myObject):
 
         # Perturb the current model
         observation = perturbed_datapoint
-        if self.kwargs.get('ignore_likelihood', False):
+        if self.ignore_likelihood:
             observation = None
 
         try:
@@ -350,7 +470,7 @@ class Inference1D(myObject):
             return
 
         # Evaluate the prior for the current model
-        prior1 += perturbed_model.probability(self.kwargs['solve_parameter'], self.kwargs['solve_gradient'])
+        prior1 += perturbed_model.probability(self.solve_parameter, self.solve_gradient)
 
         # Test for early rejection
         if (prior1 == -inf):
@@ -359,7 +479,7 @@ class Inference1D(myObject):
         # Compute the components of each acceptance ratio
         likelihood1 = 1.0
         observation = None
-        if not  self.kwargs.get('ignore_likelihood', False):
+        if not self.ignore_likelihood:
             likelihood1 = perturbed_datapoint.likelihood(log=True)
             observation = deepcopy(perturbed_datapoint)
 
@@ -422,7 +542,7 @@ class Inference1D(myObject):
                 self.plot_posteriors(axes=self.ax,
                                      fig=self.fig,
                                      title="Fiducial {}".format(self.datapoint.fiducial),
-                                     increment=self.kwargs.get('update_plot_every', 5000))
+                                     increment=self.update_plot_every)
 
             Go = not failed and (self.iteration <= self.n_markov_chains + self.burned_in_iteration)
 
@@ -434,12 +554,12 @@ class Inference1D(myObject):
         self.clk.stop()
         # self.invTime = float64(self.clk.timeinSeconds())
         # Does the user want to save the HDF5 results?
-        if (self.kwargs.get('save_hdf5', True)):
+        if self.save_hdf5:
             # No parallel write is being used, so write a single file for the data point
             self.write_inference1d(hdf_file_handle)
 
         # Does the user want to save the plot as a png?
-        if (self.kwargs.get('save_png', False)):# and not failed):
+        if self.save_png:# and not failed):
             # To save any thing the Results must be plot
             self.plot_posteriors(axes = self.ax, fig=self.fig)
             self.toPNG('.', self.datapoint.fiducial)
@@ -737,13 +857,14 @@ class Inference1D(myObject):
         # parent.create_dataset('ids',data=self.fiducials)
         # self.fiducials.toHdf(parent, 'fiducials')
         # self.fiducials.writeHdf(parent, 'fiducials')
-        parent.create_dataset('iplot', data=self.update_plot_every)
-        parent.create_dataset('plotme', data=self.interactive_plot)
-        parent.create_dataset('reciprocateParameter', data=self.reciprocateParameter)
+        parent.create_dataset('update_plot_every', data=self.update_plot_every)
+        parent.create_dataset('interactive_plot', data=self.interactive_plot)
+        parent.create_dataset('reciprocate_parameter', data=self.reciprocate_parameter)
 
         if not self.limits is None:
             parent.create_dataset('limits', data=self.limits)
-        parent.create_dataset('nmc', data=self.n_markov_chains)
+
+        parent.create_dataset('n_markov_chains', data=self.n_markov_chains)
         parent.create_dataset('nsystems', data=self.datapoint.nSystems)
         self.acceptance_x.toHdf(parent,'ratex')
 #        parent.create_dataset('ratex', [self.ratex.size], dtype=self.ratex.dtype)
@@ -751,10 +872,10 @@ class Inference1D(myObject):
 
 
         # Initialize the attributes that will be written later
-        parent.create_dataset('i', shape=(nPoints), dtype=self.iteration.dtype, fillvalue=nan)
-        parent.create_dataset('iburn', shape=(nPoints), dtype=self.burned_in_iteration.dtype, fillvalue=nan)
-        parent.create_dataset('ibest', shape=(nPoints), dtype=self.best_iteration.dtype, fillvalue=nan)
-        parent.create_dataset('burnedin', shape=(nPoints), dtype=type(self.burned_in))
+        parent.create_dataset('iteration', shape=(nPoints), dtype=self.iteration.dtype, fillvalue=nan)
+        parent.create_dataset('burned_in_iteration', shape=(nPoints), dtype=self.burned_in_iteration.dtype, fillvalue=nan)
+        parent.create_dataset('best_iteration', shape=(nPoints), dtype=self.best_iteration.dtype, fillvalue=nan)
+        parent.create_dataset('burned_in', shape=(nPoints), dtype=type(self.burned_in))
         parent.create_dataset('multiplier',  shape=(nPoints), dtype=self.multiplier.dtype, fillvalue=nan)
         parent.create_dataset('invtime',  shape=(nPoints), dtype=float, fillvalue=nan)
         parent.create_dataset('savetime',  shape=(nPoints), dtype=float, fillvalue=nan)
@@ -765,7 +886,7 @@ class Inference1D(myObject):
         # self.opacityInterp.createHdf(parent,'opacityinterp',add_axis=nPoints, fillvalue=nan)
 #        parent.create_dataset('opacityinterp', [nPoints,nz], dtype=float64)
 
-        self.acceptance_rate.createHdf(parent,'rate', add_axis=nPoints, fillvalue=nan)
+        self.acceptance_rate.createHdf(parent,'acceptance_rate', add_axis=nPoints, fillvalue=nan)
 #        parent.create_dataset('rate', [nPoints,self.rate.size], dtype=self.rate.dtype)
         self.data_misfit_v.createHdf(parent, 'phids', add_axis=nPoints, fillvalue=nan)
         #parent.create_dataset('phids', [nPoints,self.PhiDs.size], dtype=self.PhiDs.dtype)
@@ -789,16 +910,16 @@ class Inference1D(myObject):
 
         i = index
         # Add the iteration number
-        hdfFile['i'][i] = self.iteration
+        hdfFile['iteration'][i] = self.iteration
 
         # Add the burn in iteration
-        hdfFile['iburn'][i] = self.burned_in_iteration
+        hdfFile['burned_in_iteration'][i] = self.burned_in_iteration
 
         # Add the burn in iteration
-        hdfFile['ibest'][i] = self.best_iteration
+        hdfFile['best_iteration'][i] = self.best_iteration
 
         # Add the burned in logical
-        hdfFile['burnedin'][i] = self.burned_in
+        hdfFile['burned_in'][i] = self.burned_in
 
         # Add the depth of investigation
         # hdfFile['doi'][i] = self.doi()
@@ -825,7 +946,7 @@ class Inference1D(myObject):
         # # Add the interpolated opacity
 
         # Add the acceptance rate
-        self.acceptance_rate.writeHdf(hdfFile, 'rate', index=i)
+        self.acceptance_rate.writeHdf(hdfFile, 'acceptance_rate', index=i)
 
         # Add the data misfit
         self.data_misfit_v.writeHdf(hdfFile, 'phids', index=i)
@@ -862,31 +983,28 @@ class Inference1D(myObject):
             fiducials = StatArray.StatArray.fromHdf(hdfFile['data/fiducial'])
             index = fiducials.searchsorted(fiducial)
 
-        self = cls(None, None)
+        self = cls(
+                datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index),
+                interactive_plot = True,
+                multiplier = hdfRead.readKeyFromFile(hdfFile, '', '/', 'multiplier', index=index),
+                n_markov_chains = array(hdfFile.get('n_markov_chains')),
+                parameter_limits = None if not 'limits' in hdfFile else hdfFile.get('limits'),
+                reciprocate_parameters = array(hdfFile.get('reciprocate_parameter')),
+                save_hdf5 = False,
+                save_png = False,
+                update_plot_every = array(hdfFile.get('update_plot_every')),
+                dont_initialize = True)
 
         s = s_[index, :]
-
-        self._n_markov_chains = array(hdfFile.get('nmc'))
-        self._update_plot_every = array(hdfFile.get('iplot'))
-        self.interactive_plot = array(hdfFile.get('plotme'))
-
-        tmp = hdfFile.get('limits')
-        self.limits = None if tmp is None else array(tmp)
-        self.reciprocateParameter = array(hdfFile.get('reciprocateParameter'))
 
         self.nSystems = array(hdfFile.get('nsystems'))
         self.acceptance_x = hdfRead.readKeyFromFile(hdfFile, '', '/', 'ratex')
 
-        self.iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', 'i', index=index)
-        self.burned_in_iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', 'iburn', index=index)
-        self.burned_in = hdfRead.readKeyFromFile(hdfFile, '', '/', 'burnedin', index=index)
-        # self.doi = hdfRead.readKeyFromFile(hdfFile,'','/','doi', index=index)
-        self.multiplier = hdfRead.readKeyFromFile(hdfFile, '', '/', 'multiplier', index=index)
+        self.iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', 'iteration', index=index)
+        self.burned_in_iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', 'burned_in_iteration', index=index)
+        self.burned_in = hdfRead.readKeyFromFile(hdfFile, '', '/', 'burned_in', index=index)
         self.acceptance_rate = hdfRead.readKeyFromFile(hdfFile, '', '/', 'rate', index=s)
-        # self.best_datapoint = hdfRead.readKeyFromFile(
-        #     hdfFile, '', '/', 'bestd', index=index, system_file_path=system_file_path)
 
-        self.datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
         self.best_datapoint = self.datapoint
 
         self.data_misfit_v = hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s)
@@ -897,28 +1015,15 @@ class Inference1D(myObject):
 
         self.halfspace = hdfRead.readKeyFromFile(hdfFile, '', '/', 'halfspace', index=index)
 
-        # self.model.values.posterior.x.relativeTo = self.halfspace
-
         self.Hitmap = self.model.values.posterior
-        # self.currentModel._max_edge = log(self.Hitmap.y.centres[-1])
-        # except:
-        #     self.Hitmap = hdfRead.readKeyFromFile(hdfFile,'','/','hitmap', index=index)
-
-        # self.best_model = hdfRead.readKeyFromFile(
-        #     hdfFile, '', '/', 'bestmodel', index=index)
-        # self.bestModel._max_edge = log(self.Hitmap.y.centres[-1])
 
         self.invTime = array(hdfFile.get('invtime')[index])
         self.saveTime = array(hdfFile.get('savetime')[index])
 
         # Initialize a list of iteration number
-        self.iRange = StatArray.StatArray(
-            arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
+        self.iRange = StatArray.StatArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
 
         self.verbose = False
 
-        self.plotMe = True
-
-        # self.fiducial = float64(fiducials[index])
 
         return self
