@@ -118,7 +118,7 @@ def filter_color_kwargs(kwargs):
                 'clim_scaling' : None,
                 'colorbar' : True,
                 'cax' : None,
-                'cmap' : 'viridis',
+                'cmap' : 'cividis',
                 'cmapIntervals' : None,
                 'clabel' : None,
                 'nBins' : 256,
