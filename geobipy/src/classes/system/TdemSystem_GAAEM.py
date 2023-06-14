@@ -30,6 +30,7 @@ try:
             assert fIO.fileExists(system_filename), 'Could not open file: ' + system_filename
 
             super().__init__(system_filename)
+
             self.off_time = self.windows.centre
             self.read_components(system_filename)
             self.filename = system_filename
@@ -107,13 +108,15 @@ try:
             grp.attrs['data'] = self.string
 
         @classmethod
-        def fromHdf(cls, grp):
+        def fromHdf(cls, grp, filename=None):
             """ Reads the object from a HDF file """
             string = grp.attrs['data']
-            with open('tmp.stm', 'w') as f:
+            filename = 'tmp.stm' if filename is None else filename
+            with open(filename, 'w') as f:
                 f.writelines(string)
 
-            return cls(system_filename='tmp.stm')
+            out = cls(system_filename=r"{}".format(filename))
+            return out
 
 except Exception as e:
     class TdemSystem_GAAEM(object):
