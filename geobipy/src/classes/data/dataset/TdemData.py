@@ -1045,7 +1045,7 @@ class TdemData(Data):
         systems = [None]*nSystems
         for i in range(nSystems):
             # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)])
+            systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)], 'System{}.stm'.format(i))
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
 
