@@ -1,7 +1,7 @@
 """ Module containing custom MPI functions """
 from numpy.linalg import norm
 from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
-from numpy import int, int32, int64, prod, reshape, unravel_index, s_, size
+from numpy import int32, int64, prod, reshape, unravel_index, s_, size
 from numpy import ndim as npndim
 from numpy.random import RandomState
 import sys
@@ -20,9 +20,9 @@ class world3D(object):
         target = shape / norm(shape)
         best = None
         bestFit = 1e20
-        for i in range(2, int(world.size/2)+1):
-            for j in range(2, int(world.size/i)):
-                k = int(world.size/(i*j))
+        for i in range(2, int32(world.size/2)+1):
+            for j in range(2, int32(world.size/i)):
+                k = int32(world.size/(i*j))
                 nBlocks = asarray([i, j, k])
                 total = prod(nBlocks)
 
@@ -253,9 +253,9 @@ def loadBalance3D_shrinkingArrays(shape, nChunks):
     target = shape / norm(shape)
     best = None
     bestFit = 1e20
-    for i in range(2, int(nChunks/2)+1):
-        for j in range(2, int(nChunks/i)):
-            k = int(nChunks/(i*j))
+    for i in range(2, int32(nChunks/2)+1):
+        for j in range(2, int32(nChunks/i)):
+            k = int32(nChunks/(i*j))
             nBlocks = asarray([i, j, k])
             total = prod(nBlocks)
 
