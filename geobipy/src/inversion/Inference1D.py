@@ -854,9 +854,6 @@ class Inference1D(myObject):
         fiducials.writeHdf(grp, 'fiducial')
 
         # Initialize and write the attributes that won't change
-        # parent.create_dataset('ids',data=self.fiducials)
-        # self.fiducials.toHdf(parent, 'fiducials')
-        # self.fiducials.writeHdf(parent, 'fiducials')
         parent.create_dataset('update_plot_every', data=self.update_plot_every)
         parent.create_dataset('interactive_plot', data=self.interactive_plot)
         parent.create_dataset('reciprocate_parameter', data=self.reciprocate_parameter)
@@ -867,29 +864,18 @@ class Inference1D(myObject):
         parent.create_dataset('n_markov_chains', data=self.n_markov_chains)
         parent.create_dataset('nsystems', data=self.datapoint.nSystems)
         self.acceptance_x.toHdf(parent,'ratex')
-#        parent.create_dataset('ratex', [self.ratex.size], dtype=self.ratex.dtype)
-#        parent['ratex'][:] = self.ratex
-
 
         # Initialize the attributes that will be written later
         parent.create_dataset('iteration', shape=(nPoints), dtype=self.iteration.dtype, fillvalue=nan)
         parent.create_dataset('burned_in_iteration', shape=(nPoints), dtype=self.burned_in_iteration.dtype, fillvalue=nan)
         parent.create_dataset('best_iteration', shape=(nPoints), dtype=self.best_iteration.dtype, fillvalue=nan)
-        parent.create_dataset('burned_in', shape=(nPoints), dtype=type(self.burned_in))
+        parent.create_dataset('burned_in', shape=(nPoints), dtype=type(self.burned_in), fill_value=0)
         parent.create_dataset('multiplier',  shape=(nPoints), dtype=self.multiplier.dtype, fillvalue=nan)
         parent.create_dataset('invtime',  shape=(nPoints), dtype=float, fillvalue=nan)
         parent.create_dataset('savetime',  shape=(nPoints), dtype=float, fillvalue=nan)
 
-
-        # self.meanInterp.createHdf(parent,'meaninterp', add_axis=nPoints, fillvalue=nan)
-        # self.bestInterp.createHdf(parent,'bestinterp', add_axis=nPoints, fillvalue=nan)
-        # self.opacityInterp.createHdf(parent,'opacityinterp',add_axis=nPoints, fillvalue=nan)
-#        parent.create_dataset('opacityinterp', [nPoints,nz], dtype=float64)
-
         self.acceptance_rate.createHdf(parent,'acceptance_rate', add_axis=nPoints, fillvalue=nan)
-#        parent.create_dataset('rate', [nPoints,self.rate.size], dtype=self.rate.dtype)
         self.data_misfit_v.createHdf(parent, 'phids', add_axis=nPoints, fillvalue=nan)
-        #parent.create_dataset('phids', [nPoints,self.PhiDs.size], dtype=self.PhiDs.dtype)
         self.halfspace.createHdf(parent, 'halfspace', add_axis=nPoints, fillvalue=nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
