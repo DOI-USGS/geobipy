@@ -22,7 +22,7 @@ setup(name='geobipy',
     version="1.0.0",
     description='Markov chain Monte Carlo inversion',
     long_description=readme(),
-    url = 'https://github.com/usgs/geobipy',
+    url = 'https://github.com/DOI-USGS/geobipy',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved',
