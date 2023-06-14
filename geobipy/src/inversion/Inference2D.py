@@ -61,7 +61,7 @@ class Inference2D(myObject):
 
         self.fName = hdf5_file_path
         self.directory = split(hdf5_file_path)[0]
-        self.line_number = float64(os.path.splitext(split(hdf5_file_path)[1])[0])
+        # self.line_number = float64(os.path.splitext(split(hdf5_file_path)[1])[0])
 
         self.hdfFile = None
         if (hdf5_file is None): # Open the file
@@ -185,17 +185,15 @@ class Inference2D(myObject):
     #     opacity = opacity.normalize()
     #     return 1.0 - opacity
 
-    @cached_property
-    def bestData(self):
-        """ Get the best data """
-
-        attr = self._attrTokey('best data')
-        dtype = self.hdfFile[attr[0]].attrs['repr']
-        if "FdemDataPoint" in dtype:
-            bestData = FdemData.fromHdf(self.hdfFile[attr[0]])
-        elif "TdemDataPoint" in dtype:
-            bestData = TdemData.fromHdf(self.hdfFile[attr[0]])
-        return bestData
+    # @cached_property
+    # def bestData(self):
+    #     """ Get the best data """
+    #     dtype = self.hdfFile['data'].attrs['repr']
+    #     if "FdemDataPoint" in dtype:
+    #         bestData = FdemData.fromHdf(self.hdfFile[attr[0]])
+    #     elif "TdemDataPoint" in dtype:
+    #         bestData = TdemData.fromHdf(self.hdfFile[attr[0]])
+    #     return bestData
 
     @cached_property
     def best_halfspace(self, log=None):
@@ -205,7 +203,11 @@ class Inference2D(myObject):
 
     @cached_property
     def burned_in(self):
-        return StatArray.StatArray(asarray(self.hdfFile['burnedin']))
+        if 'burned_in' in self.hdfFile:
+            key = 'burned_in'
+        elif 'burnedin' in self.hdfFile:
+            key = 'burnedin'
+        return StatArray.StatArray(asarray(self.hdfFile[key]))
 
     def percentile(self, percent, slic=None):
         # Read in the opacity if present
@@ -975,8 +977,8 @@ class Inference2D(myObject):
 
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
-        out.mesh.z.relativeTo = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
 
+        out.mesh.z.relativeTo = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
         out.mesh.y.relativeTo = self.halfspace
 
         return out
@@ -1086,6 +1088,25 @@ class Inference2D(myObject):
     #         channel = s_[:]
 
     #     cP.plot(self.mesh.x, self.bestData.predictedData[:, channel], **kwargs)
+
+    def plot_burned_in(self, **kwargs):
+
+        x = self.axis(kwargs.pop('x', 'x'))
+        cmap = plt.get_cmap(kwargs.pop('cmap', 'cividis'))
+        labels = kwargs.pop('labels', True)
+
+        plt.fill_between(x, self.burned_in, 0.0, step='mid', color=cmap(1.0), label="")
+        plt.fill_between(x, 1-self.burned_in, 0.0, step='mid', color=cmap(1.0), label="")
+
+    def plot_channel_saturation(self, **kwargs):
+
+        kwargs['x'] = kwargs.pop('x', 'x')
+        labels = kwargs.pop('labels', True)
+        kwargs['color'] = kwargs.pop('color', 'k')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
+        kwargs['ylim'] = [kwargs.pop('ymin', 0.0), kwargs.pop('ymax', 1.0)]
+
+        self.data.plot(values=self.data.channel_saturation, **kwargs)
 
     def plot_data_elevation(self, **kwargs):
         """ Adds the data elevations to a plot """
@@ -1448,6 +1469,7 @@ class Inference2D(myObject):
 
         model = self.mean_parameters()
 
+
         model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
 
         if kwargs.pop('use_variance', False):
@@ -1721,91 +1743,91 @@ class Inference2D(myObject):
         return hdfRead.readKeyFromFile(self.hdfFile, self.fName, iDs, keys, index=index, **kwargs)
 
 
-    def _attrTokey(self, attributes):
-        """ Takes an easy to remember user attribute and converts to the tag in the HDF file """
-        if (isinstance(attributes, str)):
-            attributes = [attributes]
-        res = []
-        nSys= None
-        for attr in attributes:
-            low = attr.lower()
-            if (low == 'iteration #'):
-                res.append('i')
-            elif (low == '# of markov chains'):
-                res.append('nmc')
-            elif (low == 'burned in'):
-                res.append('burnedin')
-            elif (low == 'burn in #'):
-                res.append('iburn')
-            elif (low == 'data multiplier'):
-                res.append('multiplier')
-            elif (low == 'height posterior'):
-                res.append('data/z/posterior')
-            elif (low == 'fiducials'):
-                res.append('data/fiducial')
-            elif (low == 'labels'):
-                res.append('labels')
-            elif (low == 'layer posterior'):
-                res.append('model/nCells/posterior')
-            elif (low == 'layer depth posterior'):
-                res.append('model/edges/posterior')
-            elif (low == 'best data'):
-                res.append('data')
-            elif (low == 'x'):
-                res.append('data/x')
-            elif (low == 'y'):
-                res.append('data/y')
-            elif (low == 'z'):
-                res.append('data/z')
-            elif (low == 'elevation'):
-                res.append('data/e')
-            elif (low == 'observed data'):
-                res.append('data/d')
-            elif (low == 'predicted data'):
-                res.append('data/p')
-            elif (low == 'total error'):
-                res.append('data/s')
-            elif (low == '# of systems'):
-                res.append('nsystems')
-            elif (low == 'additive error'):
-                res.append('data/additive_error')
-            elif (low == 'relative error'):
-                res.append('data/relative_error')
-            elif (low == 'best model'):
-                res.append('model')
-            elif (low == 'meaninterp'):
-                res.append('meaninterp')
-            elif (low == 'bestinterp'):
-                res.append('bestinterp')
-            elif (low == 'opacityinterp'):
-                res.append('opacityinterp')
-            elif (low == '# layers'):
-                res.append('model/nCells')
-            elif (low == 'current data'):
-                res.append('data')
-            elif (low == 'hit map'):
-                res.append('model/values/posterior')
-            elif (low == 'hitmap/y'):
-                res.append('model/values/posterior/y')
-            elif (low == 'doi'):
-                res.append('doi')
-            elif (low == 'data misfit'):
-                res.append('phids')
-            elif (low == 'relative error posterior'):
-                if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
-                for i in range(nSys):
-                    res.append('data/relative_error/posterior' +str(i))
-            elif (low == 'additive error posterior'):
-                if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
-                for i in range(nSys):
-                    res.append('data/additive_error/posterior' +str(i))
-            elif (low == 'inversion time'):
-                res.append('invtime')
-            elif (low == 'saving time'):
-                res.append('savetime')
-            else:
-                assert False, self.possibleAttributes(attr)
-        return res
+    # def _attrTokey(self, attributes):
+    #     """ Takes an easy to remember user attribute and converts to the tag in the HDF file """
+    #     if (isinstance(attributes, str)):
+    #         attributes = [attributes]
+    #     res = []
+    #     nSys= None
+    #     for attr in attributes:
+    #         low = attr.lower()
+    #         if (low == 'iteration #'):
+    #             res.append('i')
+    #         elif (low == '# of markov chains'):
+    #             res.append('nmc')
+    #         elif (low == 'burned in'):
+    #             res.append('burned_in')
+    #         elif (low == 'burn in #'):
+    #             res.append('iburn')
+    #         elif (low == 'data multiplier'):
+    #             res.append('multiplier')
+    #         elif (low == 'height posterior'):
+    #             res.append('data/z/posterior')
+    #         elif (low == 'fiducials'):
+    #             res.append('data/fiducial')
+    #         elif (low == 'labels'):
+    #             res.append('labels')
+    #         elif (low == 'layer posterior'):
+    #             res.append('model/nCells/posterior')
+    #         elif (low == 'layer depth posterior'):
+    #             res.append('model/edges/posterior')
+    #         elif (low == 'best data'):
+    #             res.append('data')
+    #         elif (low == 'x'):
+    #             res.append('data/x')
+    #         elif (low == 'y'):
+    #             res.append('data/y')
+    #         elif (low == 'z'):
+    #             res.append('data/z')
+    #         elif (low == 'elevation'):
+    #             res.append('data/e')
+    #         elif (low == 'observed data'):
+    #             res.append('data/d')
+    #         elif (low == 'predicted data'):
+    #             res.append('data/p')
+    #         elif (low == 'total error'):
+    #             res.append('data/s')
+    #         elif (low == '# of systems'):
+    #             res.append('nsystems')
+    #         elif (low == 'additive error'):
+    #             res.append('data/additive_error')
+    #         elif (low == 'relative error'):
+    #             res.append('data/relative_error')
+    #         elif (low == 'best model'):
+    #             res.append('model')
+    #         elif (low == 'meaninterp'):
+    #             res.append('meaninterp')
+    #         elif (low == 'bestinterp'):
+    #             res.append('bestinterp')
+    #         elif (low == 'opacityinterp'):
+    #             res.append('opacityinterp')
+    #         elif (low == '# layers'):
+    #             res.append('model/nCells')
+    #         elif (low == 'current data'):
+    #             res.append('data')
+    #         elif (low == 'hit map'):
+    #             res.append('model/values/posterior')
+    #         elif (low == 'hitmap/y'):
+    #             res.append('model/values/posterior/y')
+    #         elif (low == 'doi'):
+    #             res.append('doi')
+    #         elif (low == 'data misfit'):
+    #             res.append('phids')
+    #         elif (low == 'relative error posterior'):
+    #             if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
+    #             for i in range(nSys):
+    #                 res.append('data/relative_error/posterior' +str(i))
+    #         elif (low == 'additive error posterior'):
+    #             if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
+    #             for i in range(nSys):
+    #                 res.append('data/additive_error/posterior' +str(i))
+    #         elif (low == 'inversion time'):
+    #             res.append('invtime')
+    #         elif (low == 'saving time'):
+    #             res.append('savetime')
+    #         else:
+    #             assert False, self.possibleAttributes(attr)
+    #     return res
 
 
     def possibleAttributes(self, askedFor=""):
