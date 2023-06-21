@@ -278,6 +278,85 @@ class Point(myObject):
 
         return channels
 
+    @staticmethod
+    def _csv_n_points(filename):
+        """Read the number of points in a data file
+
+        Parameters
+        ----------
+        filename : str or list of str.
+            Path to the files.
+
+        Returns
+        -------
+        nPoints : int
+            Number of observations.
+
+        """
+        # if isinstance(filename, str):
+        #     filename = [filename]
+
+        # nPoints = asarray([fIO.getNlines(df, 1) for df in filename])
+
+        # if nPoints.size > 1:
+        #     assert all(diff(nPoints) == 0), Exception('Number of data points must match in all data files')
+        # return nPoints[0]
+        nPoints = fIO.getNlines(filename, 1)
+
+        # if nPoints.size > 1:
+            # assert all(diff(nPoints) == 0), Exception('Number of data points must match in all data files')
+        return nPoints
+
+    @staticmethod
+    def _csv_channels(filename):
+        """Get the column indices from a csv file.
+
+        Parameters
+        ----------
+        fileName : str
+            Path to the data file.
+
+        Returns
+        -------
+        nPoints : int
+            Number of measurements.
+        columnIndex : ints
+            The column indices for line, id, x, y, z, elevation, data, uncertainties.
+
+        """
+
+        indices = []
+
+        # Get the column headers of the data file
+        channels = fIO.get_column_name(filename)
+        nChannels = len(channels)
+
+        x_names = ('e', 'x','easting')
+        y_names = ('n', 'y', 'northing')
+        z_names = ('alt', 'altitude', 'laser', 'bheight', 'height')
+        e_names = ('dtm','dem_elev','dem_np','topo', 'elev', 'elevation')
+
+        n = 0
+        labels = [None]*3
+
+        for channel in channels:
+            cTmp = channel.lower()
+            if (cTmp in x_names):
+                n += 1
+                labels[0] = channel
+            elif (cTmp in y_names):
+                n += 1
+                labels[1] = channel
+            elif (cTmp in z_names):
+                n += 1
+                labels[2] = channel
+            elif(cTmp in e_names):
+                labels.append(channel)
+
+        assert not any([x is None for x in labels[:3]]), Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(PointCloud3D.fileInformation()))
+        assert n == 3 and len(labels) <= 4, Exception("File must contain columns for easting, northing, height. May also have an elevation column \n {}".format(PointCloud3D.fileInformation()))
+        return Point._csv_n_points(filename), labels
+
 
     def append(self, other):
         """Append pointclouds together
@@ -295,6 +374,44 @@ class Point(myObject):
         self.z = hstack([self.z, other.z])
         self.elevation = hstack([self.elevation, other.elevation])
 
+    def axis(self, axis='x'):
+        """Obtain the axis against which to plot values.
+
+        Parameters
+        ----------
+        axis : str
+            If axis is 'index', returns numpy.arange(self.nPoints)
+            If axis is 'x', returns self.x
+            If axis is 'y', returns self.y
+            If axis is 'z', returns self.z
+            If axis is 'r2d', returns cumulative distance along the line in 2D using x and y.
+            If axis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
+
+        Returns
+        -------
+        out : array_like
+            The requested axis.
+
+        """
+        assert axis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("axis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
+        if axis == 'index':
+            return StatArray.StatArray(arange(self.x.size), name="Index")
+        elif axis == 'x':
+            return self.x
+        elif axis == 'y':
+            return self.y
+        elif axis == 'z':
+            return self.z
+        elif axis == 'r2d':
+            r = diff(self.x)**2.0 + diff(self.y)**2.0
+            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+            distance[1:] = cumsum(sqrt(r))
+            return distance
+        elif axis == 'r3d':
+            r = diff(self.x)**2.0 + diff(self.y)**2.0 + diff(self.z)**2.0
+            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+            distance[1:] = cumsum(sqrt(r))
+            return distance
 
     @property
     def bounds(self):
@@ -751,7 +868,7 @@ class Point(myObject):
         return self.kdtree.query(x, k, eps, p, distance_upper_bound=radius)
 
 
-    def plot(self, values, xAxis='index', **kwargs):
+    def plot(self, values, x='index', **kwargs):
         """Line plot of values against a co-ordinate.
 
         Parameters
@@ -776,10 +893,12 @@ class Point(myObject):
         geobipy.plotting.plot : For additional keyword arguments
 
         """
-        x = self.getXAxis(xAxis)
+        x = self.getXAxis(x)
         ax = cP.plot(x, values, **kwargs)
         return ax
 
+    def plot_data_elevation(self, **kwargs):
+        self.plot(values = self.z + self.elevation, **kwargs)
 
     def set_priors(self, x_prior=None, y_prior=None, z_prior=None, **kwargs):
 
@@ -1134,10 +1253,10 @@ class Point(myObject):
     def summary(self):
         """Summary of self """
         msg =  "{}\n".format(type(self).__name__)
-        msg += "x:\n{}".format("|   "+(self.x.summary.replace("\n", "\n|   "))[:-4])
-        msg += "y:\n{}".format("|   "+(self.y.summary.replace("\n", "\n|   "))[:-4])
-        msg += "z:\n{}".format("|   "+(self.z.summary.replace("\n", "\n|   "))[:-4])
-        msg += "elevation:\n{}".format("|   "+(self.elevation.summary.replace("\n", "\n|   "))[:-4])
+        msg += "x:\n{}\n".format("|   "+(self.x.summary.replace("\n", "\n|   "))[:-4])
+        msg += "y:\n{}\n".format("|   "+(self.y.summary.replace("\n", "\n|   "))[:-4])
+        msg += "z:\n{}\n".format("|   "+(self.z.summary.replace("\n", "\n|   "))[:-4])
+        msg += "elevation:\n{}\n".format("|   "+(self.elevation.summary.replace("\n", "\n|   "))[:-4])
 
         return msg
 

@@ -30,6 +30,8 @@ class EmLoops(PointCloud3D, ABC):
 
     @property
     def moment(self):
+        if size(self._moment) == 0:
+            self._moment = StatArray.StatArray(self.nPoints, "Moment", "")
         return self._moment
 
     @moment.setter
@@ -48,6 +50,8 @@ class EmLoops(PointCloud3D, ABC):
 
     @property
     def pitch(self):
+        if size(self._pitch) == 0:
+            self._pitch = StatArray.StatArray(self.nPoints, "Pitch", "$^{o}$")
         return self._pitch
 
     @pitch.setter
@@ -66,6 +70,8 @@ class EmLoops(PointCloud3D, ABC):
 
     @property
     def roll(self):
+        if size(self._roll) == 0:
+            self._roll = StatArray.StatArray(self.nPoints, "Roll", "$^{o}$")
         return self._roll
 
     @roll.setter
@@ -83,7 +89,13 @@ class EmLoops(PointCloud3D, ABC):
         self._roll = StatArray.StatArray(values, "Roll", "$^{o}$")
 
     @property
+    def size(self):
+        return self.nPoints
+
+    @property
     def yaw(self):
+        if size(self._yaw) == 0:
+            self._yaw = StatArray.StatArray(self.nPoints, "Yaw", "$^{o}$")
         return self._yaw
 
     @yaw.setter
@@ -102,7 +114,10 @@ class EmLoops(PointCloud3D, ABC):
 
     @property
     def orientation(self):
-        tmp = ['x', 'y', 'z']
+        if size(self._orientation) == 0:
+            self._orientation = StatArray.StatArray(self.nPoints, "Orientation", "")
+
+        tmp = ('x', 'y', 'z')
         return [tmp[i] for i in self._orientation]
 
     @orientation.setter
@@ -121,13 +136,11 @@ class EmLoops(PointCloud3D, ABC):
     @property
     def summary(self):
         """Print a summary"""
-        msg = ("{}"
-               "Orientation: {}\n"
-               "Moment: {}\n"
-               "Pitch: {}\n"
-               "Roll: {}\n"
-               "Yaw: {}\n"
-               ).format(super().summary, self.orientation, self.moment, self.pitch, self.roll, self.yaw)
+        msg = super().summary
+        msg += "moment:\n{}\n".format("|   "+(self.moment.summary.replace("\n", "\n|   "))[:-4])
+        msg += "pitch:\n{}\n".format("|   "+(self.pitch.summary.replace("\n", "\n|   "))[:-4])
+        msg += "roll:\n{}\n".format("|   "+(self.roll.summary.replace("\n", "\n|   "))[:-4])
+        msg += "yaw:\n{}\n".format("|   "+(self.yaw.summary.replace("\n", "\n|   "))[:-4])
         return msg
 
     def __deepcopy__(self, memo={}):
@@ -152,13 +165,18 @@ class EmLoops(PointCloud3D, ABC):
 
         """
         out = super().__getitem__(i)
-        i = unique(i)
+
+        if not isinstance(i, slice):
+            i = unique(i)
+
+        if self.nPoints == 0:
+            i = None
 
         out._orientation = self._orientation[i]
-        out._moment = self.moment[i]
-        out._pitch = self.pitch[i]
-        out._roll = self.roll[i]
-        out._yaw = self.yaw[i]
+        out.moment = self.moment[i]
+        out.pitch = self.pitch[i]
+        out.roll = self.roll[i]
+        out.yaw = self.yaw[i]
         return out
 
 

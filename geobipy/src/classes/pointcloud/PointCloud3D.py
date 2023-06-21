@@ -70,6 +70,8 @@ class PointCloud3D(myObject):
         # StatArray of elevation
         self.elevation = elevation
 
+        # raise DeprecationWarning()
+
     def __deepcopy__(self, memo={}):
         result = type(self).__new__(type(self))
         result._nPoints = 0
@@ -91,17 +93,20 @@ class PointCloud3D(myObject):
             The potentially smaller point cloud
 
         """
-        i = unique(i)
+        if not isinstance(i, slice):
+            i = unique(i)
 
         if size(i) == 1:
             cls = self.single
         else:
             cls = type(self)
 
-        return cls(x=self.x[i],
-                   y=self.y[i],
-                   z=self.z[i],
-                   elevation=self.elevation[i])
+        out = cls()
+        if self.x.size > 0: out.x = self.x[i]
+        if self.y.size > 0: out.y = self.y[i]
+        if self.z.size > 0: out.z = self.z[i]
+        if self.elevation.size > 0: out.elevation = self.elevation[i]
+        return out
 
     def _as_dict(self):
         return {self.x.name.replace(' ', '_'): self.x,
@@ -112,6 +117,8 @@ class PointCloud3D(myObject):
 
     @property
     def x(self):
+        if size(self._x) == 0:
+            self._x = StatArray.StatArray(self.nPoints, "Easting", "m", dtype=float64)
         return self._x
 
     @x.setter
@@ -130,6 +137,8 @@ class PointCloud3D(myObject):
 
     @property
     def y(self):
+        if size(self._y) == 0:
+            self._y = StatArray.StatArray(self.nPoints, "Northing", "m", dtype=float64)
         return self._y
 
     @y.setter
@@ -148,6 +157,8 @@ class PointCloud3D(myObject):
 
     @property
     def z(self):
+        if size(self._z) == 0:
+            self._z = StatArray.StatArray(self.nPoints, "Height", "m", dtype=float64)
         return self._z
 
     @z.setter
@@ -166,6 +177,8 @@ class PointCloud3D(myObject):
 
     @property
     def elevation(self):
+        if size(self._elevation) == 0:
+            self._elevation = StatArray.StatArray(self.nPoints, "Elevation", "m", dtype=float64)
         return self._elevation
 
     @elevation.setter
@@ -359,48 +372,6 @@ class PointCloud3D(myObject):
         x_grid = self.x.centred_grid_nodes(dx)
         y_grid = self.y.centred_grid_nodes(dy)
         return RectilinearMesh2D(x_edges=x_grid, y_edges=y_grid)
-
-    def axis(self, axis='x'):
-        """Obtain the axis against which to plot values.
-
-        Parameters
-        ----------
-        axis : str
-            If axis is 'index', returns numpy.arange(self.nPoints)
-            If axis is 'x', returns self.x
-            If axis is 'y', returns self.y
-            If axis is 'z', returns self.z
-            If axis is 'r2d', returns cumulative distance along the line in 2D using x and y.
-            If axis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
-
-        Returns
-        -------
-        out : array_like
-            The requested axis.
-
-        """
-        assert axis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("axis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
-        if axis == 'index':
-            return StatArray.StatArray(arange(self.x.size), name="Index")
-        elif axis == 'x':
-            return self.x
-        elif axis == 'y':
-            return self.y
-        elif axis == 'z':
-            return self.z
-        elif axis == 'r2d':
-            r = diff(self.x)**2.0
-            r += diff(self.y)**2.0
-            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
-            distance[1:] = cumsum(sqrt(r))
-            return distance
-        elif axis == 'r3d':
-            r = diff(self.x)**2.0
-            r += diff(self.y)**2.0
-            r += diff(self.z)**2.0
-            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
-            distance[1:] = cumsum(sqrt(r))
-            return distance
 
 
     def interpolate(self, dx=None, dy=None, mesh=None, values=None , method='mc', mask = False, clip = True, i=None, block=False, **kwargs):
@@ -627,9 +598,6 @@ class PointCloud3D(myObject):
         assert (not self.kdtree is None), TypeError('kdtree has not been set, use self.setKdTree()')
         return self.kdtree.query(x, k, eps, p, distance_upper_bound=radius)
 
-    def plot_data_elevation(self, **kwargs):
-        self.plot(values = self.z + self.elevation, **kwargs)
-
     def plot(self, values, x='index', **kwargs):
         """Line plot of values against a co-ordinate.
 
@@ -846,7 +814,6 @@ class PointCloud3D(myObject):
         geobipy.plotting.Scatter2D : For additional keyword arguments you may use.
 
         """
-
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.1)
         kwargs['c'] = kwargs.pop('c', self.z)
 
@@ -873,11 +840,13 @@ class PointCloud3D(myObject):
 
     @property
     def summary(self):
-        """ Display a summary of the 3D Point Cloud """
-        msg = ("{}: \n"
-              "Number of Points: : {} \n"
-              "{} {} {} {}").format(type(self).__name__, self.nPoints,
-                                    self.x.summary, self.y.summary, self.z.summary, self.elevation.summary)
+        """Summary of self """
+        msg =  "{}\n".format(type(self).__name__)
+        msg += "x:\n{}\n".format("|   "+(self.x.summary.replace("\n", "\n|   "))[:-4])
+        msg += "y:\n{}\n".format("|   "+(self.y.summary.replace("\n", "\n|   "))[:-4])
+        msg += "z:\n{}\n".format("|   "+(self.z.summary.replace("\n", "\n|   "))[:-4])
+        msg += "elevation:\n{}\n".format("|   "+(self.elevation.summary.replace("\n", "\n|   "))[:-4])
+
         return msg
 
 
