@@ -86,7 +86,10 @@ class FdemData(Data):
         # Data Class containing xyz and channel values
         super().__init__(**kwargs)
 
-        self.channelNames = kwargs.get('channel_names', None)
+        self._powerline = StatArray.StatArray(self._nPoints, "Powerline")
+        self._magnetic = StatArray.StatArray(self._nPoints, "Magnetic")
+
+        # self.channelNames = kwargs.get('channel_names', None)
 
         self.powerline = kwargs.get('powerline', None)
         self.magnetic = kwargs.get('magnetic', None)
@@ -106,39 +109,36 @@ class FdemData(Data):
 
     @property
     def magnetic(self):
+        if self._magnetic.size == 0:
+            self._magnetic = StatArray.StatArray(self._nPoints, "Magnetic", "nT")
         return self._magnetic
 
     @magnetic.setter
     def magnetic(self, values):
-        if (values is None):
-            self._magnetic = StatArray.StatArray(self.nPoints, "Magnetic", "nT")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values)
-            assert size(values) == self.nPoints, ValueError("magnetic must have size {}".format(self.nPoints))
-            if (isinstance(values, StatArray.StatArray)):
-                self._magnetic = deepcopy(values)
-            else:
+        if values is not None: # Set a default array
+            if self._nPoints == 0: self.nPoints = size(values)
+            if (self._magnetic.size != self._nPoints):
                 self._magnetic = StatArray.StatArray(values, "Magnetic", "nT")
+                return
 
+            self._magnetic[:] = values
 
     @property
     def powerline(self):
+        if self._powerline.size == 0:
+            self._powerline = StatArray.StatArray(self._nPoints, "Powerline")
         return self._powerline
-
 
     @powerline.setter
     def powerline(self, values):
-        if (values is None):
-            self._powerline = StatArray.StatArray(self.nPoints, "Powerline")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values)
-            assert size(values) == self.nPoints, ValueError("powerline must have size {}".format(self.nPoints))
-            if (isinstance(values, StatArray.StatArray)):
-                self._powerline = deepcopy(values)
-            else:
+        if values is not None: # Set a default array
+            if self._nPoints == 0: self.nPoints = size(values)
+            if (self._powerline.size != self._nPoints):
                 self._powerline = StatArray.StatArray(values, "Powerline")
+                return
+
+            self._powerline[:] = values
+
 
     @Data.std.getter
     def std(self):
@@ -635,7 +635,6 @@ class FdemData(Data):
         magnetic = None
 
         nPoints, location_channels = Data._csv_channels(data_filename)
-        print(nPoints, location_channels)
 
         # Get the column headers of the data file
         channels = fIO.get_column_name(data_filename)
@@ -650,7 +649,6 @@ class FdemData(Data):
 
         import numpy as np
 
-        print(inPhase)
         for j, channel in enumerate(channels):
             cTmp = channel.lower()
             if cTmp in ['powerline']:
@@ -751,8 +749,6 @@ class FdemData(Data):
 
         if endOfFile:
             return None
-
-        print(self._iData)
 
         D = squeeze(df[self._iData].values)
 

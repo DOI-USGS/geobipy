@@ -1562,7 +1562,7 @@ class StatArray(ndarray, myObject):
             else:
                 shap = add_axis.shape
 
-            if (self.size == 1):
+            if (self.size <= 1):
                 grp.create_dataset('data', [*shap], dtype=self.dtype, fillvalue=fillvalue)
             else:
                 shape = self.shape if shape is None else shape

@@ -1,6 +1,6 @@
 from copy import deepcopy
 from numpy import arange, argpartition, argsort, argwhere, asarray, column_stack, cumsum, diff, empty
-from numpy import float64, hstack, inf, int32, int64, isnan, mean, meshgrid, nan, nanmin, nanmax
+from numpy import float64, hstack, inf, int32, int64, isnan, maximum, mean, meshgrid, nan, nanmin, nanmax
 from numpy import ravel_multi_index, size, sqrt, squeeze, unique, vstack, zeros
 from numpy.linalg import norm
 from ...classes.core.myObject import myObject
@@ -190,74 +190,61 @@ class Point(myObject):
 
     @property
     def x(self):
-        # if self._x.size == 0:
-        #     self._x = StatArray.StatArray(self._nPoints, "Easting", "m")
+        if self._x.size == 0:
+            self._x = StatArray.StatArray(self._nPoints, "Easting", "m")
         return self._x
 
     @x.setter
     def x(self, values):
-        if values is None: # Set a default array
-            self._x = StatArray.StatArray(self._nPoints, "Easting", "m")
-        else:
-            if self._nPoints == 0:
-                self.nPoints = size(values)
-            if size(self._x) != self._nPoints:
+        if values is not None: # Set a default array
+            self.nPoints = size(values)
+            if (self._x.size != self._nPoints):
                 self._x = StatArray.StatArray(values, "Easting", "m")
                 return
 
             self._x[:] = values
 
-
     @property
     def y(self):
-        # if self._y.size == 0:
-        #     self._y = StatArray.StatArray(self._nPoints, "Northing", "m")
+        if self._y.size == 0:
+            self._y = StatArray.StatArray(self._nPoints, "Northing", "m")
         return self._y
 
     @y.setter
     def y(self, values):
-        if values is None:
-            self._y = StatArray.StatArray(self._nPoints, "Northing", "m")
-        else:
-            if self._nPoints == 0:
-                self.nPoints = size(values)
-            if size(self._y) != self._nPoints:
+        if values is not None:
+            self.nPoints = size(values)
+            if (self._y.size != self._nPoints):
                 self._y = StatArray.StatArray(values, "Northing", "m")
                 return
             self._y[:] = values
 
     @property
     def z(self):
-        # if self._z.size == 0:
-        #     self._z = StatArray.StatArray(self._nPoints, "Height", "m")
+        if self._z.size == 0:
+            self._z = StatArray.StatArray(self._nPoints, "Height", "m")
         return self._z
 
     @z.setter
     def z(self, values):
-        if values is None: # Set a default array
-            self._z = StatArray.StatArray(self._nPoints, "Height", "m")
-        else:
-            if self._nPoints == 0:
-                self.nPoints = size(values)
-            if size(self._z) != self._nPoints:
+        if values is not None: # Set a default array
+            self.nPoints = size(values)
+            if (self._z.size != self._nPoints):
                 self._z = StatArray.StatArray(values, "Height", "m")
                 return
             self._z[:] = values
 
     @property
     def elevation(self):
-        # if self._elevation.size == 0:
-        #     self._elevation = StatArray.StatArray(self._nPoints, "Elevation", "m")
+        if self._elevation.size == 0:
+            self._elevation = StatArray.StatArray(self._nPoints, "Elevation", "m")
         return self._elevation
 
     @elevation.setter
     def elevation(self, values):
-        if values is None: # Set a default array
-            self._elevation = StatArray.StatArray(self._nPoints, "Elevation", "m", dtype=float64)
-        else:
-            if self._nPoints == 0:
-                self._nPoints = size(values)
-            if size(self._elevation) != self._nPoints:
+        if values is not None: # Set a default array
+            self.nPoints = size(values)
+            if (self._elevation.size != self._nPoints):
                 self._elevation = StatArray.StatArray(values, "Elevation", "m", dtype=float64)
                 return
             self._elevation[:] = values
@@ -269,7 +256,7 @@ class Point(myObject):
 
     @nPoints.setter
     def nPoints(self, value):
-        if self._nPoints == 0:
+        if self._nPoints == 0 and value > 0:
             self._nPoints = int32(value)
 
     @property
@@ -1327,12 +1314,13 @@ class Point(myObject):
 
     @classmethod
     def Irecv(cls, source, world, **kwargs):
-        x = StatArray.StatArray.Irecv(source, world)
-        y = StatArray.StatArray.Irecv(source, world)
-        z = StatArray.StatArray.Irecv(source, world)
-        e = StatArray.StatArray.Irecv(source, world)
+        out = cls(**kwargs)
+        out._x = StatArray.StatArray.Irecv(source, world)
+        out._y = StatArray.StatArray.Irecv(source, world)
+        out._z = StatArray.StatArray.Irecv(source, world)
+        out._elevation = StatArray.StatArray.Irecv(source, world)
 
-        return cls(x=x, y=y, z=z, elevation=e, **kwargs)
+        return out
 
     def Scatterv(self, starts, chunks, world, root=0):
         """ScatterV a PointCloud3D using MPI

@@ -1,5 +1,6 @@
 from copy import deepcopy
 import numpy as np
+from numpy import int32
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -20,8 +21,8 @@ class Loop_pair(Point, PointCloud3D):
         self.y.name = 'y offset'
         self.z.name = 'z offset'
 
-        if transmitter is None and receiver is None:
-            return
+        self._receiver = EmLoop()
+        self._transmitter = EmLoop()
 
         self.transmitter = transmitter
         self.receiver = receiver
@@ -50,29 +51,49 @@ class Loop_pair(Point, PointCloud3D):
                         -self.receiver.pitch.item(),
                         -self.receiver.yaw.item())
 
-    @property
-    def transmitter(self):
-        return self._transmitter
+    @Point.nPoints.setter
+    def nPoints(self, value):
+        if self._nPoints == 0 and value > 0:
+            self._nPoints = int32(value)
 
-    @transmitter.setter
-    def transmitter(self, value):
-        if value is not None:
-            assert isinstance(value, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop')
-            self._transmitter = value
+            self.receiver.nPoints = value
+            self.transmitter.nPoints = value
 
     @property
     def receiver(self):
+        if self._receiver.nPoints == 0:
+            self._receiver = EmLoop()
         return self._receiver
 
     @receiver.setter
-    def receiver(self, value):
-        if value is not None:
-            assert isinstance(value, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop')
-            self._receiver = value
+    def receiver(self, values):
+        if (values is not None):
+            assert isinstance(values, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop(s)')
+            self.nPoints = values.nPoints
+            assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
+            values = deepcopy(values)
 
-            self.x = self.receiver.x - self.transmitter.x
-            self.y = self.receiver.y - self.transmitter.y
-            self.z = self.receiver.z - self.transmitter.z
+            self._receiver = values
+
+        self.x = self.receiver.x - self.transmitter.x
+        self.y = self.receiver.y - self.transmitter.y
+        self.z = self.receiver.z - self.transmitter.z
+
+    @property
+    def transmitter(self):
+        if self._transmitter.nPoints == 0:
+            self._transmitter = EmLoop()
+        return self._transmitter
+
+    @transmitter.setter
+    def transmitter(self, values):
+        if (values is not None):
+            assert isinstance(values, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop(s)')
+            if self.nPoints == 0: self.nPoints = values.nPoints
+            assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
+            values = deepcopy(values)
+
+            self._transmitter = values
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)

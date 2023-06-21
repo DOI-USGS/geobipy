@@ -9,7 +9,7 @@
 from copy import deepcopy
 
 from numpy import allclose, any, asarray, cumsum, empty, float64, full
-from numpy import hstack, int32, isnan, nan, nanmax, nanmean, nanmedian, nanmin, nanstd
+from numpy import hstack, int32, int64, isnan, nan, nanmax, nanmean, nanmedian, nanmin, nanstd
 from numpy import ravel_multi_index, repeat, s_, shape, size, sqrt, squeeze, unique, vstack, zeros
 from numpy import printoptions
 from numpy import all as npall
@@ -19,7 +19,7 @@ from pandas import read_csv
 
 from ...system.CircularLoop import CircularLoop
 from ...system.CircularLoops import CircularLoops
-from ...pointcloud.PointCloud3D import PointCloud3D
+from ...pointcloud.Point import Point
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
 from ....classes.core import StatArray
@@ -78,15 +78,24 @@ class TdemData(Data):
         # kwargs['components_per_channel'] = kwargs.get('components_per_channel', self.system[0].components)
         kwargs['units'] = r"$\frac{V}{m^{2}}$"
 
+        self.loop_pair = Loop_pair(kwargs.get('transmitter'), kwargs.get('receiver'))
+
         # Data Class containing xyz and channel values
         super().__init__(**kwargs)
+
+        self._secondary_field           = StatArray.StatArray((self.nPoints, self.nChannels), "Secondary field", self.units)
+        self._predicted_secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
+        self._primary_field             = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
+        self._predicted_primary_field   = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
+
 
         self.primary_field = kwargs.get('primary_field')
         self.secondary_field = kwargs.get('secondary_field')
         self.predicted_primary_field = kwargs.get('predicted_primary_field')
         self.predicted_secondary_field = kwargs.get('predicted_secondary_field')
 
-        self.loop_pair = Loop_pair(kwargs.get('transmitter'), kwargs.get('receiver'))
+        # self.loop_pair = Loop_pair(kwargs.get('transmitter'), kwargs.get('receiver'))
+
         # # StatArray of Transmitter loops
         # self.transmitter = kwargs.get('transmitter')
         # # StatArray of Receiever loops
@@ -113,7 +122,6 @@ class TdemData(Data):
 
     @Data.data.getter
     def data(self):
-
         if size(self._data, 0) == 0:
             self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
 
@@ -121,8 +129,6 @@ class TdemData(Data):
             for i in range(self.n_components):
                 ic = self._component_indices(i, j)
                 self._data[:, ic] = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
-
-            # self._data[isnan(self.secondary_field)] = nan
 
         return self._data
 
@@ -155,6 +161,13 @@ class TdemData(Data):
     #         else:
     #             self._loopOffset = StatArray.StatArray(values, "Loop Offset")
 
+    @Point.nPoints.setter
+    def nPoints(self, value):
+        if self._nPoints == 0 and value > 0:
+            self._nPoints = int32(value)
+
+        self.loop_pair.nPoints = value
+
     @property
     def nTimes(self):
         return asarray([x.nTimes for x in self.system])
@@ -168,17 +181,15 @@ class TdemData(Data):
 
     @predicted_primary_field.setter
     def predicted_primary_field(self, values):
-        shp = (self.nPoints, self.n_components * self.nSystems)
-        if values is None:
-            self._predicted_primary_field = StatArray.StatArray(shp, "Predicted primary field", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-            # if self.nChannels == 0:
-            #     self.channels_per_system = size(values, 1)
+        if values is not None:
+            self.nPoints = size(values, 0)
+
             shp = (self.nPoints, self.n_components * self.nSystems)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("predicted_primary_field must have shape {}".format(shp))
-            self._predicted_primary_field = StatArray.StatArray(values)
+            if not allclose(self._predicted_primary_field.shape, shp):
+                self._predicted_primary_field = StatArray.StatArray(values, "Predicted primary field", self.units)
+                return
+
+            self._predicted_primary_field[:, :] = values
 
     @property
     def predicted_secondary_field(self):
@@ -189,18 +200,15 @@ class TdemData(Data):
 
     @predicted_secondary_field.setter
     def predicted_secondary_field(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            values = shp
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-            if self.nChannels == 0:
-                self.channels_per_system = size(values, 1)
-            shp = (self.nPoints, self.nChannels)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("predicted_seconday_field must have shape {}".format(shp))
+        if values is not None:
+            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
-        self._predicted_secondary_field = StatArray.StatArray(values, "Predicted secondary field", self.units)
+            shp = (self.nPoints, self.nChannels)
+            if not allclose(self._predicted_secondary_field.shape, shp):
+                self._predicted_secondary_field = StatArray.StatArray(values, "Predicted secondary field", self.units)
+                return
+
+            self._predicted_secondary_field[:, :] = values
 
     @property
     def primary_field(self):
@@ -211,34 +219,31 @@ class TdemData(Data):
 
     @primary_field.setter
     def primary_field(self, values):
-        shp = (self.nPoints, self.n_components * self.nSystems)
+        if values is not None:
+            self.nPoints = size(values, 0)
 
-        if values is None:
-            self._primary_field = StatArray.StatArray(shp, "Primary field", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-            # if self.nChannels == 0:
-            #     self.channels_per_system = size(values, 1)
             shp = (self.nPoints, self.n_components * self.nSystems)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("primary_field must have shape {}".format(shp))
-            self._primary_field = StatArray.StatArray(values)
+            if not allclose(self._primary_field.shape, shp):
+                self._primary_field = StatArray.StatArray(values, "Primary field", self.units)
+                return
+
+            self._primary_field[:, :] = values
 
     @property
     def receiver(self):
-        return self._receiver
+        return self.loop_pair.receiver
 
-    @receiver.setter
-    def receiver(self, values):
-        if (values is None):
-            self._receiver = CircularLoops()
-        else:
-            assert isinstance(values, CircularLoops), ValueError('receiver must have type geobipy.CircularLoops')
-            if self.nPoints == 0:
-                self.nPoints = values.nPoints
-            assert values.nPoints == self.nPoints, ValueError("receiver must have size {}".format(self.nPoints))
+    # @receiver.setter
+    # def receiver(self, values):
+    #     if (values is None):
+    #         self._receiver = CircularLoops()
+    #     else:
+    #         assert isinstance(values, CircularLoops), ValueError('receiver must have type geobipy.CircularLoops')
+    #         if self.nPoints == 0:
+    #             self.nPoints = values.nPoints
+    #         assert values.nPoints == self.nPoints, ValueError("receiver must have size {}".format(self.nPoints))
 
-            self._receiver = values
+    #         self._receiver = values
 
     @property
     def secondary_field(self):
@@ -249,17 +254,15 @@ class TdemData(Data):
 
     @secondary_field.setter
     def secondary_field(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._secondary_field = StatArray.StatArray(shp, "Secondary field", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-            if self.nChannels == 0:
-                self.channels_per_system = size(values, 1)
+        if values is not None:
+            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+
             shp = (self.nPoints, self.nChannels)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("seconday_field must have shape {}".format(shp))
-            self._secondary_field = StatArray.StatArray(values)
+            if not allclose(self._secondary_field.shape, shp):
+                self._secondary_field = StatArray.StatArray(values, "Secondary field", self.units)
+                return
+
+            self._secondary_field[:, :] = values
 
     @Data.std.getter
     def std(self):
@@ -304,21 +307,20 @@ class TdemData(Data):
 
     @property
     def transmitter(self):
-        return self._transmitter
+        return self.loop_pair.transmitter
 
-    @transmitter.setter
-    def transmitter(self, values):
+    # @transmitter.setter
+    # def transmitter(self, values):
 
-        if (values is None):
-            self._transmitter = CircularLoops()
-        else:
-            assert isinstance(values, CircularLoops), ValueError('transmitter must have type geobipy.CircularLoops')
-            if self.nPoints == 0:
-                self.nPoints = values.nPoints
-            assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
+    #     if (values is None):
+    #         self._transmitter = CircularLoops()
+    #     else:
+    #         assert isinstance(values, CircularLoops), ValueError('transmitter must have type geobipy.CircularLoops')
+    #         if self.nPoints == 0:
+    #             self.nPoints = values.nPoints
+    #         assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
 
-            self._transmitter = values
-
+    #         self._transmitter = values
     def _as_dict(self):
         out, order = super()._as_dict()
         out['tx_pitch'] = squeeze(asarray([x.pitch for x in self.transmitter]))
@@ -466,19 +468,22 @@ class TdemData(Data):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = CircularLoops(x=self.x, y=self.y, z=self.z,
-                            pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
-                            radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
+        transmitter = CircularLoops(x=self.x,
+                                    y=self.y,
+                                    z=self.z,
+                                    pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
+                                    radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
-                                     y = self.transmitter.y + loopOffset[:, 1],
-                                     z = self.transmitter.z + loopOffset[:, 2],
-                                     pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
-                                     radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
+        receiver = CircularLoops(x = transmitter.x + loopOffset[:, 0],
+                                 y = transmitter.y + loopOffset[:, 1],
+                                 z = transmitter.z + loopOffset[:, 2],
+                                 pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
+                                 radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
+        self.loop_pair = Loop_pair(transmitter, receiver)
         # Get the data values
         # iSys = self._systemIndices(0)
 
@@ -545,7 +550,7 @@ class TdemData(Data):
 
     def csv_channels(self, data_filename):
 
-        self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
+        self.nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
 
         self._channels = self._iC + self._iR + self._iT + self._iOffset + self._iData
         if len(self._iStd) > 0:
@@ -826,6 +831,7 @@ class TdemData(Data):
         """ Define item getter for TdemData """
         if not isinstance(i, slice):
             i = unique(i)
+
         return type(self)(self.system,
                         x=self.x[i],
                         y=self.y[i],

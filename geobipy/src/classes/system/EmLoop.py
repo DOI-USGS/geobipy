@@ -1,4 +1,4 @@
-from numpy import ceil, float64, int8, int32, minimum, unravel_index
+from numpy import asarray, ceil, float64, int8, int32, minimum, size, unique, unravel_index
 from copy import deepcopy
 from matplotlib.figure import Figure
 from matplotlib.pyplot import gcf
@@ -19,9 +19,15 @@ class EmLoop(Point, ABC):
 
     """
 
-    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, orientation='z', moment=1.0, pitch=0.0, roll=0.0, yaw=0.0, **kwargs):
+    def __init__(self, x=None, y=None, z=None, elevation=None, orientation=None, moment=None, pitch=None, roll=None, yaw=None, **kwargs):
 
         super().__init__(x, y, z, elevation, **kwargs)
+
+        self._orientation = StatArray.StatArray(self.nPoints, "Orientation", "", dtype=int32)
+        self._moment = StatArray.StatArray(self._nPoints, "Moment", "")
+        self._pitch = StatArray.StatArray(self._nPoints, "Pitch", "$^{o}$")
+        self._roll = StatArray.StatArray(self._nPoints, "Roll", "$^{o}$")
+        self._yaw = StatArray.StatArray(self._nPoints, "Yaw", "$^{o}$")
 
         # Orientation of the loop dipole
         self.orientation = orientation
@@ -33,6 +39,31 @@ class EmLoop(Point, ABC):
         self.roll = roll
         # Yaw of the loop
         self.yaw = yaw
+
+    def __getitem__(self, i):
+        """Define get item
+
+        Parameters
+        ----------
+        i : ints or slice
+            The indices of the points in the pointcloud to return
+
+        out : geobipy.PointCloud3D
+            The potentially smaller point cloud
+
+        """
+        out = super().__getitem__(i)
+
+        if not isinstance(i, slice):
+            i = unique(i)
+
+        _ = self.orientation
+        out._orientation = self._orientation[i]
+        out.moment = self.moment[i]
+        out.pitch = self.pitch[i]
+        out.roll = self.roll[i]
+        out.yaw = self.yaw[i]
+        return out
 
     @property
     def addressof(self):
@@ -48,93 +79,111 @@ class EmLoop(Point, ABC):
 
     @property
     def moment(self):
+        if size(self._moment) == 0:
+            self._moment = StatArray.StatArray(self.nPoints, "Moment", "")
         return self._moment
 
     @moment.setter
-    def moment(self, value):
-        if not isinstance(value, StatArray.StatArray):
-            value = float64(value)
-        # assert isinstance(value, (StatArray.StatArray, float, float64)), TypeError("pitch must have type float")
-        self._moment = StatArray.StatArray(value, 'Moment')
+    def moment(self, values):
+        if (values is not None):
+            self.nPoints = size(values)
+            if self._moment.size != self._nPoints:
+                self._moment = StatArray.StatArray(values, "Moment", "")
+                return
+
+            self._moment[:] = values
+
+    @property
+    def pitch(self):
+        if size(self._pitch) == 0:
+            self._pitch = StatArray.StatArray(self.nPoints, "Pitch", "$^{o}$")
+        return self._pitch
+
+    @pitch.setter
+    def pitch(self, values):
+        if (values is not None):
+            self.nPoints = size(values)
+            if self._pitch.size != self._nPoints:
+                self._pitch = StatArray.StatArray(values, "Pitch", "$^{o}$")
+                return
+
+            self._pitch[:] = values
+
+
+    @property
+    def roll(self):
+        if size(self._roll) == 0:
+            self._roll = StatArray.StatArray(self.nPoints, "Roll", "$^{o}$")
+        return self._roll
+
+    @roll.setter
+    def roll(self, values):
+        if (values is not None):
+            self.nPoints = size(values)
+            if self._roll.size != self._nPoints:
+                self._roll = StatArray.StatArray(values, "Roll", "$^{o}$")
+                return
+
+            self._roll[:] = values
+
+
+    @property
+    def size(self):
+        return self.nPoints
+
+    @property
+    def yaw(self):
+        if size(self._yaw) == 0:
+            self._yaw = StatArray.StatArray(self.nPoints, "Yaw", "$^{o}$")
+        return self._yaw
+
+    @yaw.setter
+    def yaw(self, values):
+        if (values is not None):
+            self.nPoints = size(values)
+            if self._yaw.size != self._nPoints:
+                self._yaw = StatArray.StatArray(values, "Yaw", "$^{o}$")
+                return
+
+            self._yaw[:] = values
+
+    @property
+    def orientation(self):
+        if size(self._orientation) == 0:
+            self._orientation = StatArray.StatArray(self.nPoints, "Orientation", "", dtype=int32)
+
+        tmp = ('x', 'y', 'z')
+        return [tmp[i] for i in self._orientation]
+
+    @orientation.setter
+    def orientation(self, values):
+        if (values is not None):
+            tmp = {'x': 0, 'y':1, 'z':2}
+
+            self.nPoints = size(values)
+
+            values = asarray([tmp[x.replace(" ", "")] for x in values])
+
+            if self._orientation.size != self._nPoints:
+                self._orientation = StatArray.StatArray(values, "Orientation", dtype=int32)
+                return
+
+            self._orientation[:] = values
 
     @property
     def n_posteriors(self):
         return super().n_posteriors + self.pitch.hasPosterior + self.roll.hasPosterior + self.yaw.hasPosterior
 
     @property
-    def pitch(self):
-        return self._pitch
-
-    @pitch.setter
-    def pitch(self, value):
-        if not isinstance(value, StatArray.StatArray):
-            value = float64(value)
-
-        if '_pitch' in self.__dict__:
-            self._pitch[0] = value
-        else:
-            self._pitch = StatArray.StatArray(value, 'Pitch', '$^{o}$')
-
-    @property
-    def roll(self):
-        return self._roll
-
-    @roll.setter
-    def roll(self, value):
-        if not isinstance(value, StatArray.StatArray):
-            value = float64(value)
-        if '_roll' in self.__dict__:
-            self._roll[0] = value
-        else:
-            self._roll = StatArray.StatArray(value, 'Roll', '$^{o}$')
-
-    @property
-    def yaw(self):
-        return self._yaw
-
-    @yaw.setter
-    def yaw(self, value):
-        if not isinstance(value, StatArray.StatArray):
-            value = float64(value)
-
-        if '_yaw' in self.__dict__:
-            self._yaw[0] = value
-        else:
-            self._yaw = StatArray.StatArray(value, 'Yaw', '$^{o}$')
-
-    @property
-    def orientation(self):
-        if self._orientation == 0:
-            return 'x'
-        elif self._orientation == 1:
-            return 'y'
-        else:
-            return 'z'
-
-    @orientation.setter
-    def orientation(self, value):
-        if isinstance(value, str):
-            assert value in ['x', 'y', 'z'], ValueError("orientation must be 'x', 'y', or 'z'")
-            if value == 'x':
-                value = 0
-            elif value == 'y':
-                value = 1
-            else:
-                value = 2
-
-        assert 0 <= value <= 2, ValueError("orientation must be 0, 1, or 2")
-        self._orientation = StatArray.StatArray(1, dtype=int8) + value
-
-    @property
     def summary(self):
         """Print a summary"""
         msg = super().summary
 
-        msg += "orientation:\n{}\n".format("|   "+(self.orientation.replace("\n", "\n|   ")))
-        msg += "moment:\n{}".format("|   "+(self.moment.summary.replace("\n", "\n|   "))[:-4])
-        msg += "pitch:\n{}".format("|   "+(self.pitch.summary.replace("\n", "\n|   "))[:-4])
-        msg += "roll:\n{}".format("|   "+(self.roll.summary.replace("\n", "\n|   "))[:-4])
-        msg += "yaw:\n{}".format("|   "+(self.yaw.summary.replace("\n", "\n|   "))[:-4])
+        msg += "orientation:\n{}\n".format("|   "+(self._orientation.summary.replace("\n", "\n|   ")))
+        msg += "moment:\n{}\n".format("|   "+(self.moment.summary.replace("\n", "\n|   "))[:-4])
+        msg += "pitch:\n{}\n".format("|   "+(self.pitch.summary.replace("\n", "\n|   "))[:-4])
+        msg += "roll:\n{}\n".format("|   "+(self.roll.summary.replace("\n", "\n|   "))[:-4])
+        msg += "yaw:\n{}\n".format("|   "+(self.yaw.summary.replace("\n", "\n|   "))[:-4])
 
         return msg
 

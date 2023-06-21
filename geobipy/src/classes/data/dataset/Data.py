@@ -1,10 +1,10 @@
 """ @Data_Class
 Module describing a Data Set where values are associated with an xyz co-ordinate
 """
-from copy import deepcopy
+from copy import copy, deepcopy
 
 from numpy import allclose, any, arange, asarray, atleast_1d, cumsum, float64, full
-from numpy import hstack, int32, isnan, nan
+from numpy import hstack, int32, isnan, nan, ndim
 from numpy import ones, r_, s_, shape, size, sqrt, sum, unique
 from numpy import vstack, where, zeros
 from numpy import all as npall
@@ -16,7 +16,7 @@ from ....classes.core import StatArray
 from ....base import fileIO as fIO
 from ....base import utilities as cf
 from ....base import plotting as cP
-from ...pointcloud.PointCloud3D import PointCloud3D
+from ...pointcloud.Point import Point
 from ..datapoint.DataPoint import DataPoint
 from ....base import MPI as myMPI
 from matplotlib.figure import Figure
@@ -28,7 +28,7 @@ except:
     pass
 
 
-class Data(PointCloud3D):
+class Data(Point):
     """Class defining a set of Data.
 
 
@@ -68,25 +68,34 @@ class Data(PointCloud3D):
         Data class
 
     """
-
     def __init__(self, components=None, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channelNames=None, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
+        self.units = units
         self.components = components
         self._channels_per_system = atleast_1d(asarray(channels_per_system, dtype=int32)).copy()
 
         super().__init__(x, y, z, elevation)
 
+        self._fiducial = StatArray.StatArray(arange(self.nPoints), "Fiducial")
+        self._lineNumber = StatArray.StatArray(self.nPoints, "Line number")
+        shp = (self._nPoints, self.nChannels)
+        self._data = StatArray.StatArray(shp, "Data", self.units)
+        self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
+        self._std = StatArray.StatArray(ones(shp), "std", self.units)
+        shp = (self.nPoints, self.nSystems)
+        self._relative_error = StatArray.StatArray(full(shp, fill_value=0.01), "Relative error", "%")
+        self._additive_error = StatArray.StatArray(shp, "Additive error", self.units)
+
         self.fiducial = fiducial
         self.lineNumber = lineNumber
-        self.units = units
         self.data = data
         self.std = std
         self.predictedData = predictedData
         self.channelNames = channelNames
-        self.relative_error = None
-        self.additive_error = None
+        # self.relative_error = None
+        # self.additive_error = None
 
         self.error_posterior = None
 
@@ -143,20 +152,19 @@ class Data(PointCloud3D):
     def additive_error(self):
         """The data. """
         if size(self._additive_error, 0) == 0:
-            self._additive_error = StatArray.StatArray((self.nPoints, self.nSystems), "Additive error", "%")
+            self._additive_error = StatArray.StatArray((self.nPoints, self.nSystems), "Additive error", self.units)
         return self._additive_error
 
     @additive_error.setter
     def additive_error(self, values):
-        shp = (self.nPoints, self.nSystems)
-        if values is None:
-            self._additive_error = StatArray.StatArray(ones(shp), "Additive error", "%")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-                shp = (self.nPoints, self.nSystems)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
-            self._additive_error = StatArray.StatArray(values)
+        if values is not None:
+            self.nPoints = size(values, 0)
+            shp = (self.nPoints, self.nSystems)
+            if not allclose(self._additive_error.shape, shp):
+                self._additive_error = StatArray.StatArray(values, "Additive error", self.units)
+                return
+
+            self._additive_error[:, :] = values
 
     @property
     def channelNames(self):
@@ -232,17 +240,16 @@ class Data(PointCloud3D):
 
     @data.setter
     def data(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._data = StatArray.StatArray(shp, "Data", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-            if self.nChannels == 0:
-                self.channels_per_system = size(values, 1)
+        if values is not None:
+            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+
             shp = (self.nPoints, self.nChannels)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("data must have shape {}".format(shp))
-            self._data = StatArray.StatArray(values)
+            if not allclose(self._data.shape, shp):
+                self._data = StatArray.StatArray(values, "Data", self.units)
+                return
+
+            self._data[:, :] = values
+
 
     @property
     def deltaD(self):
@@ -267,16 +274,13 @@ class Data(PointCloud3D):
 
     @fiducial.setter
     def fiducial(self, values):
-        if (values is None):
-            self._fiducial = StatArray.StatArray(self.nPoints, "Fiducial")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values)
-            assert size(values) == self.nPoints, ValueError("fiducial must have size {}".format(self.nPoints))
-            if (isinstance(values, StatArray.StatArray)):
-                self._fiducial = deepcopy(values)
-            else:
+        if values is not None:
+            self.nPoints = size(values)
+            if self._fiducial.size != self.nPoints:
                 self._fiducial = StatArray.StatArray(values.astype(float64), "Fiducial")
+                return
+
+            self._fiducial[:] = values
 
     @property
     def lineNumber(self):
@@ -286,16 +290,13 @@ class Data(PointCloud3D):
 
     @lineNumber.setter
     def lineNumber(self, values):
-        if (values is None):
-            self._lineNumber = StatArray.StatArray(self.nPoints, "Line number")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values)
-            assert size(values) == self.nPoints, ValueError("lineNumber must have size {}".format(self.nPoints))
-            if (isinstance(values, StatArray.StatArray)):
-                self._lineNumber = deepcopy(values)
-            else:
+        if values is not None:
+            self.nPoints = size(values)
+            if self._lineNumber.size != self.nPoints:
                 self._lineNumber = StatArray.StatArray(values, "Line number")
+                return
+
+            self._lineNumber[:] = values
 
     @property
     def nActiveChannels(self):
@@ -304,6 +305,11 @@ class Data(PointCloud3D):
     @property
     def nChannels(self):
         return sum(self.channels_per_system)
+
+    @nChannels.setter
+    def nChannels(self, value):
+        if (sum(self.channels_per_system) == 0) and (value > 0):
+            self.channels_per_system = int32(value)
 
     @property
     def n_components(self):
@@ -330,17 +336,16 @@ class Data(PointCloud3D):
 
     @predictedData.setter
     def predictedData(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-            if self.nChannels == 0:
-                self.channels_per_system = size(values, 1)
+
+        if values is not None:
+            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+
             shp = (self.nPoints, self.nChannels)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("predictedData must have shape {}".format(shp))
-            self._predictedData = StatArray.StatArray(values)
+            if not allclose(self._predictedData.shape, shp):
+                self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
+                return
+
+            self._predictedData[:, :] = values
 
     @property
     def relative_error(self):
@@ -351,15 +356,14 @@ class Data(PointCloud3D):
 
     @relative_error.setter
     def relative_error(self, values):
-        shp = (self.nPoints, self.nSystems)
-        if values is None:
-            self._relative_error = StatArray.StatArray(full(shp, fill_value=0.01), "Relative error", "%")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-                shp = (self.nPoints, self.nSystems)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("relative_error must have shape {}".format(shp))
-            self._relative_error = StatArray.StatArray(values)
+        if values is not None:
+            self.nPoints = size(values, 0)
+            shp = (self.nPoints, self.nSystems)
+            if not allclose(self._relative_error.shape, shp):
+                self._relative_error = StatArray.StatArray(values, "Relative error", "%")
+                return
+
+            self._relative_error[:, :] = values
 
     @property
     def std(self):
@@ -374,17 +378,15 @@ class Data(PointCloud3D):
 
     @std.setter
     def std(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._std = StatArray.StatArray(ones(shp), "Standard deviation", self.units)
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-            if self.nChannels == 0:
-                self.channels_per_system = size(values, 1)
+        if values is not None:
+            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+
             shp = (self.nPoints, self.nChannels)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("std must have shape {}".format(shp))
-            self._std = StatArray.StatArray(values)
+            if not allclose(self._std.shape, shp):
+                self._std = StatArray.StatArray(values, "Std", self.units)
+                return
+
+            self._std[:, :] = values
 
     @property
     def summary(self):
@@ -499,7 +501,7 @@ class Data(PointCloud3D):
 
         assert n == 2, Exception("File {} must contain columns for line and fiducial. \n {}".format(filename, Data.fileInformation()))
 
-        nPoints, ixyz = PointCloud3D._csv_channels(filename)
+        nPoints, ixyz = Point._csv_channels(filename)
         return nPoints, labels + ixyz
 
     def _open_csv_files(self, filename):
@@ -579,13 +581,14 @@ class Data(PointCloud3D):
 
     def __getitem__(self, i):
         """ Define item getter for Data """
-        i = unique(i)
-        out = type(self)(nChannelsPerSystem=self.nChannelsPerSystem,
+        if not isinstance(i, slice):
+            i = unique(i)
+
+        return type(self)(nChannelsPerSystem=self.nChannelsPerSystem,
                    x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
                    data=self.data[i, :], std=self.std[i, :],
                    predictedData=self.predictedData[i, :],
                    channelNames=self.channelNames)
-        return out
 
     # def dataChannel(self, channel, system=0):
     #     """Gets the data in the specified channel

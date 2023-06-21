@@ -58,6 +58,9 @@ class TempestData(TdemData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._additive_error = StatArray.StatArray((self.nPoints, self.nChannels), "Additive error", "%")
+        self._relative_error = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
+
         self._file = None
 
     @property
@@ -69,15 +72,14 @@ class TempestData(TdemData):
 
     @additive_error.setter
     def additive_error(self, values):
-        shp = (self.nPoints, self.nChannels)
-        if values is None:
-            self._additive_error = StatArray.StatArray(ones(shp), "Additive error", "%")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-                shp = (self.nPoints, self.nChannels)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("additive_error must have shape {}".format(shp))
-            self._additive_error = StatArray.StatArray(values)
+        if values is not None:
+            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+            shp = (self.nPoints, self.nChannels)
+            if not allclose(self._additive_error.shape, shp):
+                self._additive_error = StatArray.StatArray(values, "Additive error", self.units)
+                return
+
+            self._additive_error[:, :] = values
 
     @property
     def file(self):
@@ -93,15 +95,14 @@ class TempestData(TdemData):
 
     @relative_error.setter
     def relative_error(self, values):
-        shp = (self.nPoints, self.n_components * self.nSystems)
-        if values is None:
-            self._relative_error = StatArray.StatArray(ones(shp), "Relative error", "%")
-        else:
-            if self.nPoints == 0:
-                self.nPoints = size(values, 0)
-                shp = (self.nPoints, self.n_components * self.nSystems)
-            assert allclose(shape(values), shp) or size(values) == self.nPoints, ValueError("relative_error must have shape {}".format(shp))
-            self._relative_error = StatArray.StatArray(values)
+        if values is not None:
+            self.nPoints = size(values, 0)
+            shp = (self.nPoints, self.n_components * self.nSystems)
+            if not allclose(self._relative_error.shape, shp):
+                self._relative_error = StatArray.StatArray(values, "Relative error", "%")
+                return
+
+            self._relative_error[:, :] = values
 
     def _as_dict(self):
         out, order = super()._as_dict()

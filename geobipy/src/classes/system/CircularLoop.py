@@ -1,5 +1,5 @@
 from copy import deepcopy
-from numpy import asarray, float64, pi
+from numpy import asarray, float64, pi, size
 from ...base import MPI as myMPI
 from .EmLoop import EmLoop
 from ..core import StatArray
@@ -33,10 +33,12 @@ class CircularLoop(EmLoop):
 
     """
 
-    def __init__(self, orient="z", moment=1.0, x=0.0, y=0.0, z=0.0, elevation=0.0, pitch=0.0, roll=0.0, yaw=0.0, radius=1.0, **kwargs):
+    def __init__(self, x=None, y=None, z=None, elevation=None, orientation=None, moment=None, pitch=None, roll=None, yaw=None, radius=None, **kwargs):
         """ Initialize a loop in an EM system """
 
-        super().__init__(x, y, z, elevation=elevation, pitch=pitch, roll=roll, yaw=yaw, **kwargs)
+        super().__init__(x=x, y=y, z=z, elevation=elevation, orientation=orientation, moment=moment, pitch=pitch, roll=roll, yaw=yaw, **kwargs)
+        self._radius = StatArray.StatArray(self._nPoints, "Radius", "m")
+
         # Radius of the loop
         self.radius = radius
 
@@ -46,14 +48,21 @@ class CircularLoop(EmLoop):
 
     @property
     def radius(self):
+        if size(self._radius) == 0:
+            self._radius = StatArray.StatArray(self.nPoints, "Radius", "m")
         return self._radius
 
     @radius.setter
-    def radius(self, value):
-        if not isinstance(value, StatArray.StatArray):
-            value = float64(value)
-        # assert isinstance(value, (StatArray.StatArray, float, float64)), TypeError("pitch must have type float")
-        self._radius = StatArray.StatArray(value, 'Radius', 'm')
+    def radius(self, values):
+        if (values is not None):
+            self.nPoints = size(values)
+
+            if self._radius.size != self._nPoints:
+                self._radius = StatArray.StatArray(values, "Radius", "m")
+                return
+
+            self._radius[:] = values
+
 
     @property
     def summary(self):
@@ -64,7 +73,7 @@ class CircularLoop(EmLoop):
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out.radius = deepcopy(self.radius, memo=memo)
+        out._radius = deepcopy(self.radius, memo=memo)
         return out
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
