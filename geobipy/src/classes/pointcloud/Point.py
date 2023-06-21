@@ -145,6 +145,46 @@ class Point(myObject):
         return (self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior) > 0
 
     @property
+    def probability(self):
+        """Evaluate the probability for the EM data point given the specified attached priors
+
+        Parameters
+        ----------
+        rEerr : bool
+            Include the relative error when evaluating the prior
+        aEerr : bool
+            Include the additive error when evaluating the prior
+        height : bool
+            Include the elevation when evaluating the prior
+        calibration : bool
+            Include the calibration parameters when evaluating the prior
+        verbose : bool
+            Return the components of the probability, i.e. the individually evaluated priors
+
+        Returns
+        -------
+        out : float64
+            The evaluation of the probability using all assigned priors
+
+        Notes
+        -----
+        For each boolean, the associated prior must have been set.
+
+        Raises
+        ------
+        TypeError
+            If a prior has not been set on a requested parameter
+
+        """
+        probability = float64(0.0)
+
+        for ax in (self.x, self.y, self.z):
+            if ax.hasPrior:
+                probability += ax.probability(log=True)
+
+        return probability
+
+    @property
     def single(self):
         return Point
 
@@ -753,50 +793,6 @@ class Point(myObject):
         ax = cP.plot(x, values, **kwargs)
         return ax
 
-    @property
-    def probability(self):
-        """Evaluate the probability for the EM data point given the specified attached priors
-
-        Parameters
-        ----------
-        rEerr : bool
-            Include the relative error when evaluating the prior
-        aEerr : bool
-            Include the additive error when evaluating the prior
-        height : bool
-            Include the elevation when evaluating the prior
-        calibration : bool
-            Include the calibration parameters when evaluating the prior
-        verbose : bool
-            Return the components of the probability, i.e. the individually evaluated priors
-
-        Returns
-        -------
-        out : float64
-            The evaluation of the probability using all assigned priors
-
-        Notes
-        -----
-        For each boolean, the associated prior must have been set.
-
-        Raises
-        ------
-        TypeError
-            If a prior has not been set on a requested parameter
-
-        """
-        probability = float64(0.0)
-
-        if self.x.hasPrior:
-            probability += self.x.probability(log=True)
-
-        if self.y.hasPrior:
-            probability += self.y.probability(log=True)
-
-        if self.z.hasPrior:
-            probability += self.z.probability(log=True)
-
-        return probability
 
     def set_priors(self, x_prior=None, y_prior=None, z_prior=None, **kwargs):
 
