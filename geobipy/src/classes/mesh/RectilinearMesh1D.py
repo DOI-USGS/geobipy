@@ -321,6 +321,8 @@ class RectilinearMesh1D(Mesh):
         self._min_width = value
         if value is None:
             self._min_width = (self.max_edge - self.min_edge) / (2.0 * self.max_cells)
+            if self._min_width > self.min_edge:
+                self._min_edge = self._min_width
 
     @property
     def nCells(self):
@@ -1035,7 +1037,7 @@ class RectilinearMesh1D(Mesh):
 
                     z = self.edges.copy()
                     # Get the internal edge to perturb
-                    i = int64(prng.uniform(1, self.nEdges-1, 1)[0])
+                    i = int32(prng.uniform(1, self.nEdges-1, 1)[0])
                     # Get the perturbation amount
                     dz = sign(prng.randn()) * self.min_width * prng.uniform()
                     # Perturb the layer
