@@ -391,11 +391,21 @@ class Data(Point):
     @property
     def summary(self):
         """ Display a summary of the Data """
-        msg = ("{}"
-              "Data:          : \n"
-              "# of Channels: {} \n"
-              "# of Total Data: {} \n"
-              "{}\n {}\n {}\n").format(super().summary, self.nChannels, self.nPoints * self.nChannels, self.data.summary, self.std.summary, self.predictedData.summary)
+        msg = super().summary
+        names = copy(self.channelNames)
+        j = arange(5, self.nChannels, 5)
+        for i in range(j.size):
+            names.insert(j[i]+i, '\n')
+
+        msg += "channel names:\n{}\n".format("|   "+(', '.join(names).replace("\n,", "\n|  ")))
+        msg += "data:\n{}\n".format("|   "+(self.data[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "predicted data:\n{}\n".format("|   "+(self.predictedData[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "std:\n{}\n".format("|   "+(self.std[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "line number:\n{}\n".format("|   "+(self.lineNumber.summary.replace("\n", "\n|   "))[:-4])
+        msg += "fiducial:\n{}\n".format("|   "+(self.fiducial.summary.replace("\n", "\n|   "))[:-4])
+        msg += "relative error:\n{}\n".format("|   "+(self.relative_error.summary.replace("\n", "\n|   "))[:-4])
+        msg += "additive error:\n{}\n".format("|   "+(self.additive_error.summary.replace("\n", "\n|   "))[:-4])
+
         return msg
 
     @property
@@ -511,6 +521,7 @@ class Data(Point):
             df = read_csv(filename, index_col=False, usecols=channels, chunksize=1, skipinitialspace = True)
         except:
             df = read_csv(filename, index_col=False, usecols=channels, chunksize=1, delim_whitespace=True, skipinitialspace = True)
+
 
         self._file = df
         self._filename = filename

@@ -719,13 +719,13 @@ class DataPoint(Point):
             names.insert(j[i]+i, '\n')
 
         msg += "channel names:\n{}\n".format("|   "+(', '.join(names).replace("\n,", "\n|  ")))
-        msg += "data:\n{}".format("|   "+(self.data[self.active].summary.replace("\n", "\n|   "))[:-4])
-        msg += "predicted data:\n{}".format("|   "+(self.predictedData[self.active].summary.replace("\n", "\n|   "))[:-4])
-        msg += "std:\n{}".format("|   "+(self.std[self.active].summary.replace("\n", "\n|   "))[:-4])
-        msg += "line number:\n{}".format("|   "+(self.lineNumber.summary.replace("\n", "\n|   "))[:-4])
-        msg += "fiducial:\n{}".format("|   "+(self.fiducial.summary.replace("\n", "\n|   "))[:-4])
-        msg += "relative error:\n{}".format("|   "+(self.relative_error.summary.replace("\n", "\n|   "))[:-4])
-        msg += "additive error:\n{}".format("|   "+(self.additive_error.summary.replace("\n", "\n|   "))[:-4])
+        msg += "data:\n{}\n".format("|   "+(self.data[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "predicted data:\n{}\n".format("|   "+(self.predictedData[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "std:\n{}\n".format("|   "+(self.std[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "line number:\n{}\n".format("|   "+(self.lineNumber.summary.replace("\n", "\n|   "))[:-4])
+        msg += "fiducial:\n{}\n".format("|   "+(self.fiducial.summary.replace("\n", "\n|   "))[:-4])
+        msg += "relative error:\n{}\n".format("|   "+(self.relative_error.summary.replace("\n", "\n|   "))[:-4])
+        msg += "additive error:\n{}\n".format("|   "+(self.additive_error.summary.replace("\n", "\n|   "))[:-4])
 
         return msg
 

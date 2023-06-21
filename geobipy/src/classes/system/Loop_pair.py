@@ -145,9 +145,9 @@ class Loop_pair(Point, PointCloud3D):
 
     @property
     def summary(self):
-        msg = "transmitter:\n{}".format("|   "+(self.transmitter.summary.replace("\n", "\n|   "))[:-4])
-        msg = "offset:\n{}".format("|   "+(super().summary.replace("\n", "\n|   "))[:-4])
-        msg += "receiver:\n{}".format("|   "+(self.receiver.summary.replace("\n", "\n|   "))[:-4])
+        msg = "transmitter:\n{}\n".format("|   "+(self.transmitter.summary.replace("\n", "\n|   "))[:-4])
+        msg += "offset:\n{}\n".format("|   "+(super().summary.replace("\n", "\n|   "))[:-4])
+        msg += "receiver:\n{}\n".format("|   "+(self.receiver.summary.replace("\n", "\n|   "))[:-4])
         return msg
 
     def update_posteriors(self):

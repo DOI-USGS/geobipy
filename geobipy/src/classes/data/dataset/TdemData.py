@@ -841,7 +841,6 @@ class TdemData(Data):
                         fiducial=self.fiducial[i],
                         transmitter=self.transmitter[i],
                         receiver=self.receiver[i],
-                        # loopOffset=self.loopOffset[i, :],
                         secondary_field=self.secondary_field[i, :],
                         primary_field=self.primary_field[i, :],
                         std=self.std[i, :],
@@ -989,13 +988,8 @@ class TdemData(Data):
 
     @property
     def summary(self):
-        """ Display a summary of the TdemData """
-        msg = PointCloud3D.summary
-        msg = "Tdem Data: \n"
-        msg += "Number of Systems: :" + str(self.nSystems) + '\n'
-        msg += self.lineNumber.summary
-        msg += self.fiducial.summary
-        msg += self.elevation.summary
+        msg = super().summary
+        msg += self.loop_pair.summary
         return msg
 
     def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
@@ -1009,7 +1003,6 @@ class TdemData(Data):
         grp.create_dataset('nSystems', data=self.nSystems)
         for i in range(self.nSystems):
             self.system[i].toHdf(grp, 'System{}'.format(i))
-
 
         self.transmitter.createHdf(grp, 'T', withPosterior=withPosterior, fillvalue=fillvalue)
         self.receiver.createHdf(grp, 'R', withPosterior=withPosterior, fillvalue=fillvalue)
