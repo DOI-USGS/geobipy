@@ -18,10 +18,10 @@ import h5py
 ################################################################################
 dataFolder = "..//supplementary//data//"
 # The data file name
-dataFiles=dataFolder + 'skytem_saline_clay.csv'
+dataFiles=dataFolder + 'skytem_304_saline_clay.csv'
 # dataFiles = dataFolder + 'Skytem.csv'
 # The EM system file name
-systemFiles=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
+systemFiles=[dataFolder + 'SkytemHM_304.stm', dataFolder + 'SkytemLM_304.stm']
 
 from pathlib import Path
 for f in systemFiles[:1]:

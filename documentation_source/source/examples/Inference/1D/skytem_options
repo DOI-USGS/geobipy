@@ -20,9 +20,9 @@ data_directory = "..//..//supplementary//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
-data_filename = join(data_directory,'skytem_resistive_dolomites.csv')
+data_filename = join(data_directory,'skytem_512_glacial.csv')
 # System File Name.
-system_filename = [join(data_directory,'SkytemHM-SLV.stm'), join(data_directory,'SkytemLM-SLV.stm')]
+system_filename = [join(data_directory,'SkytemHM_512.stm'), join(data_directory,'SkytemLM_512.stm')]
 
 # Define the data type to invert
 data_type = TdemData
@@ -36,7 +36,7 @@ n_markov_chains = 100000
 # Interactively plot a single data point as it progresses
 interactive_plot = True
 # How often to update the plot. (lower is generally slower)
-update_plot_every = 1000
+update_plot_every = 5000
 # Save a PNG of the final results for each data point.
 save_png = False
 # Save the results of the McMC inversion to HDF5 files. (Generally always True)
