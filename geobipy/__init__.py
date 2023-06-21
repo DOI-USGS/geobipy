@@ -10,7 +10,7 @@ from datetime import timedelta
 from numpy import int32
 
 # from .src.base import utilities
-# from .src.base import plotting
+from .src.base import plotting
 # from .src.base import fileIO
 # from .src.base import interpolation
 
@@ -81,7 +81,7 @@ def checkCommandArguments():
     Parser.add_argument('inputFile', help='User input file')
     Parser.add_argument('output_directory', help='Output directory for results')
     Parser.add_argument('--skipHDF5', dest='skipHDF5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
-    Parser.add_argument('--seed', dest='seed', default=None, help='Specify a single integer to fix the seed of the random number generator. Only used in serial mode.')
+    Parser.add_argument('--seed', dest='seed', default=None, help='Specify a numpy seed file to fix the random number generator. Only used in serial mode.')
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
@@ -146,12 +146,13 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
 
 def serial_dataset(output_directory, seed=None, index=None, fiducial=None, line_number=None, **kwargs):
 
-    dataset = kwargs['data_type'](system=kwargs['system_filename'])
+    data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
 
-    inference3d = Inference3D(output_directory, kwargs['system_filename'])
-    inference3d.create_hdf5(dataset, **kwargs)
+    inference3d = Inference3D(data=data)#output_directory, kwargs['system_filename'])
 
-    inference3d.infer(dataset, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **kwargs)
+    inference3d.create_hdf5(directory=output_directory, **kwargs)
+
+    inference3d.infer(data, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **kwargs)
 
 def parallel_geobipy(inputFile, outputDir, skipHDF5):
 
@@ -180,7 +181,8 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
     kwargs = user_parameters.read(inputFile)
 
     # Everyone needs the system classes read in early.
-    dataset = kwargs['data_type'](system=kwargs['system_filename'])
+    data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
+
 
     # Get the number of points in the file.
     if masterRank:
@@ -196,12 +198,12 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    inference3d = Inference3D(output_directory, kwargs['system_filename'], mpi_enabled=True)
-    inference3d.create_hdf5(dataset, **kwargs)
+    inference3d = Inference3D(data, world=world)
+    inference3d.create_hdf5(directory=output_directory, **kwargs)
 
     myMPI.rankPrint(world, "Created hdf5 files in {} h:m:s".format(str(timedelta(seconds=MPI.Wtime()-t0))))
 
-    inference3d.infer(dataset, **kwargs)
+    inference3d.infer(data, **kwargs)
 
 def geobipy():
     """Run the serial implementation of GeoBIPy. """

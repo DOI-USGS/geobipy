@@ -22,10 +22,11 @@ from ..classes.core import StatArray
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram import Histogram
 from ..classes.core.myObject import myObject
+from ..classes.data.datapoint.DataPoint import DataPoint
 # from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
 # from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
-# from ..classes.model.Model import Model
+from ..classes.model.Model import Model
 from ..classes.core.Stopwatch import Stopwatch
 from ..base.HDF import hdfRead
 from cached_property import cached_property
@@ -72,10 +73,9 @@ class Inference1D(myObject):
     """
 
     def __init__(self,
-                 datapoint,
                  ignore_likelihood:bool = False,
                  interactive_plot:bool = True,
-                 multiplier = 1.0,
+                 multiplier:float = 1.0,
                  n_markov_chains = 100000,
                  parameter_limits = None,
                  prng=None,
@@ -86,7 +86,6 @@ class Inference1D(myObject):
                  solve_parameter:bool = False,
                  update_plot_every = 5000,
                  world=None,
-                 dont_initialize = False,
                  **kwargs):
         """ Initialize the results of the inversion """
 
@@ -96,8 +95,6 @@ class Inference1D(myObject):
 
         self.prng = prng
         kwargs['prng'] = self.prng
-
-        self.datapoint = datapoint
 
         self.ignore_likelihood = ignore_likelihood
         self.n_markov_chains = n_markov_chains
@@ -110,11 +107,167 @@ class Inference1D(myObject):
         self.limits = parameter_limits
         self.reciprocate_parameter = reciprocate_parameters
 
-        if dont_initialize:
-            return
-
         assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
 
+    @property
+    def datapoint(self):
+        return self._datapoint
+
+    @datapoint.setter
+    def datapoint(self, value):
+        assert isinstance(value, DataPoint), TypeError("datapoint must have type geobipy.Datapoint")
+        self._datapoint = value
+
+    @cached_property
+    def iz(self):
+        return arange(self.model.values.posterior.y.nCells.item())
+
+    @property
+    def ignore_likelihood(self):
+        return self._ignore_likelihood
+
+    @ignore_likelihood.setter
+    def ignore_likelihood(self, value:bool):
+        assert isinstance(value, bool), ValueError('ignore_likelihood must have type bool')
+        self._ignore_likelihood = value
+
+    @property
+    def interactive_plot(self):
+        return self._interactive_plot
+
+    @interactive_plot.setter
+    def interactive_plot(self, value:bool):
+        assert isinstance(value, bool), ValueError('interactive_plot must have type bool')
+        if self.mpi_enabled:
+            value = False
+        self._interactive_plot = value
+
+    @property
+    def limits(self):
+        return self._limits
+
+    @limits.setter
+    def limits(self, values):
+        self._limits = None
+        if values is not None:
+            assert size(values) == 2, ValueError("Limits must have length 2")
+            self._limits = sort(asarray(values, dtype=float64))
+
+    @property
+    def model(self):
+        return self._model
+
+    @model.setter
+    def model(self, value):
+        assert isinstance(value, Model), TypeError("model must have type geobipy.Model")
+        self._model = value
+
+    @property
+    def mpi_enabled(self):
+        return not (self.world is None)
+
+    @property
+    def multiplier(self):
+        return self._multiplier
+
+    @multiplier.setter
+    def multiplier(self, value):
+        self._multiplier = float64(value)
+
+    @property
+    def n_markov_chains(self):
+        return self._n_markov_chains
+
+    @n_markov_chains.setter
+    def n_markov_chains(self, value):
+        self._n_markov_chains = int64(value)
+
+    @property
+    def prng(self):
+        return self._prng
+
+    @prng.setter
+    def prng(self, value):
+        if value is None:
+            assert not self.mpi_enabled, TypeError("Must specify a prng when running in parallel")
+            self._prng = RandomState()
+        else:
+            self._prng = value
+
+        self.seed = self.prng.get_state()
+
+    @property
+    def rank(self):
+        if self.mpi_enabled:
+            return self.world.rank
+        else:
+            return 1
+
+    @property
+    def reciprocate_parameters(self):
+        return self._reciprocate_parameters
+
+    @reciprocate_parameters.setter
+    def reciprocate_parameters(self, value:bool):
+        assert isinstance(value, bool), ValueError('reciprocate_parameters must have type bool')
+        self._reciprocate_parameters = value
+
+    @property
+    def save_hdf5(self):
+        return self._save_hdf5
+
+    @save_hdf5.setter
+    def save_hdf5(self, value:bool):
+        assert isinstance(value, bool), ValueError('save_hdf5 must have type bool')
+        self._save_hdf5 = value
+
+    @property
+    def save_png(self):
+        return self._save_png
+
+    @save_png.setter
+    def save_png(self, value:bool):
+        assert isinstance(value, bool), ValueError('save_png must have type bool')
+        if self.mpi_enabled:
+            value = False
+        self._save_png = value
+
+    @property
+    def solve_parameter(self):
+        return self._solve_parameter
+
+    @solve_parameter.setter
+    def solve_parameter(self, value:bool):
+        assert isinstance(value, bool), ValueError('solve_parameter must have type bool')
+        self._solve_parameter = value
+
+    @property
+    def solve_gradient(self):
+        return self._solve_gradient
+
+    @solve_gradient.setter
+    def solve_gradient(self, value:bool):
+        assert isinstance(value, bool), ValueError('solve_gradient must have type bool')
+        self._solve_gradient = value
+
+    @property
+    def update_plot_every(self):
+        return self._update_plot_every
+
+    @update_plot_every.setter
+    def update_plot_every(self, value):
+        self._update_plot_every = int32(value)
+
+    @property
+    def world(self):
+        return self._world
+
+    @world.setter
+    def world(self, value):
+        self._world = value
+
+
+    def initialize(self, datapoint, **kwargs):
         # Get the initial best fitting halfspace and set up
         # priors and posteriors using user parameters
         # ------------------------------------------------
@@ -236,149 +389,9 @@ class Inference1D(myObject):
         self.best_posterior = self.posterior
         self.best_iteration = int64(0)
 
-
-    @cached_property
-    def iz(self):
-        return arange(self.model.values.posterior.y.nCells.item())
-
-    @property
-    def limits(self):
-        return self._limits
-
-    @limits.setter
-    def limits(self, values):
-        assert size(values) == 2, ValueError("Limits must have length 2")
-        self._limits = sort(asarray(values, dtype=float64))
-
-    @property
-    def ignore_likelihood(self):
-        return self._ignore_likelihood
-
-    @ignore_likelihood.setter
-    def ignore_likelihood(self, value:bool):
-        assert isinstance(value, bool), ValueError('ignore_likelihood must have type bool')
-        self._ignore_likelihood = value
-
-    @property
-    def interactive_plot(self):
-        return self._interactive_plot
-
-    @interactive_plot.setter
-    def interactive_plot(self, value:bool):
-        assert isinstance(value, bool), ValueError('interactive_plot must have type bool')
-        if self.mpi_enabled:
-            value = False
-        self._interactive_plot = value
-
-    @property
-    def mpi_enabled(self):
-        return not (self.world is None)
-
-    @property
-    def multiplier(self):
-        return self._multiplier
-
-    @multiplier.setter
-    def multiplier(self, value):
-        self._multiplier = float64(value)
-
-    @property
-    def n_markov_chains(self):
-        return self._n_markov_chains
-
-    @n_markov_chains.setter
-    def n_markov_chains(self, value):
-        self._n_markov_chains = int64(value)
-
-    @property
-    def prng(self):
-        return self._prng
-
-    @prng.setter
-    def prng(self, value):
-        if value is None:
-            assert not self.mpi_enabled, TypeError("Must specify a prng when running in parallel")
-            self._prng = RandomState()
-        else:
-            self._prng = value
-
-        self.seed = self.prng.get_state()
-
-    @property
-    def rank(self):
-        if self.mpi_enabled:
-            return self.world.rank
-        else:
-            return 1
-
-    @property
-    def reciprocate_parameters(self):
-        return self._reciprocate_parameters
-
-    @reciprocate_parameters.setter
-    def reciprocate_parameters(self, value:bool):
-        assert isinstance(value, bool), ValueError('reciprocate_parameters must have type bool')
-        self._reciprocate_parameters = value
-
-    @property
-    def save_hdf5(self):
-        return self._save_hdf5
-
-    @save_hdf5.setter
-    def save_hdf5(self, value:bool):
-        assert isinstance(value, bool), ValueError('save_hdf5 must have type bool')
-        self._save_hdf5 = value
-
-    @property
-    def save_png(self):
-        return self._save_png
-
-    @save_png.setter
-    def save_png(self, value:bool):
-        assert isinstance(value, bool), ValueError('save_png must have type bool')
-        if self.mpi_enabled:
-            value = False
-        self._save_png = value
-
-    @property
-    def solve_parameter(self):
-        return self._solve_parameter
-
-    @solve_parameter.setter
-    def solve_parameter(self, value:bool):
-        assert isinstance(value, bool), ValueError('solve_parameter must have type bool')
-        self._solve_parameter = value
-
-    @property
-    def solve_gradient(self):
-        return self._solve_gradient
-
-    @solve_gradient.setter
-    def solve_gradient(self, value:bool):
-        assert isinstance(value, bool), ValueError('solve_gradient must have type bool')
-        self._solve_gradient = value
-
-    @property
-    def update_plot_every(self):
-        return self._update_plot_every
-
-    @update_plot_every.setter
-    def update_plot_every(self, value):
-        self._update_plot_every = int32(value)
-
-    @property
-    def world(self):
-        return self._world
-
-    @world.setter
-    def world(self, value):
-        self._world = value
-
     def initialize_datapoint(self, datapoint, **kwargs):
 
         self.datapoint = datapoint
-
-        # _ = self.datapoint.find_best_halfspace()
 
         # ---------------------------------------
         # Set the statistical properties of the datapoint
@@ -601,10 +614,6 @@ class Inference1D(myObject):
                 self.datapoint.reset_posteriors()
 
         if (self.posterior > self.best_posterior):
-
-            # print(abs(self.best_posterior - self.posterior))
-            # print(abs(self.best_posterior - self.posterior) / self.best_posterior)
-
             self.best_iteration = self.iteration
             self.best_model = deepcopy(self.model)
             self.best_datapoint = deepcopy(self.datapoint)
@@ -839,19 +848,19 @@ class Inference1D(myObject):
         return self
 
 
-    def createHdf(self, parent, fiducials):
+    def createHdf(self, parent, add_axis=None):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
 
-        assert not any(isnan(fiducials)), ValueError("Cannot have fiducials == NaN")
+        assert self.datapoint is not None, ValueError("Inference needs a datapoint before creating HDF5 files.")
 
-        fiducials = StatArray.StatArray(sort(fiducials))
-        nPoints = fiducials.size
+        if add_axis is not None:
+            if not isinstance(add_axis, (int, int32, int64)):
+                add_axis = size(add_axis)
 
-        grp = self.datapoint.createHdf(parent, 'data', add_axis=nPoints, fillvalue=nan)
-        fiducials.writeHdf(grp, 'fiducial')
+        self.datapoint.createHdf(parent, 'data', add_axis=add_axis, fillvalue=nan)
 
         # Initialize and write the attributes that won't change
         parent.create_dataset('update_plot_every', data=self.update_plot_every)
@@ -866,21 +875,27 @@ class Inference1D(myObject):
         self.acceptance_x.toHdf(parent,'ratex')
 
         # Initialize the attributes that will be written later
-        parent.create_dataset('iteration', shape=(nPoints), dtype=self.iteration.dtype, fillvalue=nan)
-        parent.create_dataset('burned_in_iteration', shape=(nPoints), dtype=self.burned_in_iteration.dtype, fillvalue=nan)
-        parent.create_dataset('best_iteration', shape=(nPoints), dtype=self.best_iteration.dtype, fillvalue=nan)
-        parent.create_dataset('burned_in', shape=(nPoints), dtype=type(self.burned_in), fill_value=0)
-        parent.create_dataset('multiplier',  shape=(nPoints), dtype=self.multiplier.dtype, fillvalue=nan)
-        parent.create_dataset('invtime',  shape=(nPoints), dtype=float, fillvalue=nan)
-        parent.create_dataset('savetime',  shape=(nPoints), dtype=float, fillvalue=nan)
+        s = add_axis
+        if add_axis is None:
+            s = 1
 
-        self.acceptance_rate.createHdf(parent,'acceptance_rate', add_axis=nPoints, fillvalue=nan)
-        self.data_misfit_v.createHdf(parent, 'phids', add_axis=nPoints, fillvalue=nan)
-        self.halfspace.createHdf(parent, 'halfspace', add_axis=nPoints, fillvalue=nan)
+        parent.create_dataset('iteration', shape=(s), dtype=self.iteration.dtype, fillvalue=nan)
+        parent.create_dataset('burned_in_iteration', shape=(s), dtype=self.burned_in_iteration.dtype, fillvalue=nan)
+        parent.create_dataset('best_iteration', shape=(s), dtype=self.best_iteration.dtype, fillvalue=nan)
+        parent.create_dataset('burned_in', shape=(s), dtype=type(self.burned_in), fillvalue=0)
+        parent.create_dataset('multiplier',  shape=(s), dtype=self.multiplier.dtype, fillvalue=nan)
+        parent.create_dataset('invtime',  shape=(s), dtype=float, fillvalue=nan)
+        parent.create_dataset('savetime',  shape=(s), dtype=float, fillvalue=nan)
+
+        self.acceptance_rate.createHdf(parent,'acceptance_rate', add_axis=add_axis, fillvalue=nan)
+        self.data_misfit_v.createHdf(parent, 'phids', add_axis=add_axis, fillvalue=nan)
+        self.halfspace.createHdf(parent, 'halfspace', add_axis=add_axis, fillvalue=nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
         tmp = self.model.pad(self.model.mesh.max_cells)
-        tmp.createHdf(parent, 'model', add_axis=nPoints, fillvalue=nan)
+        tmp.createHdf(parent, 'model', add_axis=add_axis, fillvalue=nan)
+
+        return parent
 
     def write_inference1d(self, parent, index=None):
         """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """

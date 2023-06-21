@@ -1047,11 +1047,17 @@ class TdemData(Data):
             return cls.single.fromHdf(grp, **kwargs)
 
         nSystems = int32(asarray(grp.get('nSystems')))
+        if 'system_filename' in kwargs:
+            system_filename = kwargs['system_filename']
+            if not isinstance(system_filename, list): system_filename = [system_filename]
 
         systems = [None]*nSystems
         for i in range(nSystems):
-            # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)], 'System{}.stm'.format(i))
+            if 'system_filename' in kwargs:
+                systems[i] = TdemSystem(system_filename=system_filename[i])
+            else:
+                # Get the system file name. h5py has to encode strings using utf-8, so decode it!
+                systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)], 'System{}.stm'.format(i))
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
 

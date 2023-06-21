@@ -1,8 +1,9 @@
 import os
+from pathlib import Path
 from numpy import float64, int32, s_, integer
 from numpy import arange, argmax, argsort, asarray, divide, empty, full, isnan, linspace, logspace
 from numpy import log10, minimum, mean, min,max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
-from numpy import searchsorted, size, shape, squeeze, unique, where, zeros
+from numpy import searchsorted, size, shape, sort, squeeze, unique, where, zeros
 from numpy import all as npall
 
 import h5py
@@ -18,6 +19,7 @@ from ..classes.statistics.Histogram import Histogram
 # from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+from ..classes.data.dataset.Data import Data
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
 from ..classes.data.dataset.TempestData import TempestData
@@ -44,60 +46,274 @@ _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': 
 
 class Inference2D(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
-    def __init__(self, hdf5_file_path=None, hdf5_file=None, mode='r+', world=None):
+    def __init__(self, data, world=None):
         """ Initialize the lineResults """
 
-        self._world = world
-        if (hdf5_file_path is None): return
+        self.world = world
 
-        # assert not system_file_path is None, Exception("Please also specify the path to the system file")
+        self.data = data
 
-        self._burnedIn = None
-        self._marginal_probability = None
-        self.range = None
-        # self.system_file_path = system_file_path
-        self._zPosterior = None
-        self._mesh = None
+        # if (hdf5_file_path is None): return
+        # # assert not system_file_path is None, Exception("Please also specify the path to the system file")
+        # self.fName = hdf5_file_path
+        # self.directory = split(hdf5_file_path)[0]
+        # # self.line_number = float64(os.path.splitext(split(hdf5_file_path)[1])[0])
+        # self.hdf_file = None
+        # if (hdf5_file is None): # Open the file
+        #     self.open(mode, world)
+        # else:
+        #     self.hdf_file = hdf5_file
+        # self._indices = None
 
-        self.fName = hdf5_file_path
-        self.directory = split(hdf5_file_path)[0]
-        # self.line_number = float64(os.path.splitext(split(hdf5_file_path)[1])[0])
+    @cached_property
+    def acceptance(self):
+        return StatArray.StatArray.fromHdf(self.hdf_file['rate'])
 
-        self.hdfFile = None
-        if (hdf5_file is None): # Open the file
-            self.open(mode, world)
-            self.mode = mode
+    @cached_property
+    def additiveError(self):
+        """ Get the Additive error of the best data points """
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/additive_error'])
+
+    @property
+    def additiveErrorPosteriors(self):
+        return self.data.additive_error.posterior
+
+    @cached_property
+    def best_halfspace(self, log=None):
+        a = log10(asarray(self.hdf_file['model/values/posterior/x/x/data'][:, 0]))
+        b = log10(asarray(self.hdf_file['model/values/posterior/x/x/data'][:, -1]))
+        return 0.5 * (b + a)
+
+    @cached_property
+    def burned_in(self):
+        if 'burned_in' in self.hdf_file:
+            key = 'burned_in'
+        elif 'burnedin' in self.hdf_file:
+            key = 'burnedin'
+        return StatArray.StatArray(asarray(self.hdf_file[key]))
+
+    @property
+    def data(self):
+        """ Get the best data """
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        assert isinstance(value, Data), TypeError("data must have type geobipy.Data")
+        assert value.nPoints > 0, ValueError("Data has no value. nPoints is 0.")
+        self._data = value
+
+
+    @property
+    def doi(self):
+        if 'doi' in self.hdf_file.keys():
+            return StatArray.StatArray.fromHdf(self.hdf_file['doi'])
         else:
-            self.hdfFile = hdf5_file
-        self._indices = None
+            return self.compute_doi()
 
-    def __deepcopy__(self, memo={}):
-        return None
+    @property
+    def easting(self):
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/x'])
+
+    @property
+    def northing(self):
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/y'])
+
+    @property
+    def depth(self):
+        return self.mesh.z.centres
+
+    @cached_property
+    def elevation(self):
+        """ Get the elevation of the data points """
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/elevation'])
+
+    @property
+    def entropy(self):
+        return self.parameter_posterior().entropy(axis=1)
+
+    @cached_property
+    def fiducials(self):
+        """ Get the id numbers of the data points in the line results file """
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/fiducial'])
+
+    @cached_property
+    def halfspace(self):
+        return StatArray.StatArray.fromHdf(self.hdf_file['halfspace'])
+
+    @property
+    def hdf_file(self):
+        return self._hdf_file
+
+    @hdf_file.setter
+    def hdf_file(self, value):
+        assert isinstance(value, h5py.File), TypeError("hdf_file must have type h5py.File")
+        self._hdf_file = value
+    @cached_property
+    def height(self):
+        """Get the height of the observations. """
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/z'])
+
+    @cached_property
+    def heightPosterior(self):
+        zPosterior = self.getAttribute('height posterior')
+        zPosterior.bins.name = 'Relative ' + zPosterior.bins.name
+
+        return zPosterior
+
+    @property
+    def indices(self):
+        return self._indices
+
+    @indices.setter
+    def indices(self, values):
+        assert isinstance(values, slice), TypeError("indices must be a slice")
+        self._indices = values
+
+    @property
+    def interfacePosterior(self):
+        out = Histogram.fromHdf(self.hdf_file['model/mesh/y/edges/posterior'])
+
+        if out.mesh.y.name == "Depth":
+            out.mesh.y.edges = StatArray.StatArray(-out.mesh.y.edges, name='elevation', units=out.mesh.y.units)
+        out.mesh.y.relativeTo = self.data.elevation
+
+        return out
+
+    @cached_property
+    def labels(self):
+        return self.getAttribute('labels')
+
+    @cached_property
+    def line_number(self):
+        return unique(self.data.lineNumber)
+
+    @property
+    def longest_coordinate(self):
+        # if 0.8 < self.data.x.range / self.data.y.range < 1.2:
+        #     return sqrt(self.data.x**2.0 + self.data.y**2.0)
+        return self.data.x if self.data.x.range > self.data.y.range else self.data.y
+
+    @cached_property
+    def mesh(self):
+        """Get the 2D topo fitting rectilinear mesh. """
+        # if self._mesh is None:
+        mesh = hdfRead.read_item(self.hdf_file['/model/mesh/y/edges/posterior/mesh'], skip_posterior=True)
+
+        # Change positive depth to negative height
+        mesh.y.edges = StatArray.StatArray(-out.y.edges, name='Height', units=self.y.units)
+        mesh.y.relativeTo = self.elevation
+        mesh.x.centres = self.longest_coordinate
+
+        return mesh
+
+    @property
+    def minParameter(self):
+        """ Get the mean model of the parameters """
+        return min(asarray(self.hdf_file["model/values/posterior/x/x/data"][:, 0]))
+
+    @cached_property
+    def model(self):
+        out = Model.fromHdf(self.hdf_file['/model'], skip_posterior=False)
+
+        out.mesh.y_edges = StatArray.StatArray(-out.mesh.y_edges, name='elevation', units=self.mean_parameters().mesh.y.units)
+        out.mesh.relativeTo = self.elevation
+        out.mesh.x.centres = self.longest_coordinate
+        return out
+
+    @cached_property
+    def nLayers(self):
+        """ Get the number of layers in the best model for each data point """
+        return StatArray.StatArray.fromHdf(self.hdf_file['model/nCells'])
+
+    @property
+    def nPoints(self):
+        return self.fiducials.size
+
+    @cached_property
+    def nSystems(self):
+        """ Get the number of systems """
+        return self.getAttribute('# of systems')
+
+    @property
+    def parallel_access(self):
+        return not self.world is None
+
+    @property
+    def parameterName(self):
+        return self.hdf_file['/model/values/posterior/mesh/y/edges'].attrs['name']
+
+    @property
+    def parameterUnits(self):
+        return self.hdf_file['/model/values/posterior/mesh/y/edges'].attrs['units']
+
+    @cached_property
+    def relativeError(self):
+        """ Get the Relative error of the best data points """
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/relative_error'])
+
+    @property
+    def relativeErrorPosteriors(self):
+        """ Get the Relative error of the best data points """
+        return self.data.relative_error.posterior
+
+    @cached_property
+    def totalError(self):
+        """ Get the total error of the best data points """
+        return self.getAttribute('Total Error')
+
+    @cached_property
+    def x(self):
+        """ Get the X co-ordinates (Easting) """
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/x'])
+
+    @cached_property
+    def y(self):
+        """ Get the Y co-ordinates (Easting) """
+        return StatArray.StatArray.fromHdf(self.hdf_file['data/y'])
+
+    @property
+    def probability_of_highest_marginal(self):
+
+        out = StatArray.StatArray(self.mesh.shape, "Probability")
+
+        hm = self.highestMarginal
+        classes = unique(hm)
+
+        mp = self.marginal_probability()
+
+        for i, c in enumerate(classes):
+            iWhere = where(hm == c)
+            out[iWhere[0], iWhere[1]] = mp[i, iWhere[0], iWhere[1]]
+
+        return out
 
     @property
     def world(self):
         return self._world
 
-    def open(self, mode='r+', world=None):
-        """ Check whether the file is open """
-        try:
-            self.hdfFile.attrs
-        except:
+    @world.setter
+    def world(self, communicator):
+        self._world = communicator
 
-            if world is None:
-                self.hdfFile = h5py.File(self.fName, mode)
-            else:
-                self._world = world
-                self.hdfFile = h5py.File(self.fName, mode, driver='mpio', comm=world)
+    def __deepcopy__(self, memo={}):
+        return None
+
+    def open(self, filename, mode = "r", **kwargs):
+        """ Check whether the file is open """
+        if self.parallel_access:
+            kwargs['driver'] = 'mpio'
+            kwargs['comm'] = self.world
+
+        self.hdf_file = h5py.File(filename, mode, **kwargs)
+        self.mode = mode
 
     def close(self):
         """ Check whether the file is open """
-        if (self.hdfFile is None): return
         try:
-            self.hdfFile.close()
+            self.hdf_file.close()
         except:
             pass # Already closed
-
 
     def changeUnits(self, units='m'):
         """Change the units of the Coordinates
@@ -143,20 +359,6 @@ class Inference2D(myObject):
     #     cP.xlabel(self.relativeError.getNameUnits())
     #     cP.ylabel(self.additiveError.getNameUnits())
 
-    @cached_property
-    def acceptance(self):
-        return StatArray.StatArray.fromHdf(self.hdfFile['rate'])
-
-    @cached_property
-    def additiveError(self):
-        """ Get the Additive error of the best data points """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/additive_error'])
-
-
-    @property
-    def additiveErrorPosteriors(self):
-        return self.data.additive_error.posterior
-
     def uncache(self, variable):
 
         if isinstance(variable, str):
@@ -188,41 +390,27 @@ class Inference2D(myObject):
     # @cached_property
     # def bestData(self):
     #     """ Get the best data """
-    #     dtype = self.hdfFile['data'].attrs['repr']
+    #     dtype = self.hdf_file['data'].attrs['repr']
     #     if "FdemDataPoint" in dtype:
-    #         bestData = FdemData.fromHdf(self.hdfFile[attr[0]])
+    #         bestData = FdemData.fromHdf(self.hdf_file[attr[0]])
     #     elif "TdemDataPoint" in dtype:
-    #         bestData = TdemData.fromHdf(self.hdfFile[attr[0]])
+    #         bestData = TdemData.fromHdf(self.hdf_file[attr[0]])
     #     return bestData
-
-    @cached_property
-    def best_halfspace(self, log=None):
-        a = log10(asarray(self.hdfFile['model/values/posterior/x/x/data'][:, 0]))
-        b = log10(asarray(self.hdfFile['model/values/posterior/x/x/data'][:, -1]))
-        return 0.5 * (b + a)
-
-    @cached_property
-    def burned_in(self):
-        if 'burned_in' in self.hdfFile:
-            key = 'burned_in'
-        elif 'burnedin' in self.hdfFile:
-            key = 'burnedin'
-        return StatArray.StatArray(asarray(self.hdfFile[key]))
 
     def percentile(self, percent, slic=None):
         # Read in the opacity if present
         key = "percentile_{}".format(percent)
-        if key in self.hdfFile.keys():
-            return StatArray.StatArray.fromHdf(self.hdfFile[key], index=slic)
+        if key in self.hdf_file.keys():
+            return StatArray.StatArray.fromHdf(self.hdf_file[key], index=slic)
         else:
             h = self.parameter_posterior()
             ci = h.percentile(percent=percent, axis=1)
 
             if self.mode == 'r+':
-                if key in self.hdfFile.keys():
-                    ci.writeHdf(self.hdfFile, key)
+                if key in self.hdf_file.keys():
+                    ci.writeHdf(self.hdf_file, key)
                 else:
-                    ci.toHdf(self.hdfFile, key)
+                    ci.toHdf(self.hdf_file, key)
             return ci
 
     def credible_interval(self, percent=90.0):
@@ -236,12 +424,12 @@ class Inference2D(myObject):
 
         if self.mode == 'r+':
             key = 'mean_parameter'
-            if key in self.hdfFile.keys():
-                mean.writeHdf(self.hdfFile, key)
+            if key in self.hdf_file.keys():
+                mean.writeHdf(self.hdf_file, key)
             else:
-                mean.toHdf(self.hdfFile, key)
-            self.hdfFile[key].attrs['name'] = mean.values.name
-            self.hdfFile[key].attrs['units'] = mean.values.units
+                mean.toHdf(self.hdf_file, key)
+            self.hdf_file[key].attrs['name'] = mean.values.name
+            self.hdf_file[key].attrs['units'] = mean.values.units
 
         return mean
 
@@ -250,19 +438,6 @@ class Inference2D(myObject):
     #     """ Get the model parameter opacity using the credible intervals """
     #     return self.credibleUpper(slic) - self.credibleLower(slic)
 
-
-    @cached_property
-    def data(self):
-        """ Get the best data """
-        return hdfRead.read_item(self.hdfFile['data'])
-
-    # @cached_property
-    @property
-    def doi(self):
-        if 'doi' in self.hdfFile.keys():
-            return StatArray.StatArray.fromHdf(self.hdfFile['doi'])
-        else:
-            return self.compute_doi()
 
     def compute_doi(self, percent=67.0, smooth=None, track=True):
         """ Get the DOI of the line depending on a percentage credible interval cutoff for each data point """
@@ -298,33 +473,12 @@ class Inference2D(myObject):
             doi = doi.smooth(smooth)
 
         if self.mode == 'r+':
-            if 'doi' in self.hdfFile.keys():
-                doi.writeHdf(self.hdfFile, 'doi')
+            if 'doi' in self.hdf_file.keys():
+                doi.writeHdf(self.hdf_file, 'doi')
             else:
-                doi.toHdf(self.hdfFile, 'doi')
+                doi.toHdf(self.hdf_file, 'doi')
 
         return doi
-
-    @property
-    def easting(self):
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/x'])
-
-    @property
-    def northing(self):
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/y'])
-
-    @property
-    def depth(self):
-        return self.mesh.z.centres
-
-    @cached_property
-    def elevation(self):
-        """ Get the elevation of the data points """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/elevation'])
-
-    @property
-    def entropy(self):
-        return self.parameter_posterior().entropy(axis=1)
 
     # def extract1DModel(self, values, index=None, fiducial=None):
     #     """ Obtain the results for the given iD number """
@@ -361,7 +515,7 @@ class Inference2D(myObject):
     def find_posteriors(self, grp=None, out=None):
         from h5py import Group, File
         if grp is None:
-            grp = self.hdfFile
+            grp = self.hdf_file
         if out is None:
             out = []
         if isinstance(grp, (Group, File)):
@@ -417,42 +571,13 @@ class Inference2D(myObject):
             assert not kwargs['index'] is None, ValueError('Please specify keyword "index" when requesting marginal_probability')
             return self.marginal_probability((slic[0], slic[1], kwargs["index"]))
 
-    @cached_property
-    def halfspace(self):
-        return StatArray.StatArray.fromHdf(self.hdfFile['halfspace'])
-
-    @cached_property
-    def height(self):
-        """Get the height of the observations. """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/z'])
-
-    @cached_property
-    def heightPosterior(self):
-        zPosterior = self.getAttribute('height posterior')
-        zPosterior.bins.name = 'Relative ' + zPosterior.bins.name
-
-        return zPosterior
-
-    @property
-    def indices(self):
-        return self._indices
-
-    @indices.setter
-    def indices(self, values):
-        assert isinstance(values, slice), TypeError("indices must be a slice")
-        self._indices = values
-
-    @cached_property
-    def fiducials(self):
-        """ Get the id numbers of the data points in the line results file """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/fiducial'])
 
     # def fit_gaussian_mixture(self, intervals, **kwargs):
 
     #     distributions = []
 
     #     hm = deepcopy(self.hitmap(0))
-    #     counts = asarray(self.hdfFile['model/values/posterior/arr/data'])
+    #     counts = asarray(self.hdf_file['model/values/posterior/arr/data'])
 
     #     # Bar = progressbar.ProgressBar()
     #     for i in range(self.nPoints):
@@ -480,7 +605,7 @@ class Inference2D(myObject):
     #     distributions = []
 
     #     hm = deepcopy(self.hitmap(0))
-    #     counts = asarray(self.hdfFile['model/values/posterior/arr/data'])
+    #     counts = asarray(self.hdf_file['model/values/posterior/arr/data'])
 
     #     # Bar = progressbar.ProgressBar()
     #     for i in range(self.nPoints):
@@ -524,7 +649,7 @@ class Inference2D(myObject):
         if external_files:
             hdfFile = h5py.File("Line_{}_fits.h5".format(self.line_number), 'w')
         else:
-            hdfFile = self.hdfFile
+            hdfFile = self.hdf_file
 
         a = zeros(max_distributions)
         mixture = mixPearson(a, a, a, a)
@@ -599,7 +724,7 @@ class Inference2D(myObject):
         if external_files:
             hdfFile = h5py.File("Line_{}_fits.h5".format(self.line_number), 'w', driver='mpio', comm=self.world)
         else:
-            hdfFile = self.hdfFile
+            hdfFile = self.hdf_file
 
         a = zeros(max_distributions)
         mixture = mixPearson(a, a, a, a)
@@ -784,17 +909,6 @@ class Inference2D(myObject):
         """ Get the layer interfaces from the layer depth histograms """
         return self.interfacePosterior.pdf
 
-
-    @property
-    def interfacePosterior(self):
-        out = Histogram.fromHdf(self.hdfFile['model/mesh/y/edges/posterior'])
-
-        if out.mesh.y.name == "Depth":
-            out.mesh.y.edges = StatArray.StatArray(-out.mesh.y.edges, name='elevation', units=out.mesh.y.units)
-        out.mesh.y.relativeTo = self.data.elevation
-
-        return out
-
     # def compute_interface_probability(self):
     #     maxCount = self.interfacePosterior.counts.max()
     #     if size(self.interfacePosterior.counts, 0) != (self.mesh.z.nCells):
@@ -803,92 +917,43 @@ class Inference2D(myObject):
     #     else:
     #         out = StatArray.StatArray(self.interfacePosterior.counts / float64(maxCount), "interfaces", "")
 
-        # if 'p(interface)' in self.hdfFile.keys():
-        #     out.writeHdf(self.hdfFile, 'p(interface)')
+        # if 'p(interface)' in self.hdf_file.keys():
+        #     out.writeHdf(self.hdf_file, 'p(interface)')
         # else:
-        #     out.toHdf(self.hdfFile, 'p(interface)')
+        #     out.toHdf(self.hdf_file, 'p(interface)')
 
-        return out
-
-    @cached_property
-    def labels(self):
-        return self.getAttribute('labels')
+        # return out
 
     # @property
     # def maxParameter(self):
     #     """ Get the mean model of the parameters """
-    #     return max(asarray(self.hdfFile["model/values/posterior/mesh/x/edges/data"][:, -1]))
+    #     return max(asarray(self.hdf_file["model/values/posterior/mesh/x/edges/data"][:, -1]))
 
     def mean_parameters(self, slic=None):
-        if not 'mean_parameter' in self.hdfFile:
+        if not 'mean_parameter' in self.hdf_file:
             self._mean_parameter = self.compute_mean_parameter(log=10)
         else:
-            # g = self.hdfFile['mean_parameter']
+            # g = self.hdf_file['mean_parameter']
             # print(g.attrs['repr'])
-            self._mean_parameter = Model.fromHdf(self.hdfFile['mean_parameter'])
+            self._mean_parameter = Model.fromHdf(self.hdf_file['mean_parameter'])
 
         return self._mean_parameter
 
-    @property
-    def longest_coordinate(self):
-        # if 0.8 < self.data.x.range / self.data.y.range < 1.2:
-        #     return sqrt(self.data.x**2.0 + self.data.y**2.0)
-        return self.data.x if self.data.x.range > self.data.y.range else self.data.y
 
-    @property
-    def mesh(self):
-        """Get the 2D topo fitting rectilinear mesh. """
-        if self._mesh is None:
-            out = hdfRead.read_item(self.hdfFile['/model/mesh/y/edges/posterior/mesh'], skip_posterior=True)
-
-            # Change positive depth to negative height
-            out.y.edges = StatArray.StatArray(-out.y.edges, name='Height', units=self.y.units)
-            out.y.relativeTo = self.elevation
-
-            out.x.centres = self.longest_coordinate
-            self._mesh = out
-
-        return self._mesh
 
     def change_mesh_axis(self, axis):
         if self._mesh is None:
             self.mesh
         self._mesh.x.centres = self.x_axis(axis)
 
-    @property
-    def minParameter(self):
-        """ Get the mean model of the parameters """
-        return min(asarray(self.hdfFile["model/values/posterior/x/x/data"][:, 0]))
 
-    @cached_property
-    def model(self):
-        out = Model.fromHdf(self.hdfFile['/model'], skip_posterior=False)
-
-        out.mesh.y_edges = StatArray.StatArray(-out.mesh.y_edges, name='elevation', units=self.mean_parameters().mesh.y.units)
-        out.mesh.relativeTo = self.elevation
-        out.mesh.x.centres = self.longest_coordinate
-        return out
-
-    @cached_property
-    def nLayers(self):
-        """ Get the number of layers in the best model for each data point """
-        return StatArray.StatArray.fromHdf(self.hdfFile['model/nCells'])
-
-    @property
-    def nPoints(self):
-        return self.fiducials.size
-
-    @cached_property
-    def nSystems(self):
-        """ Get the number of systems """
-        return self.getAttribute('# of systems')
 
     def opacity(self, slic=None):
         """ Get the model parameter opacity using the credible intervals """
-        if "opacity" in self.hdfFile.keys():
+        if "opacity" in self.hdf_file.keys():
             if not slic is None:
                 slic = slic[::-1]
-            return Model.fromHdf(self.hdfFile['opacity'], index=slic)
+            return Model.fromHdf(self.hdf_file['opacity'], index=slic)
         else:
             return self.compute_opacity()
 
@@ -899,23 +964,16 @@ class Inference2D(myObject):
         opacity = self.parameter_posterior().opacity(percent, log, axis=1)
 
         if self.mode == 'r+':
-            if 'opacity' in self.hdfFile.keys():
-                opacity.writeHdf(self.hdfFile, 'opacity')
+            if 'opacity' in self.hdf_file.keys():
+                opacity.writeHdf(self.hdf_file, 'opacity')
             else:
-                opacity.toHdf(self.hdfFile, 'opacity')
+                opacity.toHdf(self.hdf_file, 'opacity')
 
         return opacity
 
     def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
         return self.parameter_posterior().compute_probability(distribution, log, log_probability, axis, **kwargs)
 
-    @property
-    def parameterName(self):
-        return self.hdfFile['/model/values/posterior/mesh/y/edges'].attrs['name']
-
-    @property
-    def parameterUnits(self):
-        return self.hdfFile['/model/values/posterior/mesh/y/edges'].attrs['units']
 
     # def percentageParameter(self, value, depth=None, depth2=None, progress=False):
 
@@ -932,12 +990,12 @@ class Inference2D(myObject):
     #     percentage = StatArray.StatArray(empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.parameterName, value), units = self.parameterUnits)
 
     #     if depth:
-    #         counts = self.hdfFile['model/values/posterior/arr/data'][:, j:k, :]
+    #         counts = self.hdf_file['model/values/posterior/arr/data'][:, j:k, :]
     #         # return StatArray.StatArray(sum(counts[:, :, pj:]) / sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
     #     else:
-    #         counts = self.hdfFile['model/values/posterior/arr/data']
+    #         counts = self.hdf_file['model/values/posterior/arr/data']
 
-    #     parameters = RectilinearMesh1D.fromHdf(self.hdfFile['model/values/posterior/x'])
+    #     parameters = RectilinearMesh1D.fromHdf(self.hdf_file['model/values/posterior/x'])
 
     #     Bar = progressbar.ProgressBar()
     #     print('Computing P(X > value)', flush=True)
@@ -952,17 +1010,7 @@ class Inference2D(myObject):
     #     return percentage
 
     def read(self, key, **kwargs):
-        return hdfRead.read_item(self.hdfFile, key, **kwargs)
-
-    @cached_property
-    def relativeError(self):
-        """ Get the Relative error of the best data points """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/relative_error'])
-
-    @property
-    def relativeErrorPosteriors(self):
-        """ Get the Relative error of the best data points """
-        return self.data.relative_error.posterior
+        return hdfRead.read_item(self.hdf_file, key, **kwargs)
 
     def parameter_posterior(self, index=None, fiducial=None, **kwargs):
 
@@ -971,7 +1019,7 @@ class Inference2D(myObject):
             # Get the point index
             index = self.fiducials.searchsorted(fiducial)
 
-        out = Histogram.fromHdf(self.hdfFile['/model/values/posterior'], index=index)
+        out = Histogram.fromHdf(self.hdf_file['/model/values/posterior'], index=index)
 
         out.x.centres = self.data.axis(kwargs.get('x', 'x'))
 
@@ -990,7 +1038,7 @@ class Inference2D(myObject):
             # Get the point index
             index = self.fiducials.searchsorted(fiducial)
 
-        return Histogram.fromHdf(self.hdfFile['/model/mesh/nCells/posterior'], index=index)
+        return Histogram.fromHdf(self.hdf_file['/model/mesh/nCells/posterior'], index=index)
 
 
     def inference_1d(self, index=None, fiducial=None, reciprocateParameter=False):
@@ -1004,21 +1052,10 @@ class Inference2D(myObject):
             # Get the point index
             index = self.fiducials.searchsorted(fiducial)
 
-        R = Inference1D.fromHdf(self.hdfFile, index=index)
+        R = Inference1D.fromHdf(self.hdf_file, index=index)
 
         return R
 
-
-
-    @cached_property
-    def totalError(self):
-        """ Get the total error of the best data points """
-        return self.getAttribute('Total Error')
-
-    @cached_property
-    def x(self):
-        """ Get the X co-ordinates (Easting) """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/x'])
 
     def axis(self, axis):
         if axis == 'index':
@@ -1048,11 +1085,6 @@ class Inference2D(myObject):
     #     elif axis == 'y':
     #         ax = self.y
     #     return ax
-
-    @cached_property
-    def y(self):
-        """ Get the Y co-ordinates (Easting) """
-        return StatArray.StatArray.fromHdf(self.hdfFile['data/y'])
 
     # def pcolorDataResidual(self, abs=False, **kwargs):
     #     """ Plot a channel of data as points """
@@ -1371,12 +1403,12 @@ class Inference2D(myObject):
         x1 = log10(self.maxParameter)
 
         if depth:
-            counts = self.hdfFile['model/values/posterior/arr/data'][:, j:k, :]
+            counts = self.hdf_file['model/values/posterior/arr/data'][:, j:k, :]
             # return StatArray.StatArray(sum(counts[:, :, pj:]) / sum(counts) * 100.0, name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
         else:
-            counts = self.hdfFile['model/values/posterior/arr/data']
+            counts = self.hdf_file['model/values/posterior/arr/data']
 
-        parameters = RectilinearMesh1D.fromHdf(self.hdfFile['model/values/posterior/x'])
+        parameters = RectilinearMesh1D.fromHdf(self.hdf_file['model/values/posterior/x'])
 
         bins = StatArray.StatArray(logspace(x0, x1, nBins), self.parameterName, units = self.parameterUnits)
 
@@ -1469,7 +1501,6 @@ class Inference2D(myObject):
 
         model = self.mean_parameters()
 
-
         model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
 
         if kwargs.pop('use_variance', False):
@@ -1516,10 +1547,10 @@ class Inference2D(myObject):
 
     def marginal_probability(self, slic=None):
 
-        assert 'probabilities' in self.hdfFile.keys(), Exception("Marginal probabilities need computing, use Inference_2D.computeMarginalProbability_X()")
+        assert 'probabilities' in self.hdf_file.keys(), Exception("Marginal probabilities need computing, use Inference_2D.computeMarginalProbability_X()")
 
-        if 'probabilities' in self.hdfFile.keys():
-            marginal_probability = StatArray.StatArray.fromHdf(self.hdfFile['probabilities'], index=slic)
+        if 'probabilities' in self.hdf_file.keys():
+            marginal_probability = StatArray.StatArray.fromHdf(self.hdf_file['probabilities'], index=slic)
 
         return marginal_probability
 
@@ -1647,10 +1678,10 @@ class Inference2D(myObject):
     #             else:
     #                 self.marginal_probability[i, j, :] = nan
 
-    #     if 'marginal_probability' in self.hdfFile.keys():
-    #         self.marginal_probability.writeHdf(self.hdfFile, 'marginal_probability')
+    #     if 'marginal_probability' in self.hdf_file.keys():
+    #         self.marginal_probability.writeHdf(self.hdf_file, 'marginal_probability')
     #     else:
-    #         self.marginal_probability.toHdf(self.hdfFile, 'marginal_probability')
+    #         self.marginal_probability.toHdf(self.hdf_file, 'marginal_probability')
 
 
     # def compute_marginal_probability_from_fits(self, fit_file, mask_by_doi=True):
@@ -1674,31 +1705,15 @@ class Inference2D(myObject):
     #         mp = hm.marginal_probability(1.0, distributions=mixtures, log=10, maxDistributions=means.shape[-1])
     #         self.marginal_probability[i, :mp.shape[0], :] = mp
 
-    #     if 'marginal_probability' in self.hdfFile.keys():
-    #         self.marginal_probability.writeHdf(self.hdfFile, 'marginal_probability')
+    #     if 'marginal_probability' in self.hdf_file.keys():
+    #         self.marginal_probability.writeHdf(self.hdf_file, 'marginal_probability')
     #     else:
-    #         self.marginal_probability.toHdf(self.hdfFile, 'marginal_probability')
+    #         self.marginal_probability.toHdf(self.hdf_file, 'marginal_probability')
     #     # self.marginal_probability.toHdf('line_{}_marginal_probability.h5'.format(self.line), 'marginal_probability')
 
 
     def highestMarginal(self, slic=None):
         return StatArray.StatArray(argmax(self.marginal_probability(slic), axis=-1), name='Highest marginal')
-
-    @property
-    def probability_of_highest_marginal(self):
-
-        out = StatArray.StatArray(self.mesh.shape, "Probability")
-
-        hm = self.highestMarginal
-        classes = unique(hm)
-
-        mp = self.marginal_probability()
-
-        for i, c in enumerate(classes):
-            iWhere = where(hm == c)
-            out[iWhere[0], iWhere[1]] = mp[i, iWhere[0], iWhere[1]]
-
-        return out
 
     def plot_inference_1d(self, fiducial, **kwargs):
         """ Plot the geobipy results for the given data point """
@@ -1740,7 +1755,7 @@ class Inference2D(myObject):
         if (iDs is None):
             iDs = ['/']
 
-        return hdfRead.readKeyFromFile(self.hdfFile, self.fName, iDs, keys, index=index, **kwargs)
+        return hdfRead.readKeyFromFile(self.hdf_file, self.fName, iDs, keys, index=index, **kwargs)
 
 
     # def _attrTokey(self, attributes):
@@ -1814,11 +1829,11 @@ class Inference2D(myObject):
     #         elif (low == 'data misfit'):
     #             res.append('phids')
     #         elif (low == 'relative error posterior'):
-    #             if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
+    #             if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdf_file, self.fName, '/','nsystems')
     #             for i in range(nSys):
     #                 res.append('data/relative_error/posterior' +str(i))
     #         elif (low == 'additive error posterior'):
-    #             if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdfFile, self.fName, '/','nsystems')
+    #             if (nSys is None): nSys = hdfRead.readKeyFromFile(self.hdf_file, self.fName, '/','nsystems')
     #             for i in range(nSys):
     #                 res.append('data/additive_error/posterior' +str(i))
     #         elif (low == 'inversion time'):
@@ -1868,12 +1883,38 @@ class Inference2D(myObject):
               "marginal_probability"+
               "====================================================\n")
 
-
-    def createHdf(self, hdfFile, fiducials, inference1d):
+    def createHdf(self, hdf_file, inference1d):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
+        hdf_file = inference1d.createHdf(hdf_file, add_axis=self.data.fiducial)
 
-        self.hdfFile = hdfFile
-        inference1d.createHdf(hdfFile, fiducials)
+        # Write the line number
+        self.data.lineNumber.writeHdf(hdf_file, 'data/line_number')
+
+        # Write the sorted fiducials
+        fids = sort(self.data.fiducial)
+        fids.writeHdf(hdf_file, 'data/fiducial')
+
+        self.hdf_file = hdf_file
+
+        return hdf_file
+
+    @classmethod
+    def fromHdf(cls, grp, mode = "r", world=None, **kwargs):
+        assert mode != 'w', ValueError("Don't use mode = 'w' when reading!")
+        if isinstance(grp, (Path, str)):
+            tmp = {}
+            if world is not None:
+                tmp['driver'] = 'mpio'
+                tmp['comm'] = world
+
+            grp = h5py.File(grp, mode, **tmp)
+
+        data = hdfRead.read_item(grp['data'], **kwargs)
+
+        self = cls(data, world=world)
+        self.mode = mode
+        self.hdf_file = grp
+        return self
