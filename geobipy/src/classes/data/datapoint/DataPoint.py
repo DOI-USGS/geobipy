@@ -58,6 +58,8 @@ class DataPoint(Point):
         Names of each channel of length sum(nChannelsPerSystem)
 
     """
+    __slots__ = ('_units', '_data', '_std', '_predictedData', '_lineNumber', '_fiducial', '_channelNames',
+                 '_relative_error', '_additive_error', '_sensitivity_matrix', '_components')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
                        data=None, std=None, predictedData=None,
@@ -201,15 +203,15 @@ class DataPoint(Point):
         """
         return StatArray.StatArray(self.predictedData - self.data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
 
-    @property
-    def elevation(self):
-        return self._elevation
+    # @property
+    # def elevation(self):
+    #     return self._elevation
 
-    @elevation.setter
-    def elevation(self, value):
-        if value is None:
-            value = 1
-        self._elevation = StatArray.StatArray(value, "Elevation", "m")
+    # @elevation.setter
+    # def elevation(self, value):
+    #     if value is None:
+    #         value = 1
+    #     self._elevation = StatArray.StatArray(value, "Elevation", "m")
 
     @property
     def n_active_channels(self):

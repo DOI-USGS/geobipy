@@ -73,6 +73,8 @@ class FdemData(Data):
 
     single = FdemDataPoint
 
+    __slots__ = ('_magnetic', '_powerline')
+
     def __init__(self, system=None, **kwargs):
         """Instantiate the FdemData class. """
 
@@ -603,7 +605,7 @@ class FdemData(Data):
     #     return channels
 
     def csv_channels(self, filename):
-        self._nPoints, self._iC, self._iData, self._iStd, iP, iM = self._csv_channels(filename)
+        self.nPoints, self._iC, self._iData, self._iStd, iP, iM = self._csv_channels(filename)
 
         self._channels = self._iC + self._iData
         if len(self._iStd) > 0:

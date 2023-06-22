@@ -65,6 +65,8 @@ class TdemData(Data):
 
     single = TdemDataPoint
 
+    __slots__ = ('_loop_pair', '_primary_field', '_predicted_primary_field', '_secondary_field', '_predicted_secondary_field')
+
     def __init__(self, system=None, **kwargs):
         """ Initialize the TDEM data """
 
@@ -139,12 +141,14 @@ class TdemData(Data):
                           self.receiver.y - self.transmitter.y,
                           self.receiver.z - self.transmitter.z]).T
 
-        # offset = empty((self.nPoints, 3))
-        # for i in range(self.nPoints):
-        #     offset[i, :] = r_[self.receiver[i].x - self.transmitter[i].x,
-        #                          self.receiver[i].y - self.transmitter[i].y,
-        #                          self.receiver[i].z - self.transmitter[i].z]
-        # return offset
+    @property
+    def loop_pair(self):
+        return self._loop_pair
+
+    @loop_pair.setter
+    def loop_pair(self, value):
+        assert isinstance(value, Loop_pair), TypeError("loop_pair must have type geobipy.Loop_pair")
+        self._loop_pair = value
 
     # @loopOffset.setter
     # def loopOffset(self, values):

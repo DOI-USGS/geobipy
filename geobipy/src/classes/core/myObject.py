@@ -13,6 +13,8 @@ from numpy import log10
 import h5py
 
 class myObject(ABC):
+
+    __slots__ = ()
     """Abstract base class """
 
     # def __init__(self, **kwargs):

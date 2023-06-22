@@ -75,6 +75,7 @@ class TdemDataPoint(EmDataPoint):
     The same is true for the errors, and the predicted data vector.
 
     """
+    __slots__ = ('_loop_pair', '_predicted_primary_field', '_predicted_secondary_field', '_primary_field', '_secondary_field')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0,
                  primary_field=None, secondary_field=None,

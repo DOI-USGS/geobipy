@@ -543,7 +543,7 @@ class TempestData(TdemData):
         FdemData.__initLineByLineRead() must have already been run.
 
         """
-        if self._filename.endswith('.csv'):
+        if self._data_filename.endswith('.csv'):
             out = super()._read_record(record, mpi_enabled=mpi_enabled)
             return out
 
@@ -608,7 +608,7 @@ class TempestData(TdemData):
             return
 
         self._file = h5py.File(filename, 'r')
-        self._filename = filename
+        self._data_filename = filename
         self.lineNumber, self.fiducial = self._read_variable(['Line', 'Fiducial'])
 
     @classmethod

@@ -28,6 +28,7 @@ class EmDataPoint(DataPoint):
     geobipy.src.classes.data.datapoint.TdemDataPoint
 
     """
+    __slots__ = ('_channels_per_system', '_system')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
                        components=None, channels_per_system=None,

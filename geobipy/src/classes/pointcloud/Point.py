@@ -57,6 +57,7 @@ class Point(myObject):
         The 3D point cloud
 
     """
+    __slots__ = ('_nPoints', '_x', '_y', '_z', '_elevation')
 
     def __init__(self, x=None, y=None, z=None, elevation=None, **kwargs):
         """ Initialize the class """

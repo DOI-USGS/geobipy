@@ -63,6 +63,8 @@ class RectilinearMesh1D(Mesh):
         edges must be a geobipy.StatArray.
 
     """
+    __slots__ = ('_centres', '_widths', '_edges', '_min_width', '_min_edge', '_max_edge', '_dimension',
+                 '_max_cells', '_event_proposal', '_action', '_nCells', '_relativeTo', '_log')
     def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=None, dimension=0):
         """ Initialize a 1D Rectilinear Mesh"""
         self._centres = None
@@ -284,6 +286,20 @@ class RectilinearMesh1D(Mesh):
     @property
     def label(self):
         return self.centres.label
+
+    @property
+    def log(self):
+        return self._log
+
+    @log.setter
+    def log(self, value):
+
+        self._log = None
+
+        if value is not None:
+            if isinstance(value, str):
+                assert value == 'e', ValueError("log must be 'e' if not numeric")
+            self._log = value
 
     @property
     def max_cells(self):

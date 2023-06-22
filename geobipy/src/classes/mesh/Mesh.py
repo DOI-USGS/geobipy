@@ -1,7 +1,7 @@
 """ @Mesh_Class
 Module describing a Mesh
 """
-from numpy import abs, apply_along_axis, cumsum, diff, divide, expand_dims, float64
+from numpy import abs, argmax, apply_along_axis, cumsum, diff, divide, expand_dims, float64
 from numpy import minimum, ndim
 from numpy import r_, s_, searchsorted, size, squeeze, sum, take, take_along_axis, where, zeros_like
 from ...classes.core.myObject import myObject
@@ -22,7 +22,7 @@ class Mesh(myObject):
     geobipy.RectilinearMesh3D
 
     """
-
+    __slots__ = ()
     def __init__(self):
         """ABC method"""
         NotImplementedError()

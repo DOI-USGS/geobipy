@@ -67,7 +67,7 @@ class Tempest_datapoint(TdemDataPoint):
     The same is true for the errors, and the predicted data vector.
 
     """
-
+    __slots__ = ('_additive_error_multiplier')
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._additive_error_multiplier = deepcopy(self.additive_error_multiplier)
