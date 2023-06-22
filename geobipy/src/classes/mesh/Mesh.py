@@ -109,7 +109,7 @@ class Mesh(myObject):
                 out[i] += ax.relativeTo
         out = power_(out, ax.log)
 
-        out.name = ax.name
+        out.name = 'Mean ' + ax.name
         out.units = ax.units
 
         return out
@@ -132,7 +132,41 @@ class Mesh(myObject):
             Contains the medians along the specified axis. Has size equal to arr.shape[axis].
 
         """
-        return self._percentile(values, 50.0, axis)
+        out = self._percentile(values, 50.0, axis)
+        out.name =  "Median " + self.centres(axis).name
+        return out
+
+    def _mode(self, values, axis=0):
+        """Gets the maximum along axis.
+
+        Parameters
+        ----------
+        values : array_like
+            Values used to compute interval like histogram counts.
+        axis : int
+            Along which axis to obtain the interval locations.
+
+        Returns
+        -------
+        interval : array_like
+            Contains the location of the maximum. Has size equal to self.shape[axis].
+
+        """
+        # total of the counts
+        i = argmax(values, axis=axis)
+        # i[i == values.shape[axis]] = values.shape[axis]-1
+
+        # Obtain the values at those locations
+        # ax = self.axis(axis)
+        if self.ndim == 1:
+            out = self.centres_absolute[i]
+        else:
+            # if size(percent) == 1:
+            i = expand_dims(i, axis)
+            out = squeeze(take_along_axis(self.centres(axis), i, axis=axis))
+
+        out.name = "Mode " + self.centres(axis).name
+        return out
 
     def _percentile(self, values, percent=95.0, axis=0):
         """Gets the percent interval along axis.
@@ -179,7 +213,6 @@ class Mesh(myObject):
             if size(percent) == 1:
                 i = expand_dims(i, axis)
             return squeeze(take_along_axis(self.centres(axis), i, axis=axis))
-            # return squeeze(ax.centres_absolute[i])
 
 
     def remove_axis(self, axis):

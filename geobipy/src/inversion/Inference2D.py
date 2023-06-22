@@ -433,10 +433,37 @@ class Inference2D(myObject):
 
         return mean
 
+    def compute_median_parameter(self, log=None, track=True):
 
-    # def credible_range(self, perceslic=None):
-    #     """ Get the model parameter opacity using the credible intervals """
-    #     return self.credibleUpper(slic) - self.credibleLower(slic)
+        posterior = self.parameter_posterior()
+        mean = posterior.median(axis=1)
+
+        # if self.mode == 'r+':
+        #     key = 'mean_parameter'
+        #     if key in self.hdf_file.keys():
+        #         mean.writeHdf(self.hdf_file, key)
+        #     else:
+        #         mean.toHdf(self.hdf_file, key)
+        #     self.hdf_file[key].attrs['name'] = mean.values.name
+        #     self.hdf_file[key].attrs['units'] = mean.values.units
+
+        return mean
+
+    def compute_mode_parameter(self, log=None, track=True):
+
+        posterior = self.parameter_posterior()
+        mean = posterior.mode(axis=1)
+
+        # if self.mode == 'r+':
+        #     key = 'mean_parameter'
+        #     if key in self.hdf_file.keys():
+        #         mean.writeHdf(self.hdf_file, key)
+        #     else:
+        #         mean.toHdf(self.hdf_file, key)
+        #     self.hdf_file[key].attrs['name'] = mean.values.name
+        #     self.hdf_file[key].attrs['units'] = mean.values.units
+
+        return mean
 
 
     def compute_doi(self, percent=67.0, smooth=None, track=True):
@@ -1500,6 +1527,34 @@ class Inference2D(myObject):
     def plot_mean_model(self, **kwargs):
 
         model = self.mean_parameters()
+
+        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+
+        if kwargs.pop('use_variance', False):
+            kwargs['alpha'] = self.opacity().values
+
+        if kwargs.pop('mask_below_doi', False):
+            kwargs['alpha'] = self.doi_mask(model, **kwargs)
+
+        return model.pcolor(**kwargs)
+
+    def plot_median_model(self, **kwargs):
+
+        model = self.compute_median_parameter()
+
+        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+
+        if kwargs.pop('use_variance', False):
+            kwargs['alpha'] = self.opacity().values
+
+        if kwargs.pop('mask_below_doi', False):
+            kwargs['alpha'] = self.doi_mask(model, **kwargs)
+
+        return model.pcolor(**kwargs)
+
+    def plot_mode_model(self, **kwargs):
+
+        model = self.compute_mode_parameter()
 
         model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
 

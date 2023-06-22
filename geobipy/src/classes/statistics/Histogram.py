@@ -304,6 +304,28 @@ class Histogram(Model):
         out = self.mesh.remove_axis(axis)
         return Model(mesh=out, values=values)
 
+    def mode(self, log=None, axis=0):
+        """Gets the median for the specified axis.
+
+        Parameters
+        ----------
+        log : 'e' or float, optional
+            Take the log of the median to a base. 'e' if log = 'e', or a number e.g. log = 10.
+        axis : int
+            Along which axis to obtain the median.
+
+        Returns
+        -------
+        out : array_like
+            The medians along the specified axis. Has size equal to arr.shape[axis].
+
+        """
+        values = self.mesh._mode(self.counts, axis=axis)
+        if self.ndim == 1:
+            return values
+        mesh = self.mesh.remove_axis(axis)
+        return Model(mesh=mesh, values=values)
+
     def opacity(self, percent=95.0, log=None, axis=0):
         """Return an opacity between 0 and 1 based on the difference between credible invervals of the hitmap.
 
