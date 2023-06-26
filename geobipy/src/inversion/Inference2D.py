@@ -1938,23 +1938,23 @@ class Inference2D(myObject):
               "marginal_probability"+
               "====================================================\n")
 
-    def createHdf(self, hdf_file, inference1d):
+    def createHdf(self, parent, inference1d):
         """ Create the hdf group metadata in file
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        hdf_file = inference1d.createHdf(hdf_file, add_axis=self.data.fiducial)
+        parent = inference1d.createHdf(parent, add_axis=self.data.fiducial)
 
         # Write the line number
-        self.data.lineNumber.writeHdf(hdf_file, 'data/line_number')
+        self.data.lineNumber.writeHdf(parent, 'data/line_number')
 
         # Write the sorted fiducials
-        fids = sort(self.data.fiducial)
-        fids.writeHdf(hdf_file, 'data/fiducial')
+        fiducials = sort(self.data.fiducial)
+        fiducials.writeHdf(parent, 'data/fiducial')
 
-        self.hdf_file = hdf_file
+        self.hdf_file = parent
 
-        return hdf_file
+        return parent
 
     @classmethod
     def fromHdf(cls, grp, mode = "r", world=None, **kwargs):

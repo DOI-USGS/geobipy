@@ -569,7 +569,7 @@ class Inference1D(myObject):
         # Does the user want to save the HDF5 results?
         if self.save_hdf5:
             # No parallel write is being used, so write a single file for the data point
-            self.write_inference1d(hdf_file_handle)
+            self.writeHdf(hdf_file_handle)
 
         # Does the user want to save the plot as a png?
         if self.save_png:# and not failed):
@@ -897,36 +897,31 @@ class Inference1D(myObject):
 
         return parent
 
-    def write_inference1d(self, parent, index=None):
+    def writeHdf(self, parent, index=None):
         """ Given a HDF file initialized as line results, write the contents of results to the appropriate arrays """
-
-        # assert self.datapoint.fiducial in self.fiducials, Exception("The HDF file does not have ID number {}. Available ids are between {} and {}".format(inference1d.fiducial, min(self.fiducials), max(self.fiducials)))
-
-        hdfFile = parent
 
         # Get the point index
         if index is None:
             fiducials = StatArray.StatArray.fromHdf(parent['data/fiducial'])
             index = fiducials.searchsorted(self.datapoint.fiducial)
 
-        i = index
         # Add the iteration number
-        hdfFile['iteration'][i] = self.iteration
+        parent['iteration'][index] = self.iteration
 
         # Add the burn in iteration
-        hdfFile['burned_in_iteration'][i] = self.burned_in_iteration
+        parent['burned_in_iteration'][index] = self.burned_in_iteration
 
         # Add the burn in iteration
-        hdfFile['best_iteration'][i] = self.best_iteration
+        parent['best_iteration'][index] = self.best_iteration
 
         # Add the burned in logical
-        hdfFile['burned_in'][i] = self.burned_in
+        parent['burned_in'][index] = self.burned_in
 
         # Add the depth of investigation
         # hdfFile['doi'][i] = self.doi()
 
         # Add the multiplier
-        hdfFile['multiplier'][i] = self.multiplier
+        parent['multiplier'][index] = self.multiplier
 
         # Add the inversion time
         # hdfFile['invtime'][i] = self.invTime

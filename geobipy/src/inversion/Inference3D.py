@@ -430,7 +430,7 @@ class Inference3D(myObject):
             r = range(index, index+1)
 
         for i in r:
-            datapoint = dataset._read_record(record = i)
+            datapoint = dataset._read_record()
 
             # Pass through the line results file object if a parallel file system is in use.
             iLine = self.lineNumber.searchsorted(datapoint.lineNumber)[0]
