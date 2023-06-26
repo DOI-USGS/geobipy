@@ -6,7 +6,7 @@ from os.path import join
 
 from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
-from numpy import max, min, log, array, full, float128
+from numpy import max, min, log, array, full, longdouble
 
 from numpy.random import RandomState
 from numpy.linalg import norm
@@ -507,7 +507,7 @@ class Inference1D(myObject):
         proposal_ratio = proposal - proposal1
 
         try:
-            log_acceptance_ratio = float128(prior_ratio + likelihood_ratio + proposal_ratio)
+            log_acceptance_ratio = longdouble(prior_ratio + likelihood_ratio + proposal_ratio)
             acceptance_probability = cF.expReal(log_acceptance_ratio)
         except:
             log_acceptance_ratio = -inf
