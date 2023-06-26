@@ -1155,7 +1155,8 @@ class Inference2D(myObject):
         labels = kwargs.pop('labels', True)
 
         plt.fill_between(x, self.burned_in, 0.0, step='mid', color=cmap(1.0), label="")
-        plt.fill_between(x, 1-self.burned_in, 0.0, step='mid', color=cmap(1.0), label="")
+        plt.fill_between(x, 1-self.burned_in, 0.0, step='mid', color=cmap(0.0), label="")
+
 
     def plot_channel_saturation(self, **kwargs):
 
