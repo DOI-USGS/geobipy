@@ -942,22 +942,22 @@ class Inference1D(myObject):
         # # Add the interpolated opacity
 
         # Add the acceptance rate
-        self.acceptance_rate.writeHdf(hdfFile, 'acceptance_rate', index=i)
+        self.acceptance_rate.writeHdf(parent, 'acceptance_rate', index=index)
 
         # Add the data misfit
-        self.data_misfit_v.writeHdf(hdfFile, 'phids', index=i)
+        self.data_misfit_v.writeHdf(parent, 'phids', index=index)
 
         # Write the data posteriors
-        self.datapoint.writeHdf(hdfFile,'data',  index=i)
+        self.datapoint.writeHdf(parent,'data',  index=index)
         # Write the highest posterior data
-        self.best_datapoint.writeHdf(hdfFile,'data', withPosterior=False, index=i)
+        self.best_datapoint.writeHdf(parent,'data', withPosterior=False, index=index)
 
-        self.halfspace.writeHdf(hdfFile, 'halfspace', index=i)
+        self.halfspace.writeHdf(parent, 'halfspace', index=index)
 
         # Write the model posteriors
-        self.model.writeHdf(hdfFile,'model', index=i)
+        self.model.writeHdf(parent,'model', index=index)
         # Write the highest posterior data
-        self.best_model.writeHdf(hdfFile,'model', withPosterior=False, index=i)
+        self.best_model.writeHdf(parent,'model', withPosterior=False, index=index)
 
 
     def read_fromH5Obj(self, h5obj, fName, grpName, system_file_path = ''):
