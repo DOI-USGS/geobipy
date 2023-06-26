@@ -669,13 +669,13 @@ def expReal(this):
         exp(this).
 
     """
-    # if this < -746.0:
-    #     return 0.0
+    # np.float64 = 709.0
+    # np.longdouble = 11356.0
 
-    if this > 709.0:
+    if this > 11356.0:
         return inf
 
-    return longdouble(exp(this))
+    return exp(longdouble(this))
 
 
 def tanh(this):

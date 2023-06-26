@@ -506,12 +506,8 @@ class Inference1D(myObject):
 
         proposal_ratio = proposal - proposal1
 
-        try:
-            log_acceptance_ratio = longdouble(prior_ratio + likelihood_ratio + proposal_ratio)
-            acceptance_probability = cF.expReal(log_acceptance_ratio)
-        except:
-            log_acceptance_ratio = -inf
-            acceptance_probability = -1.0
+        log_acceptance_ratio = prior_ratio + likelihood_ratio + proposal_ratio
+        acceptance_probability = cF.expReal(log_acceptance_ratio)
 
         # If we accept the model
         accepted = acceptance_probability > self.prng.uniform()
