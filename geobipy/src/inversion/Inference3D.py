@@ -412,7 +412,7 @@ class Inference3D(myObject):
                 prng = RandomState(seed)
         else:
             prng = RandomState()
-            save('seed', prng.get_state())
+            save('seed', asarray(prng.get_state(), dtype=object))
 
         if index is None:
 
