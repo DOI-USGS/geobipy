@@ -812,7 +812,7 @@ class Model(myObject):
             if kwargs.get('solve_value', False):
                 assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
                 # Assign the initial prior to the parameters
-                variance = nplog(11.0)**2.0 #self.mesh.cell_weights /
+                variance = nplog(1.0 + kwargs.get('factor', 10.0))**2.0 #self.mesh.cell_weights /
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
                                                 variance=variance,
                                                 ndim=self.mesh.nCells,
@@ -822,7 +822,7 @@ class Model(myObject):
         if gradient_prior is None:
             if kwargs.get('solve_gradient', False):
                 self.gradient.prior = Distribution('MvNormal', mean=0.0,
-                                            variance=kwargs.get('gradient_variance', 1.5),
+                                            variance=kwargs.get('gradient_standard_deviation', 1.5)**2.0,
                                             ndim=maximum(1, self.mesh.nCells-1),
                                             prng=kwargs.get('prng'))
 

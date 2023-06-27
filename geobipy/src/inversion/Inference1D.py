@@ -420,10 +420,12 @@ class Inference1D(myObject):
             max_edge=kwargs['maximum_depth'],
             max_cells=kwargs['maximum_number_of_layers'],
             solve_value=True, #self.solve_parameter,
-            solve_gradient=self.solve_gradient,
-            parameter_limits=self.limits,
+            # solve_gradient=self.solve_gradient,
+            # parameter_limits=,
             min_width=kwargs.get('minimum_thickness', None),
-            factor=kwargs.get('factor', 10.0), prng=self.prng
+            # factor=kwargs.get('factor', 10.0),
+            prng=self.prng,
+            **kwargs
         )
 
         # Assign a Hitmap as a prior if one is given
