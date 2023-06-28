@@ -121,35 +121,13 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
 
     options = user_parameters.read(inputFile)
 
-    # Everyone needs the system classes read in early.
-    # Dataset = userParameters.data_type()
-
-    # if isinstance(Dataset, DataPoint):
-    #     serial_datapoint(userParameters, output_directory, seed=seed)
-    # else:
     serial_dataset(output_directory, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **options)
-
-
-# def serial_datapoint(options, output_directory, seed=None):
-
-#     datapoint = type(options.data_type)()
-#     datapoint.read(options.data_filename)
-
-#     # Get the random number generator
-#     prng = np.random.RandomState(seed)
-
-#     # options = userParameters.userParameters(datapoint)
-#     # options.output_directory = output_directory
-
-#     infer(options, datapoint, prng=prng)
-
 
 def serial_dataset(output_directory, seed=None, index=None, fiducial=None, line_number=None, **kwargs):
 
     data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
 
-    inference3d = Inference3D(data=data)#output_directory, kwargs['system_filename'])
-
+    inference3d = Inference3D(data=data)
     inference3d.create_hdf5(directory=output_directory, **kwargs)
 
     inference3d.infer(data, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **kwargs)
