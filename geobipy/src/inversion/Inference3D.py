@@ -414,23 +414,22 @@ class Inference3D(myObject):
             prng = RandomState()
             save('seed', asarray(prng.get_state(), dtype=object))
 
+        nPoints = dataset.nPoints
+        r = range(nPoints)
         if index is None:
-
             if fiducial is not None:
                 index = squeeze(argwhere((dataset.lineNumber == line_number) & (dataset.fiducial == fiducial)))
 
                 nPoints = 1
                 r = range(index, index+1)
-
-            else:
-                nPoints = dataset.nPoints
-                r = range(nPoints)
         else:
             nPoints = 1
             r = range(index, index+1)
 
         for i in r:
-            datapoint = dataset._read_record()
+            rec = i if nPoints == 1 else None
+
+            datapoint = dataset._read_record(record = rec)
 
             # Pass through the line results file object if a parallel file system is in use.
             iLine = self.lineNumber.searchsorted(datapoint.lineNumber)[0]

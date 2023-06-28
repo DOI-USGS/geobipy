@@ -437,16 +437,13 @@ class Model(myObject):
         return remapped_model, perturbed_model
 
     def prior_derivative(self, order):
-        if order == 1:
-            gradient = dot(self.mesh.cell_weights, self.values.prior.deviation(self.values)) + self.values.priorDerivative(order=1)
-            if self.gradient.hasPrior:
-                Wz = self.mesh.gradient_operator
-                gradient +=  dot(dot(Wz.T, Wz), self.values.prior.deviation(self.values))
-        elif order == 2:
-            gradient = self.mesh.cell_weights + self.values.priorDerivative(order=2)
-            if self.gradient.hasPrior:
-                Wz = self.mesh.gradient_operator
-                gradient += dot(Wz.T, Wz)
+        # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ww'WwWs)(m - mref)
+        operator = self.mesh.cell_weights * self.values.priorDerivative(order=2)
+        if self.gradient.hasPrior:
+            Wz = self.mesh.gradient_operator
+            operator += self.mesh.cell_weights * dot(Wz.T, Wz)
+
+        return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
         return gradient
 
