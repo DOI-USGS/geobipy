@@ -445,8 +445,6 @@ class Model(myObject):
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
-        return gradient
-
     def perturb_structure(self, update_priors=True):
 
         remapped_mesh, remapped_values = self.mesh.perturb(values=self.values)
