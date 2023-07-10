@@ -2,9 +2,10 @@ from copy import deepcopy
 
 from numpy import abs, arange, argsort, argwhere, asarray, atleast_1d, complex128, cos, diag, diff, divide, dot, empty
 from numpy import exp, flip, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
-from numpy import log, log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
+from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
 from numpy import real, s_, shape, sin, size, where, zeros
 from numpy import all as npall
+from numpy import log as nplog
 
 from numpy.linalg import cholesky, det, inv, slogdet
 from numpy.lib.stride_tricks import as_strided
@@ -432,14 +433,14 @@ def Inv(A):
 
     """
 
-    ndim = ndim(A)
+    nd = ndim(A)
 
-    assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
+    assert nd <= 2, TypeError('The number of dimesions of A must be <= 2')
 
-    if (ndim == 2):
+    if (nd == 2):
         return inv(A)
 
-    return 1.0 / A
+    return power(A, -1.0)
 
 
 def isNumpy(x):
@@ -512,16 +513,16 @@ def Det(A, N=1.0):
 
     """
 
-    ndim = ndim(A)
-    assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
+    nd = ndim(A)
+    assert nd <= 2, TypeError('The number of dimesions of A must be <= 2')
 
-    if (ndim == 0):
-        return A**N
+    if (nd == 0):
+        return power(A, N)
 
-    if (ndim == 1):
+    if (nd == 1):
         return prod(A)
 
-    if (ndim == 2):
+    if (nd == 2):
         return det(A)
 
 
@@ -545,16 +546,16 @@ def LogDet(A, N=1.0):
 
     """
 
-    ndim = ndim(A)
-    assert ndim <= 2, TypeError('The number of dimesions of A must be <= 2')
+    nd = ndim(A)
+    assert nd <= 2, TypeError('The number of dimesions of A must be <= 2')
 
-    if (ndim == 0):
-        return log(A**N)
+    if (nd == 0):
+        return nplog(power(A, N))
 
-    if (ndim == 1):
+    if (nd == 1):
         return float64(slogdet(diag(A))[1])
 
-    if (ndim == 2):
+    if (nd == 2):
         d = slogdet(A)
         return d[0] * d[1]
 
@@ -781,7 +782,7 @@ def _logScalar(value, log=None):
         print(Warning('Value <= 0.0 have been masked before taking their log'))
 
     if (log == 'e'):
-        tmp = log(value)
+        tmp = nplog(value)
         label = 'ln'
         return tmp, label
 
@@ -846,7 +847,7 @@ def _logArray(values, log=None):
     tmp[:] = nan
 
     if (log == 'e'):
-        tmp[i] = log(values[i])
+        tmp[i] = nplog(values[i])
         label = 'ln'
         return tmp, label
 
