@@ -98,6 +98,7 @@ class Inference1D(myObject):
 
         self.ignore_likelihood = ignore_likelihood
         self.n_markov_chains = n_markov_chains
+        self.multiplier = multiplier
         self.solve_gradient = solve_gradient
         self.solve_parameter = solve_parameter
         self.save_hdf5 = save_hdf5
@@ -918,7 +919,7 @@ class Inference1D(myObject):
         # Add the depth of investigation
         # hdfFile['doi'][i] = self.doi()
 
-        # Add the multiplier
+        # Add the multiplierx
         parent['multiplier'][index] = self.multiplier
 
         # Add the inversion time
@@ -978,25 +979,28 @@ class Inference1D(myObject):
             index = fiducials.searchsorted(fiducial)
 
         self = cls(
-                datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index),
                 interactive_plot = True,
                 multiplier = hdfRead.readKeyFromFile(hdfFile, '', '/', 'multiplier', index=index),
-                n_markov_chains = array(hdfFile.get('n_markov_chains')),
+                n_markov_chains = array(hdfFile.get('n_markov_chains', 100000)),
                 parameter_limits = None if not 'limits' in hdfFile else hdfFile.get('limits'),
-                reciprocate_parameters = array(hdfFile.get('reciprocate_parameter')),
+                reciprocate_parameters = array(hdfFile.get('reciprocate_parameter', False)),
                 save_hdf5 = False,
                 save_png = False,
-                update_plot_every = array(hdfFile.get('update_plot_every')),
+                update_plot_every = array(hdfFile.get('update_plot_every', 5000)),
                 dont_initialize = True)
+        self._datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
 
         s = s_[index, :]
 
         self.nSystems = array(hdfFile.get('nsystems'))
         self.acceptance_x = hdfRead.readKeyFromFile(hdfFile, '', '/', 'ratex')
 
-        self.iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', 'iteration', index=index)
-        self.burned_in_iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', 'burned_in_iteration', index=index)
-        self.burned_in = hdfRead.readKeyFromFile(hdfFile, '', '/', 'burned_in', index=index)
+        key = 'iteration' if 'iteration' in hdfFile else 'i'
+        self.iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=index)
+        key = 'burned_in_iteration' if 'burned_in_iteration' in hdfFile else 'iburn'
+        self.burned_in_iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=index)
+        key = 'burned_in' if 'burned_in' in hdfFile else 'burnedin'
+        self.burned_in = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=index)
         self.acceptance_rate = hdfRead.readKeyFromFile(hdfFile, '', '/', 'rate', index=s)
 
         self.best_datapoint = self.datapoint
