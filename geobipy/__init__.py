@@ -123,6 +123,7 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
 
     serial_dataset(output_directory, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **options)
 
+
 def serial_dataset(output_directory, seed=None, index=None, fiducial=None, line_number=None, **kwargs):
 
     data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
@@ -130,10 +131,10 @@ def serial_dataset(output_directory, seed=None, index=None, fiducial=None, line_
     inference3d = Inference3D(data=data)
     inference3d.create_hdf5(directory=output_directory, **kwargs)
 
-    inference3d.infer(data, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **kwargs)
+    inference3d.infer(seed=seed, index=index, fiducial=fiducial, line_number=line_number, **kwargs)
+
 
 def parallel_geobipy(inputFile, outputDir, skipHDF5):
-
     parallel_mpi(inputFile, outputDir, skipHDF5)
 
 def parallel_mpi(inputFile, output_directory, skipHDF5):
@@ -181,7 +182,7 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
 
     myMPI.rankPrint(world, "Created hdf5 files in {} h:m:s".format(str(timedelta(seconds=MPI.Wtime()-t0))))
 
-    inference3d.infer(data, **kwargs)
+    inference3d.infer(**kwargs)
 
 def geobipy():
     """Run the serial implementation of GeoBIPy. """
