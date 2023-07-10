@@ -82,29 +82,36 @@ class Inference3D(myObject):
     def __deepcopy__(self, memo={}):
         return None
 
+    @classmethod
+    def fromHdf(cls, grp, mode = "r", world=None, **kwargs):
+        assert mode != 'w', ValueError("Don't use mode = 'w' when reading!")
+        if isinstance(grp, (Path, str)):
+            tmp = {}
+            if world is not None:
+                tmp['driver'] = 'mpio'
+                tmp['comm'] = world
+
+            grp = h5py.File(grp, mode, **tmp)
+
+        lines = [Inference2D.fromHdf(grp[file], world = world) for file in grp.keys()]
+
+        data = lines[0].data
+        for line in lines[1:]:
+            data.append(line.data)
+
+        self = cls(data, world=world)
+        self.mode = mode
+        self.hdf_file = grp
+        self.lines = lines
+        return self
+
     def open(self, directory, **kwargs):
+        assert kwargs.get('mode', 'r') in ('r', 'r+', 'a', 'w'), ValueError("mode must be in ('r', 'r+', 'a', 'w')")
 
-        mode = kwargs.get('mode', 'r')
-        assert mode in ('r', 'r+', 'a', 'w'), ValueError("mode must be in ('r', 'r+', 'a', 'w')")
+        self.lines = [Inference2D.fromHdf(file, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
 
-        if mode in ('r', 'r+', 'a'):
-            files = self._get_h5Files(directory, **kwargs)
-
-            self.lines = [Inference2D.fromHdf(file, world = self.world, **kwargs) for file in files]
-            self.lineNumber = asarray([tmp.line_number for tmp in self.lines])
-
-        elif mode == 'w':
-            files = [join(directory, '{}.h5'.format(line)) for line in self.lineNumber]
-
-            self.lines = []
-            for line, file in zip(self.lineNumber, files):
-                subset = self.data.line[line]
-                tmp = Inference2D(data=subset, world=self.world)
-                tmp.open(file, **kwargs)
-                self.lines.append(tmp)
-
-
-    def _get_h5Files(self, directory, files=None, **kwargs):
+    @staticmethod
+    def _get_h5Files(directory, files=None, **kwargs):
 
         if not files is None:
             if not isinstance(files, list):
@@ -244,8 +251,6 @@ class Inference3D(myObject):
                 inference3d._create_HDF5_dataset(directory, **kwargs)
 
             self.world.barrier()
-            # Open the files with the full communicator
-            # self.__init__()directory, kwargs['system_filename'], world=self.world)
 
         else:
             self._create_HDF5_dataset(directory, **kwargs)
@@ -262,11 +267,6 @@ class Inference3D(myObject):
 
     def _create_HDF5_dataset(self, directory, **kwargs):
 
-        # Prepare the dataset so that we can read a point at a time.
-        self.data = self.data._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
-        self.data._read_line_fiducial(kwargs['data_filename'])
-        self.lineNumber = self.data.lineNumber
-
         # Get a datapoint from the file.
         datapoint = self.data._read_record(record=0)
 
@@ -278,7 +278,6 @@ class Inference3D(myObject):
         self.print('Files are being created for data files {} and system files {}'.format(kwargs['data_filename'], kwargs['system_filename']))
 
         # No need to create and close the files like in parallel, so create and keep them open
-        s = 0
         for line in self.lineNumber:
 
             subset = self.data.line(line)
@@ -291,9 +290,12 @@ class Inference3D(myObject):
             with h5py.File(join(directory, '{}.h5'.format(line)), 'w', **kwargs) as f:
                 Inference2D(subset).createHdf(f, inference1d)
 
-            self.print('Created hdf5 file for line {} with {} data points'.format(line, subset.fiducial.size))
-            s += subset.fiducial.size
-        self.print('Created hdf5 files {} total data points'.format(s))
+            self.print('Created hdf5 file for line {} with {} data points'.format(line, subset.nPoints))
+        self.print('Created hdf5 files {} total data points'.format(self.data.nPoints))
+
+        if self.parallel_access:
+            self.world.barrier()
+
 
     def print(self, *args):
         if self.world is None:
@@ -339,11 +341,11 @@ class Inference3D(myObject):
 
     @property
     def lineNumber(self):
-        return self._lineNumber
+        return sort(unique(self.data.lineNumber))
 
-    @lineNumber.setter
-    def lineNumber(self, values):
-        self._lineNumber = unique(values)
+    # @lineNumber.setter
+    # def lineNumber(self, values):
+    #     self._lineNumber = unique(values)
 
     @property
     def nLines(self):
@@ -392,17 +394,17 @@ class Inference3D(myObject):
             line.uncache('additiveError')
         return out
 
-    def infer(self, dataset, seed=None, index=None, fiducial=None, line_number=None, **options):
+    def infer(self, seed=None, index=None, fiducial=None, line_number=None, **options):
 
         if self.parallel_access:
-            self.infer_mpi(dataset, **options)
+            self.infer_mpi(**options)
         else:
-            self.infer_serial(dataset, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **options)
+            self.infer_serial(seed=seed, index=index, fiducial=fiducial, line_number=line_number, **options)
 
-    def infer_serial(self, dataset, seed=None, index=None, fiducial=None, line_number=None, **options):
+    def infer_serial(self, seed=None, index=None, fiducial=None, line_number=None, **options):
 
         t0 = time.time()
-        dataset = dataset._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+        dataset = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
         if seed is not None:
             if isinstance(seed, str):
@@ -414,11 +416,11 @@ class Inference3D(myObject):
             prng = RandomState()
             save('seed', asarray(prng.get_state(), dtype=object))
 
-        nPoints = dataset.nPoints
+        nPoints = self.data.nPoints
         r = range(nPoints)
         if index is None:
             if fiducial is not None:
-                index = squeeze(argwhere((dataset.lineNumber == line_number) & (dataset.fiducial == fiducial)))
+                index = squeeze(argwhere((self.data.lineNumber == line_number) & (self.data.fiducial == fiducial)))
 
                 nPoints = 1
                 r = range(index, index+1)
@@ -429,7 +431,7 @@ class Inference3D(myObject):
         for i in r:
             rec = i if nPoints == 1 else None
 
-            datapoint = dataset._read_record(record = rec)
+            datapoint = self.data._read_record(record = rec)
 
             # Pass through the line results file object if a parallel file system is in use.
             iLine = self.lineNumber.searchsorted(datapoint.lineNumber)[0]
@@ -446,7 +448,7 @@ class Inference3D(myObject):
             print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-i-1, nPoints, elapsed, eta))
 
 
-    def infer_mpi(self, dataset, **options):
+    def infer_mpi(self, **options):
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
@@ -460,21 +462,21 @@ class Inference3D(myObject):
 
         # Carryout the master-worker tasks
         if (world.rank == 0):
-            self._infer_mpi_master_task(dataset, **options)
+            self._infer_mpi_master_task(**options)
         else:
-            self._infer_mpi_worker_task(dataset.single, prng, **options)
+            self._infer_mpi_worker_task(prng, **options)
 
-    def _infer_mpi_master_task(self, dataset, **options):
+    def _infer_mpi_master_task(self, **options):
         """ Define a Send Recv Send procedure on the master """
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
 
         # Prep the data for point by point reading
-        dataset = dataset._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+        # dataset = dataset._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
         # Set the total number of data points
-        nPoints = dataset.nPoints
+        nPoints = self.data.nPoints
 
         nFinished = 0
         nSent = 0
@@ -483,7 +485,7 @@ class Inference3D(myObject):
         # Send out the first indices to the workers
         for iWorker in range(1, world.size):
             # Get a datapoint from the file.
-            datapoint = dataset._read_record(nSent, mpi_enabled=True)
+            datapoint = self.data._read_record(nSent, mpi_enabled=True)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
@@ -513,7 +515,7 @@ class Inference3D(myObject):
             if nSent == nPoints:
                 datapoint = None
             else:
-                datapoint = dataset._read_record(nSent, mpi_enabled=True)
+                datapoint = self.data._read_record(nSent, mpi_enabled=True)
 
             # If DataPoint is None, then we reached the end of the file and no more points can be read in.
             if datapoint is None:
@@ -533,7 +535,7 @@ class Inference3D(myObject):
                 eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
                 myMPI.print("Points sent {} || Remaining {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nSent, nPoints-nFinished, nPoints, elapsed, eta))
 
-    def _infer_mpi_worker_task(self, datapoint, prng, **options):
+    def _infer_mpi_worker_task(self, prng, **options):
         """ Define a wait run ping procedure for each worker """
 
         # Import here so serial code still works...
@@ -550,7 +552,7 @@ class Inference3D(myObject):
         continueRunning = world.recv(source=0)
         # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
         if continueRunning:
-            datapoint = datapoint.Irecv(source=0, world=world)
+            datapoint = self.data.single.Irecv(source=0, world=world)
         else:
             Go = False
 
@@ -580,7 +582,7 @@ class Inference3D(myObject):
 
             # If we continue running, receive the next DataPoint. Otherwise, shutdown the rank
             if continueRunning:
-                datapoint = datapoint.Irecv(source=0, world=world, system=datapoint.system)
+                datapoint = self.data.single.Irecv(source=0, world=world, system=datapoint.system)
             else:
                 Go = False
 
@@ -2075,7 +2077,6 @@ class Inference3D(myObject):
             res = res[logical_not(isnan(res[:,0]))]
 
         return res
-
 
     def kMeans(self, nClusters, precomputedParVsZ=None, standardize=False, log10Depth=False, plot=False, bestModel=True, withDoi=True, reciprocateParameter=True, log10=True, clipNan=True, **kwargs):
         """  """
