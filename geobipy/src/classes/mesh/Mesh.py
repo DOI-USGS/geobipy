@@ -133,7 +133,8 @@ class Mesh(myObject):
 
         """
         out = self._percentile(values, 50.0, axis)
-        out.name =  "Median " + self.centres(axis).name
+        if isinstance(out, StatArray.StatArray):
+            out.name =  "Median " + self.axis(axis).centres.name
         return out
 
     def _mode(self, values, axis=0):
@@ -213,7 +214,6 @@ class Mesh(myObject):
             if size(percent) == 1:
                 i = expand_dims(i, axis)
             return squeeze(take_along_axis(self.centres(axis), i, axis=axis))
-
 
     def remove_axis(self, axis):
         tmp = [s_[:] for i in range(self.ndim)]

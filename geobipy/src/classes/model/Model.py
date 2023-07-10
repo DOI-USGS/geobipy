@@ -4,10 +4,11 @@ Module describing a Model
 from copy import deepcopy
 
 from numpy import abs, any, arange, argpartition, argsort, argwhere, asarray, column_stack
-from numpy import cumsum, diff, dot, empty, exp, hstack, inf, isinf, maximum, mean, meshgrid
-from numpy import ravel_multi_index, s_, sign, size, squeeze, unique, vstack, zeros
+from numpy import cumsum, diag, diff, dot, empty, exp, hstack, inf, isinf, maximum, mean, meshgrid
+from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, unique, vstack, zeros
 from numpy import log as nplog
 from numpy.linalg import inv
+from matplotlib.pyplot import gcf
 from ...base.utilities import reslice
 from ...base import plotting
 from ..core.myObject import myObject
@@ -438,21 +439,21 @@ class Model(myObject):
 
     def prior_derivative(self, order):
         # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ww'WwWs)(m - mref)
-        operator = self.mesh.cell_weights * self.values.priorDerivative(order=2)
+        wts = self.mesh.cell_weights
+        operator = wts * self.values.priorDerivative(order=2)
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
-            operator += self.mesh.cell_weights * dot(Wz.T, Wz)
+            operator += wts * dot(Wz.T, Wz)
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
-    def perturb_structure(self, update_priors=True):
+    def perturb_structure(self):
 
         remapped_mesh, remapped_values = self.mesh.perturb(values=self.values)
         remapped_model = type(self)(remapped_mesh, values=remapped_values)
 
         remapped_model._gradient = deepcopy(self._gradient)
 
-        # if update_priors:
         if self.value_bounds is not None:
             remapped_model.value_bounds = self.value_bounds
         if remapped_model.values.hasPrior:
@@ -488,6 +489,13 @@ class Model(myObject):
         self.values.reset_posteriors()
 
     def plot_posteriors(self, axes=None, values_kwargs={}, axis=0, **kwargs):
+
+        if axes is None:
+            axes = kwargs.pop('fig', gcf())
+
+        if not isinstance(axes, list):
+            axes = self._init_posterior_plots(axes)
+
         self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
 
         self.values.posterior.mean(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
