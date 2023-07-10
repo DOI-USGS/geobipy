@@ -147,8 +147,9 @@ class Inference2D(myObject):
 
     @hdf_file.setter
     def hdf_file(self, value):
-        assert isinstance(value, h5py.File), TypeError("hdf_file must have type h5py.File")
+        assert isinstance(value, (h5py.File, h5py.Group)), TypeError("hdf_file must have type h5py.File")
         self._hdf_file = value
+
     @cached_property
     def height(self):
         """Get the height of the observations. """
@@ -186,7 +187,7 @@ class Inference2D(myObject):
 
     @cached_property
     def line_number(self):
-        return unique(self.data.lineNumber)
+        return self.data.lineNumber[0]
 
     @property
     def longest_coordinate(self):
@@ -1952,8 +1953,6 @@ class Inference2D(myObject):
         # Write the sorted fiducials
         fiducials = sort(self.data.fiducial)
         fiducials.writeHdf(parent, 'data/fiducial')
-
-        self.hdf_file = parent
 
         return parent
 
