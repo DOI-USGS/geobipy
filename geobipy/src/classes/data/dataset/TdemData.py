@@ -1043,6 +1043,20 @@ class TdemData(Data):
         if kwargs.get('index') is not None:
             return cls.single.fromHdf(grp, **kwargs)
 
+        systems = TdemData.read_systems_from_h5(grp, **kwargs)
+
+        self = super(TdemData, cls).fromHdf(grp, system=systems)
+
+        self.primary_field = None#StatArray.StatArray.fromHdf(grp['primary_field'])
+        self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])
+        self.predicted_primary_field = None#StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
+        self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
+        self.loop_pair = Loop_pair.fromHdf(grp['loop_pair'])
+
+        return self
+
+    @staticmethod
+    def read_systems_from_h5(grp, **kwargs):
         nSystems = int32(asarray(grp.get('nSystems')))
         if 'system_filename' in kwargs:
             system_filename = kwargs['system_filename']
@@ -1055,16 +1069,7 @@ class TdemData(Data):
             else:
                 # Get the system file name. h5py has to encode strings using utf-8, so decode it!
                 systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)], 'System{}.stm'.format(i))
-
-        self = super(TdemData, cls).fromHdf(grp, system=systems)
-
-        self.primary_field = None#StatArray.StatArray.fromHdf(grp['primary_field'])
-        self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])
-        self.predicted_primary_field = None#StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
-        self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
-        self.loop_pair = Loop_pair.fromHdf(grp['loop_pair'])
-
-        return self
+        return systems
 
     def _BcastSystem(self, world, root=0, system=None):
         """Broadcast the TdemSystems.
