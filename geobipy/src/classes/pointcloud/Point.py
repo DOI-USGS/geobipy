@@ -57,7 +57,7 @@ class Point(myObject):
         The 3D point cloud
 
     """
-    __slots__ = ('_nPoints', '_x', '_y', '_z', '_elevation')
+    __slots__ = ('_nPoints', '_x', '_y', '_z', '_elevation', '_kdtree')
 
     def __init__(self, x=None, y=None, z=None, elevation=None, **kwargs):
         """ Initialize the class """
@@ -77,6 +77,8 @@ class Point(myObject):
         self.z = z
         # StatArray of elevation
         self.elevation = elevation
+
+        self._kdtree = None
 
     def __add__(self, other):
         """ Add two points together """
@@ -186,6 +188,15 @@ class Point(myObject):
         return probability
 
     @property
+    def kdtree(self):
+
+        if self._kdtree is None:
+            assert self.ndim > 1, ValueError("Points must have more than 1 dimension")
+            self.set_kdtree(ndim=self.ndim)
+
+        return self._kdtree
+
+    @property
     def single(self):
         return Point
 
@@ -249,6 +260,10 @@ class Point(myObject):
                 self._elevation = StatArray.StatArray(values, "Elevation", "m", dtype=float64)
                 return
             self._elevation[:] = values
+
+    @property
+    def ndim(self):
+        return sum([size(t) == self._nPoints for t in (self.x, self.y, self.z)])
 
     @property
     def nPoints(self):
@@ -1233,7 +1248,7 @@ class Point(myObject):
         return ax, sc, cbar
 
 
-    def setKdTree(self, nDims=3):
+    def set_kdtree(self, ndim):
         """Creates a k-d tree of the point co-ordinates
 
         Parameters
@@ -1242,13 +1257,10 @@ class Point(myObject):
             Either 2 or 3 to exclude or include the vertical co-ordinate
 
         """
-        self.kdtree = None
-        if (nDims == 2):
-            tmp = column_stack((self.x, self.y))
-        elif (nDims == 3):
-            tmp = column_stack((self.x, self.y, self.z))
-        self.kdtree = cKDTree(tmp)
-
+        if (ndim == 2):
+            self._kdtree = cKDTree(column_stack((self.x, self.y)))
+        elif (ndim == 3):
+            self._kdtree = cKDTree(column_stack((self.x, self.y, self.z)))
 
     @property
     def summary(self):
