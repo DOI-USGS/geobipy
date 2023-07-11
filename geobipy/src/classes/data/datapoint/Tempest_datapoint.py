@@ -325,7 +325,10 @@ class Tempest_datapoint(TdemDataPoint):
                 ax.append(tmp)
 
             # Loop pair
-            ax.append(self.loop_pair._init_posterior_plots(splt_bottom[i:]))
+            tmp = []
+            if self.loop_pair.hasPosteriors:
+                tmp = self.loop_pair._init_posterior_plots(splt_bottom[i:])
+            ax.append(tmp)
 
         return ax
 
