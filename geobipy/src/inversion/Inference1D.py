@@ -646,7 +646,7 @@ class Inference1D(myObject):
         # region. Columns are able to span multiple rows
         fig  = kwargs.get('fig', plt.gcf())
         if gs is None:
-            fig = kwargs.pop('fig', plt.figure(facecolor='white', figsize=(10, 7)))
+            fig = kwargs.pop('fig', plt.figure(facecolor='white', figsize=(16, 9)))
             gs = fig
 
         if isinstance(gs, Figure):
