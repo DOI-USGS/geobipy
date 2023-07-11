@@ -889,7 +889,7 @@ class Data(Point):
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        ax = super().plot(x=x, values=self.data[:, rTmp], label=[self.channelNames[tmp] for tmp in rTmp], **kwargs)
+        ax = super().plot(x=x, values=self.data[:, rTmp], label=self.channelNames[rTmp], **kwargs)
 
         if legend:
             # Put a legend to the right of the current axis

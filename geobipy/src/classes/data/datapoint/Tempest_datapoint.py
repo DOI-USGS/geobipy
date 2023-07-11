@@ -97,6 +97,10 @@ class Tempest_datapoint(TdemDataPoint):
 
         return self._data
 
+    # @property
+    # def nChannels(self):
+    #     return sum(self.channels_per_system) * self.n_components
+
     @TdemDataPoint.predictedData.getter
     def predictedData(self):
         # for j in range(self.nSystems):
@@ -480,7 +484,6 @@ class Tempest_datapoint(TdemDataPoint):
             self.additive_error.prior = prior
 
     def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
-
         super().set_proposals(relative_error_proposal, additive_error_proposal, **kwargs)
 
     def set_additive_error_proposal(self, proposal, **kwargs):

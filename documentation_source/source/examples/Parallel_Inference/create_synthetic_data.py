@@ -12,7 +12,7 @@ from geobipy import StatArray
 
 np.random.seed(0)
 
-data_path = '..//..//supplementary//data'
+data_path = '..//supplementary//data'
 
 def create_model(model_type):
 
@@ -53,7 +53,7 @@ def make_figure(ds, model, title):
     d = ds.datapoint(0); plt.subplot(splt[0, 0]); d.plot();
 
     ax = plt.subplot(splt[0, 1]);
-    ds.plot_data(x='x');
+    ds.plot_data();
     ax.get_legend().remove();
     ax1 = plt.subplot(splt[1, 1], sharex=ax);
     model.pcolor(flipY=True, log=10);
@@ -109,11 +109,11 @@ def create_skytem(model, output_suffix, system):
     ds.z = np.full(model.x.nCells, fill_value=30.0)
     ds.elevation = np.zeros(model.x.nCells)
 
-    ds.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
+    ds.loop_pair.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
                     #  pitch=0.0, roll=0.0, yaw=0.0,
                     radius=np.full(model.x.nCells, ds.system[0].loopRadius()))
 
-    ds.receiver = CircularLoops(x=ds.transmitter.x -13.0,
+    ds.loop_pair.receiver = CircularLoops(x=ds.transmitter.x -13.0,
                     y=ds.transmitter.y + 0.0,
                     z=ds.transmitter.z + 2.0,
                     #  pitch=0.0, roll=0.0, yaw=0.0,
@@ -199,13 +199,13 @@ def create_tempest(model, output_suffix):
     ds.elevation = np.zeros(model.x.nCells)
     ds.fiducial = np.arange(model.x.nCells)
 
-    ds.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
+    ds.loop_pair.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
                     pitch = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                     roll = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                     yaw = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                     radius=np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-    ds.receiver = CircularLoops(x=ds.transmitter.x - 107.0,
+    ds.loop_pair.receiver = CircularLoops(x=ds.transmitter.x - 107.0,
                     y=ds.transmitter.y + 0.0,
                     z=ds.transmitter.z - 45.0,
                     pitch = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
@@ -260,8 +260,8 @@ if __name__ == '__main__':
     for k in keys:
         wedge_model = create_model(k)
 
-        # create_resolve(wedge_model, k)
+        create_resolve(wedge_model, k)
         create_skytem(wedge_model, k, 512)
         create_skytem(wedge_model, k, 304)
         # create_aerotem(wedge_model, k)
-        # create_tempest(wedge_model, k)
+        create_tempest(wedge_model, k)
