@@ -83,24 +83,23 @@ class Inference3D(myObject):
         return None
 
     @classmethod
-    def fromHdf(cls, grp, mode = "r", world=None, **kwargs):
-        assert mode != 'w', ValueError("Don't use mode = 'w' when reading!")
-        if isinstance(grp, (Path, str)):
-            tmp = {}
-            if world is not None:
-                tmp['driver'] = 'mpio'
-                tmp['comm'] = world
+    def fromHdf(cls, grp, world=None, **kwargs):
+        # if isinstance(grp, (Path, str)):
+        #     tmp = {}
+        #     if world is not None:
+        #         tmp['driver'] = 'mpio'
+        #         tmp['comm'] = world
 
-            grp = h5py.File(grp, mode, **tmp)
+        #     grp = h5py.File(grp, mode, **tmp)
 
-        lines = [Inference2D.fromHdf(grp[file], world = world) for file in grp.keys()]
+        lines = [Inference2D.fromHdf(file, world = world, **kwargs) for file in Inference3D._get_h5Files(grp)]
 
         data = lines[0].data
         for line in lines[1:]:
             data.append(line.data)
 
         self = cls(data, world=world)
-        self.mode = mode
+        self.mode = kwargs.get('mode', 'r')
         self.hdf_file = grp
         self.lines = lines
         return self
@@ -404,7 +403,7 @@ class Inference3D(myObject):
     def infer_serial(self, seed=None, index=None, fiducial=None, line_number=None, **options):
 
         t0 = time.time()
-        dataset = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+        self.data = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
         if seed is not None:
             if isinstance(seed, str):
@@ -473,7 +472,7 @@ class Inference3D(myObject):
         from ..base import MPI as myMPI
 
         # Prep the data for point by point reading
-        # dataset = dataset._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+        self.data = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
         # Set the total number of data points
         nPoints = self.data.nPoints

@@ -997,11 +997,15 @@ class Inference1D(myObject):
 
         key = 'iteration' if 'iteration' in hdfFile else 'i'
         self.iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=index)
+
         key = 'burned_in_iteration' if 'burned_in_iteration' in hdfFile else 'iburn'
         self.burned_in_iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=index)
+
         key = 'burned_in' if 'burned_in' in hdfFile else 'burnedin'
         self.burned_in = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=index)
-        self.acceptance_rate = hdfRead.readKeyFromFile(hdfFile, '', '/', 'rate', index=s)
+
+        key = 'acceptance_rate' if 'acceptance_rate' in hdfFile else 'rate'
+        self.acceptance_rate = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=s)
 
         self.best_datapoint = self.datapoint
 

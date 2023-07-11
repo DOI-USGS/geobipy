@@ -2,7 +2,7 @@ from abc import abstractmethod
 from cached_property import cached_property
 from copy import copy, deepcopy
 
-from numpy import arange, argwhere, atleast_2d, diag_indices
+from numpy import arange, argwhere, asarray, atleast_2d, diag_indices
 from numpy import dot, float64, full, hstack, isnan
 from numpy import s_, size, squeeze, sqrt, sum
 from numpy import all as npall
@@ -796,6 +796,9 @@ class DataPoint(Point):
             out.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'], index=index)
         if 'line_number' in grp:
             out.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'], index=index)
+
+        if 'components' in grp:
+            out._components = asarray(grp['components'])
 
         out.data = StatArray.StatArray.fromHdf(grp['data'], index=index)
         out.std = StatArray.StatArray.fromHdf(grp['std'], index=index)

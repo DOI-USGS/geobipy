@@ -603,6 +603,7 @@ class TdemDataPoint(EmDataPoint):
         for i in range(self.nSystems):
             self.system[i].toHdf(grp, 'System{}'.format(i))
 
+        grp.create_dataset('components', data=self._components)
         self.loop_pair.createHdf(grp, 'loop_pair', add_axis=add_axis, fillvalue=fillvalue)
 
         self.primary_field.createHdf(grp, 'primary_field', add_axis=add_axis, fillvalue=fillvalue)
@@ -639,11 +640,7 @@ class TdemDataPoint(EmDataPoint):
 
         nSystems = int32(asarray(grp['nSystems']))
 
-        systems = [None]*nSystems
-        for i in range(nSystems):
-            # Get the system file name. h5py has to encode strings using utf-8, so decode it!
-            systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)])
-
+        systems = TdemDataPoint.read_systems_from_h5(grp, **kwargs)
 
         self = super(TdemDataPoint, cls).fromHdf(grp, system=systems, **kwargs)
 
@@ -655,6 +652,22 @@ class TdemDataPoint(EmDataPoint):
         self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], **kwargs)
 
         return self
+
+    @staticmethod
+    def read_systems_from_h5(grp, **kwargs):
+        nSystems = int32(asarray(grp.get('nSystems')))
+        if 'system_filename' in kwargs:
+            system_filename = kwargs['system_filename']
+            if not isinstance(system_filename, list): system_filename = [system_filename]
+
+        systems = [None]*nSystems
+        for i in range(nSystems):
+            if 'system_filename' in kwargs:
+                systems[i] = TdemSystem(system_filename=system_filename[i])
+            else:
+                # Get the system file name. h5py has to encode strings using utf-8, so decode it!
+                systems[i] = TdemSystem.fromHdf(grp['System{}'.format(i)], 'System{}.stm'.format(i))
+        return systems
 
     def perturb(self):
         super().perturb()
