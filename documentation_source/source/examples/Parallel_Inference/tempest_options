@@ -56,16 +56,16 @@ solve_relative_error = True
 # Assign an initial percentage relative Error
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_relative_error = [0.005, 0.005]
+initial_relative_error = [0.001, 0.001]
 ## Relative Error Prior Details
 # Distribution('Uniform', min=[0.01, 0.01], max=[0.5, 0.5])
 # Minimum Relative Error
-minimum_relative_error = [0.001, 0.001]
+minimum_relative_error = [0.0001, 0.0001]
 # Maximum Relative Error
-maximum_relative_error = [0.5, 0.5]
+maximum_relative_error = [0.01, 0.01]
 ## Proposal variance for the relative error
 # Distribution('Normal', mean=[0.0, 0.0], variance=[2.5e-7, 2.5e-7])
-relative_error_proposal_variance = [2.5e-4, 2.5e-4]
+relative_error_proposal_variance = [1e-4, 1e-4]
 # -------------------------------------------------------
 # -------------------------------------------------------
 # Use the prior on the additive data errors
@@ -117,19 +117,19 @@ transmitter_pitch_proposal_variance = 0.01
 # -------------------------------------------------------
 # Receiver loop parameters.
 # Add entries for "receiver_{x, y, z, pitch, roll, yaw}"
-solve_receiver_x = True
+solve_receiver_x = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_x_change = 5.0 # meters
 # Distribution('Normal', mean=VALUE, variance=0.0001)
 receiver_x_proposal_variance = 0.025
 
-solve_receiver_z = True
+solve_receiver_z = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_z_change = 5.0 # meters
 # Distribution('Normal', mean=VALUE, variance=0.0001)
 receiver_z_proposal_variance = 0.025
 
-solve_receiver_pitch = True
+solve_receiver_pitch = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_pitch_change = 5.0 # degrees
 # Distribution('Normal', mean=VALUE, variance=0.0001)
@@ -202,6 +202,6 @@ ignore_likelihood = False
 parameter_limits = None
 
 # Display the resistivity?
-reciprocate_parameters = True
+reciprocate_parameters = False
 
 verbose = False

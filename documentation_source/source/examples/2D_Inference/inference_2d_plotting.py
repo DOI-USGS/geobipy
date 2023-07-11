@@ -36,7 +36,7 @@ def create_plots(data_type, model_type):
 
     fig = plt.figure(figsize=(16, 4))
     plt.suptitle("{} {}".format(data_type, model_type))
-    gs0 = fig.add_gridspec(4, 4, height_ratios=[1, 1, 1, 4])
+    gs0 = fig.add_gridspec(3, 4)
     ax1 = fig.add_subplot(gs0[0, 0])
     true_model = create_model(model_type)
 
@@ -62,7 +62,7 @@ def create_plots(data_type, model_type):
 
     # By adding the useVariance keyword, we can make regions of lower confidence more transparent
     ax1 = fig.add_subplot(gs0[2, 0])
-    results_2d.plot_mean_model(use_variance=True, **kwargs);
+    results_2d.plot_mode_model(use_variance=False, **kwargs);
     results_2d.plot_data_elevation(linewidth=0.3);
     results_2d.plot_elevation(linewidth=0.3);
 
