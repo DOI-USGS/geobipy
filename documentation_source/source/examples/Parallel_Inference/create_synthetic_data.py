@@ -27,7 +27,15 @@ def create_model(model_type):
                      'coastal_salt_water' : np.r_[1, 100, 20],    # Coastal salt water upper layer
                      'ice_over_salt_water' : np.r_[10000, 100, 1] # Antarctica glacier ice over salt water
     }
-    conductivity = StatArray(1.0/resistivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
+    conductivities = {'glacial' : np.r_[0.01, 0.1, 0.03333333],   # Glacial sediments, sands and tills
+                      'saline_clay' : np.r_[0.01, 0.1, 1.  ],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                      'resistive_dolomites' : np.r_[0.02, 0.002, 0.02 ],   # Glacial sediments, resistive dolomites, marine shale.
+                      'resistive_basement' : np.r_[0.01, 0.1, 0.0001],# Resistive Basement
+                      'coastal_salt_water' : np.r_[1., 0.01, 0.05],    # Coastal salt water upper layer
+                      'ice_over_salt_water' : np.r_[1.e-04, 1.e-02, 1.e+00] # Antarctica glacier ice over salt water
+    }
+
+    conductivity = StatArray(conductivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
 
     # Create distributions for three lithology classes
     lithology_distribution = Distribution('MvLogNormal',
@@ -144,6 +152,7 @@ def create_skytem(model, output_suffix, system):
     #                     ['data/SkytemHM-SLV.stm',
     #                     'data/SkytemLM-SLV.stm'])
 
+#%%
 def create_aerotem(model, output_suffix):
     from geobipy import TdemData
 
@@ -185,7 +194,7 @@ def create_aerotem(model, output_suffix):
     ds.write_csv(data_path+'//{}.csv'.format(title))
 
     # TdemData.read_csv('data/aerotem.csv', 'data/aerotem.stm')
-
+#%%
 def create_tempest(model, output_suffix):
     from geobipy import TempestData
 
@@ -199,21 +208,23 @@ def create_tempest(model, output_suffix):
     ds.elevation = np.zeros(model.x.nCells)
     ds.fiducial = np.arange(model.x.nCells)
 
-    ds.loop_pair.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
-                    pitch = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                    roll = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                    yaw = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                    radius=np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+    ds.loop_pair.transmitter = CircularLoops(
+                    x = ds.x, y = ds.y, z = ds.z,
+                    pitch = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                    roll  = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                    yaw   = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                    radius = np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-    ds.loop_pair.receiver = CircularLoops(x=ds.transmitter.x - 107.0,
-                    y=ds.transmitter.y + 0.0,
-                    z=ds.transmitter.z - 45.0,
-                    pitch = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                    roll = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                    yaw = np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                    radius=np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+    ds.loop_pair.receiver = CircularLoops(
+                    x = ds.transmitter.x - 107.0,
+                    y = ds.transmitter.y + 0.0,
+                    z = ds.transmitter.z - 45.0,
+                    pitch = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                    roll  = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                    yaw   = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                    radius = np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-    ds.relative_error = np.repeat(np.r_[0.005, 0.005][None, :], model.x.nCells, 0)
+    ds.relative_error = np.repeat(np.r_[0.001, 0.001][None, :], model.x.nCells, 0)
     add_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
                     0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
     ds.additive_error = np.repeat(add_error[None, :], model.x.nCells, 0)
@@ -236,9 +247,9 @@ def create_tempest(model, output_suffix):
     # Add noise to various solvable parameters
 
     # ds.z += np.random.uniform(low=-5.0, high=5.0, size=model.x.nCells)
-    ds.receiver.x += np.random.normal(loc=0.0, scale=0.25**2.0, size=model.x.nCells)
-    ds.receiver.z += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
-    ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+    # ds.receiver.x += np.random.normal(loc=0.0, scale=0.25**2.0, size=model.x.nCells)
+    # ds.receiver.z += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+    # ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
     # ds.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
     # ds.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
 
@@ -260,8 +271,8 @@ if __name__ == '__main__':
     for k in keys:
         wedge_model = create_model(k)
 
-        create_resolve(wedge_model, k)
-        create_skytem(wedge_model, k, 512)
-        create_skytem(wedge_model, k, 304)
+        # create_resolve(wedge_model, k)
+        # create_skytem(wedge_model, k, 512)
+        # create_skytem(wedge_model, k, 304)
         # create_aerotem(wedge_model, k)
         create_tempest(wedge_model, k)
