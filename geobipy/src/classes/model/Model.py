@@ -505,6 +505,13 @@ class Model(myObject):
             linewidth=1,
             color='#5046C8',
             axes=axes[-1])
+        self.values.posterior.mode(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
+            flipY=False,
+            reciprocateX=values_kwargs.get('reciprocateX', None),
+            labels=False,
+            linewidth=1,
+            color='#6046C8',
+            axes=axes[-1])
 
     def pcolor(self, **kwargs):
         """Plot like an image
