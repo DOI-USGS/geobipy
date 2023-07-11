@@ -15,6 +15,12 @@ def parallel_mpi(data_type, model_type, output_directory):
     from geobipy.src.base import MPI as myMPI
     from datetime import timedelta
 
+    world = MPI.COMM_WORLD
+    rank = world.rank
+    nRanks = world.size
+    masterRank = rank == 0
+
+
     data_filename = data_type + '_' + model_type
 
     # Make the data for the given test model
@@ -32,21 +38,17 @@ def parallel_mpi(data_type, model_type, output_directory):
         elif data_type == 'tempest':
             create_tempest(wedge_model, model_type)
 
-    world = MPI.COMM_WORLD
-    rank = world.rank
-    nRanks = world.size
-    masterRank = rank == 0
-
-    myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(nRanks))
-    myMPI.rankPrint(world,'Using user input file {}'.format(parameter_file))
-    myMPI.rankPrint(world,'Output files will be produced at {}'.format(output_directory))
-
     parameter_file = "{}_options".format(data_type)
     inputFile = pathlib.Path(parameter_file)
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
 
     output_directory = pathlib.Path(output_directory)
     assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
+
+    myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(nRanks))
+    myMPI.rankPrint(world,'Using user input file {}'.format(parameter_file))
+    myMPI.rankPrint(world,'Output files will be produced at {}'.format(output_directory))
+
 
     kwargs = user_parameters.read(inputFile)
     kwargs['data_filename'] = kwargs['data_filename'] + '//' + data_filename + '.csv'
@@ -57,8 +59,8 @@ def parallel_mpi(data_type, model_type, output_directory):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    inference3d = Inference3D(output_directory, kwargs['system_filename'], mpi_enabled=True)
-    inference3d.create_hdf5(data, **kwargs)
+    inference3d = Inference3D(data, world=world)
+    inference3d.create_hdf5(directory=output_directory, **kwargs)
 
     myMPI.rankPrint(world, "Created hdf5 files in {} h:m:s".format(str(timedelta(seconds=MPI.Wtime()-t0))))
 

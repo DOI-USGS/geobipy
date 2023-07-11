@@ -16,7 +16,7 @@ from os.path import join
 # General file structure information.
 # -------------------------------------------------------
 # Data folder
-data_directory = "..//..//supplementary//data"
+data_directory = "..//supplementary//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
