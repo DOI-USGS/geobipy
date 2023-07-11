@@ -1,0 +1,38 @@
+from matplotlib import pyplot as plt
+import numpy as np
+from geobipy import Distribution
+
+
+dist = Distribution('uniform', 0.0, 1.0)
+
+plt.figure()
+dist.plot_pdf()
+dist.plot_pdf(log=True)
+
+
+dist = Distribution('normal', 0.0, 1.0)
+
+plt.figure()
+dist.plot_pdf()
+dist.plot_pdf(log=True)
+
+
+dist = Distribution('lognormal', 1.0, 1.0, linearSpace=True)
+
+plt.figure()
+dist.plot_pdf()
+dist.plot_pdf(log=True)
+
+
+# dist = Distribution('mvnormal', np.r_[0.0, 1.0, 2.0], np.r_[1.0, 1.0, 1.0])
+
+# plt.figure()
+# dist.plot_pdf()
+
+
+# dist = Distribution('mvlognormal', np.r_[1.0, 2.0, 3.0], np.r_[1.0, 1.0, 1.0])
+
+# plt.figure()
+# dist.plot_pdf()
+
+plt.show()

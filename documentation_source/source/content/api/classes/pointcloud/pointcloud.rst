@@ -5,4 +5,3 @@ Pointcloud classes
    :maxdepth: 1
 
    Point
-   PointCloud3D

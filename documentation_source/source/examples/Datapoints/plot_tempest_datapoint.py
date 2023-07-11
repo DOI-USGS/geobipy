@@ -149,7 +149,11 @@ relative_proposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2
 receiver_x_proposal = Distribution('Normal', mean=tdp.receiver.x, variance = 0.01)
 receiver_z_proposal = Distribution('Normal', mean=tdp.receiver.z, variance = 0.01)
 receiver_pitch_proposal = Distribution('Normal', mean=tdp.receiver.pitch, variance = 0.01)
-tdp.set_proposals(relative_error_proposal=relative_proposal, receiver_x_proposal=receiver_x_proposal, receiver_z_proposal=receiver_z_proposal, receiver_pitch_proposal=receiver_pitch_proposal)
+tdp.set_proposals(relative_error_proposal=relative_proposal,
+                  receiver_x_proposal=receiver_x_proposal,
+                  receiver_z_proposal=receiver_z_proposal,
+                  receiver_pitch_proposal=receiver_pitch_proposal,
+                  solve_additive_error=True, additive_error_proposal_variance=1e-4)
 
 ################################################################################
 # With priorss set we can auto generate the posteriors

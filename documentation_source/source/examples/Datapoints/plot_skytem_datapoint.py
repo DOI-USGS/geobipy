@@ -39,7 +39,7 @@ from geobipy import Model
 from geobipy import StatArray
 from geobipy import Distribution
 
-dataFolder = "..//supplementary//Data//"
+dataFolder = "..//supplementary//data//"
 
 ###############################################################################
 # Obtaining a datapoint from a dataset
@@ -50,9 +50,9 @@ dataFolder = "..//supplementary//Data//"
 # For more information about the time domain data set, see :ref:`Time domain dataset`
 
 # The data file name
-dataFile=dataFolder + 'skytem_saline_clay.csv'
+dataFile=dataFolder + 'skytem_512_saline_clay.csv'
 # The EM system file name
-systemFile=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
+systemFile=[dataFolder + 'SkytemHM_512.stm', dataFolder + 'SkytemLM_512.stm']
 
 ################################################################################
 # Initialize and read an EM data set

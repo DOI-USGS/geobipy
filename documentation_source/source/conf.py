@@ -363,19 +363,22 @@ from sphinx_gallery.sorting import ExampleTitleSortKey
 sphinx_gallery_conf = {
     'examples_dirs': 'examples',   # path to your example scripts
     'gallery_dirs': 'examples',  # path to where to save gallery generated output
-    # 'filename_pattern': 'plot_rectilinear*',
-    'subsection_order': ExplicitOrder(['examples/Distributions/',
-                                    'examples/Statistics/',
-                                    'examples/Meshes/',
-                                    'examples/Models/',
-
-#                                     '../../examples/Pointclouds/',
-                                    'examples/Data/',
-                                    'examples/Datapoints/',
-                                    'examples/Inference',
-                                    'examples/HDF5',
-                                    ]),
-    # "ignore_pattern": r"examples/Inference/aerotem_options.py", r"examples/Inference/resolve_options.py"
+    'filename_pattern': 'plot_',
+    'ignore_pattern': 'sub_',
+    'subsection_order': ExplicitOrder([
+                                       'examples/Distributions/',
+                                       'examples/Statistics/',
+                                       'examples/Meshes/',
+                                       'examples/Models/',
+                                       'examples/Data/',
+                                       'examples/Datapoints/',
+                                       'examples/1D_Inference/',
+                                       'examples/2D_Inference/',
+                                       'examples/Parallel_Inference/',
+                                       'examples/HDF5',
+                                       ]),
+    # "ignore_pattern": ExplicitOrder([r"create_model", r"inference_2d_plotting"]),
+    #r"examples/Inference/resolve_options.py"
     # "ignore_pattern": r"examples/Inference/resolve_options.py",
     "within_subsection_order": ExampleTitleSortKey,
     "image_scrapers": ('matplotlib'),
