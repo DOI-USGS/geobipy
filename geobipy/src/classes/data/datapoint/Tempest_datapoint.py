@@ -317,11 +317,11 @@ class Tempest_datapoint(TdemDataPoint):
             if self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior:
                 tmp = []
                 tmp = self.additive_error_multiplier._init_posterior_plots(splt_bottom[i])
-                if tmp is not None:
-                    i += 1
-                    for j in range(self.nSystems):
-                        others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
-                        tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
+                # if tmp is not None:
+                    # i += 1
+                    # for j in range(self.nSystems):
+                    #     others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
+                        # tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
                 ax.append(tmp)
 
             # Loop pair

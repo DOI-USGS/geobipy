@@ -8,7 +8,7 @@ from numpy import all as npall
 
 from numpy.ma import masked_invalid
 
-from matplotlib.cm import get_cmap
+from matplotlib import colormaps
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 from matplotlib.colors import ListedColormap, Colormap
@@ -127,7 +127,7 @@ def filter_color_kwargs(kwargs):
                 'alpha_color' : [1, 1, 1],
                 'ticks': None}
     out, kwargs = filter_kwargs(kwargs, defaults)
-    out['cmap'] = copy(get_cmap(out['cmap'], out['cmapIntervals']))
+    out['cmap'] = copy(colormaps.get_cmap(out['cmap']))#, out['cmapIntervals']))
     out['cmap'].set_bad(color='white')
     return out, kwargs
 
