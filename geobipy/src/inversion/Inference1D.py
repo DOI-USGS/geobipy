@@ -467,72 +467,71 @@ class Inference1D(myObject):
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
-        perturbed_datapoint = deepcopy(self.datapoint)
+        test_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
-        observation = perturbed_datapoint
+        observation = test_datapoint
         if self.ignore_likelihood:
             observation = None
 
-        try:
-            remapped_model, perturbed_model = self.model.perturb(observation)
-        except:
-            print('singularity line {} fid {}'.format(observation.line_number, observation.fiducial))
-            return True
+        # try:
+        remapped_model, test_model = self.model.perturb(observation)
+        # except:
+        #     print('singularity line {} fid {}'.format(observation.line_number, observation.fiducial))
+        #     return True
 
         # Propose a new data point, using assigned proposal distributions
-        perturbed_datapoint.perturb()
+        test_datapoint.perturb()
 
         # Forward model the data from the candidate model
-        perturbed_datapoint.forward(perturbed_model)
+        test_datapoint.forward(test_model)
 
         # Compute the data misfit
-        data_misfit1 = perturbed_datapoint.dataMisfit()
+        test_data_misfit = test_datapoint.data_misfit()
 
         # Evaluate the prior for the current data
-        prior1 = perturbed_datapoint.probability
+        test_prior = test_datapoint.probability
         # Test for early rejection
-        if (prior1 == -inf):
+        if (test_prior == -inf):
             return
 
         # Evaluate the prior for the current model
-        prior1 += perturbed_model.probability(self.solve_parameter, self.solve_gradient)
+        test_prior += test_model.probability(self.solve_parameter, self.solve_gradient)
 
         # Test for early rejection
-        if (prior1 == -inf):
+        if (test_prior == -inf):
             return
 
         # Compute the components of each acceptance ratio
-        likelihood1 = 1.0
+        test_likelihood = 1.0
         observation = None
         if not self.ignore_likelihood:
-            likelihood1 = perturbed_datapoint.likelihood(log=True)
-            observation = deepcopy(perturbed_datapoint)
+            test_likelihood =test_datapoint.likelihood(log=True)
+            observation = test_datapoint
 
-        proposal, proposal1 = perturbed_model.proposal_probabilities(remapped_model, observation)
+        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation)
 
-        posterior1 = prior1 + likelihood1
+        test_posterior = test_prior + test_likelihood
 
-        prior_ratio = prior1 - self.prior
+        prior_ratio = test_prior - self.prior
 
-        likelihood_ratio = likelihood1 - self.likelihood
+        likelihood_ratio = test_likelihood - self.likelihood
 
-        proposal_ratio = proposal - proposal1
+        proposal_ratio = proposal - test_proposal
 
         log_acceptance_ratio = prior_ratio + likelihood_ratio + proposal_ratio
         acceptance_probability = cF.expReal(log_acceptance_ratio)
 
         # If we accept the model
-        accepted = acceptance_probability > self.prng.uniform()
+        self.accepted = acceptance_probability > self.prng.uniform()
 
-        if (accepted):
-            self.accepted += 1
-            self.data_misfit = data_misfit1
-            self.prior = prior1
-            self.likelihood = likelihood1
-            self.posterior = posterior1
-            self.model = perturbed_model
-            self.datapoint = perturbed_datapoint
+        if (self.accepted):
+            self.data_misfit = test_data_misfit
+            self.prior = test_prior
+            self.likelihood = test_likelihood
+            self.posterior = test_posterior
+            self.model = test_model
+            self.datapoint = test_datapoint
             # Reset the sensitivity locally to the newly accepted model
             self.datapoint.sensitivity(self.model, modelChanged=False)
 
