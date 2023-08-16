@@ -1,6 +1,6 @@
 from ..core.myObject import myObject
 from numpy.random import Generator
-from randomgen import SFC64
+from randomgen import Xoshiro256
 
 class baseDistribution(myObject):
     """ Define an abstract base distribution class """
@@ -8,7 +8,7 @@ class baseDistribution(myObject):
     def __init__(self, prng=None):
 
         if (prng is None):
-            self.prng = Generator(SFC64())
+            self.prng = Generator(Xoshiro256())
         else:
             self.prng = prng
 
