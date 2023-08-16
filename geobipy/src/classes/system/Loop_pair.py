@@ -60,6 +60,10 @@ class Loop_pair(Point, PointCloud3D):
             self.transmitter.nPoints = value
 
     @property
+    def hasPosterior(self):
+        return self.transmitter.hasPosterior or super().hasPosterior or self.receiver.hasPosterior
+
+    @property
     def receiver(self):
         if self._receiver.nPoints == 0:
             self._receiver = EmLoop()
@@ -107,6 +111,7 @@ class Loop_pair(Point, PointCloud3D):
         self.receiver.perturb()
 
     def set_priors(self, **kwargs):
+
         transmitter_kwargs = {k.replace('transmitter_', ''): kwargs.get(k, False) for k in kwargs.keys() if 'transmitter' in k}
         transmitter_kwargs['prng'] = kwargs.get('prng')
         self.transmitter.set_priors(**transmitter_kwargs)
@@ -157,8 +162,8 @@ class Loop_pair(Point, PointCloud3D):
 
     def _init_posterior_plots(self, gs=None):
 
-        if not self.transmitter.hasPosteriors and not super().hasPosteriors and not self.receiver.hasPosteriors:
-            return [[], []]
+        if not self.transmitter.hasPosterior and not super().hasPosterior and not self.receiver.hasPosterior:
+            return []
 
         if gs is None:
             gs = plt.figure()
@@ -166,26 +171,26 @@ class Loop_pair(Point, PointCloud3D):
         if isinstance(gs, matplotlib.figure.Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        splt = gs.subgridspec(1, self.transmitter.hasPosteriors + super().hasPosteriors + self.receiver.hasPosteriors, wspace=0.3)
+        splt = gs.subgridspec(1, self.transmitter.hasPosterior + super().hasPosterior + self.receiver.hasPosterior, wspace=0.3)
         ax = []
         i = 0
-        if self.transmitter.hasPosteriors:
+        if self.transmitter.hasPosterior:
             ax.append(self.transmitter._init_posterior_plots(splt[i]))
             i += 1
 
-        if super().hasPosteriors:
+        if super().hasPosterior:
             ax.append(super()._init_posterior_plots(splt[i]))
             i += 1
 
         # Reciever axes
-        if self.receiver.hasPosteriors:
+        if self.receiver.hasPosterior:
             ax.append(self.receiver._init_posterior_plots(splt[i]))
 
         return ax
 
     def plot_posteriors(self, axes=None, **kwargs):
 
-        n_posteriors = self.transmitter.hasPosteriors + self.hasPosteriors + self.receiver.hasPosteriors
+        n_posteriors = self.transmitter.hasPosterior + self.hasPosterior + self.receiver.hasPosterior
         if n_posteriors == 0:
             return
 
@@ -195,7 +200,7 @@ class Loop_pair(Point, PointCloud3D):
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
-        n_posteriors = self.transmitter.hasPosteriors + self.hasPosteriors + self.receiver.hasPosteriors
+        n_posteriors = self.transmitter.hasPosterior + super().hasPosterior + self.receiver.hasPosterior
         assert len(axes) == n_posteriors, ValueError("Length {} axes must have length {} list for the posteriors. self.init_posterior_plots can generate them".format(len(axes), n_posteriors))
 
         transmitter_kwargs = kwargs.pop('transmitter_kwargs', {})
@@ -209,15 +214,15 @@ class Loop_pair(Point, PointCloud3D):
             receiver_kwargs['overlay'] = overlay.receiver
 
         i = 0
-        if self.transmitter.hasPosteriors:
+        if self.transmitter.hasPosterior:
             self.transmitter.plot_posteriors(axes = axes[i], **transmitter_kwargs)
             i += 1
 
-        if super().hasPosteriors:
+        if super().hasPosterior:
             super().plot_posteriors(axes = axes[i], **offset_kwargs)
             i += 1
 
-        if self.receiver.hasPosteriors:
+        if self.receiver.hasPosterior:
             self.receiver.plot_posteriors(axes = axes[i], **receiver_kwargs)
 
     @property

@@ -74,7 +74,7 @@ class EmLoop(Point, ABC):
         return msg
 
     @property
-    def hasPosteriors(self):
+    def hasPosterior(self):
         return self.n_posteriors > 0
 
     @property
@@ -342,7 +342,7 @@ class EmLoop(Point, ABC):
         splt = gs.subgridspec(*shp, wspace=0.3, hspace=1.0)
 
         ax = []
-        if super().hasPosteriors:
+        if super().hasPosterior:
             ax = super()._init_posterior_plots(splt[:super().n_posteriors, 0])
 
         k = 0

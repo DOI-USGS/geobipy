@@ -1205,9 +1205,12 @@ class RectilinearMesh1D(Mesh):
     def plot_line(self, value, **kwargs):
         kwargs.pop('axis', None)
 
-        subset, kwargs = cp.filter_plotting_kwargs(kwargs)
+        geobipy_kwargs, kwargs = cp.filter_plotting_kwargs(kwargs)
         color_kwargs, kwargs = cp.filter_color_kwargs(kwargs)
-        f = plt.axhline if subset['transpose'] else plt.axvline
+
+        ax = geobipy_kwargs['ax']
+
+        f = ax.axhline if geobipy_kwargs['transpose'] else ax.axvline
 
         linecolor = kwargs.pop('linecolor', 'y')
 
@@ -1280,8 +1283,11 @@ class RectilinearMesh1D(Mesh):
             edges_kwargs['overlay'] = tmp.edges
 
         if self.nCells.hasPosterior:
+            axes[0].cla()
             self.nCells.plot_posteriors(ax = axes[0], **ncells_kwargs)
+
         if self.edges.hasPosterior:
+            axes[1].cla()
             self.edges.plot_posteriors(ax = axes[1], **edges_kwargs)
 
         if values is not None:
@@ -1289,7 +1295,7 @@ class RectilinearMesh1D(Mesh):
             values.plot_posteriors(ax=axes[2], **values_kwargs)
 
             if overlay is not None:
-                overlay.plot(xscale=values_kwargs.get('xscale', 'linear'),
+                overlay.plot(ax=axes[2], xscale=values_kwargs.get('xscale', 'linear'),
                         flipY=False,
                         reciprocateX=values_kwargs.get('reciprocateX', None),
                         labels=False,
@@ -1297,7 +1303,7 @@ class RectilinearMesh1D(Mesh):
                         color=cp.wellSeparated[3])
 
                 doi = values.posterior.opacity_level(percent=67.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
-                plt.axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
+                axes[2].axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
         return axes
 
     @property

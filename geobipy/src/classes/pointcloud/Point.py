@@ -144,7 +144,7 @@ class Point(myObject):
         return msg
 
     @property
-    def hasPosteriors(self):
+    def hasPosterior(self):
         return (self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior) > 0
 
     @property

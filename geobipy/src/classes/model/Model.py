@@ -499,19 +499,19 @@ class Model(myObject):
         self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
 
         self.values.posterior.mean(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
-            flipY=False,
-            reciprocateX=values_kwargs.get('reciprocateX', None),
-            labels=False,
-            linewidth=1,
-            color='#5046C8',
-            axes=axes[-1])
+                                                   flipY=False,
+                                                   reciprocateX=values_kwargs.get('reciprocateX', None),
+                                                   labels=False,
+                                                   linewidth=1,
+                                                   color='#5046C8',
+                                                   ax=axes[-1])
         self.values.posterior.mode(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
-            flipY=False,
-            reciprocateX=values_kwargs.get('reciprocateX', None),
-            labels=False,
-            linewidth=1,
-            color='#6046C8',
-            axes=axes[-1])
+                                                   flipY=False,
+                                                   reciprocateX=values_kwargs.get('reciprocateX', None),
+                                                   labels=False,
+                                                   linewidth=1,
+                                                   color='#6046C8',
+                                                   ax=axes[-1])
 
     def pcolor(self, **kwargs):
         """Plot like an image

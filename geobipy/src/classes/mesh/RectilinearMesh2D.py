@@ -858,7 +858,8 @@ class RectilinearMesh2D(Mesh):
             flipY = kwargs.pop('flipY', False)
             c = kwargs.pop('color', 'k')
 
-            ax = plt.gca()
+            ax = kwargs.get('ax', plt.gca())
+
             cP.pretty(ax)
 
             x_mesh = self.x_edges
@@ -878,10 +879,10 @@ class RectilinearMesh2D(Mesh):
             dz = 0.02 * abs(y_mesh.max() - y_mesh.min())
             ax.set_ylim(y_mesh.min() - dz, y_mesh.max() + dz)
 
-            plt.xscale(xscale)
-            plt.yscale(yscale)
-            cP.xlabel(self.x._centres.label)
-            cP.ylabel(self.y._centres.label)
+            ax.set_xscale(xscale)
+            ax.set_yscale(yscale)
+            ax.set_xlabel(self.x._centres.label)
+            ax.set_ylabel(self.y._centres.label)
 
             if flipX:
                 ax.set_xlim(ax.get_xlim()[::-1])

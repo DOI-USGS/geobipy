@@ -277,7 +277,7 @@ class Tempest_datapoint(TdemDataPoint):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         n_rows = 1
-        if (self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior) or any([self.transmitter.hasPosteriors, self.receiver.hasPosteriors]):
+        if (self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior) or any([self.transmitter.hasPosterior, self.receiver.hasPosterior]):
             n_rows = 2
 
         splt = gs.subgridspec(n_rows, 1, wspace=0.3)
@@ -295,19 +295,15 @@ class Tempest_datapoint(TdemDataPoint):
         # Data axis
         ax.append(subplot(splt_top[-1]))
 
-        tmp = []
         if self.relative_error.hasPosterior:
             # Relative error axes
-            tmp = self.relative_error._init_posterior_plots(splt_top[0])
-        ax.append(tmp)
+            ax.append(self.relative_error._init_posterior_plots(splt_top[0]))
 
         if not self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior:
-
-            tmp = self.additive_error_multiplier._init_posterior_plots(splt_top[0])
-            ax.append(tmp)
+            ax.append(self.additive_error_multiplier._init_posterior_plots(splt_top[0]))
 
         ## Bottom row of plot
-        n_cols = sum([self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior, self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
+        n_cols = sum([self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior, self.transmitter.hasPosterior, super(Loop_pair, self.loop_pair).hasPosterior, self.receiver.hasPosterior])
 
         if n_cols > 0:
             splt_bottom = splt[1].subgridspec(1, n_cols)
@@ -315,20 +311,12 @@ class Tempest_datapoint(TdemDataPoint):
             i = 0
             # Additive Error axes
             if self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior:
-                tmp = []
-                tmp = self.additive_error_multiplier._init_posterior_plots(splt_bottom[i])
-                # if tmp is not None:
-                    # i += 1
-                    # for j in range(self.nSystems):
-                    #     others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
-                        # tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
-                ax.append(tmp)
+                ax.append(self.additive_error_multiplier._init_posterior_plots(splt_bottom[i]))
+                i += 1
 
             # Loop pair
-            tmp = []
-            if self.loop_pair.hasPosteriors:
-                tmp = self.loop_pair._init_posterior_plots(splt_bottom[i:])
-            ax.append(tmp)
+            if self.loop_pair.hasPosterior:
+                ax.append(self.loop_pair._init_posterior_plots(splt_bottom[i:]))
 
         return ax
 
@@ -354,11 +342,11 @@ class Tempest_datapoint(TdemDataPoint):
 
         if axes is None:
             axes = kwargs.pop('fig', gcf())
-
         if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
-        assert len(axes) == 4, ValueError("Must have length 4 list of axes for the posteriors. self.init_posterior_plots can generate them")
+        required_axes = 1 + sum([x.hasPosterior for x in (self.relative_error, self.additive_error_multiplier, self.loop_pair)])
+        assert len(axes) == required_axes, ValueError("Must have length {} list of axes for the posteriors. self.init_posterior_plots can generate them".format(required_axes))
 
         # point_kwargs = kwargs.pop('point_kwargs', {})
         data_kwargs = kwargs.pop('data_kwargs', {})
@@ -373,20 +361,27 @@ class Tempest_datapoint(TdemDataPoint):
                 # add_error_kwargs['axis'] = 1
                 add_error_kwargs['overlay'] = overlay.additive_error_multiplier
 
-
-        axes[0].clear()
-        self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
-        self.plot(ax=axes[0], **data_kwargs)
+        i = 0
+        axes[i].cla()
+        self.predictedData.plot_posteriors(ax = axes[i], colorbar=False, **data_kwargs)
+        self.plot(ax=axes[i], **data_kwargs)
 
         c = cP.wellSeparated[0] if overlay is None else cP.wellSeparated[3]
-        self.plot_predicted(color=c, ax=axes[0], **data_kwargs)
+        self.plot_predicted(color=c, ax=axes[i], **data_kwargs)
+        i += 1
 
-        self.relative_error.plot_posteriors(ax=axes[1], **rel_error_kwargs)
+        if self.relative_error.hasPosterior:
+            self.relative_error.plot_posteriors(ax=axes[i], **rel_error_kwargs)
+            i += 1
 
-        add_error_kwargs['colorbar'] = False
-        self.additive_error_multiplier.plot_posteriors(ax=axes[2], **add_error_kwargs)
+        if self.additive_error_multiplier.hasPosterior:
+            add_error_kwargs['colorbar'] = False
+            self.additive_error_multiplier.plot_posteriors(ax=axes[i], **add_error_kwargs)
+            i += 1
 
-        self.loop_pair.plot_posteriors(axes = axes[3], **kwargs)
+        if self.loop_pair.hasPosterior:
+            self.loop_pair.plot_posteriors(axes = axes[i], **kwargs)
+
 
     def plot_predicted(self, **kwargs):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
@@ -395,9 +390,9 @@ class Tempest_datapoint(TdemDataPoint):
 
     def plot_secondary_field(self, title='Secondary field', **kwargs):
 
-        ax = kwargs.pop('ax', None)
-        ax = gca() if ax is None else sca(ax)
-        cla()
+        # ax = kwargs.get('ax', None)
+        # ax = gca() if ax is None else sca(ax)
+        # cla()
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
@@ -424,8 +419,8 @@ class Tempest_datapoint(TdemDataPoint):
                 self.secondary_field[ic].plot(x=system_times, **kwargs)
 
     def plot_predicted_secondary_field(self, title='Secondary field', **kwargs):
-        ax = kwargs.pop('ax', None)
-        ax = gca() if ax is None else sca(ax)
+        # ax = kwargs.pop('ax', None)
+        # ax = gca() if ax is None else sca(ax)
 
         noLabels = kwargs.pop('nolabels', False)
 

@@ -128,11 +128,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
 
         assert npall(shape(values) == self.shape), ValueError("values must have shape {}".format(self.shape))
 
-        ax = kwargs.pop('ax', None)
-        if ax is None:
-            ax = plt.gca()
-        else:
-            plt.sca(ax)
+        ax = kwargs.pop('ax', plt.gca())
+
         cP.pretty(ax)
 
         xscale = kwargs.pop('xscale', 'linear')

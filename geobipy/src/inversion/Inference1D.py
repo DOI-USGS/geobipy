@@ -654,17 +654,16 @@ class Inference1D(myObject):
 
         gs = gs.subgridspec(2, 2, height_ratios=(1, 6))
 
-        ax = [None] * 4
+        ax = []
 
-        ax[0] = cP.pretty(plt.subplot(gs[0, 0]))  # Acceptance Rate 0
+        ax.append([cP.pretty(plt.subplot(gs[0, 0]))])  # Acceptance Rate 0
 
         splt = gs[0, 1].subgridspec(1, 2, width_ratios=[4, 1])
-        tmp = [plt.subplot(splt[0, 0])]
-        tmp.append(plt.subplot(splt[0, 1]))#, sharey=ax[0]))
-        ax[1] = tmp  # Data misfit vs iteration 1 and posterior
+        tmp = []; tmp.append(cP.pretty(plt.subplot(splt[0, 0]))); tmp.append(cP.pretty(plt.subplot(splt[0, 1])))
+        ax.append(tmp)  # Data misfit vs iteration 1 and posterior
 
-        ax[2] = self.model._init_posterior_plots(gs[1, 0])
-        ax[3] = self.datapoint._init_posterior_plots(gs[1, 1])
+        ax.append(self.model._init_posterior_plots(gs[1, 0]))
+        ax.append(self.datapoint._init_posterior_plots(gs[1, 1]))
 
         if self.interactive_plot:
             plt.show(block=False)
@@ -681,7 +680,7 @@ class Inference1D(myObject):
             return
 
         if axes is None:
-            fig = kwargs.pop('fig', None)
+            fig = kwargs.pop('fig', self.fig)
             axes = fig
             if fig is None:
                 fig, axes = self._init_posterior_plots()
@@ -714,7 +713,6 @@ class Inference1D(myObject):
                     'flipY': True,
                     'xscale': 'log',
                     'credible_interval_kwargs': {
-                        # 'axis': 1
                     }
                 },
                 overlay=overlay)
@@ -734,7 +732,6 @@ class Inference1D(myObject):
 
             cP.suptitle(title)
 
-            # self.fig.tight_layout()
             if self.fig is not None:
                 self.fig.canvas.draw()
                 self.fig.canvas.flush_events()
@@ -744,27 +741,37 @@ class Inference1D(myObject):
     def _plotAcceptanceVsIteration(self, **kwargs):
         """ Plots the acceptance percentage against iteration. """
 
-        i = s_[:int64(self.iteration / self.update_plot_every)]
+        # i = s_[:int64(self.iteration / self.update_plot_every)]
 
-        acceptance_rate = self.acceptance_rate[i]
-        i_positive = argwhere(acceptance_rate > 0.0)
-        i_zero = argwhere(acceptance_rate == 0.0)
+        # acceptance_rate = self.acceptance_v[:self.iteration]
+        # i_positive = argwhere(acceptance_rate > 0.0)
+        # i_zero = argwhere(acceptance_rate == 0.0)
 
-        kwargs['ax'] = kwargs.get('ax', self.ax[0])
+        kwargs['ax'] = kwargs.get('ax', self.ax[0][0])
         kwargs['marker'] = kwargs.get('marker', 'o')
         kwargs['alpha'] = kwargs.get('alpha', 0.7)
         kwargs['linestyle'] = kwargs.get('linestyle', 'none')
         kwargs['markeredgecolor'] = kwargs.get('markeredgecolor', 'k')
 
-        self.acceptance_rate[i_positive].plot(x=self.acceptance_x[i_positive], color='k', **kwargs)
-        self.acceptance_rate[i_zero].plot(x=self.acceptance_x[i_zero], color='r', **kwargs)
+        i = s_[:int64(self.iteration / self.update_plot_every)]
 
-        self.ax[0].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+        self.acceptance_rate.plot(x=self.acceptance_x, i=i, color='k', **kwargs)
+
+
+        # (self.acceptance_v/self.iteration).plot(x=self.iRange, i=s_[:self.iteration], color='k', **kwargs)
+        # self.acceptance_v[i_zero].plot(x=self.iRange[i_zero], color='r', **kwargs)
+
+        # self.ax[0][0].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
+
+        # kwargs['ax'] = kwargs.get('ax', self.ax[0][1])
+
+        # self.ax[0][1].spines["right"].set_visible(True)
+
+        # self.ax[0][1].tick_params(axis='y')
 
     def _plotMisfitVsIteration(self, **kwargs):
         """ Plot the data misfit against iteration. """
 
-        ax = kwargs.get('ax', self.ax[1])
         m = kwargs.pop('marker', '.')
         # ms = kwargs.pop('markersize', 1)
         a = kwargs.pop('alpha', 0.7)
@@ -772,43 +779,35 @@ class Inference1D(myObject):
         c = kwargs.pop('color', 'k')
         # lw = kwargs.pop('linewidth', 1)
 
-        kwargs['ax'] = ax[0]
-
-        tmp_ax = self.data_misfit_v.plot(self.iRange, i=s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, **kwargs)
-        plt.ylabel('Data Misfit')
+        ax = self.ax[1][0]
+        ax.cla()
+        tmp_ax = self.data_misfit_v.plot(self.iRange, i=s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, ax=ax, **kwargs)
+        ax.set_ylabel('Data Misfit')
 
         dum = self.multiplier * self.data_misfit_v.prior.df
-        plt.axhline(dum, color='#C92641', linestyle='dashed')
+        ax.axhline(dum, color='#C92641', linestyle='dashed')
         if (self.burned_in):
-            plt.axvline(self.burned_in_iteration, color='#C92641',
-                        linestyle='dashed')
-            # plt.axvline(self.best_iteration, color=cP.wellSeparated[3])
-        plt.yscale('log')
+            ax.axvline(self.burned_in_iteration, color='#C92641', linestyle='dashed')
+
+        ax.set_yscale('log')
         tmp_ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
 
-        plt.xlim([0, self.iRange[self.iteration]])
+        ax.set_xlim([0, self.iRange[self.iteration]])
 
         if not self.burned_in:
             self.data_misfit_v.reset_posteriors()
 
         self.data_misfit_v.posterior.update(self.data_misfit_v[maximum(0, self.iteration-self.update_plot_every):self.iteration], trim=True)
 
-        kwargs = {'ax' : ax[1],
-                  'normalize' : True}
-        kwargs['ax'].cla()
-        tmp_ax = self.data_misfit_v.posterior.plot(transpose=True, **kwargs)
-        ylim = tmp_ax.get_ylim()
-        tmp_ax = self.data_misfit_v.prior.plot_pdf(ax=kwargs['ax'], transpose=True, c='#C92641', linestyle='dashed')
+        ax = self.ax[1][1]
+        ax.cla()
 
-        centres = self.data_misfit_v.posterior.mesh.centres
-        h_pdf = self.data_misfit_v.posterior.pdf.values
-        pdf = self.data_misfit_v.prior.probability(self.data_misfit_v.posterior.mesh.centres, log=False)
+        misfit_ax = self.data_misfit_v.posterior.plot(transpose=True, ax=ax, normalize=True, **kwargs)
+        ylim = misfit_ax.get_ylim()
 
-        self.relative_chi_squared_fit = norm(h_pdf - pdf)/norm(pdf)
-
-        plt.hlines(sum(self.datapoint.active), xmin=0.0, xmax=0.5*tmp_ax.get_xlim()[1], color='#C92641', linestyle='dashed')
-        tmp_ax.set_ylim(ylim)
-
+        self.data_misfit_v.prior.plot_pdf(ax=ax, transpose=True, c='#C92641', linestyle='dashed')
+        ax.hlines(self.data_misfit_v.prior.df, xmin=0.0, xmax=0.5*ax.get_xlim()[1], color='#C92641', linestyle='dashed')
+        ax.set_ylim(ylim)
 
     # def _plotObservedPredictedData(self, **kwargs):
     #     """ Plot the observed and predicted data """

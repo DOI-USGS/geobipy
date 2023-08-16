@@ -4,6 +4,7 @@ from numpy import nanmin, nanmax, ndim, s_, size, sqrt, sum, unique, var
 from numpy import all as npall
 from numpy.random import rand
 import matplotlib as mpl
+from matplotlib.pyplot import gca
 
 from .mixPearson import mixPearson
 from ...base import utilities
@@ -414,27 +415,27 @@ class Histogram(Model):
         linecolor = kwargs.pop('linecolor', cP.wellSeparated[3])
 
         if self.ndim == 1:
-            ax = self.mesh.bar(values=values, **kwargs)
+            bar = self.mesh.bar(values=values, **kwargs)
 
             if overlay is not None:
                 kwargs['linecolor'] = linecolor
                 self.mesh.plot_line(overlay, **kwargs)
 
             if interval_kwargs is not None:
-                self.plotCredibleIntervals(**interval_kwargs)
-            return ax
+                self.plotCredibleIntervals(ax=kwargs['ax'], **interval_kwargs)
+            return bar
         else:
             kwargs['cmap'] = kwargs.pop('cmap', mpl.cm.Greys)
-            ax, pm, cb = self.mesh.pcolor(values=values, **kwargs)
+            pc, pm, cb = self.mesh.pcolor(values=values, **kwargs)
 
             if overlay is not None:
                 kwargs['color'] = linecolor
                 self.mesh.plot_line(overlay, **kwargs)
 
             if interval_kwargs is not None:
-                self.plotCredibleIntervals(**interval_kwargs)
+                self.plotCredibleIntervals(ax=kwargs['ax'], **interval_kwargs)
 
-            return ax, pm, cb
+            return pc, pm, cb
 
     def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
 

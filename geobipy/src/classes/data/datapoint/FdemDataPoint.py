@@ -362,16 +362,12 @@ class FdemDataPoint(EmDataPoint):
             Figure axis
 
         """
-        ax = kwargs.pop('ax', None)
-        if not ax is None:
-            plt.sca(ax)
-        else:
-            ax = plt.gca()
+        ax = kwargs.pop('ax', plt.gca())
         cp.pretty(ax)
 
-        cp.xlabel('Frequency (Hz)')
-        cp.ylabel('Frequency domain data (ppm)')
-        cp.title(title)
+        ax.set_xlabel('Frequency (Hz)')
+        ax.set_ylabel('Frequency domain data (ppm)')
+        ax.set_title(title)
 
         inColor = kwargs.pop('incolor', cp.wellSeparated[0])
         quadColor = kwargs.pop('quadcolor', cp.wellSeparated[1])
@@ -390,21 +386,21 @@ class FdemDataPoint(EmDataPoint):
         f = self.frequencies(system)
 
         if with_error_bars:
-            plt.errorbar(f, self.inphase(system), yerr=self.inphaseStd(system),
+            ax.errorbar(f, self.inphase(system), yerr=self.inphaseStd(system),
                 marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
 
-            plt.errorbar(f, self.quadrature(system), yerr=self.quadratureStd(system),
+            ax.errorbar(f, self.quadrature(system), yerr=self.quadratureStd(system),
                 marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
         else:
-            plt.plot(f, log10(self.inphase(system)),
+            ax.plot(f, log10(self.inphase(system)),
                 marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
 
-            plt.plot(f, log10(self.quadrature(system)),
+            ax.plot(f, log10(self.quadrature(system)),
                 marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
 
-        plt.xscale(xscale)
-        plt.yscale(yscale)
-        plt.legend(fontsize=8)
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
+        ax.legend(fontsize=8)
 
         return ax
 
@@ -429,19 +425,15 @@ class FdemDataPoint(EmDataPoint):
             Figure axis
 
         """
-        ax = kwargs.pop('ax', None)
-        if not ax is None:
-            plt.sca(ax)
-        else:
-            ax = plt.gca()
+        ax = kwargs.pop('ax', plt.gca())
         cp.pretty(ax)
 
         labels = kwargs.pop('labels', True)
 
         if (labels):
-            cp.xlabel('Frequency (Hz)')
-            cp.ylabel('Data (ppm)')
-            cp.title(title)
+            ax.set_xlabel('Frequency (Hz)')
+            ax.set_ylabel('Data (ppm)')
+            ax.set_title(title)
 
         c = kwargs.pop('color', cp.wellSeparated[3])
         lw = kwargs.pop('linewidth', 2)
@@ -450,11 +442,11 @@ class FdemDataPoint(EmDataPoint):
         xscale = kwargs.pop('xscale','log')
         yscale = kwargs.pop('yscale','log')
 
-        plt.semilogx(self.frequencies(system), self.predictedInphase(system), color=c, linewidth=lw, alpha=a, **kwargs)
-        plt.semilogx(self.frequencies(system), self.predictedQuadrature(system), color=c, linewidth=lw, alpha=a, **kwargs)
+        ax.semilogx(self.frequencies(system), self.predictedInphase(system), color=c, linewidth=lw, alpha=a, **kwargs)
+        ax.semilogx(self.frequencies(system), self.predictedQuadrature(system), color=c, linewidth=lw, alpha=a, **kwargs)
 
-        plt.xscale(xscale)
-        plt.yscale(yscale)
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
 
         return ax
 

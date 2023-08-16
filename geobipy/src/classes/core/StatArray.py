@@ -22,7 +22,6 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.figure import Figure
 
-
 class StatArray(ndarray, myObject):
     """Class extension to numpy.ndarray
 
@@ -862,15 +861,15 @@ class StatArray(ndarray, myObject):
         msg = ('Name: {} {}\n'
                'Shape: {}\n'
                'Values: {}\n'
-               'min: {}\n'
-               'max: {}\n').format(self.getNameUnits(), hex(id(self)), self.shape, self, self.min(), self.max())
+               'Min: {}\n'
+               'Max: {}\n').format(self.getNameUnits(), hex(id(self)), self.shape, self, self.min(), self.max())
         if self.hasPrior:
             msg += "Prior:\n{}".format(("|   "+self.prior.summary.replace("\n", "\n|   "))[:-4])
 
         if self.hasProposal:
             msg += "Proposal:\n{}".format(("|   "+self.proposal.summary.replace("\n", "\n|   "))[:-4])
 
-        msg += 'has_posterior: {}'.format(self.hasPosterior)
+        msg += 'has_posterior: {}\n'.format(self.hasPosterior)
         #     if self.n_posteriors > 1:
         #         for p in self.posterior:
         #             msg += "Posterior:\n{}".format(("|   "+p.summary.replace("\n", "\n|   "))[:-4])
@@ -1230,7 +1229,7 @@ class StatArray(ndarray, myObject):
 
             return cP.pcolor(self, x=mx, y=my, **kwargs)
 
-    def plot(self, x=None, i=None, axis=0, ax=None, **kwargs):
+    def plot(self, x=None, i=None, axis=0, **kwargs):
         """Plot self against x
 
         If x and y are StatArrays, the axes are automatically labelled.
@@ -1267,10 +1266,6 @@ class StatArray(ndarray, myObject):
             matplotlib.pyplot.plot : For additional keyword arguments you may use.
 
         """
-
-        if not ax is None:
-            plt.sca(ax)
-
         if (not i is None):
             assert (isinstance(i, (slice, tuple))), TypeError(
                 "i must be a slice, use s_[]")
@@ -1319,7 +1314,7 @@ class StatArray(ndarray, myObject):
 
         return ax
 
-    def plot_posteriors(self, ax=None, **kwargs):
+    def plot_posteriors(self, **kwargs):
         """Plot the posteriors of the StatArray.
 
         Parameters
@@ -1332,11 +1327,12 @@ class StatArray(ndarray, myObject):
         if not self.hasPosterior:
             return
 
-        if ax is None:
-            ax = kwargs.pop('fig', plt.gca())
+        if kwargs.get('ax') is None:
+            kwargs['ax'] = kwargs.pop('fig', plt.gcf())
+        if not isinstance(kwargs['ax'], (list, SubplotBase)):
+            kwargs['ax'] = self._init_posterior_plots(kwargs['ax'])
 
-        if not isinstance(ax, (list, SubplotBase)):
-            ax = self._init_posterior_plots(ax)
+        ax = kwargs['ax']
 
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
         kwargs['normalize'] = kwargs.get('normalize', True)
@@ -1347,16 +1343,14 @@ class StatArray(ndarray, myObject):
                 assert len(kwargs['overlay']) == len(ax), ValueError("line in kwargs must have size {}".format(len(ax)))
             overlay = kwargs.pop('overlay', asarray([None for i in range(len(ax))]))
 
+            ax = kwargs.pop('ax')
             for i in range(self.n_posteriors):
-                plt.sca(ax[i])
-                plt.cla()
-                self.posterior[i].plot(overlay=overlay[i], **kwargs)
+                ax[i].cla()
+                self.posterior[i].plot(overlay=overlay[i], ax=ax[i], **kwargs)
         else:
             if isinstance(ax, list):
                 ax = ax[0]
-            plt.sca(ax)
-            plt.cla()
-
+            ax.cla()
             self.posterior.plot(**kwargs)
 
     def scatter(self, x=None, y=None, i=None, **kwargs):

@@ -688,10 +688,10 @@ class TdemDataPoint(EmDataPoint):
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        n_plots = sum([self.relative_error.hasPosterior, self.additive_error.hasPosterior, self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
+        n_plots = sum([self.relative_error.hasPosterior, self.additive_error.hasPosterior, self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior])
 
         n_rows = 1
-        if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) or any([self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors]):
+        if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) or any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior]):
             n_rows = 2
 
         splt = gs.subgridspec(n_rows, 1, wspace=0.3)
@@ -716,12 +716,12 @@ class TdemDataPoint(EmDataPoint):
             ax.append(self.additive_error._init_posterior_plots(splt_top[0]))
 
         ## Bottom row of plot
-        n_cols = any([self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors])
+        n_cols = any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior])
         n_cols += (self.relative_error.hasPosterior and self.additive_error.hasPosterior)
 
         if n_cols > 0:
             widths = None
-            if n_cols == 1 and not any([self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors]):
+            if n_cols == 1 and not any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior]):
                 n_cols = 2
                 widths = (1, 2)
             if n_cols == 2:
@@ -741,7 +741,7 @@ class TdemDataPoint(EmDataPoint):
                 ax.append(tmp)
                 i += 1
 
-            if any([self.transmitter.hasPosteriors, self.loop_pair.hasPosteriors, self.receiver.hasPosteriors]):
+            if any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior]):
                 # Loop pair
                 ax.append(self.loop_pair._init_posterior_plots(splt_bottom[i]))
 
@@ -789,7 +789,7 @@ class TdemDataPoint(EmDataPoint):
             self.additive_error.plot_posteriors(ax=axes[i], **add_error_kwargs)
             i += 1
 
-        if any([x.hasPosteriors for x in [self.transmitter, self.loop_pair, self.receiver]]):
+        if any([x.hasPosterior for x in [self.transmitter, self.loop_pair, self.receiver]]):
             self.loop_pair.plot_posteriors(axes = axes[i], **kwargs)
 
     def plotWaveform(self, **kwargs):
@@ -806,7 +806,7 @@ class TdemDataPoint(EmDataPoint):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         """
         ax = kwargs.pop('ax', None)
-        ax = plt.gca() if ax is None else plt.sca(ax)
+        ax = plt.gca() if ax is None else ax
 
         markers = kwargs.pop('marker', ['o', 'x', 'v'])
         kwargs['markersize'] = kwargs.pop('markersize', 1)
@@ -838,39 +838,39 @@ class TdemDataPoint(EmDataPoint):
 
                 if (with_error_bars):
                     s = self.std[icomp]
-                    plt.errorbar(system_times, d, yerr=s,
+                    ax.errorbar(system_times, d, yerr=s,
                                  color=c[j],
                                  markerfacecolor=mfc[j],
                                  label='System: {}{}'.format(j+1, self.components[k]),
                                  **kwargs)
                 else:
-                    plt.plot(system_times, d,
+                    ax.plot(system_times, d,
                              markerfacecolor=mfc[j],
                              label='System: {}{}'.format(j+1, self.components[k]),
                              **kwargs)
 
-        plt.xscale(xscale)
-        plt.yscale(yscale)
-        cp.xlabel('Time (s)')
-        cp.ylabel(cf.getNameUnits(self.data))
-        cp.title(title)
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel(cf.getNameUnits(self.data))
+        ax.set_title(title)
 
         if self.nSystems > 1 or self.n_components > 1:
-            plt.legend()
+            ax.legend()
 
         return ax
 
     def plot_predicted(self, title='Time Domain EM Data', **kwargs):
 
-        ax = kwargs.pop('ax', None)
-        ax = plt.gca() if ax is None else plt.sca(ax)
+        ax = kwargs.get('ax', None)
+        ax = plt.gca() if ax is None else ax
 
         labels = kwargs.pop('labels', True)
 
         if (labels):
-            cp.xlabel('Time (s)')
-            cp.ylabel(cf.getNameUnits(self.predictedData))
-            cp.title(title)
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel(cf.getNameUnits(self.predictedData))
+            ax.set_title(title)
 
         kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
         kwargs['linewidth'] = kwargs.pop('linewidth', 1)
@@ -896,12 +896,12 @@ class TdemDataPoint(EmDataPoint):
                 p = self.predictedData[iS][active]
                 p.plot(x=system_times[active], **kwargs)
 
-        plt.xscale(xscale)
-        plt.yscale(yscale)
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
 
     def plotDataResidual(self, title='', **kwargs):
 
-        ax = kwargs.pop('ax', None)
+        ax = kwargs.get('ax', None)
         ax = plt.gca() if ax is None else plt.sca(ax)
         cp.pretty(ax)
 
