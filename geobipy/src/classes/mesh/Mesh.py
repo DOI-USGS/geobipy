@@ -158,13 +158,13 @@ class Mesh(myObject):
         # i[i == values.shape[axis]] = values.shape[axis]-1
 
         # Obtain the values at those locations
-        # ax = self.axis(axis)
         if self.ndim == 1:
             out = self.centres_absolute[i]
         else:
-            # if size(percent) == 1:
-            i = expand_dims(i, axis)
-            out = squeeze(take_along_axis(self.centres(axis), i, axis=axis))
+            centres = self.axis(axis).centres_absolute
+            if centres.ndim > 1:
+                i = expand_dims(i, axis)
+            out = squeeze(take_along_axis(centres, i, axis=axis))
 
         out.name = "Mode " + self.centres(axis).name
         return out
