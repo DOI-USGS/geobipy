@@ -835,7 +835,7 @@ class Model(myObject):
 
         if gradient_prior is None:
             if kwargs.get('solve_gradient', False):
-                self.gradient.prior = Distribution('MvNormal', mean=0.0,
+                gradient_prior = Distribution('MvNormal', mean=0.0,
                                             variance=kwargs.get('gradient_standard_deviation', 1.5)**2.0,
                                             ndim=maximum(1, self.mesh.nCells-1),
                                             prng=kwargs.get('prng'))
