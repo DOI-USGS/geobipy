@@ -4,9 +4,9 @@ Class to store inversion results. Contains plotting and writing to file procedur
 from copy import deepcopy
 from os.path import join
 
-from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32
+from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
-from numpy import max, min, log, array, full, longdouble
+from numpy import max, min, log, array, full, longdouble, exp, maximum
 
 from numpy.random import RandomState
 from numpy.linalg import norm
@@ -95,6 +95,7 @@ class Inference1D(myObject):
 
         self.prng = prng
         kwargs['prng'] = self.prng
+        self.options = kwargs
 
         self.ignore_likelihood = ignore_likelihood
         self.n_markov_chains = n_markov_chains
@@ -109,6 +110,14 @@ class Inference1D(myObject):
         self.reciprocate_parameter = reciprocate_parameters
 
         assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
+
+    @property
+    def acceptance_percent(self):
+        if self.iteration > self.update_plot_every:
+            s = sum(self.acceptance_v[self.iteration-self.update_plot_every:self.iteration])
+        else:
+            s = sum(self.acceptance_v[:self.iteration])
+        return 100.0 * s / float64(self.update_plot_every)
 
     @property
     def datapoint(self):
@@ -365,10 +374,11 @@ class Inference1D(myObject):
         # Model acceptance rate
         self.accepted = 0
 
+        self.acceptance_v = StatArray.StatArray(full(2 * self.n_markov_chains, fill_value=0, dtype=uint8), name='% Acceptance')
+
         n = 2 * int32(self.n_markov_chains / self.update_plot_every)
         self.acceptance_x = StatArray.StatArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
         self.acceptance_rate = StatArray.StatArray(full(n, fill_value=nan), name='% Acceptance')
-
 
         self.iRange = StatArray.StatArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
 
@@ -563,6 +573,10 @@ class Inference1D(myObject):
                 if not Go:
                     failed = True
 
+            # if not self.burned_in and self.acceptance_percent == 0.0 and self.iteration > self.update_plot_every:
+            #     print('resetting')
+            #     self.reset()
+
         self.clk.stop()
         # self.invTime = float64(self.clk.timeinSeconds())
         # Does the user want to save the HDF5 results?
@@ -618,15 +632,15 @@ class Inference1D(myObject):
             self.best_datapoint = deepcopy(self.datapoint)
             self.best_posterior = self.posterior
 
+        self.acceptance_v[self.iteration] = self.accepted
+
         if ((self.iteration > 0) and (mod(self.iteration, self.update_plot_every) == 0)):
-            acceptance_percent = 100.0 * float64(self.accepted) / float64(self.update_plot_every)
-            self.acceptance_rate[int32(self.iteration / self.update_plot_every)-1] = acceptance_percent
-            self.accepted = 0
+            self.acceptance_rate[int32(self.iteration / self.update_plot_every)-1] = self.acceptance_percent
 
         if (mod(self.iteration, self.update_plot_every) == 0):
             time_per_model = self.clk.lap() / self.update_plot_every
             bi = "" if self.burned_in else "*"
-            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, float64(self.model.nCells[0]), bi, acceptance_percent, time_per_model, self.clk.timeinSeconds())
+            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, float64(self.model.nCells[0]), bi, self.acceptance_percent, time_per_model, self.clk.timeinSeconds())
             if (self.rank == 1):
                 print(tmp, flush=True)
 
@@ -845,6 +859,9 @@ class Inference1D(myObject):
         self.plotMe = True
         return self
 
+    def reset(self):
+        self.initialize(self.datapoint, solve_gradient=self.solve_gradient, **self.options)
+
 
     def createHdf(self, parent, add_axis=None):
         """ Create the hdf group metadata in file
@@ -870,7 +887,7 @@ class Inference1D(myObject):
 
         parent.create_dataset('n_markov_chains', data=self.n_markov_chains)
         parent.create_dataset('nsystems', data=self.datapoint.nSystems)
-        self.acceptance_x.toHdf(parent,'ratex')
+        # self.acceptance_v.toHdf(parent,'ratex')
 
         # Initialize the attributes that will be written later
         s = add_axis
@@ -885,7 +902,7 @@ class Inference1D(myObject):
         parent.create_dataset('invtime',  shape=(s), dtype=float, fillvalue=nan)
         parent.create_dataset('savetime',  shape=(s), dtype=float, fillvalue=nan)
 
-        self.acceptance_rate.createHdf(parent,'acceptance_rate', add_axis=add_axis, fillvalue=nan)
+        self.acceptance_v.createHdf(parent,'acceptance_rate', add_axis=add_axis, fillvalue=nan)
         self.data_misfit_v.createHdf(parent, 'phids', add_axis=add_axis, fillvalue=nan)
         self.halfspace.createHdf(parent, 'halfspace', add_axis=add_axis, fillvalue=nan)
 
@@ -940,7 +957,7 @@ class Inference1D(myObject):
         # # Add the interpolated opacity
 
         # Add the acceptance rate
-        self.acceptance_rate.writeHdf(parent, 'acceptance_rate', index=index)
+        self.acceptance_v.writeHdf(parent, 'acceptance_rate', index=index)
 
         # Add the data misfit
         self.data_misfit_v.writeHdf(parent, 'phids', index=index)
