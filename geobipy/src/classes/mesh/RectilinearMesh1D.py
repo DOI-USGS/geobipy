@@ -1026,7 +1026,7 @@ class RectilinearMesh1D(Mesh):
                 tries = 0
                 while (not suitable_width):  # Continue while the new layer is smaller than the minimum
                     # Get the new edge
-                    new_edge = exp(prng.uniform(nplog(self.min_edge), nplog(self.max_edge), 1))
+                    new_edge = exp(prng.uniform(low=nplog(self.min_edge), high=nplog(self.max_edge), size=1))
                     # Insert the new depth
                     i = self.edges.searchsorted(new_edge)
                     z = self.edges.insert(i, new_edge)
@@ -1042,7 +1042,7 @@ class RectilinearMesh1D(Mesh):
 
             if (event == 1):  # Remove an edge
                 # Get the layer to remove
-                iDeleted = int64(prng.uniform(0, self.nCells.item()-1, 1)[0]) + 1
+                iDeleted = int64(prng.uniform(low=0, high=self.nCells.item()-1, size=1)[0]) + 1
                 # Remove the layer and return
                 return self.delete_edge(iDeleted, values=values)
 
@@ -1053,9 +1053,9 @@ class RectilinearMesh1D(Mesh):
 
                     z = self.edges.copy()
                     # Get the internal edge to perturb
-                    i = int32(prng.uniform(1, self.nEdges-1, 1)[0])
+                    i = int32(prng.uniform(low=1, high=self.nEdges-1, size=1)[0])
                     # Get the perturbation amount
-                    dz = sign(prng.randn()) * self.min_width * prng.uniform()
+                    dz = sign(prng.normal()) * self.min_width * prng.uniform()
                     # Perturb the layer
                     z[i] += dz
                     # Get the minimum thickness

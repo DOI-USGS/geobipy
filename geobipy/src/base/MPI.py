@@ -3,7 +3,8 @@ from numpy.linalg import norm
 from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
 from numpy import int32, int64, prod, reshape, unravel_index, s_, size
 from numpy import ndim as npndim
-from numpy.random import RandomState
+from numpy.random import Generator
+from randomgen import SFC64
 import sys
 import numpy as np
 from os import getpid
@@ -170,8 +171,7 @@ def helloWorld(world):
     rank = world.rank
     orderedPrint(world, '/ {}'.format(rank + 1, size), "Hello From!")
 
-
-def getParallelPrng(world, timeFunction):
+def get_prng(timeFunction, seed=None, world=None):
     """Generate a random seed using time and the process id
 
     Returns
@@ -180,15 +180,23 @@ def getParallelPrng(world, timeFunction):
         The seed on each core
 
     """
+    if seed is None:
+        bit_generator = SFC64(seed = int64(abs(((timeFunction()*181)*((getpid()-83)*359))%104729)))
+    else:
+        if isinstance(seed, str):
+            bit_generator = SFC64(seed = np.uint64(np.load(seed)))
+        else:
+            bit_generator = SFC64(seed = seed)
 
-    i = getpid()
-    t = timeFunction()
-    seed = int64(abs(((t*181)*((i-83)*359))%104729))
+    if world is not None:
+        if world.rank == 0:
+            np.save('seed', bit_generator.seed_seq.entropy)
 
-    prng = RandomState(seed)
+        bit_generator.jumped(world.rank)
+    else:
+        np.save('seed', bit_generator.seed_seq.entropy)
 
-    return prng
-
+    return Generator(bit_generator)
 
 def loadBalance1D_shrinkingArrays(N, nChunks):
     """Splits the length of an array into a number of chunks. Load balances the chunks in a shrinking arrays fashion.

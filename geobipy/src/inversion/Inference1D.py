@@ -189,13 +189,14 @@ class Inference1D(myObject):
 
     @prng.setter
     def prng(self, value):
-        if value is None:
-            assert not self.mpi_enabled, TypeError("Must specify a prng when running in parallel")
-            self._prng = RandomState()
-        else:
-            self._prng = value
+        from ..base.MPI import get_prng
 
-        self.seed = self.prng.get_state()
+        if value is None:
+            import time
+            value = get_prng(time.time)
+
+        self._prng = value
+        self.seed = self._prng.bit_generator.seed_seq.entropy
 
     @property
     def rank(self):
@@ -425,7 +426,6 @@ class Inference1D(myObject):
             # parameter_limits=,
             min_width=kwargs.get('minimum_thickness', None),
             # factor=kwargs.get('factor', 10.0),
-            prng=self.prng,
             **kwargs
         )
 

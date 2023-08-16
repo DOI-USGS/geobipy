@@ -175,7 +175,7 @@ class MvNormal(baseDistribution):
 
     def rng(self, size=1):
         """  """
-        return atleast_1d(squeeze(self.prng.multivariate_normal(self._mean, self.variance, size)))
+        return atleast_1d(squeeze(self.prng.multivariate_normal(self._mean, self.variance, size=size)))
 
     def probability(self, x, log, axis=None, **kwargs):
         """ For a realization x, compute the probability """

@@ -93,7 +93,7 @@ class ChiSquared(baseDistribution):
 
         """
         size = (size, self.ndim)
-        values = squeeze(self.prng.chisquare(size=size, df=self.df))
+        values = squeeze(self.prng.chisquare(df=self.df, size=size))
         return exp(values) if self.log else values
 
     def plot_pdf(self, log=False, **kwargs):
@@ -161,4 +161,4 @@ class ChiSquared(baseDistribution):
 
     def bins(self, nBins = 99, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
-        return StatArray.StatArray(linspace(1, nStd*self.df, nBins+1))
+        return StatArray.StatArray(linspace(0.5, nStd*self.df, nBins+1))

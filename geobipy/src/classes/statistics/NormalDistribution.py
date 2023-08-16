@@ -104,7 +104,7 @@ class Normal(baseDistribution):
 
         """
         size = (size, self.mean.size)
-        values = squeeze(self.prng.normal(size=size, loc=self._mean, scale=self.variance))
+        values = squeeze(self.prng.normal(self._mean, self.variance, size=size))
         return exp(values) if self.log else values
 
     def plot_pdf(self, log=False, **kwargs):

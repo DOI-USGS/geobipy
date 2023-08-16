@@ -97,7 +97,7 @@ class Categorical(baseDistribution):
             Event index, 0 to nEvents - 1
 
         """
-        r = self.prng.rand(size)
+        r = self.prng.uniform(size=size)
         return searchsorted(self._probabilityMassFunction, r)
 
 

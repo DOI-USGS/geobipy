@@ -8,6 +8,8 @@ import sys
 import shutil
 from datetime import timedelta
 from numpy import int32
+from randomgen import SFC64
+from numpy.random import Generator
 
 # from .src.base import utilities
 from .src.base import plotting

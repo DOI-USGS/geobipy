@@ -120,7 +120,7 @@ class Uniform(baseDistribution):
 
 
     def rng(self, size=1):
-        values = self.prng.uniform(self._min, self._max, size=size)
+        values = self.prng.uniform(low=self._min, high=self._max, size=size)
         return exp(values) if self.log else values
 
 

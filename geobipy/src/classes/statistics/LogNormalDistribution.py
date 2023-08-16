@@ -97,7 +97,7 @@ class LogNormal(Normal):
 
         """
         size = (size, size(self.mean))
-        values = squeeze(self.prng.normal(size=size, loc=self._mean, scale=self.variance))
+        values = squeeze(self.prng.normal(loc=self._mean, scale=self.variance, size=size))
 
         return exp(values) if self.linearSpace else values
 

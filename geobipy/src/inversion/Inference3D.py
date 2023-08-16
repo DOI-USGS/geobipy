@@ -11,7 +11,9 @@ from numpy import full, hstack, int32, log10, logical_not, linspace, load, max, 
 from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, unique, vstack, where, zeros
 from numpy import all as npall
 
-from numpy.random import RandomState
+from randomgen import SFC64
+from numpy.random import Generator
+
 from datetime import timedelta
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -44,13 +46,15 @@ import progressbar
 class Inference3D(myObject):
     """ Class to define results from Inv_MCMC for a full data set """
 
-    def __init__(self, data, world=None):#directory, system_file_path, files=None, mpi_enabled=False, mode='r+', world=None):
+    def __init__(self, data, prng=None, world=None, debug=False):#directory, system_file_path, files=None, mpi_enabled=False, mode='r+', world=None):
         """ Initialize the 3D inference
         directory = directory containing folders for each line of data results
         """
         self.world = world
 
         self.data = data
+
+        self.prng = prng
 
         # self.directory = directory
         # self._h5files = None
@@ -81,6 +85,7 @@ class Inference3D(myObject):
 
     def __deepcopy__(self, memo={}):
         return None
+
 
     @classmethod
     def fromHdf(cls, grp, world=None, **kwargs):
@@ -189,6 +194,25 @@ class Inference3D(myObject):
             _point_starts = zeros(1, dtype=int32)
         return _point_starts
 
+    @property
+    def prng(self):
+        return self._prng
+
+    @prng.setter
+    def prng(self, value):
+        from ..base.MPI import get_prng
+
+        if value is None:
+            if self.parallel_access:
+                from mpi4py import MPI
+                value = get_prng(MPI.Wtime, self.world)
+            else:
+                import time
+                value = get_prng(time.time)
+
+        self._prng = value
+        self.seed = self._prng.bit_generator.seed_seq.entropy
+
     @cached_property
     def line_chunks(self):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
@@ -270,7 +294,7 @@ class Inference3D(myObject):
         datapoint = self.data._read_record(record=0)
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
-        inference1d = Inference1D(**kwargs)
+        inference1d = Inference1D(prng=self.prng, **kwargs)
         inference1d.initialize(datapoint=datapoint, **kwargs)
 
         self.print('Creating HDF5 files, this may take a few minutes...')
@@ -398,22 +422,12 @@ class Inference3D(myObject):
         if self.parallel_access:
             self.infer_mpi(**options)
         else:
-            self.infer_serial(seed=seed, index=index, fiducial=fiducial, line_number=line_number, **options)
+            self.infer_serial(index=index, fiducial=fiducial, line_number=line_number, **options)
 
-    def infer_serial(self, seed=None, index=None, fiducial=None, line_number=None, **options):
+    def infer_serial(self, index=None, fiducial=None, line_number=None, **options):
 
         t0 = time.time()
         self.data = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
-
-        if seed is not None:
-            if isinstance(seed, str):
-                prng = RandomState()
-                prng.set_state(tuple(load(seed, allow_pickle=True)))
-            else:
-                prng = RandomState(seed)
-        else:
-            prng = RandomState()
-            save('seed', asarray(prng.get_state(), dtype=object))
 
         nPoints = self.data.nPoints
         r = range(nPoints)
@@ -435,7 +449,8 @@ class Inference3D(myObject):
             # Pass through the line results file object if a parallel file system is in use.
             iLine = self.lineNumber.searchsorted(datapoint.lineNumber)[0]
 
-            inference = Inference1D(prng=prng, **options)
+            inference = Inference1D(prng=self.prng, **options)
+
             inference.initialize(datapoint, **options)
 
             inference.infer(hdf_file_handle=self.lines[iLine].hdf_file)
@@ -454,16 +469,13 @@ class Inference3D(myObject):
 
         world = self.world
 
-        # Create a parallel RNG on each worker with a different seed.
-        prng = myMPI.getParallelPrng(world, MPI.Wtime)
-
         t0 = MPI.Wtime()
 
         # Carryout the master-worker tasks
         if (world.rank == 0):
             self._infer_mpi_master_task(**options)
         else:
-            self._infer_mpi_worker_task(prng, **options)
+            self._infer_mpi_worker_task(**options)
 
     def _infer_mpi_master_task(self, **options):
         """ Define a Send Recv Send procedure on the master """
@@ -534,7 +546,7 @@ class Inference3D(myObject):
                 eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
                 myMPI.print("Points sent {} || Remaining {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nSent, nPoints-nFinished, nPoints, elapsed, eta))
 
-    def _infer_mpi_worker_task(self, prng, **options):
+    def _infer_mpi_worker_task(self, **options):
         """ Define a wait run ping procedure for each worker """
 
         # Import here so serial code still works...
@@ -564,7 +576,7 @@ class Inference3D(myObject):
             # Pass through the line results file object if a parallel file system is in use.
             iLine = lineNumber.searchsorted(datapoint.lineNumber)[0]
 
-            inference = Inference1D(prng=prng, world=self.world, **options)
+            inference = Inference1D(prng=self.prng, world=self.world, **options)
             inference.initialize(datapoint, **options)
 
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdf_file)
