@@ -11,7 +11,7 @@ from numpy import full, hstack, int32, log10, logical_not, linspace, load, max, 
 from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, unique, vstack, where, zeros
 from numpy import all as npall
 
-from randomgen import SFC64
+from randomgen import Xoshiro256
 from numpy.random import Generator
 
 from datetime import timedelta

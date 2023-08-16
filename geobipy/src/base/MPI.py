@@ -4,7 +4,7 @@ from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
 from numpy import int32, int64, prod, reshape, unravel_index, s_, size
 from numpy import ndim as npndim
 from numpy.random import Generator
-from randomgen import SFC64
+from randomgen import Xoshiro256
 import sys
 import numpy as np
 from os import getpid
@@ -181,12 +181,12 @@ def get_prng(timeFunction, seed=None, world=None):
 
     """
     if seed is None:
-        bit_generator = SFC64(seed = int64(abs(((timeFunction()*181)*((getpid()-83)*359))%104729)))
+        bit_generator = Xoshiro256(seed = int64(abs(((timeFunction()*181)*((getpid()-83)*359))%104729)))
     else:
         if isinstance(seed, str):
-            bit_generator = SFC64(seed = np.uint64(np.load(seed)))
+            bit_generator = Xoshiro256(seed = np.uint64(np.load(seed)))
         else:
-            bit_generator = SFC64(seed = seed)
+            bit_generator = Xoshiro256(seed = seed)
 
     if world is not None:
         if world.rank == 0:
