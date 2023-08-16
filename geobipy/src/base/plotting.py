@@ -166,31 +166,6 @@ def filter_kwargs(kwargs, defaults):
     subset = {k: tmp.pop(k, defaults[k]) for k in defaults.keys()}
     return subset, tmp
 
-
-def xlabel(label, **kwargs):
-    """Create an x label with default fontsizes
-
-    Parameters
-    ----------
-    label : str
-        The x label.
-
-    """
-    plt.xlabel(label, **kwargs)
-
-
-def ylabel(label, **kwargs):
-    """Create a y label with default fontsizes
-
-    Parameters
-    ----------
-    label : str
-        The y label.
-
-    """
-    plt.ylabel(label, **kwargs)
-
-
 def clabel(cb, label, **kwargs):
     """Create a colourbar label with default fontsizes
 
@@ -300,30 +275,6 @@ def hillshade(arr, azimuth=30, altitude=30):
 
     return 255 * (shaded + 1) / 2
 
-
-def title(label, **kwargs):
-    """Create a title with default fontsizes
-
-    Parameters
-    ----------
-    label : str
-        The title.
-
-    """
-    plt.title(label, **kwargs)
-
-
-def suptitle(label, **kwargs):
-    """Create a super title above all subplots with default font sizes
-
-    Parameters
-    ----------
-    label : str
-        The suptitle.
-
-    """
-    plt.suptitle(label, **kwargs)
-
 def bar(values, edges, line=None, **kwargs):
     """Plot a bar chart.
 
@@ -354,11 +305,7 @@ def bar(values, edges, line=None, **kwargs):
     kwargs['linewidth'] = kwargs.get('linewidth', 0.5)
     kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
 
-    ax = geobipy_kwargs.pop('ax', None)
-    if ax is None:
-        ax = plt.gca()
-    else:
-        plt.sca(ax)
+    ax = geobipy_kwargs.pop('ax', plt.gca())
 
     pretty(ax)
 
@@ -392,14 +339,14 @@ def bar(values, edges, line=None, **kwargs):
     centres = edges[:-1] + 0.5 * (diff(edges))
 
     if (geobipy_kwargs['transpose']):
-        plt.barh(centres, values, height=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
-        ylabel(label)
-        xlabel(utilities.getNameUnits(values))
+        ax.barh(centres, values, height=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
+        ax.set_ylabel(label)
+        ax.set_xlabel(utilities.getNameUnits(values))
         geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
     else:
-        plt.bar(centres, values, width=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
-        xlabel(label)
-        ylabel(utilities.getNameUnits(values))
+        ax.bar(centres, values, width=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
+        ax.set_xlabel(label)
+        ax.set_ylabel(utilities.getNameUnits(values))
 
     if geobipy_kwargs['flipX']:
         ax.invert_xaxis()
@@ -407,8 +354,8 @@ def bar(values, edges, line=None, **kwargs):
     if geobipy_kwargs['flipY']:
         ax.invert_yaxis()
 
-    plt.xscale(geobipy_kwargs['xscale'])
-    plt.yscale(geobipy_kwargs['yscale'])
+    ax.set_xscale(geobipy_kwargs['xscale'])
+    ax.set_yscale(geobipy_kwargs['yscale'])
 
     if geobipy_kwargs['xscale'] == 'linear':
         ax.ticklabel_format(style='sci', axis='x', scilimits=(0, 2))
@@ -518,8 +465,8 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     ax, pm, cb = pcolormesh(X=mx, Y=my, values=values, **kwargs)
 
-    xlabel(utilities.getNameUnits(x))
-    ylabel(utilities.getNameUnits(y))
+    ax.set_xlabel(utilities.getNameUnits(x))
+    ax.set_ylabel(utilities.getNameUnits(y))
 
     return ax, pm, cb
 
@@ -649,10 +596,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     kwargs['cmap'] = color_kwargs['cmap']
 
     ax = geobipy_kwargs['ax']
-    if ax is None:
-        ax = plt.gca()
-    else:
-        plt.sca(ax)
+
     pretty(ax)
 
     # Gridlines
@@ -690,8 +634,8 @@ def _pcolormesh(X, Y, values, **kwargs):
     Zm = masked_invalid(values, copy=False)
     pm = ax.pcolormesh(X, Y, values, alpha = color_kwargs['alpha'], **kwargs)
 
-    plt.xscale(geobipy_kwargs['xscale'])
-    plt.yscale(geobipy_kwargs['yscale'])
+    ax.set_xscale(geobipy_kwargs['xscale'])
+    ax.set_yscale(geobipy_kwargs['yscale'])
 
     if geobipy_kwargs['flipX']:
         ax.invert_xaxis()
@@ -786,10 +730,7 @@ def pcolor_as_bar(X, Y, values, **kwargs):
     assert ndim(values) == 2, ValueError('Number of dimensions must be 2')
 
     ax = kwargs.pop('ax', None)
-    if ax is None:
-        ax = plt.gca()
-    else:
-        plt.sca(ax)
+
     pretty(ax)
 
     kwargs['shading'] = 'auto'
@@ -846,8 +787,8 @@ def pcolor_as_bar(X, Y, values, **kwargs):
 
     pm = ax.pcolormesh(X, Y, Zm, alpha = alpha, **kwargs)
 
-    plt.xscale(xscale)
-    plt.yscale(yscale)
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
 
     if flipX:
         ax.invert_xaxis()
@@ -932,10 +873,7 @@ def pcolor_1D(values, y=None, **kwargs):
 
     # Get the figure axis
     ax = geobipy_kwargs['ax']
-    if ax is None:
-        ax = plt.gca()
-    else:
-        plt.sca(ax)
+
     pretty(ax)
 
     # Set the x and y axes before meshgridding them
@@ -979,14 +917,14 @@ def pcolor_1D(values, y=None, **kwargs):
     if geobipy_kwargs['flip']:
         ax.invert_yaxis() if geobipy_kwargs['transpose'] else ax.invert_xaxis()
 
-    plt.xscale(geobipy_kwargs['xscale'])
-    plt.yscale(geobipy_kwargs['yscale'])
+    ax.set_xscale(geobipy_kwargs['xscale'])
+    ax.set_yscale(geobipy_kwargs['yscale'])
 
     if geobipy_kwargs['transpose']:
-        ylabel(utilities.getNameUnits(y))
+        ax.set_ylabel(utilities.getNameUnits(y))
         ax.get_xaxis().set_ticks([])
     else:
-        xlabel(utilities.getNameUnits(y))
+        ax.set_xlabel(utilities.getNameUnits(y))
         ax.get_yaxis().set_ticks([])
 
     if not geobipy_kwargs['xlim'] is None:
@@ -1052,12 +990,14 @@ def hlines(*args, **kwargs):
     geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
+    ax = geobipy_kwargs['ax']
+
     kwargs['linestyles'] = kwargs.pop('linestyle', 'solid')
 
     if 'linecolor' in kwargs:
         kwargs['color'] = kwargs.pop('linecolor')
 
-    return plt.hlines(*args, **kwargs)
+    return ax.hlines(*args, **kwargs)
 
 def vlines(*args, **kwargs):
     """Plot y against x
@@ -1098,10 +1038,12 @@ def vlines(*args, **kwargs):
     geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
+    ax = geobipy_kwargs['ax']
+
     if 'linecolor' in kwargs:
         kwargs['color'] = kwargs.pop('linecolor')
 
-    return plt.vlines(*args, **kwargs)
+    return ax.vlines(*args, **kwargs)
 
 def plot(x, y, **kwargs):
     """Plot y against x
@@ -1142,6 +1084,7 @@ def plot(x, y, **kwargs):
     geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
+    ax = geobipy_kwargs['ax']
 
     if geobipy_kwargs['transpose']:
         y, x = x, y
@@ -1158,11 +1101,6 @@ def plot(x, y, **kwargs):
         tmp, logLabel = utilities._log(y, geobipy_kwargs['log'])
         yl = logLabel + yl
 
-    ax = geobipy_kwargs['ax']
-    if ax is None:
-        ax = plt.gca()
-    else:
-        plt.sca(ax)
     pretty(ax)
 
     # try:
@@ -1181,9 +1119,9 @@ def plot(x, y, **kwargs):
 
     if (geobipy_kwargs['labels']):
         if xl != '':
-            plt.xlabel(xl)
+            ax.set_xlabel(xl)
         if yl != '':
-            plt.ylabel(yl)
+            ax.set_ylabel(yl)
     ax.margins(0.1, 0.1)
 
     if geobipy_kwargs['flipX']:
@@ -1418,24 +1356,20 @@ def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
     xscale = kwargs.pop('xscale','linear')
     yscale = kwargs.pop('yscale','linear')
 
-    ax = kwargs.pop('ax', None)
-    if ax is None:
-        ax = plt.gca()
-    else:
-        plt.sca(ax)
+    ax = kwargs.pop('ax', plt.gca())
 
     pretty(ax)
 
-    plt.stackplot(x, y, labels=labels, colors=colors, **kwargs)
+    ax.stackplot(x, y, labels=labels, colors=colors, **kwargs)
 
     if (not len(labels)==0):
-        plt.legend()
+        ax.legend()
 
-    plt.xscale(xscale)
-    plt.yscale(yscale)
-    xlabel(utilities.getNameUnits(x))
-    ylabel(utilities.getNameUnits(y))
-    plt.margins(0.1, 0.1)
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
+    ax.set_xlabel(utilities.getNameUnits(x))
+    ax.set_ylabel(utilities.getNameUnits(y))
+    ax.set_margins(0.1, 0.1)
 
     return ax
 
@@ -1471,10 +1405,7 @@ def step(x, y, **kwargs):
     color_kwargs['color'] = color_kwargs.pop('color', wellSeparated[3])
 
     ax = geobipy_kwargs.pop('ax', None)
-    if ax is None:
-        ax = plt.gca()
-    else:
-        plt.sca(ax)
+
     pretty(ax)
 
     x, _ = utilities._log(x, geobipy_kwargs['logX'])
@@ -1484,6 +1415,7 @@ def step(x, y, **kwargs):
         geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
         x, y = y, x
 
+    plt.sca(ax)
     stp = plt.step(x=x, y=y, **kwargs)
 
     if geobipy_kwargs['flipX']:
@@ -1493,11 +1425,11 @@ def step(x, y, **kwargs):
         ax.invert_yaxis()
 
     if (geobipy_kwargs['labels']):
-        xlabel(utilities.getNameUnits(x))
-        ylabel(utilities.getNameUnits(y))
+        ax.set_xlabel(utilities.getNameUnits(x))
+        ax.set_ylabel(utilities.getNameUnits(y))
 
-    plt.xscale(geobipy_kwargs['xscale'])
-    plt.yscale(geobipy_kwargs['yscale'])
+    ax.set_xscale(geobipy_kwargs['xscale'])
+    ax.set_yscale(geobipy_kwargs['yscale'])
 
     return ax, stp
 
