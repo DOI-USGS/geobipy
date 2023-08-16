@@ -20,6 +20,7 @@ from ...base import utilities
 from ...base import plotting as cp
 from ..statistics.baseDistribution import baseDistribution
 from ..statistics.Distribution import Distribution
+from ..statistics.CategoricalDistribution import Categorical
 from ..statistics import Histogram
 from scipy.sparse import diags
 from scipy import interpolate
@@ -274,6 +275,11 @@ class RectilinearMesh1D(Mesh):
     @property
     def event_proposal(self):
         return self._event_proposal
+
+    @event_proposal.setter
+    def event_proposal(self, value):
+        assert isinstance(value, Categorical), TypeError("event_proposal must be a geobipy.Categorical distribution")
+        self._event_proposal = value
 
     @property
     def internaledges(self):
