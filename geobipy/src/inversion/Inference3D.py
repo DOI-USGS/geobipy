@@ -200,7 +200,7 @@ class Inference3D(myObject):
         if value is None:
             if self.parallel_access:
                 from mpi4py import MPI
-                value = get_prng(MPI.Wtime, self.world)
+                value = get_prng(MPI.Wtime, world=self.world)
             else:
                 import time
                 value = get_prng(time.time)
