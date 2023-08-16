@@ -598,12 +598,23 @@ class Inference1D(myObject):
     def hitmap(self):
         return self.model.values.posterior
 
+    @cached_property
+    def chisquare_pdf(self):
+        return self.data_misfit_v.prior.probability(self.data_misfit_v.posterior.mesh.centres, log=False)
+
+    @cached_property
+    def norm_chisquare(self):
+        return norm(self.chisquare_pdf)
+
     def update(self):
         """Update the posteriors of the McMC algorithm. """
 
         self.iteration += 1
 
         self.data_misfit_v[self.iteration - 1] = self.data_misfit
+
+        # Check the fit of the chi square distribution with theoretical
+        self.relative_chi_squared_fit = norm(self.data_misfit_v.posterior.pdf.values - self.chisquare_pdf)/self.norm_chisquare
 
         # Determine if we are burning in
         if (not self.burned_in):
