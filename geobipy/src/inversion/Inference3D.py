@@ -159,13 +159,8 @@ class Inference3D(myObject):
         return self._world
 
     @world.setter
-    def world(self, communicator):
-
-        if communicator is None:
-            self._world = None
-            return
-
-        self._world = communicator
+    def world(self, value):
+        self._world = value
 
     @property
     def parallel_access(self):
