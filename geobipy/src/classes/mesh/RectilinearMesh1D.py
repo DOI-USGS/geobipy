@@ -1822,14 +1822,14 @@ class RectilinearMesh1D(Mesh):
         """Summary of self """
         msg =  "{}\n".format(type(self).__name__)
         if self._nCells is not None:
-            msg += "Number of Cells:\n{}".format("|   "+(self._nCells.summary.replace("\n", "\n|   "))[:-4])
+            msg += "Number of Cells:\n{}\n".format("|   "+(self._nCells.summary.replace("\n", "\n|   "))[:-4])
         else:
             msg += "Number of Cells:\n{}\n".format("|   "+str(self.nCells))
-        msg += "Cell Centres:\n{}".format("|   "+(self._centres.summary.replace("\n", "\n|   "))[:-4])
-        msg += "Cell Edges:\n{}".format("|   "+(self._edges.summary.replace("\n", "\n|    "))[:-4])
-        msg = msg[:-1]
+        msg += "Cell Centres:\n{}\n".format("|   "+(self._centres.summary.replace("\n", "\n|   "))[:-4])
+        msg += "Cell Edges:\n{}\n".format("|   "+(self._edges.summary.replace("\n", "\n|   "))[:-4])
+        # msg = msg[:-1]
         msg += "log:\n{}".format("|   "+str(self.log)+'\n')
-        msg += "relativeTo:\n{}".format("|   "+(self.relativeTo.summary.replace("\n", "\n|    "))[:-4])
+        msg += "relativeTo:\n{}\n".format("|   "+(self.relativeTo.summary.replace("\n", "\n|   "))[:-4])
 
         return msg
 

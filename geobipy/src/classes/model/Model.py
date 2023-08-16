@@ -127,7 +127,7 @@ class Model(myObject):
         """Summary of self """
         msg =  "{}:\n".format(type(self).__name__)
         msg += "mesh:\n{}".format("|   "+(self.mesh.summary.replace("\n", "\n|   "))[:-4])
-        msg += "values:\n{}".format("|   "+(self.values.summary.replace("\n", "\n|   "))[:-4])
+        msg += "values:\n{}\n".format("|   "+(self.values.summary.replace("\n", "\n|   "))[:-4])
         return msg
 
     @property

@@ -126,10 +126,9 @@ class Uniform(baseDistribution):
 
     @property
     def summary(self):
-        msg = 'Uniform Distribution: \n'
-
-        msg += '  Min: :' + str(self.min) + '\n'
-        msg += '  Max: :' + str(self.max) + '\n'
+        msg =  'Uniform Distribution: \n'
+        msg += 'Min: {}\n'.format(self.min)
+        msg += 'Max: {}\n'.format(self.max)
         return msg
 
 
