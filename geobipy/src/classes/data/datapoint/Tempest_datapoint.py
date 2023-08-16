@@ -17,6 +17,7 @@ from ...statistics.Histogram import Histogram
 from ...model.Model import Model
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...mesh.RectilinearMesh2D import RectilinearMesh2D
+from ...system.Loop_pair import Loop_pair
 
 from ....base import utilities as cf
 from ....base import plotting as cP
