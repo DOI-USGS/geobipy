@@ -292,7 +292,7 @@ class Inference1D(myObject):
         self.initialize_model(**kwargs)
 
         # Compute the data misfit
-        self.data_misfit = datapoint.dataMisfit()
+        self.data_misfit = datapoint.data_misfit()
 
         # # Calibrate the response if it is being solved for
         # if (self.kwargs.solveCalibration):

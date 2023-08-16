@@ -570,7 +570,7 @@ class Data(Point):
         self.predictedData = vstack([self.predictedData, other.predictedData])
         self.std = vstack([self.std, other.std])
 
-    def dataMisfit(self, squared=False):
+    def data_misfit(self, squared=False):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
         .. math::
@@ -590,8 +590,8 @@ class Data(Point):
 
         """
         x = MaskedArray((self.deltaD / self.std)**2.0, mask=~self.active)
-        dataMisfit = StatArray.StatArray(sum(x, axis=1), "Data misfit")
-        return dataMisfit if squared else sqrt(dataMisfit)
+        data_misfit = StatArray.StatArray(sum(x, axis=1), "Data misfit")
+        return data_misfit if squared else sqrt(data_misfit)
 
     def __getitem__(self, i):
         """ Define item getter for Data """

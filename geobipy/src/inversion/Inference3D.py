@@ -899,8 +899,8 @@ class Inference3D(myObject):
         return model
 
     @cached_property
-    def dataMisfit(self):
-        return self.bestData.dataMisfit()
+    def data_misfit(self):
+        return self.bestData.data_misfit()
 
     @cached_property
     def doi(self):
@@ -1987,9 +1987,9 @@ class Inference3D(myObject):
         return self.scatter2D(c=self.additiveError[system, :], **kwargs)
 
 
-    def plotDataMisfit(self, normalized=True, **kwargs):
+    def plotdata_misfit(self, normalized=True, **kwargs):
         """ Plot the observation locations """
-        x = self.dataMisfit
+        x = self.data_misfit
         if normalized:
             x = x / self.bestData.nActiveChannels
             x._name = "Normalized data misfit"

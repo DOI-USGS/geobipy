@@ -178,7 +178,7 @@ class EmDataPoint(DataPoint):
         for i in range(nSamples):
             model.values[0] = c[i]
             self.forward(model)
-            PhiD[i] = self.dataMisfit()
+            PhiD[i] = self.data_misfit()
 
         i = argmin(PhiD)
         model.values[0] = c[i]
@@ -215,7 +215,7 @@ class EmDataPoint(DataPoint):
         for i in range(size(c)):
             model.values[0] = c[i]
             self.forward(model)
-            PhiD[i] = self.dataMisfit()
+            PhiD[i] = self.data_misfit()
 
         plt.loglog(c, PhiD, **kwargs)
         cP.xlabel(c.getNameUnits())

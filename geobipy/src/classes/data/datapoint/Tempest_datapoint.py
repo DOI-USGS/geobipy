@@ -184,7 +184,7 @@ class Tempest_datapoint(TdemDataPoint):
             for i in range(conductivity.nCells):
                 model.values[0] = conductivity.centres_absolute[i]
                 self.forward(model)
-                misfit.values[i] = self.dataMisfit()
+                misfit.values[i] = self.data_misfit()
 
         else:
             pitch = RectilinearMesh1D(centres = linspace(*pitch_range, n_samples))
@@ -197,7 +197,7 @@ class Tempest_datapoint(TdemDataPoint):
                     self.receiver.pitch = pitch.centres[j]
 
                     self.forward(model)
-                    misfit.values[i, j] = self.dataMisfit()
+                    misfit.values[i, j] = self.data_misfit()
 
         return misfit
 
@@ -234,7 +234,7 @@ class Tempest_datapoint(TdemDataPoint):
     #         model.values[0] = x[0]
     #         dp.receiver.pitch = x[1]
     #         dp.forward(model)
-    #         return dp.dataMisfit()
+    #         return dp.data_misfit()
 
     #     conductivities = logspace(-8, 5, 12)
     #     pitch = linspace(-20.0, 20.0, 12)

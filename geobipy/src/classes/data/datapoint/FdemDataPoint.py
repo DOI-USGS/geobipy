@@ -494,11 +494,11 @@ class FdemDataPoint(EmDataPoint):
     #     # Initialize the first conductivity
     #     model._values[0] = 10.0**c0
     #     self.forward(model)  # Forward model the EM data
-    #     PhiD1 = self.dataMisfit()  # Compute the measure between observed and predicted data
+    #     PhiD1 = self.data_misfit()  # Compute the measure between observed and predicted data
     #     # Initialize the second conductivity
     #     model._values[0] = 10.0**c1
     #     self.forward(model)  # Forward model the EM data
-    #     PhiD2 = self.dataMisfit()  # Compute the measure between observed and predicted data
+    #     PhiD2 = self.data_misfit()  # Compute the measure between observed and predicted data
     #     # Compute a relative change in the data misfit
     #     dPhiD = abs(PhiD2 - PhiD1) / PhiD2
     #     i = 1
@@ -507,7 +507,7 @@ class FdemDataPoint(EmDataPoint):
     #         cnew = 0.5 * (c0 + c1)  # Bisect the conductivities
     #         model._values[0] = 10.0**cnew
     #         self.forward(model)  # Forward model the EM data
-    #         PhiDnew = self.dataMisfit()
+    #         PhiDnew = self.data_misfit()
     #         if (PhiD2 > PhiDnew):
     #             c1 = cnew
     #             PhiD2 = PhiDnew

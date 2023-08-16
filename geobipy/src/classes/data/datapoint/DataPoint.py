@@ -490,7 +490,7 @@ class DataPoint(Point):
         """
         return self.predictedData.probability(i=self.active, log=log)
 
-    def dataMisfit(self):
+    def data_misfit(self):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
         .. math::
