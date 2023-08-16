@@ -78,15 +78,16 @@ def checkCommandArguments():
 
     Parser = argparse.ArgumentParser(description="GeoBIPy",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    Parser.add_argument('inputFile', help='User input file')
+    Parser.add_argument('options_file', help='User options file')
     Parser.add_argument('output_directory', help='Output directory for results')
-    Parser.add_argument('--skipHDF5', dest='skipHDF5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
+    Parser.add_argument('--skip_hdf5', dest='skip_hdf5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
     Parser.add_argument('--seed', dest='seed', default=None, help='Specify a numpy seed file to fix the random number generator. Only used in serial mode.')
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
     Parser.add_argument('--verbose', dest='verbose', action='store_true', help='Throw warnings as errors.')
     Parser.add_argument('--mpi', dest='mpi', action='store_true', help='Run geobipy with MPI libraries.')
+    Parser.add_argument('--debug', dest='debug', action='store_true', help='Run geobipy in debug mode.')
 
     args = Parser.parse_args()
 
@@ -99,9 +100,9 @@ def checkCommandArguments():
         import warnings
         warnings.filterwarnings("error")
 
-    return args.inputFile, args.output_directory, args.skipHDF5, args.seed, args.index, args.fiducial, args.line_number, args.mpi
+    return args
 
-def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None):
+def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None, debug=False):
 
     print('Running GeoBIPy in serial mode')
     print('Using user input file {}'.format(inputFile))
@@ -121,17 +122,22 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
 
     options = user_parameters.read(inputFile)
 
-    serial_dataset(output_directory, seed=seed, index=index, fiducial=fiducial, line_number=line_number, **options)
+    data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+
+    prng = None
+    if seed is not None:
+        from time import time
+        from .src.base.MPI import get_prng
+        prng = get_prng(time, seed=seed)
+
+    inference3d = Inference3D(data=data, prng=prng, debug=debug)
+    inference3d.create_hdf5(directory=output_directory, **options)
+
+    inference3d.infer(index=index, fiducial=fiducial, line_number=line_number, **options)
 
 
-def serial_dataset(output_directory, seed=None, index=None, fiducial=None, line_number=None, **kwargs):
 
-    data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
 
-    inference3d = Inference3D(data=data)
-    inference3d.create_hdf5(directory=output_directory, **kwargs)
-
-    inference3d.infer(seed=seed, index=index, fiducial=fiducial, line_number=line_number, **kwargs)
 
 
 def parallel_geobipy(inputFile, outputDir, skipHDF5):
@@ -187,11 +193,18 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
 def geobipy():
     """Run the serial implementation of GeoBIPy. """
 
-    inputFile, output_directory, skipHDF5, seed, index, fiducial, line_number, mpi_enabled = checkCommandArguments()
+    args = checkCommandArguments()
     sys.path.append(getcwd())
 
-
-    if mpi_enabled:
-        parallel_geobipy(inputFile, output_directory, skipHDF5)
+    if args.mpi:
+        parallel_geobipy(args.options_file,
+                         args.output_directory,
+                         args.skip_hdf5)
     else:
-        serial_geobipy(inputFile, output_directory, seed, index, fiducial, line_number)
+        serial_geobipy(args.options_file,
+                       args.output_directory,
+                       args.seed,
+                       args.index,
+                       args.fiducial,
+                       args.line_number,
+                       args.debug)
