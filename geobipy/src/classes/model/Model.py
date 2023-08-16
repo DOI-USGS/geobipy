@@ -388,7 +388,7 @@ class Model(myObject):
         """
         return self.stochastic_newton_perturbation(observation)
 
-    def stochastic_newton_perturbation(self, observation=None):
+    def stochastic_newton_perturbation(self, observation=None, low_variance=0.2, high_variance=2.0):
 
         # Perturb the structure of the model
 
@@ -401,6 +401,14 @@ class Model(myObject):
         # Update the local Hessian around the current model.
         # inv(J'Wd'WdJ + Wm'Wm)
         inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
+
+        if inverse_hessian.size > 1:
+            ih_max = inverse_hessian.max()
+            if ih_max < low_variance:
+                inverse_hessian *= (low_variance / ih_max)
+            elif ih_max > high_variance:
+                inverse_hessian *= (high_variance / ih_max)
+
 
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)
@@ -417,12 +425,8 @@ class Model(myObject):
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
         dSigma = 0.5 * dot(inverse_hessian, gradient)
-        # bounded = abs(dSigma) > 6.0
-        # dSigma[bounded] = sign(dSigma[bounded]) * 6.0
 
         mean = exp(nplog(remapped_model.values) - dSigma)
-
-        # mean = remapped_model.values.copy()
 
         perturbed_model = deepcopy(remapped_model)
 
