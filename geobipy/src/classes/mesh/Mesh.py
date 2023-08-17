@@ -162,8 +162,10 @@ class Mesh(myObject):
             out = self.centres_absolute[i]
         else:
             centres = self.axis(axis).centres_absolute
-            if centres.ndim > 1:
+            if centres.ndim != i.ndim:
+            # if centres.ndim > 1:
                 i = expand_dims(i, axis)
+
             out = squeeze(take_along_axis(centres, i, axis=axis))
 
         out.name = "Mode " + self.centres(axis).name
