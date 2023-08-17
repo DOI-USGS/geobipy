@@ -7,11 +7,10 @@ from pathlib import Path
 import time
 from pprint import pprint
 from numpy import atleast_1d, arange, argsort, argwhere, asarray, column_stack, cumsum, divide, empty, exp, float64
-from numpy import full, hstack, int32, log10, logical_not, linspace, load, max, nan,  nanmin, nanmax, newaxis
-from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, unique, vstack, where, zeros
+from numpy import full, hstack, int32, int64, log10, logical_not, linspace, load, max, nan,  nanmin, nanmax, newaxis
+from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, uint64, unique, vstack, where, zeros
 from numpy import all as npall
 
-from randomgen import Xoshiro256
 from numpy.random import Generator
 
 from datetime import timedelta
@@ -195,18 +194,24 @@ class Inference3D(myObject):
 
     @prng.setter
     def prng(self, value):
-        from ..base.MPI import get_prng
-
-        if value is None:
-            if self.parallel_access:
-                from mpi4py import MPI
-                value = get_prng(MPI.Wtime, world=self.world)
-            else:
-                import time
-                value = get_prng(time.time)
+        assert isinstance(value, Generator), TypeError(("prng must have type np.random.Generator.\n"
+                                                        "You can generate one using\n"
+                                                        "from numpy.random import Generator\n"
+                                                        "from numpy.random import PCG64DXSM"
+                                                        "Generator(bit_generator)\n\n"
+                                                        "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
         self._prng = value
         self.seed = self._prng.bit_generator.seed_seq.entropy
+
+    @property
+    def seed(self):
+        return self._seed
+
+    @seed.setter
+    def seed(self, value):
+        assert isinstance(value, int64), TypeError("seed must be an int64 but has type {}".format(type(value)))
+        self._seed = value
 
     @cached_property
     def line_chunks(self):

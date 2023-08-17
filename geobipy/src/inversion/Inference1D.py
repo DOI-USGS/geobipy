@@ -8,7 +8,7 @@ from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float6
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
 from numpy import max, min, log, array, full, longdouble, exp, maximum
 
-from numpy.random import RandomState
+from numpy.random import Generator
 from numpy.linalg import norm
 
 import matplotlib.pyplot as plt
@@ -198,11 +198,12 @@ class Inference1D(myObject):
 
     @prng.setter
     def prng(self, value):
-        from ..base.MPI import get_prng
-
-        if value is None:
-            import time
-            value = get_prng(time.time)
+        assert isinstance(value, Generator), TypeError(("prng must have type np.random.Generator.\n"
+                                                        "You can generate one using\n"
+                                                        "from numpy.random import Generator\n"
+                                                        "from numpy.random import PCG64DXSM"
+                                                        "Generator(bit_generator)\n\n"
+                                                        "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
         self._prng = value
         self.seed = self._prng.bit_generator.seed_seq.entropy
@@ -242,6 +243,15 @@ class Inference1D(myObject):
         if self.mpi_enabled:
             value = False
         self._save_png = value
+
+    @property
+    def seed(self):
+        return self._seed
+
+    @seed.setter
+    def seed(self, value):
+        assert isinstance(value, int64), TypeError("seed must be an int64 but has type {}".format(type(value)))
+        self._seed = value
 
     @property
     def solve_parameter(self):
@@ -474,11 +484,11 @@ class Inference1D(myObject):
         if self.ignore_likelihood:
             observation = None
 
-        # try:
-        remapped_model, test_model = self.model.perturb(observation)
-        # except:
-        #     print('singularity line {} fid {}'.format(observation.line_number, observation.fiducial))
-        #     return True
+        try:
+            remapped_model, test_model = self.model.perturb(observation)
+        except:
+            print('singularity line {} fid {}'.format(observation.line_number, observation.fiducial, self.seed))
+            return True
 
         # Propose a new data point, using assigned proposal distributions
         test_datapoint.perturb()
