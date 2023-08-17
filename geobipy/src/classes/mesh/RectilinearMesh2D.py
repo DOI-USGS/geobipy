@@ -802,8 +802,8 @@ class RectilinearMesh2D(Mesh):
                 kwargs['yscale'] = 'log'
 
             ax, pm, cb = cP.pcolormesh(xm, ym, values, **kwargs)
-            cP.xlabel(xm.label)
-            cP.ylabel(ym.label)
+            ax.set_xlabel(xm.label)
+            ax.set_ylabel(ym.label)
         else:
             # Need to expand the yaxis edges since they could be draped.
             if (x_mask is not None) or (y_mask is not None):

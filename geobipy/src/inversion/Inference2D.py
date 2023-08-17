@@ -1215,8 +1215,8 @@ class Inference2D(myObject):
         """ Plot the number of layers in the best model for each data point """
         post = self.model.nCells.posterior
         post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
-        post.plot(overlay=self.model.nCells, axis=1)
-        cP.title('P(# of Layers)')
+        ax, _, _ = post.plot(overlay=self.model.nCells, axis=1)
+        ax.set_title('P(# of Layers)')
 
 
     def plot_additive_error(self, **kwargs):

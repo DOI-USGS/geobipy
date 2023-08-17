@@ -423,7 +423,7 @@ class Histogram(Model):
 
             if interval_kwargs is not None:
                 self.plotCredibleIntervals(ax=kwargs['ax'], **interval_kwargs)
-            return bar
+            return bar, None, None
         else:
             kwargs['cmap'] = kwargs.pop('cmap', mpl.cm.Greys)
             pc, pm, cb = self.mesh.pcolor(values=values, **kwargs)

@@ -114,54 +114,55 @@ def pretty(ax):
     return ax
 
 def filter_color_kwargs(kwargs):
-    defaults = {'equalize' : False,
-                'clim_scaling' : None,
-                'colorbar' : True,
+    defaults = {'alpha' : 1.0,
+                'alpha_color' : [1, 1, 1],
                 'cax' : None,
+                'clabel' : None,
+                'clim_scaling' : None,
                 'cmap' : 'cividis',
                 'cmapIntervals' : None,
-                'clabel' : None,
+                'colorbar' : True,
+                'equalize' : False,
                 'nBins' : 256,
                 'orientation' : 'vertical',
-                'alpha' : 1.0,
-                'alpha_color' : [1, 1, 1],
                 'ticks': None}
-    out, kwargs = filter_kwargs(kwargs, defaults)
+
+    out, kwargs = _filter_kwargs(kwargs, defaults)
     out['cmap'] = copy(colormaps.get_cmap(out['cmap']))#, out['cmapIntervals']))
     out['cmap'].set_bad(color='white')
     return out, kwargs
 
 def filter_plotting_kwargs(kwargs):
-    defaults = {'transpose': False,
-                'xscale': 'linear',
-                'yscale': 'linear',
+    defaults = {'ax' : plt.gca(),
                 'flip' : False,
                 'flipX' : False,
                 'flipY' : False,
+                'grid' : False,
+                'hillshade' : None,
+                'labels' : True,
+                'legend_size' : None,
                 'log' : None,
+                'logBins' : False,
                 'logX' : None,
                 'logY' : None,
                 'trim' : None,
                 'reciprocateX' : False,
                 'reciprocateY' : False,
-                'labels' : True,
-                'logBins' : False,
-                'grid' : False,
                 'shading' : 'auto',
+                'transpose' : False,
+                'width' : None,
+                'xscale' : 'linear',
                 'xlim' : None,
                 'ylim' : None,
-                'ax' : None,
-                'width' : None,
-                'legend_size' : None,
-                'hillshade' : None
-                }
-    out, kwargs = filter_kwargs(kwargs, defaults)
+                'yscale': 'linear'}
+
+    out, kwargs = _filter_kwargs(kwargs, defaults)
     if out['grid']:
         out['color'] = 'k'
 
     return out, kwargs
 
-def filter_kwargs(kwargs, defaults):
+def _filter_kwargs(kwargs, defaults):
     tmp = copy(kwargs)
     subset = {k: tmp.pop(k, defaults[k]) for k in defaults.keys()}
     return subset, tmp

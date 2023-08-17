@@ -764,7 +764,7 @@ class Inference1D(myObject):
                 #     'normalize': True},
                 overlay=overlay)
 
-            cP.suptitle(title)
+            self.fig.suptitle(title)
 
             if self.fig is not None:
                 self.fig.canvas.draw()
@@ -836,7 +836,7 @@ class Inference1D(myObject):
         ax = self.ax[1][1]
         ax.cla()
 
-        misfit_ax = self.data_misfit_v.posterior.plot(transpose=True, ax=ax, normalize=True, **kwargs)
+        misfit_ax, _, _ = self.data_misfit_v.posterior.plot(transpose=True, ax=ax, normalize=True, **kwargs)
         ylim = misfit_ax.get_ylim()
 
         self.data_misfit_v.prior.plot_pdf(ax=ax, transpose=True, c='#C92641', linestyle='dashed')

@@ -128,58 +128,51 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
 
         assert npall(shape(values) == self.shape), ValueError("values must have shape {}".format(self.shape))
 
-        ax = kwargs.pop('ax', plt.gca())
+        geobipy_kwargs, kwargs = cP.filter_plotting_kwargs(kwargs)
+        color_kwargs, kwargs = cP.filter_color_kwargs(kwargs)
+
+        ax = geobipy_kwargs['ax']
 
         cP.pretty(ax)
 
-        xscale = kwargs.pop('xscale', 'linear')
-        if self.x.log is not None:
-            xscale = 'log'
-        yscale = kwargs.pop('yscale', 'linear')
-        if self.y_log is not None:
-            yscale = 'log'
-        flipX = kwargs.pop('flipX', False)
-        flipY = kwargs.pop('flipY', False)
+        xscale = kwargs.pop('xscale', 'linear' if self.x.log is None else 'log')
+        yscale = kwargs.pop('yscale', 'linear' if self.y_log is None else 'log')
 
-        equalize = kwargs.pop('equalize', False)
-        clim_scaling = kwargs.pop('clim_scaling', None)
-        colorbar = kwargs.pop('colorbar', True)
-        cl = kwargs.pop('clabel', None)
-        cax = kwargs.pop('cax', None)
-        cmap = kwargs.pop('cmap', 'viridis')
-        cmapIntervals = kwargs.pop('cmapIntervals', None)
-        cmap = copy(mplcm.get_cmap(cmap, cmapIntervals))
-        cmap.set_bad(color='white')
-        orientation = kwargs.pop('orientation', 'vertical')
-        log = kwargs.pop('log', False)
-        vmin = kwargs.pop('vmin', None)
-        vmax = kwargs.pop('vmax', None)
+        color_kwargs['cmap'].set_bad(color='white')
 
-        grid = kwargs.pop('grid', False)
         if 'edgecolor' in kwargs:
-            grid = True
-        if grid:
+            geobipy_kwargs['grid'] = True
+
+        if geobipy_kwargs['grid']:
             kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
             kwargs['linewidth'] = kwargs.pop('linewidth', 2)
 
-        if (log):
-            values, logLabel = utilities._log(values, log)
+        if (geobipy_kwargs['log']):
+            values, logLabel = utilities._log(values, geobipy_kwargs['log'])
 
+        vmin = kwargs.pop('vmin', None)
         if vmin is not None:
             values[values < vmin] = vmin
+
+        vmax = kwargs.pop('vmax', None)
         if vmax is not None:
             values[values > vmax] = vmax
 
-        if equalize:
-            nBins = kwargs.pop('nbins', 256)
-            assert nBins > 0, ValueError('nBins must be greater than zero')
-            values, dummy = utilities.histogramEqualize(values, nBins=nBins)
+        if color_kwargs['equalize']:
+            assert color_kwargs['nBins'] > 0, ValueError('nBins must be greater than zero')
+            values, dummy = utilities.histogramEqualize(values, nBins=color_kwargs['nBins'])
+
+        if color_kwargs['clim_scaling'] is not None:
+            values = utilities.trim_by_percentile(values, color_kwargs['clim_scaling'])
+
+        if geobipy_kwargs['hillshade'] is not None:
+            kw = geobipy_kwargs['hillshade'] if isinstance(geobipy_kwargs['hillshade'], dict) else {}
+            values = cP.hillshade(values, azimuth=kw.get('azimuth', 30), altitude=kw.get('altitude', 30))
 
         rescale = lambda y: (y - nanmin(y)) / (nanmax(y) - nanmin(y))
         v = rescale(values)
 
         y_edges = self.y_edges
-
         y_edges = utilities._power(y_edges, self.y_log)
 
         max_edge = max(y_edges[isfinite(y_edges)])
@@ -200,38 +193,46 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             width = zeros(self.x.nCells)
             width[active] = top[active] - bottom[active]
 
-            pm = plt.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=cmap(v[:, i]), **kwargs)
+            pm = ax.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=color_kwargs['cmap'](v[:, i]), **kwargs)
 
-        plt.xscale(xscale)
-        plt.yscale(yscale)
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
 
-        cP.xlabel(self.x.label)
-        cP.ylabel(self.y_edges.label)
+        ax.set_xlabel(self.x.label)
+        ax.set_ylabel(self.y_edges.label)
 
-        if flipX:
+        if geobipy_kwargs['flipX']:
             ax.invert_xaxis()
 
-        if flipY:
+        if geobipy_kwargs['flipY']:
             ax.invert_yaxis()
 
-        cbar = None
-        if (colorbar):
+        if geobipy_kwargs['xlim'] is not None:
+            ax.set_xlim(geobipy_kwargs['xlim'])
 
-            sm = mplcm.ScalarMappable(cmap=cmap, norm=plt.Normalize(nanmin(values), nanmax(values)))
+        if geobipy_kwargs['ylim'] is not None:
+            ax.set_ylim(geobipy_kwargs['ylim'])
+
+        cbar = None
+        if (color_kwargs['colorbar']):
+
+            sm = mplcm.ScalarMappable(cmap=color_kwargs['cmap'], norm=plt.Normalize(nanmin(values), nanmax(values)))
             sm.set_array([])
 
-            if (equalize):
-                cbar = plt.colorbar(sm, extend='both', cax=cax, orientation=orientation)
+            if (color_kwargs['equalize']):
+                cbar = plt.colorbar(sm, extend='both', cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
             else:
-                cbar = plt.colorbar(sm, cax=cax, orientation=orientation)
+                cbar = plt.colorbar(sm, cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
 
-            if cl is None:
-                if (log):
+            if color_kwargs['clabel'] is None:
+                if (geobipy_kwargs['log']):
                     cP.clabel(cbar, logLabel + utilities.getNameUnits(values))
                 else:
                     cP.clabel(cbar, utilities.getNameUnits(values))
             else:
-                cP.clabel(cbar, cl)
+                cP.clabel(cbar, color_kwargs['clabel'])
+
+        return ax, pm, cbar
 
     def _init_posterior_plots(self, gs, values=None, sharex=None, sharey=None):
         """Initialize axes for posterior plots
