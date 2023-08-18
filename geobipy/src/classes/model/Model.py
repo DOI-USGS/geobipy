@@ -366,7 +366,7 @@ class Model(myObject):
         assert isinstance(self.values, baseDistribution), TypeError("values must have type geobipy.basDistribution")
         return self.mesh.map_to_pdf(distribution=self.values, pdf=pdf, log=log, axis=axis)
 
-    def perturb(self, observation=None):
+    def perturb(self, observation=None, low_variance=0.2, high_variance=1.0):
         """Perturb a model's structure and parameter values.
 
         Uses a stochastic newtown approach if a datapoint is provided.
@@ -386,12 +386,11 @@ class Model(myObject):
             The model with perturbed structure and parameter values.
 
         """
-        return self.stochastic_newton_perturbation(observation)
+        return self.stochastic_newton_perturbation(observation, low_variance=low_variance, high_variance=high_variance)
 
-    def stochastic_newton_perturbation(self, observation=None, low_variance=0.2, high_variance=2.0):
+    def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf):
 
         # Perturb the structure of the model
-
         remapped_model = self.perturb_structure()
 
         if observation is not None:
@@ -409,7 +408,6 @@ class Model(myObject):
             elif ih_max > high_variance:
                 inverse_hessian *= (high_variance / ih_max)
 
-
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)
         # Need to have the gradient be a part of this too.
@@ -424,14 +422,14 @@ class Model(myObject):
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        dSigma = 0.5 * dot(inverse_hessian, gradient)
-
-        mean = exp(nplog(remapped_model.values) - dSigma)
+        dSigma = -dot(inverse_hessian, gradient)
+        mean = exp(nplog(remapped_model.values) + dSigma)
 
         perturbed_model = deepcopy(remapped_model)
 
         # Assign a proposal distribution for the parameter using the mean and variance.
-        perturbed_model.values.proposal = Distribution('MvLogNormal', mean=mean,
+        perturbed_model.values.proposal = Distribution('MvLogNormal',
+                                                       mean=mean,
                                                        variance=inverse_hessian,
                                                        linearSpace=True,
                                                        prng=perturbed_model.values.proposal.prng)
@@ -443,11 +441,12 @@ class Model(myObject):
 
     def prior_derivative(self, order):
         # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ww'WwWs)(m - mref)
-        wts = self.mesh.cell_weights
-        operator = wts * self.values.priorDerivative(order=2)
+        operator = self.values.priorDerivative(order=2)
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
-            operator += wts * dot(Wz.T, Wz)
+            operator += dot(Wz.T, Wz)
+
+        operator *= self.mesh.cell_weights
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
@@ -715,18 +714,13 @@ class Model(myObject):
             gradient += observation.prior_derivative(order=1)
 
         # Compute the stochastic newton offset.
-        # The negative sign because we want to move downhill
-        SN_step_from_perturbed = 0.5 * dot(self.values.proposal.variance, gradient)
-        # bounded = abs(SN_step_from_perturbed) > 6.0
-        # SN_step_from_perturbed[bounded] = sign(SN_step_from_perturbed[bounded]) * 6.0
+        SN_step_from_perturbed = -dot(self.values.proposal.variance, gradient)
 
         prng = self.values.proposal.prng
-
         # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
         # # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
         # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        # #
-        tmp = Distribution('MvLogNormal', exp(nplog(self.values) - SN_step_from_perturbed), self.values.proposal.variance, linearSpace=True, prng=prng)
+        tmp = Distribution('MvLogNormal', exp(nplog(self.values) + SN_step_from_perturbed), self.values.proposal.variance, linearSpace=True, prng=prng)
         # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
         proposal = tmp.probability(x=remappedModel.values, log=True)
@@ -740,8 +734,8 @@ class Model(myObject):
         if action == 'insert':
             k = self.nCells - 1
 
-            forward = Distribution('Uniform', 0.0, self.mesh.remainingSpace(k))
-            reverse = Distribution('Uniform', 0.0, k)
+            forward = Distribution('Uniform', 0.0, self.mesh.remainingSpace(k), prng=prng)
+            reverse = Distribution('Uniform', 0.0, k, prng=prng)
 
             proposal += reverse.probability(1, log=True)
             proposal1 += forward.probability(0.0, log=True)
@@ -749,8 +743,8 @@ class Model(myObject):
         if action == 'delete':
             k = self.nCells
 
-            forward = Distribution('Uniform', 0.0, self.mesh.remainingSpace(k))
-            reverse = Distribution('Uniform', 0.0, k)
+            forward = Distribution('Uniform', 0.0, self.mesh.remainingSpace(k), prng=prng)
+            reverse = Distribution('Uniform', 0.0, k, prng=prng)
 
             proposal += forward.probability(0.0, log=True)
             proposal1 += reverse.probability(1, log=True)
