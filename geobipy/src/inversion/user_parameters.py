@@ -36,6 +36,7 @@ class user_parameters(dict):
         if len(missing) > 0:
             raise ValueError("Missing {} from the user parameter file".format(missing))
 
+        kwargs.pop('join', None)
         kwargs['gradient_standard_deviation'] = 1.5 if kwargs.get('gradient_standard_deviation') is None else kwargs.get('gradient_standard_deviation')
         kwargs['multiplier'] = float64(1.0) if kwargs.get('multiplier') is None else kwargs.get('multiplier')
         kwargs['stochastic_newton'] = not kwargs.get('ignore_likelihood', False)
