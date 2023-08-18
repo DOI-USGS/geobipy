@@ -12,6 +12,7 @@ from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, t
 from numpy import all as npall
 
 from numpy.random import Generator
+from randomgen import Xoshiro256
 
 from datetime import timedelta
 import matplotlib.pyplot as plt
@@ -45,7 +46,7 @@ import progressbar
 class Inference3D(myObject):
     """ Class to define results from Inv_MCMC for a full data set """
 
-    def __init__(self, data, prng=None, world=None, debug=False):#directory, system_file_path, files=None, mpi_enabled=False, mode='r+', world=None):
+    def __init__(self, data, prng, world=None, debug=False):#directory, system_file_path, files=None, mpi_enabled=False, mode='r+', world=None):
         """ Initialize the 3D inference
         directory = directory containing folders for each line of data results
         """
@@ -197,7 +198,7 @@ class Inference3D(myObject):
         assert isinstance(value, Generator), TypeError(("prng must have type np.random.Generator.\n"
                                                         "You can generate one using\n"
                                                         "from numpy.random import Generator\n"
-                                                        "from numpy.random import PCG64DXSM"
+                                                        "from numpy.random import PCG64DXSM\n"
                                                         "Generator(bit_generator)\n\n"
                                                         "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
@@ -269,7 +270,7 @@ class Inference3D(myObject):
 
             if (single_rank_comm != MPI.COMM_NULL):
                 # Instantiate a new blank inference3d linked to the master
-                inference3d = Inference3D(self.data, world=single_rank_comm)
+                inference3d = Inference3D(self.data, prng=Generator(Xoshiro256()), world=single_rank_comm)
                 # Create the hdf5 files
                 inference3d._create_HDF5_dataset(directory, **kwargs)
 
@@ -279,7 +280,6 @@ class Inference3D(myObject):
             self._create_HDF5_dataset(directory, **kwargs)
 
         self.open(directory, mode='r+', **kwargs)
-
 
     # def _create_hdf5(self, **kwargs):
 

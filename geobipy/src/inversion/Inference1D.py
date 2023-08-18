@@ -93,10 +93,9 @@ class Inference1D(myObject):
 
         self.world = world
 
-        self.prng = prng
-        kwargs['prng'] = self.prng
         self.options = kwargs
 
+        self.prng = prng
         self.ignore_likelihood = ignore_likelihood
         self.n_markov_chains = n_markov_chains
         self.multiplier = multiplier

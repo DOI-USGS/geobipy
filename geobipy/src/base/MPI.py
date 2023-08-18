@@ -181,17 +181,19 @@ def get_prng(timeFunction, seed=None, world=None):
 
     """
     if seed is None:
-        bit_generator = Xoshiro256(seed = int64(abs(((timeFunction()*181)*((getpid()-83)*359))%104729)))
+        seed = int64(abs(((timeFunction()*181)*((getpid()-83)*359))%104729))
+        bit_generator = Xoshiro256(seed = seed)
+        if world is None:
+            np.save('seed', bit_generator.seed_seq.entropy)
     else:
         if isinstance(seed, str):
             bit_generator = Xoshiro256(seed = np.int64(np.load(seed)))
         else:
-            bit_generator = Xoshiro256(seed = seed)
+            bit_generator = Xoshiro256(seed = np.int64(seed))
 
     if world is not None:
         bit_generator.jumped(world.rank)
-    else:
-        np.save('seed', bit_generator.seed_seq.entropy)
+
 
     return Generator(bit_generator)
 

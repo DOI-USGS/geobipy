@@ -13,6 +13,7 @@ from numpy.random import Generator
 
 # from .src.base import utilities
 from .src.base import plotting
+from .src.base.MPI import get_prng
 # from .src.base import fileIO
 # from .src.base import interpolation
 
@@ -106,6 +107,8 @@ def checkCommandArguments():
 
 def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None, debug=False):
 
+    from time import time
+
     print('Running GeoBIPy in serial mode')
     print('Using user input file {}'.format(inputFile))
     print('Output files will be produced at {}'.format(output_directory))
@@ -126,13 +129,10 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
 
     data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
-    prng = None
-    if seed is not None:
-        from time import time
-        from .src.base.MPI import get_prng
-        prng = get_prng(time, seed=seed)
+    prng = get_prng(time, seed=seed)
 
     inference3d = Inference3D(data=data, prng=prng, debug=debug)
+
     inference3d.create_hdf5(directory=output_directory, **options)
 
     inference3d.infer(index=index, fiducial=fiducial, line_number=line_number, **options)
@@ -169,12 +169,6 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
 
     # Get the number of points in the file.
     if masterRank:
-    #     nPoints = dataset._csv_n_points(UP.dataFilename)
-    #     assert (nRanks > 1), Exception("You need to use at least 2 ranks for the mpi version.")
-    #     assert (nRanks <= nPoints+1), Exception('You requested more ranks than you have data points.  Please lower the number of ranks to a maximum of {}. '.format(nPoints+1))
-
-    #     # Make sure the results folders exist
-    #     makedirs(output_directory, exist_ok=True)
         # Copy the user_parameter file to the output directory
         shutil.copy(inputFile, output_directory)
 

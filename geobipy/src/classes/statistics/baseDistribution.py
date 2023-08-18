@@ -26,14 +26,14 @@ class baseDistribution(myObject):
     def prng(self, value):
         from ...base.MPI import get_prng
 
-        if value is None:
-            import time
-            value = get_prng(time.time)
+        # if value is None:
+        #     import time
+        #     value = get_prng(time.time)
 
         assert isinstance(value, Generator), TypeError(("prng must have type np.random.Generator.\n"
                                                         "You can generate one using\n"
                                                         "from numpy.random import Generator\n"
-                                                        "from numpy.random import PCG64DXSM"
+                                                        "from numpy.random import PCG64DXSM\n"
                                                         "Generator(bit_generator)\n\n"
                                                         "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
