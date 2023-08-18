@@ -295,7 +295,8 @@ class Inference3D(myObject):
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
         inference1d = Inference1D(prng=self.prng, **kwargs)
-        inference1d.initialize(datapoint=datapoint, **kwargs)
+
+        inference1d.initialize(datapoint=datapoint)
 
         self.print('Creating HDF5 files, this may take a few minutes...')
         self.print('Files are being created for data files {} and system files {}'.format(kwargs['data_filename'], kwargs['system_filename']))
@@ -451,7 +452,7 @@ class Inference3D(myObject):
 
             inference = Inference1D(prng=self.prng, **options)
 
-            inference.initialize(datapoint, **options)
+            inference.initialize(datapoint)
 
             inference.infer(hdf_file_handle=self.lines[iLine].hdf_file)
 

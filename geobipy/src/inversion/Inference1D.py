@@ -30,6 +30,7 @@ from ..classes.model.Model import Model
 from ..classes.core.Stopwatch import Stopwatch
 from ..base.HDF import hdfRead
 from cached_property import cached_property
+from .user_parameters import user_parameters
 
 class Inference1D(myObject):
     """Define the results for the Bayesian MCMC Inversion.
@@ -113,10 +114,10 @@ class Inference1D(myObject):
     @property
     def acceptance_percent(self):
         if self.iteration > self.update_plot_every:
-            s = sum(self.acceptance_v[self.iteration-self.update_plot_every:self.iteration])
+            s = sum(self.acceptance_v[self.iteration-self.update_plot_every:self.iteration]) / float64(self.update_plot_every)
         else:
-            s = sum(self.acceptance_v[:self.iteration])
-        return 100.0 * s / float64(self.update_plot_every)
+            s = sum(self.acceptance_v[:self.iteration]) / float64(self.iteration)
+        return 100.0 * s
 
     @property
     def datapoint(self):
@@ -133,34 +134,34 @@ class Inference1D(myObject):
 
     @property
     def ignore_likelihood(self):
-        return self._ignore_likelihood
+        return self.options['ignore_likelihood']
 
     @ignore_likelihood.setter
     def ignore_likelihood(self, value:bool):
         assert isinstance(value, bool), ValueError('ignore_likelihood must have type bool')
-        self._ignore_likelihood = value
+        self._options['ignore_likelihood'] = value
 
     @property
     def interactive_plot(self):
-        return self._interactive_plot
+        return self.options['interactive_plot']
 
     @interactive_plot.setter
     def interactive_plot(self, value:bool):
         assert isinstance(value, bool), ValueError('interactive_plot must have type bool')
         if self.mpi_enabled:
             value = False
-        self._interactive_plot = value
+        self.options['interactive_plot'] = value
 
     @property
     def limits(self):
-        return self._limits
+        return self.options['limits']
 
     @limits.setter
     def limits(self, values):
-        self._limits = None
         if values is not None:
             assert size(values) == 2, ValueError("Limits must have length 2")
-            self._limits = sort(asarray(values, dtype=float64))
+            values = sort(asarray(values, dtype=float64))
+        self.options['limits'] = values
 
     @property
     def model(self):
@@ -173,39 +174,48 @@ class Inference1D(myObject):
 
     @property
     def mpi_enabled(self):
-        return not (self.world is None)
+        return self.world is not None
 
     @property
     def multiplier(self):
-        return self._multiplier
+        return self.options['multiplier']
 
     @multiplier.setter
     def multiplier(self, value):
-        self._multiplier = float64(value)
+        self.options['multiplier'] = float64(value)
 
     @property
     def n_markov_chains(self):
-        return self._n_markov_chains
+        return self.options['n_markov_chains']
 
     @n_markov_chains.setter
     def n_markov_chains(self, value):
-        self._n_markov_chains = int64(value)
+        self.options['n_markov_chains'] = int64(value)
+
+    @property
+    def options(self):
+        return self._options
+
+    @options.setter
+    def options(self, value):
+        assert isinstance(value, dict), TypeError("options must have type dict")
+        self._options = value
 
     @property
     def prng(self):
-        return self._prng
+        return self.options['prng']
 
     @prng.setter
     def prng(self, value):
         assert isinstance(value, Generator), TypeError(("prng must have type np.random.Generator.\n"
                                                         "You can generate one using\n"
                                                         "from numpy.random import Generator\n"
-                                                        "from numpy.random import PCG64DXSM"
+                                                        "from numpy.random import PCG64DXSM\n"
                                                         "Generator(bit_generator)\n\n"
                                                         "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
-        self._prng = value
-        self.seed = self._prng.bit_generator.seed_seq.entropy
+        self.options['prng'] = value
+        self.seed = self.options['prng'].bit_generator.seed_seq.entropy
 
     @property
     def rank(self):
@@ -216,32 +226,32 @@ class Inference1D(myObject):
 
     @property
     def reciprocate_parameters(self):
-        return self._reciprocate_parameters
+        return self.options['reciprocate_parameters']
 
     @reciprocate_parameters.setter
     def reciprocate_parameters(self, value:bool):
         assert isinstance(value, bool), ValueError('reciprocate_parameters must have type bool')
-        self._reciprocate_parameters = value
+        self.options['reciprocate_parameters'] = value
 
     @property
     def save_hdf5(self):
-        return self._save_hdf5
+        return self.options['save_hdf5']
 
     @save_hdf5.setter
     def save_hdf5(self, value:bool):
         assert isinstance(value, bool), ValueError('save_hdf5 must have type bool')
-        self._save_hdf5 = value
+        self.options['save_hdf5'] = value
 
     @property
     def save_png(self):
-        return self._save_png
+        return self.options['save_png']
 
     @save_png.setter
     def save_png(self, value:bool):
         assert isinstance(value, bool), ValueError('save_png must have type bool')
         if self.mpi_enabled:
             value = False
-        self._save_png = value
+        self.options['save_png'] = value
 
     @property
     def seed(self):
@@ -254,29 +264,29 @@ class Inference1D(myObject):
 
     @property
     def solve_parameter(self):
-        return self._solve_parameter
+        return self.options['solve_parameter']
 
     @solve_parameter.setter
     def solve_parameter(self, value:bool):
         assert isinstance(value, bool), ValueError('solve_parameter must have type bool')
-        self._solve_parameter = value
+        self.options['solve_parameter'] = value
 
     @property
     def solve_gradient(self):
-        return self._solve_gradient
+        return self.options['solve_gradient']
 
     @solve_gradient.setter
     def solve_gradient(self, value:bool):
         assert isinstance(value, bool), ValueError('solve_gradient must have type bool')
-        self._solve_gradient = value
+        self.options['solve_gradient'] = value
 
     @property
     def update_plot_every(self):
-        return self._update_plot_every
+        return self.options['update_plot_every']
 
     @update_plot_every.setter
     def update_plot_every(self, value):
-        self._update_plot_every = int32(value)
+        self.options['update_plot_every'] = int32(value)
 
     @property
     def world(self):
@@ -287,13 +297,13 @@ class Inference1D(myObject):
         self._world = value
 
 
-    def initialize(self, datapoint, **kwargs):
+    def initialize(self, datapoint):
         # Get the initial best fitting halfspace and set up
         # priors and posteriors using user parameters
         # ------------------------------------------------
         # Intialize the datapoint with the user parameters
         # ------------------------------------------------
-        self.initialize_datapoint(datapoint, **kwargs)
+        self.initialize_datapoint(datapoint, **self.options)
 
         # # Initialize the calibration parameters
         # if (kwargs.solveCalibration):
@@ -307,7 +317,7 @@ class Inference1D(myObject):
         # ---------------------------------
         # Set the earth model properties
         # ---------------------------------
-        self.initialize_model(**kwargs)
+        self.initialize_model(**self.options)
 
         # Compute the data misfit
         self.data_misfit = datapoint.data_misfit()
@@ -348,7 +358,7 @@ class Inference1D(myObject):
         target = sum(self.datapoint.active)
         self._n_target_hits = 0
 
-        self.data_misfit_v.prior = Distribution('chi2', df=target)
+        self.data_misfit_v.prior = Distribution('chi2', df=target, prng=self.prng)
 
         self.relative_chi_squared_fit = 100.0
 
