@@ -175,7 +175,7 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    prng = myMPI.get_prng(MPI.Wtime, world=self.world)
+    prng = myMPI.get_prng(MPI.Wtime, world=world)
 
     inference3d = Inference3D(data, world=world, prng=prng)
     inference3d.create_hdf5(directory=output_directory, **kwargs)

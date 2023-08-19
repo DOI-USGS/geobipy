@@ -9,7 +9,7 @@ import sys
 import numpy as np
 from os import getpid
 from time import time
-#from ...base.Error import Error as Err
+from ..classes.core import StatArray
 
 
 class world3D(object):
@@ -180,20 +180,28 @@ def get_prng(timeFunction, seed=None, world=None):
         The seed on each core
 
     """
-    if seed is None:
-        seed = int64(abs(((timeFunction()*181)*((getpid()-83)*359))%104729))
-        bit_generator = Xoshiro256(seed = seed)
-        if world is None:
+    if world is None:
+        if seed is None:
+            bit_generator = Xoshiro256()
             np.save('seed', bit_generator.seed_seq.entropy)
-    else:
-        if isinstance(seed, str):
-            bit_generator = Xoshiro256(seed = np.int64(np.load(seed)))
         else:
-            bit_generator = Xoshiro256(seed = np.int64(seed))
+            if isinstance(seed, str):
+                bit_generator = Xoshiro256(seed = np.int64(np.load(seed)))
+            else:
+                bit_generator = Xoshiro256(seed = np.int64(seed))
 
-    if world is not None:
+    else:
+        bit_generator = Xoshiro256()
+
+        # Broadcast the seed to all ranks.
+        seed = world.bcast(bit_generator.seed_seq.entropy, root=0)
+
+        bit_generator = Xoshiro256(seed = seed)
+
+        if world.rank == 0:
+            np.save('seed', bit_generator.seed_seq.entropy)
+
         bit_generator.jumped(world.rank)
-
 
     return Generator(bit_generator)
 

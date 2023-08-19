@@ -259,7 +259,6 @@ class Inference1D(myObject):
 
     @seed.setter
     def seed(self, value):
-        assert isinstance(value, int64), TypeError("seed must be an int64 but has type {}".format(type(value)))
         self._seed = value
 
     @property

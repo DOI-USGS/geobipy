@@ -211,7 +211,6 @@ class Inference3D(myObject):
 
     @seed.setter
     def seed(self, value):
-        assert isinstance(value, int64), TypeError("seed must be an int64 but has type {}".format(type(value)))
         self._seed = value
 
     @cached_property
@@ -578,7 +577,7 @@ class Inference3D(myObject):
             iLine = lineNumber.searchsorted(datapoint.lineNumber)[0]
 
             inference = Inference1D(prng=self.prng, world=self.world, **options)
-            inference.initialize(datapoint, **options)
+            inference.initialize(datapoint)
 
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdf_file)
 
