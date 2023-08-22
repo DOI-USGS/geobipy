@@ -138,10 +138,10 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
     inference3d.infer(index=index, fiducial=fiducial, line_number=line_number, **options)
 
 
-def parallel_geobipy(inputFile, outputDir, skipHDF5):
-    parallel_mpi(inputFile, outputDir, skipHDF5)
+def parallel_geobipy(inputFile, outputDir, skipHDF5, seed=None):
+    parallel_mpi(inputFile, outputDir, skipHDF5, seed=seed)
 
-def parallel_mpi(inputFile, output_directory, skipHDF5):
+def parallel_mpi(inputFile, output_directory, skipHDF5, seed=None):
 
     from mpi4py import MPI
     from .src.base import MPI as myMPI
@@ -175,7 +175,7 @@ def parallel_mpi(inputFile, output_directory, skipHDF5):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    prng = myMPI.get_prng(MPI.Wtime, world=world)
+    prng = get_prng(MPI.Wtime, seed=seed, world=world)
 
     inference3d = Inference3D(data, world=world, prng=prng)
     inference3d.create_hdf5(directory=output_directory, **kwargs)
@@ -193,7 +193,8 @@ def geobipy():
     if args.mpi:
         parallel_geobipy(args.options_file,
                          args.output_directory,
-                         args.skip_hdf5)
+                         args.skip_hdf5,
+                         seed = args.seed)
     else:
         serial_geobipy(args.options_file,
                        args.output_directory,
