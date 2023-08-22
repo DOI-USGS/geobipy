@@ -1,16 +1,16 @@
 """ Module containing custom MPI functions """
+import pickle
+from os import getpid
+from time import time
+import sys
 from numpy.linalg import norm
 from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
 from numpy import int32, int64, prod, reshape, unravel_index, s_, size
 from numpy import ndim as npndim
 from numpy.random import Generator
 from randomgen import Xoshiro256
-import sys
 import numpy as np
-from os import getpid
-from time import time
 from ..classes.core import StatArray
-
 
 class world3D(object):
 
@@ -183,23 +183,28 @@ def get_prng(timeFunction, seed=None, world=None):
     if world is None:
         if seed is None:
             bit_generator = Xoshiro256()
-            np.save('seed', bit_generator.seed_seq.entropy)
+            pickle.dump(bit_generator.seed_seq.entropy, open('seed.pkl', 'wb'))
         else:
             if isinstance(seed, str):
-                bit_generator = Xoshiro256(seed = np.int64(np.load(seed)))
+                bit_generator = Xoshiro256(seed = pickle.load(open(seed, 'rb')))
             else:
-                bit_generator = Xoshiro256(seed = np.int64(seed))
+                bit_generator = Xoshiro256(seed = seed)
 
     else:
-        bit_generator = Xoshiro256()
 
-        # Broadcast the seed to all ranks.
-        seed = world.bcast(bit_generator.seed_seq.entropy, root=0)
+        if seed is None:
+            bit_generator = Xoshiro256()
+            # Broadcast the seed to all ranks.
+            seed = world.bcast(bit_generator.seed_seq.entropy, root=0)
+        else:
+            if isinstance(seed, str):
+                bit_generator = Xoshiro256(seed = pickle.load(open(seed, 'rb')))
+                seed = bit_generator.seed_seq.entropy
 
         bit_generator = Xoshiro256(seed = seed)
 
         if world.rank == 0:
-            np.save('seed', bit_generator.seed_seq.entropy)
+            pickle.dump(bit_generator.seed_seq.entropy, open('seed.pkl', 'wb'))
 
         bit_generator.jumped(world.rank)
 
