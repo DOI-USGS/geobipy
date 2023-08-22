@@ -393,6 +393,8 @@ class Model(myObject):
         # Perturb the structure of the model
         remapped_model = self.perturb_structure()
 
+        print('    ', remapped_model.mesh.action, flush=True)
+
         if observation is not None:
             if remapped_model.mesh.action[0] != 'none':
                 observation.sensitivity(remapped_model)
@@ -401,22 +403,25 @@ class Model(myObject):
         # inv(J'Wd'WdJ + Wm'Wm)
         inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
 
-        if inverse_hessian.size > 1:
-            ih_max = inverse_hessian.max()
-            if ih_max < low_variance:
-                inverse_hessian *= (low_variance / ih_max)
-            elif ih_max > high_variance:
-                inverse_hessian *= (high_variance / ih_max)
+        # if inverse_hessian.size > 1:
+        #     ih_max = inverse_hessian.max()
+        #     if ih_max < low_variance:
+        #         inverse_hessian *= (low_variance / ih_max)
+        #     elif ih_max > high_variance:
+        #         inverse_hessian *= (high_variance / ih_max)
 
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)
         # Need to have the gradient be a part of this too.
         gradient = remapped_model.prior_derivative(order=1)
+        # print('    gradient a', gradient, flush=True)
 
         if not observation is None:
             # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
             tmp = observation.prior_derivative(order=1)
             gradient += tmp
+            # print('    gradient b', tmp, flush=True)
+            # print('    gradient', gradient, flush=True)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
@@ -424,6 +429,10 @@ class Model(myObject):
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
         dSigma = -dot(inverse_hessian, gradient)
         mean = exp(nplog(remapped_model.values) + dSigma)
+        # print('    dSigma', dSigma, flush=True)
+        # print('    mean', mean, flush=True)
+
+        # print('    min, max variance', inverse_hessian.min(), inverse_hessian.max(), flush=True)
 
         perturbed_model = deepcopy(remapped_model)
 

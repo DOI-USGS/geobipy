@@ -285,7 +285,7 @@ class Inference1D(myObject):
 
     @update_plot_every.setter
     def update_plot_every(self, value):
-        self.options['update_plot_every'] = int32(value)
+        self.options['update_plot_every'] = int32(1)
 
     @property
     def world(self):
@@ -485,7 +485,13 @@ class Inference1D(myObject):
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
+        # print(self.datapoint.addressof)
+        print(self.datapoint.sensitivity_matrix.addressof)
+
         test_datapoint = deepcopy(self.datapoint)
+        print(test_datapoint.sensitivity_matrix.addressof)
+
+        # print(test_datapoint.addressof)
 
         # Perturb the current model
         observation = test_datapoint
@@ -493,10 +499,14 @@ class Inference1D(myObject):
             observation = None
 
         try:
+            # print(self.model.addressof)
             remapped_model, test_model = self.model.perturb(observation)
+            # print(remapped_model.addressof)
+            # print(test_model.addressof)
         except:
             print('singularity line {} fid {}'.format(observation.line_number, observation.fiducial, self.seed))
             return True
+        print(test_datapoint.sensitivity_matrix.addressof)
 
         # Propose a new data point, using assigned proposal distributions
         test_datapoint.perturb()
@@ -507,14 +517,21 @@ class Inference1D(myObject):
         # Compute the data misfit
         test_data_misfit = test_datapoint.data_misfit()
 
+        print('test misfit', test_data_misfit, flush=True)
+
         # Evaluate the prior for the current data
         test_prior = test_datapoint.probability
+
+        print('test prior a', test_prior, flush=True)
+
         # Test for early rejection
         if (test_prior == -inf):
             return
 
         # Evaluate the prior for the current model
-        test_prior += test_model.probability(self.solve_parameter, self.solve_gradient)
+        tmp = test_model.probability(self.solve_parameter, self.solve_gradient)
+        test_prior += tmp
+        print('test prior b', tmp, flush=True)
 
         # Test for early rejection
         if (test_prior == -inf):
@@ -543,6 +560,15 @@ class Inference1D(myObject):
         # If we accept the model
         self.accepted = acceptance_probability > self.prng.uniform()
 
+        print('test likelihood', test_likelihood, flush=True)
+        print('proposal, test_proposal', proposal, test_proposal, flush=True)
+        print('test_posterior', test_posterior, flush=True)
+        print('prior ratio', prior_ratio, flush=True)
+        print('likelihood ratio', likelihood_ratio,flush=True)
+        print('proposal ratio', proposal_ratio, flush=True)
+        print('accepted', self.accepted, flush=True)
+
+
         if (self.accepted):
             self.data_misfit = test_data_misfit
             self.prior = test_prior
@@ -551,8 +577,11 @@ class Inference1D(myObject):
             self.model = test_model
             self.datapoint = test_datapoint
             # Reset the sensitivity locally to the newly accepted model
-            self.datapoint.sensitivity(self.model, modelChanged=False)
+            # self.datapoint.sensitivity(self.model, modelChanged=False)
+            # print(self.datapoint.addressof)
+            # print(self.model.addressof)
 
+        input('Iteration {} done'.format(self.iteration))
         return False
 
     def infer(self, hdf_file_handle):
