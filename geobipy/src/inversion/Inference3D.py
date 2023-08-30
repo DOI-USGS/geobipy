@@ -417,7 +417,7 @@ class Inference3D(myObject):
             line.uncache('additiveError')
         return out
 
-    def infer(self, seed=None, index=None, fiducial=None, line_number=None, **options):
+    def infer(self, index=None, fiducial=None, line_number=None, **options):
 
         if self.parallel_access:
             self.infer_mpi(**options)

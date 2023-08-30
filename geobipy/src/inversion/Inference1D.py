@@ -445,7 +445,7 @@ class Inference1D(myObject):
 
         # Setup the model for perturbation
         self.model.set_priors(
-            value_mean=halfspace.values.item(),
+            value_mean=kwargs.pop('value_mean', halfspace.values.item()),
             min_edge=kwargs['minimum_depth'],
             max_edge=kwargs['maximum_depth'],
             max_cells=kwargs['maximum_number_of_layers'],

@@ -366,7 +366,7 @@ class Model(myObject):
         assert isinstance(self.values, baseDistribution), TypeError("values must have type geobipy.basDistribution")
         return self.mesh.map_to_pdf(distribution=self.values, pdf=pdf, log=log, axis=axis)
 
-    def perturb(self, observation=None, low_variance=0.2, high_variance=1.0):
+    def perturb(self, observation=None, low_variance=0.1, high_variance=2.0):
         """Perturb a model's structure and parameter values.
 
         Uses a stochastic newtown approach if a datapoint is provided.
