@@ -422,7 +422,7 @@ class Model(myObject):
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        dSigma = -dot(inverse_hessian, gradient)
+        dSigma = -0.5 * dot(inverse_hessian, gradient)
         mean = exp(nplog(remapped_model.values) + dSigma)
 
         perturbed_model = deepcopy(remapped_model)
@@ -714,7 +714,7 @@ class Model(myObject):
             gradient += observation.prior_derivative(order=1)
 
         # Compute the stochastic newton offset.
-        SN_step_from_perturbed = -dot(self.values.proposal.variance, gradient)
+        SN_step_from_perturbed = -0.5 * dot(self.values.proposal.variance, gradient)
 
         prng = self.values.proposal.prng
         # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
