@@ -401,12 +401,12 @@ class Model(myObject):
         # inv(J'Wd'WdJ + Wm'Wm)
         inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
 
-        if inverse_hessian.size > 1:
-            ih_max = inverse_hessian.max()
-            if ih_max < low_variance:
-                inverse_hessian *= (low_variance / ih_max)
-            elif ih_max > high_variance:
-                inverse_hessian *= (high_variance / ih_max)
+        # if inverse_hessian.size > 1:
+        #     ih_max = inverse_hessian.max()
+        #     if ih_max < low_variance:
+        #         inverse_hessian *= (low_variance / ih_max)
+        #     elif ih_max > high_variance:
+        #         inverse_hessian *= (high_variance / ih_max)
 
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)
