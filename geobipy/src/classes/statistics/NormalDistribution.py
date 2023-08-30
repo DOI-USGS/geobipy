@@ -20,7 +20,7 @@ class Normal(baseDistribution):
         The variance of the distribution
 
     """
-    def __init__(self, mean, variance, log=False, prng=None, **kwargs):
+    def __init__(self, mean=0.0, variance=1.0, log=False, prng=None, **kwargs):
         """Instantiate a Normal distribution """
         # assert size(mean) == 1, 'Univariate Normal mean must have size = 1'
         # assert size(variance) == 1, 'Univariate Normal variance must have size = 1'

@@ -51,7 +51,7 @@ class MvNormal(baseDistribution):
         if (type(variance) is float):
             variance = float64(variance)
 
-        baseDistribution.__init__(self, prng)
+        super().__init__(prng)
 
         if ndim is None:
             self._mean = atleast_1d(mean).copy()

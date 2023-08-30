@@ -59,10 +59,6 @@ def Distribution(distributionType, *args, **kwargs):
     geobipy.src.classes.statistics.CategoricalDistribution
 
     """
-
-    #if (not 'prng' in kwargs):
-    #    kwargs['prng'] = RandomState()
-
     if (isinstance(distributionType, baseDistribution)):
         return deepcopy(distributionType)
 
