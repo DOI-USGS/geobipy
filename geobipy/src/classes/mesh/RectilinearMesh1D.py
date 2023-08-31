@@ -410,7 +410,7 @@ class RectilinearMesh1D(Mesh):
 
         if npall(value > 0.0):
             value, _ = utilities._log(value, self.log)
-        self._relativeTo = StatArray.StatArray(value)
+        self._relativeTo = deepcopy(StatArray.StatArray(value))
 
     @property
     def shape(self):
@@ -1557,7 +1557,7 @@ class RectilinearMesh1D(Mesh):
             self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
         if self._relativeTo is not None:
-            self.relativeTo.createHdf(grp, 'relativeTo', add_axis=add_axis, fillvalue=fillvalue)
+            self.relativeTo.createHdf(grp, 'relativeTo', add_axis=add_axis, fillvalue=fillvalue, withPosterior=False)
 
         # self.centres.toHdf(grp, 'centres', withPosterior=withPosterior)
         self.edges.toHdf(grp, 'edges', withPosterior=withPosterior)
@@ -1628,7 +1628,7 @@ class RectilinearMesh1D(Mesh):
             self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
 
         if self._relativeTo is not None:
-            self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
+            self.relativeTo.writeHdf(grp, 'relativeTo', index=index, withPosterior=False)
 
         # Edges can have a posterior
         self.edges.writeHdf(grp, 'edges',  withPosterior=withPosterior)
@@ -1636,11 +1636,10 @@ class RectilinearMesh1D(Mesh):
         # grp['dimension'][0] = self.dimension
 
     def _write_hdf_2d(self, parent, name, withPosterior=True, index=None):
-
         grp = parent.get(name)
 
         if self._relativeTo is not None:
-            self.relativeTo.writeHdf(grp, 'y/relativeTo', index=index)
+            self.relativeTo.writeHdf(grp, 'y/relativeTo', index=index, withPosterior=False)
 
         ind = None
         if self._nCells is not None:

@@ -231,15 +231,15 @@ class Loop_pair(Point, PointCloud3D):
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         grp = super().createHdf(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.transmitter.createHdf(grp, 'transmitter', add_axis=add_axis, fillvalue=fillvalue)
-        self.receiver.createHdf(grp, 'receiver', add_axis=add_axis, fillvalue=fillvalue)
+        self.transmitter.createHdf(grp, 'transmitter', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.receiver.createHdf(grp, 'receiver', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
     def writeHdf(self, parent, name, withPosterior=True, index=None):
         super().writeHdf(parent, name, withPosterior, index)
 
         grp = parent[name]
-        self.transmitter.writeHdf(grp, 'transmitter', index=index)
-        self.receiver.writeHdf(grp, 'receiver', index=index)
+        self.transmitter.writeHdf(grp, 'transmitter', withPosterior=withPosterior, index=index)
+        self.receiver.writeHdf(grp, 'receiver', withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None):

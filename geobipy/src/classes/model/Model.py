@@ -366,7 +366,7 @@ class Model(myObject):
         assert isinstance(self.values, baseDistribution), TypeError("values must have type geobipy.basDistribution")
         return self.mesh.map_to_pdf(distribution=self.values, pdf=pdf, log=log, axis=axis)
 
-    def perturb(self, observation=None, low_variance=0.1, high_variance=2.0):
+    def perturb(self, observation=None, low_variance=-inf, high_variance=inf):
         """Perturb a model's structure and parameter values.
 
         Uses a stochastic newtown approach if a datapoint is provided.
@@ -401,12 +401,12 @@ class Model(myObject):
         # inv(J'Wd'WdJ + Wm'Wm)
         inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
 
-        # if inverse_hessian.size > 1:
-        #     ih_max = inverse_hessian.max()
-        #     if ih_max < low_variance:
-        #         inverse_hessian *= (low_variance / ih_max)
-        #     elif ih_max > high_variance:
-        #         inverse_hessian *= (high_variance / ih_max)
+        if inverse_hessian.size > 1:
+            ih_max = inverse_hessian.max()
+            if ih_max < low_variance:
+                inverse_hessian *= (low_variance / ih_max)
+            elif ih_max > high_variance:
+                inverse_hessian *= (high_variance / ih_max)
 
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)

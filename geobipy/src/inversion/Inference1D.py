@@ -74,8 +74,10 @@ class Inference1D(myObject):
     """
 
     def __init__(self,
+                 high_variance:float = inf,
                  ignore_likelihood:bool = False,
                  interactive_plot:bool = True,
+                 low_variance:float = -inf,
                  multiplier:float = 1.0,
                  n_markov_chains = 100000,
                  parameter_limits = None,
@@ -108,8 +110,13 @@ class Inference1D(myObject):
         self.update_plot_every = update_plot_every
         self.limits = parameter_limits
         self.reciprocate_parameter = reciprocate_parameters
+        self.low_variance = low_variance
+        self.high_variance = high_variance
 
         assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
+
+        self._n_zero_acceptance = 0
+        self._n_resets = 0
 
     @property
     def acceptance_percent(self):
@@ -127,6 +134,14 @@ class Inference1D(myObject):
     def datapoint(self, value):
         assert isinstance(value, DataPoint), TypeError("datapoint must have type geobipy.Datapoint")
         self._datapoint = value
+
+    @property
+    def high_variance(self):
+        return self.options['high_variance']
+
+    @high_variance.setter
+    def high_variance(self, value):
+        self.options['high_variance'] = float64(value)
 
     @cached_property
     def iz(self):
@@ -162,6 +177,14 @@ class Inference1D(myObject):
             assert size(values) == 2, ValueError("Limits must have length 2")
             values = sort(asarray(values, dtype=float64))
         self.options['limits'] = values
+
+    @property
+    def low_variance(self):
+        return self.options['low_variance']
+
+    @low_variance.setter
+    def low_variance(self, value):
+        self.options['low_variance'] = float64(value)
 
     @property
     def model(self):
@@ -492,11 +515,15 @@ class Inference1D(myObject):
         if self.ignore_likelihood:
             observation = None
 
-        try:
-            remapped_model, test_model = self.model.perturb(observation)
-        except:
-            print('singularity line {} fid {}'.format(observation.line_number, observation.fiducial, self.seed))
-            return True
+        # print("initial model values", self.model.values)
+        # try:
+        remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance)
+
+        # print('perturbed', test_model.values)
+        # except:
+        #     print('singularity line {} fid {} {}'.format(observation.line_number, observation.fiducial, self.seed, self.iteration))
+        #     raise Exception('')
+        #     return True
 
         # Propose a new data point, using assigned proposal distributions
         test_datapoint.perturb()
@@ -590,6 +617,21 @@ class Inference1D(myObject):
                 if not Go:
                     failed = True
 
+
+            if self._n_resets == 3 and not self.burned_in:
+                if self.low_variance == -inf:
+                    # If we reset 3 times, we might have either too low or high a proposal variance.
+                    # Add limiters and try again.
+                    self.low_variance = 0.1
+                    self.high_variance = 2.0
+                    self._n_resets = 0
+                    self.reset()
+
+                # If we tried limiters and reset again 3 times, fail the datapoint.
+                else:
+                    Go = False
+                    failed = True
+
             # if not self.burned_in and self.acceptance_percent == 0.0 and self.iteration > self.update_plot_every:
             #     print('resetting')
             #     self.reset()
@@ -672,6 +714,19 @@ class Inference1D(myObject):
             if (self.rank == 1):
                 print(tmp, flush=True)
 
+            # Test resetting of the inversion.
+            if not self.burned_in:
+
+                if self.acceptance_percent == 0.0:
+                    self._n_zero_acceptance += 1
+
+                    # Reset if we have 3 zero acceptances
+                    if self._n_zero_acceptance == 3:
+                        self.reset()
+                        self._n_zero_acceptance = 0
+                else:
+                    self._n_zero_acceptance = 0
+
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.kwargs['multiplier']
 
@@ -692,6 +747,7 @@ class Inference1D(myObject):
             gs = fig
 
         if isinstance(gs, Figure):
+            gs.clf()
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         gs = gs.subgridspec(2, 2, height_ratios=(1, 6))
@@ -888,7 +944,12 @@ class Inference1D(myObject):
         return self
 
     def reset(self):
-        self.initialize(self.datapoint, solve_gradient=self.solve_gradient, **self.options)
+        self._n_resets += 1
+        self.initialize(self.datapoint)
+        if self.interactive_plot:
+            self._init_posterior_plots(fig=self.fig)
+
+        self.clk.restart()
 
 
     def createHdf(self, parent, add_axis=None):
