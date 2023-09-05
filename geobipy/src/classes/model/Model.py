@@ -399,7 +399,7 @@ class Model(myObject):
 
         # Update the local Hessian around the current model.
         # inv(J'Wd'WdJ + Wm'Wm)
-        inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
+        inverse_hessian = 0.75 * remapped_model.compute_local_inverse_hessian(observation)
 
         if inverse_hessian.size > 1:
             ih_max = inverse_hessian.max()
@@ -422,7 +422,7 @@ class Model(myObject):
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        dSigma = -0.5 * dot(inverse_hessian, gradient)
+        dSigma = -dot(inverse_hessian, gradient)
         mean = exp(nplog(remapped_model.values) + dSigma)
 
         perturbed_model = deepcopy(remapped_model)

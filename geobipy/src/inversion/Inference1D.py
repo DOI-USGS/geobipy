@@ -79,16 +79,17 @@ class Inference1D(myObject):
                  interactive_plot:bool = True,
                  low_variance:float = -inf,
                  multiplier:float = 1.0,
-                 n_markov_chains = 100000,
+                 n_markov_chains:int = 100000,
                  parameter_limits = None,
                  prng=None,
                  reciprocate_parameters:bool = False,
+                 reset_limit:int = 1,
                  save_hdf5:bool = True,
                  save_png:bool = False,
                  solve_gradient:bool = True,
                  solve_parameter:bool = False,
-                 update_plot_every = 5000,
-                 world=None,
+                 update_plot_every:int = 5000,
+                 world = None,
                  **kwargs):
         """ Initialize the results of the inversion """
 
@@ -110,6 +111,7 @@ class Inference1D(myObject):
         self.update_plot_every = update_plot_every
         self.limits = parameter_limits
         self.reciprocate_parameter = reciprocate_parameters
+        self.reset_limit = reset_limit
         self.low_variance = low_variance
         self.high_variance = high_variance
 
@@ -214,6 +216,14 @@ class Inference1D(myObject):
     @n_markov_chains.setter
     def n_markov_chains(self, value):
         self.options['n_markov_chains'] = int64(value)
+
+    @property
+    def reset_limit(self):
+        return self.options['reset_limit']
+
+    @reset_limit.setter
+    def reset_limit(self, value):
+        self.options['reset_limit'] = int64(value)
 
     @property
     def options(self):
@@ -721,7 +731,7 @@ class Inference1D(myObject):
                     self._n_zero_acceptance += 1
 
                     # Reset if we have 3 zero acceptances
-                    if self._n_zero_acceptance == 3:
+                    if self._n_zero_acceptance == self.reset_limit:
                         self.reset()
                         self._n_zero_acceptance = 0
                 else:
