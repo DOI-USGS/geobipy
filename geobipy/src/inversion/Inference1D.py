@@ -484,7 +484,7 @@ class Inference1D(myObject):
             max_cells=kwargs['maximum_number_of_layers'],
             solve_value=True, #self.solve_parameter,
             # solve_gradient=self.solve_gradient,
-            # parameter_limits=,
+            parameter_limits=self.limits,
             min_width=kwargs.get('minimum_thickness', None),
             # factor=kwargs.get('factor', 10.0),
             **kwargs
