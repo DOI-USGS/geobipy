@@ -366,7 +366,7 @@ class Model(myObject):
         assert isinstance(self.values, baseDistribution), TypeError("values must have type geobipy.basDistribution")
         return self.mesh.map_to_pdf(distribution=self.values, pdf=pdf, log=log, axis=axis)
 
-    def perturb(self, observation=None, low_variance=-inf, high_variance=inf):
+    def perturb(self, *args, **kwargs):
         """Perturb a model's structure and parameter values.
 
         Uses a stochastic newtown approach if a datapoint is provided.
@@ -386,9 +386,9 @@ class Model(myObject):
             The model with perturbed structure and parameter values.
 
         """
-        return self.stochastic_newton_perturbation(observation, low_variance=low_variance, high_variance=high_variance)
+        return self.stochastic_newton_perturbation(*args, **kwargs)
 
-    def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf):
+    def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, variance_scaling=1.0):
 
         # Perturb the structure of the model
         remapped_model = self.perturb_structure()
@@ -399,7 +399,7 @@ class Model(myObject):
 
         # Update the local Hessian around the current model.
         # inv(J'Wd'WdJ + Wm'Wm)
-        inverse_hessian = 0.75 * remapped_model.compute_local_inverse_hessian(observation)
+        inverse_hessian = variance_scaling * remapped_model.compute_local_inverse_hessian(observation)
 
         if inverse_hessian.size > 1:
             ih_max = inverse_hessian.max()
@@ -714,7 +714,7 @@ class Model(myObject):
             gradient += observation.prior_derivative(order=1)
 
         # Compute the stochastic newton offset.
-        SN_step_from_perturbed = -0.5 * dot(self.values.proposal.variance, gradient)
+        SN_step_from_perturbed = -dot(self.values.proposal.variance, gradient)
 
         prng = self.values.proposal.prng
         # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.

@@ -89,6 +89,7 @@ class Inference1D(myObject):
                  solve_gradient:bool = True,
                  solve_parameter:bool = False,
                  update_plot_every:int = 5000,
+                 variance_scaling:float = 0.75,
                  world = None,
                  **kwargs):
         """ Initialize the results of the inversion """
@@ -114,6 +115,7 @@ class Inference1D(myObject):
         self.reset_limit = reset_limit
         self.low_variance = low_variance
         self.high_variance = high_variance
+        self.variance_scaling = variance_scaling
 
         assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
 
@@ -319,6 +321,14 @@ class Inference1D(myObject):
     @update_plot_every.setter
     def update_plot_every(self, value):
         self.options['update_plot_every'] = int32(value)
+
+    @property
+    def variance_scaling(self):
+        return self.options['variance_scaling']
+
+    @variance_scaling.setter
+    def variance_scaling(self, value):
+        self.options['variance_scaling'] = float64(value)
 
     @property
     def world(self):
@@ -527,7 +537,7 @@ class Inference1D(myObject):
 
         # print("initial model values", self.model.values)
         # try:
-        remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance)
+        remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.variance_scaling)
 
         # print('perturbed', test_model.values)
         # except:
@@ -954,10 +964,18 @@ class Inference1D(myObject):
         return self
 
     def reset(self):
+        def clear(this):
+            if isinstance(this, list):
+                for ax in this:
+                    clear(ax)
+            else:
+                this.cla()
         self._n_resets += 1
         self.initialize(self.datapoint)
         if self.interactive_plot:
-            self._init_posterior_plots(fig=self.fig)
+            for ax in self.ax:
+                clear(ax)
+            # self._init_posterior_plots(fig=self.fig)
 
         self.clk.restart()
 

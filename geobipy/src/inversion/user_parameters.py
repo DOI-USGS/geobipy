@@ -41,6 +41,7 @@ class user_parameters(dict):
         kwargs['multiplier'] = float64(1.0) if kwargs.get('multiplier') is None else kwargs.get('multiplier')
         kwargs['stochastic_newton'] = not kwargs.get('ignore_likelihood', False)
         kwargs['factor'] = float64(10.0) if kwargs.get('factor') is None else kwargs.get('factor')
+        kwargs['variance_scaling'] = float64(1.0) if kwargs.get('variance_scaling') is None else kwargs.get('variance_scaling')
 
         for key, value in kwargs.items():
             self[key] = value
