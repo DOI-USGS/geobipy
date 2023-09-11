@@ -11,8 +11,7 @@ from numpy import full, hstack, int32, int64, log10, logical_not, linspace, load
 from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, uint64, unique, vstack, where, zeros
 from numpy import all as npall
 
-from numpy.random import Generator
-from randomgen import Xoshiro256
+from numpy.random import Generator, PCG64DXSM
 
 from datetime import timedelta
 import matplotlib.pyplot as plt
@@ -203,7 +202,7 @@ class Inference3D(myObject):
                                                         "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
         self._prng = value
-        self.seed = self._prng.bit_generator.seed_seq.entropy
+        self.seed = self._prng.bit_generator.state['state']['state']
 
     @property
     def seed(self):
@@ -269,7 +268,7 @@ class Inference3D(myObject):
 
             if (single_rank_comm != MPI.COMM_NULL):
                 # Instantiate a new blank inference3d linked to the master
-                inference3d = Inference3D(self.data, prng=Generator(Xoshiro256()), world=single_rank_comm)
+                inference3d = Inference3D(self.data, prng=Generator(PCG64DXSM()), world=single_rank_comm)
                 # Create the hdf5 files
                 inference3d._create_HDF5_dataset(directory, **kwargs)
 
