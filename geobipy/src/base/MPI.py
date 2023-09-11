@@ -7,8 +7,7 @@ from numpy.linalg import norm
 from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
 from numpy import int32, int64, prod, reshape, unravel_index, s_, size
 from numpy import ndim as npndim
-from numpy.random import Generator
-from randomgen import Xoshiro256
+from numpy.random import Generator, PCG64DXSM
 import numpy as np
 from ..classes.core import StatArray
 
@@ -181,32 +180,31 @@ def get_prng(timeFunction, seed=None, world=None):
 
     """
     if world is None:
+        rank = 0
         if seed is None:
-            bit_generator = Xoshiro256()
-            pickle.dump(bit_generator.seed_seq.entropy, open('seed.pkl', 'wb'))
+            bit_generator = PCG64DXSM()
+            pickle.dump(bit_generator.state['state']['state'], open('seed.pkl', 'wb'))
         else:
             if isinstance(seed, str):
-                bit_generator = Xoshiro256(seed = pickle.load(open(seed, 'rb')))
+                bit_generator = PCG64DXSM(seed = pickle.load(open(seed, 'rb')))
             else:
-                bit_generator = Xoshiro256(seed = seed)
-
+                bit_generator = PCG64DXSM(seed = seed)
     else:
-
+        rank = world.rank
         if seed is None:
-            bit_generator = Xoshiro256()
+            bit_generator = PCG64DXSM()
             # Broadcast the seed to all ranks.
-            seed = world.bcast(bit_generator.seed_seq.entropy, root=0)
+            seed = world.bcast(bit_generator.state['state']['state'], root=0)
         else:
             if isinstance(seed, str):
-                bit_generator = Xoshiro256(seed = pickle.load(open(seed, 'rb')))
-                seed = bit_generator.seed_seq.entropy
+                seed = pickle.load(open(seed, 'rb'))
 
-        bit_generator = Xoshiro256(seed = seed)
+        bit_generator = PCG64DXSM(seed = seed)
 
         if world.rank == 0:
-            pickle.dump(bit_generator.seed_seq.entropy, open('seed.pkl', 'wb'))
+            pickle.dump(bit_generator.state['state']['state'], open('seed.pkl', 'wb'))
 
-        bit_generator.jumped(world.rank)
+        bit_generator = bit_generator.jumped(world.rank)
 
     return Generator(bit_generator)
 
@@ -324,6 +322,8 @@ def _isendDtype(value, dest, world):
         tmp = str(value.dtype)  # Try to get the dtype attribute
     except:
         tmp = str(value.__class__.__name__)  # Otherwise use the type finder
+    if tmp == 'int':
+        tmp = 'int32'
     world.send(tmp, dest=dest)
     return tmp
 
