@@ -74,6 +74,7 @@ class Inference1D(myObject):
     """
 
     def __init__(self,
+                 covariance_scaling:float = 0.75,
                  high_variance:float = inf,
                  ignore_likelihood:bool = False,
                  interactive_plot:bool = True,
@@ -89,7 +90,6 @@ class Inference1D(myObject):
                  solve_gradient:bool = True,
                  solve_parameter:bool = False,
                  update_plot_every:int = 5000,
-                 variance_scaling:float = 0.75,
                  world = None,
                  **kwargs):
         """ Initialize the results of the inversion """
@@ -115,7 +115,7 @@ class Inference1D(myObject):
         self.reset_limit = reset_limit
         self.low_variance = low_variance
         self.high_variance = high_variance
-        self.variance_scaling = variance_scaling
+        self.covariance_scaling = covariance_scaling
 
         assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
 
@@ -129,6 +129,14 @@ class Inference1D(myObject):
         else:
             s = sum(self.acceptance_v[:self.iteration]) / float64(self.iteration)
         return 100.0 * s
+
+    @property
+    def covariance_scaling(self):
+        return self.options['covariance_scaling']
+
+    @covariance_scaling.setter
+    def covariance_scaling(self, value):
+        self.options['covariance_scaling'] = float64(value)
 
     @property
     def datapoint(self):
@@ -250,7 +258,7 @@ class Inference1D(myObject):
                                                         "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
         self.options['prng'] = value
-        self.seed = self.options['prng'].bit_generator.seed_seq.entropy
+        self.seed = self.options['prng'].bit_generator.state['state']['state']
 
     @property
     def rank(self):
@@ -321,14 +329,6 @@ class Inference1D(myObject):
     @update_plot_every.setter
     def update_plot_every(self, value):
         self.options['update_plot_every'] = int32(value)
-
-    @property
-    def variance_scaling(self):
-        return self.options['variance_scaling']
-
-    @variance_scaling.setter
-    def variance_scaling(self, value):
-        self.options['variance_scaling'] = float64(value)
 
     @property
     def world(self):
@@ -536,14 +536,13 @@ class Inference1D(myObject):
             observation = None
 
         # print("initial model values", self.model.values)
-        # try:
-        remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.variance_scaling)
+        try:
+            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
 
-        # print('perturbed', test_model.values)
-        # except:
-        #     print('singularity line {} fid {} {}'.format(observation.line_number, observation.fiducial, self.seed, self.iteration))
-        #     raise Exception('')
-        #     return True
+        except:
+            print('singularity line={} fid={} seed={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.seed, self.iteration, self.rank))
+            # raise Exception('')
+            return True
 
         # Propose a new data point, using assigned proposal distributions
         test_datapoint.perturb()
@@ -652,20 +651,12 @@ class Inference1D(myObject):
                     Go = False
                     failed = True
 
-            # if not self.burned_in and self.acceptance_percent == 0.0 and self.iteration > self.update_plot_every:
-            #     print('resetting')
-            #     self.reset()
-
         self.clk.stop()
-        # self.invTime = float64(self.clk.timeinSeconds())
-        # Does the user want to save the HDF5 results?
+
         if self.save_hdf5:
-            # No parallel write is being used, so write a single file for the data point
             self.writeHdf(hdf_file_handle)
 
-        # Does the user want to save the plot as a png?
-        if self.save_png:# and not failed):
-            # To save any thing the Results must be plot
+        if self.save_png:
             self.plot_posteriors(axes = self.ax, fig=self.fig)
             self.toPNG('.', self.datapoint.fiducial)
 
