@@ -96,7 +96,7 @@ def checkCommandArguments():
     if args.seed is not None:
         if isinstance(args.seed, str):
             if not '.' in args.seed:
-                args.seed = int32(args.seed)
+                args.seed = int(args.seed)
 
     if args.verbose:
         import warnings
