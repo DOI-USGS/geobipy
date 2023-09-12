@@ -36,12 +36,13 @@ def create_model(model_type):
     }
 
     conductivity = StatArray(conductivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
+    print(conductivity)
 
-    # Create distributions for three lithology classes
-    lithology_distribution = Distribution('MvLogNormal',
-                                       mean=conductivity,
-                                       variance=[0.5,0.5,0.5],
-                                       linearSpace=True)
+    # # Create distributions for three lithology classes
+    # lithology_distribution = Distribution('MvLogNormal',
+    #                                    mean=conductivity,
+    #                                    variance=[0.5,0.5,0.5],
+    #                                    linearSpace=True)
 
     x = RectilinearMesh1D(centres=StatArray(np.arange(n_points, dtype=np.float64), name='x'))
     mesh = RectilinearMesh2D_stitched(3, x=x)
@@ -51,7 +52,7 @@ def create_model(model_type):
     mesh.y_edges[:, 3] = np.inf
     mesh.y_edges.name, mesh.y_edges.units = 'Depth', 'm'
 
-    return Model(mesh=mesh, values=np.repeat(lithology_distribution.mean[None, :], n_points, 0))
+    return Model(mesh=mesh, values=np.repeat(conductivity[None, :], n_points, 0))
 
 def make_figure(ds, model, title):
     from pathlib import Path
@@ -235,6 +236,7 @@ def create_tempest(model, output_suffix):
     for k in range(model.x.nCells):
         mod = model[k]
 
+        print(mod.summary)
         dp.forward(mod)
         dp.secondary_field[:] = dp.predicted_secondary_field
         dp.primary_field[:] = dp.predicted_primary_field
