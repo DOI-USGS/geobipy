@@ -183,10 +183,12 @@ def get_prng(timeFunction, seed=None, world=None):
         rank = 0
         if seed is None:
             bit_generator = PCG64DXSM()
-            pickle.dump(bit_generator.state['state']['state'], open('seed.pkl', 'wb'))
+            with open('seed.pkl', 'wb') as f:
+                pickle.dump(bit_generator.state['state']['state'], f)
         else:
             if isinstance(seed, str):
-                bit_generator = PCG64DXSM(seed = pickle.load(open(seed, 'rb')))
+                with open(seed, 'rb') as f:
+                    bit_generator = PCG64DXSM(seed = pickle.load(f))
             else:
                 bit_generator = PCG64DXSM(seed = seed)
     else:
@@ -197,12 +199,14 @@ def get_prng(timeFunction, seed=None, world=None):
             seed = world.bcast(bit_generator.state['state']['state'], root=0)
         else:
             if isinstance(seed, str):
-                seed = pickle.load(open(seed, 'rb'))
+                with open(seed, 'rb') as f:
+                    seed = pickle.load(f)
 
         bit_generator = PCG64DXSM(seed = seed)
 
         if world.rank == 0:
-            pickle.dump(bit_generator.state['state']['state'], open('seed.pkl', 'wb'))
+            with open('seed.pkl', 'wb') as f:
+                pickle.dump(bit_generator.state['state']['state'], f)
 
         bit_generator = bit_generator.jumped(world.rank)
 
