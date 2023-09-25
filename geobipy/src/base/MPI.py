@@ -8,6 +8,7 @@ from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
 from numpy import int32, int64, prod, reshape, unravel_index, s_, size
 from numpy import ndim as npndim
 from numpy.random import Generator, PCG64DXSM
+from randomgen import Xoshiro256
 import numpy as np
 from ..classes.core import StatArray
 
@@ -170,7 +171,7 @@ def helloWorld(world):
     rank = world.rank
     orderedPrint(world, '/ {}'.format(rank + 1, size), "Hello From!")
 
-def get_prng(timeFunction, seed=None, world=None):
+def get_prng(timeFunction, generator=Xoshiro256, seed=None, world=None):
     """Generate a random seed using time and the process id
 
     Returns
@@ -182,19 +183,19 @@ def get_prng(timeFunction, seed=None, world=None):
     if world is None:
         rank = 0
         if seed is None:
-            bit_generator = PCG64DXSM()
+            bit_generator = generator()
             with open('seed.pkl', 'wb') as f:
                 pickle.dump(bit_generator.seed_seq.entropy, f)
         else:
             if isinstance(seed, str):
                 with open(seed, 'rb') as f:
-                    bit_generator = PCG64DXSM(seed = pickle.load(f))
+                    bit_generator = generator(seed = pickle.load(f))
             else:
-                bit_generator = PCG64DXSM(seed = seed)
+                bit_generator = generator(seed = seed)
     else:
         rank = world.rank
         if seed is None:
-            bit_generator = PCG64DXSM()
+            bit_generator = generator()
             # Broadcast the seed to all ranks.
             seed = world.bcast(bit_generator.seed_seq.entropy, root=0)
         else:
@@ -202,7 +203,7 @@ def get_prng(timeFunction, seed=None, world=None):
                 with open(seed, 'rb') as f:
                     seed = pickle.load(f)
 
-        bit_generator = PCG64DXSM(seed = seed)
+        bit_generator = generator(seed = seed)
 
         if world.rank == 0:
             with open('seed.pkl', 'wb') as f:
