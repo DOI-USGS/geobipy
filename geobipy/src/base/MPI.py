@@ -184,7 +184,7 @@ def get_prng(timeFunction, seed=None, world=None):
         if seed is None:
             bit_generator = PCG64DXSM()
             with open('seed.pkl', 'wb') as f:
-                pickle.dump(bit_generator.state['state']['state'], f)
+                pickle.dump(bit_generator.seed_seq.entropy, f)
         else:
             if isinstance(seed, str):
                 with open(seed, 'rb') as f:
@@ -196,7 +196,7 @@ def get_prng(timeFunction, seed=None, world=None):
         if seed is None:
             bit_generator = PCG64DXSM()
             # Broadcast the seed to all ranks.
-            seed = world.bcast(bit_generator.state['state']['state'], root=0)
+            seed = world.bcast(bit_generator.seed_seq.entropy, root=0)
         else:
             if isinstance(seed, str):
                 with open(seed, 'rb') as f:
@@ -206,7 +206,7 @@ def get_prng(timeFunction, seed=None, world=None):
 
         if world.rank == 0:
             with open('seed.pkl', 'wb') as f:
-                pickle.dump(bit_generator.state['state']['state'], f)
+                pickle.dump(bit_generator.seed_seq.entropy, f)
 
         bit_generator = bit_generator.jumped(world.rank)
 
