@@ -123,9 +123,9 @@ except Exception as e:
 
         def __init__(self, *args, **kwargs):
             h = ("\nCould not import the time domain forward modeller from GA_AEM. \n"
-                 "\n{0}\n"
                  "Please see the package's README for instructions on how to install it \n"
-                 "Check that you have loaded the compiler that was used to compile the forward modeller\n").format(err)
+                 "Check that you have loaded the compiler that was used to compile the forward modeller\n")
             print(Warning(h))
 
     print(e)
+    raise Exception(e)
