@@ -171,7 +171,7 @@ def helloWorld(world):
     rank = world.rank
     orderedPrint(world, '/ {}'.format(rank + 1, size), "Hello From!")
 
-def get_prng(timeFunction, generator=Xoshiro256, seed=None, world=None):
+def get_prng(generator=Xoshiro256, seed=None, world=None):
     """Generate a random seed using time and the process id
 
     Returns
@@ -180,35 +180,32 @@ def get_prng(timeFunction, generator=Xoshiro256, seed=None, world=None):
         The seed on each core
 
     """
-    if world is None:
-        rank = 0
-        if seed is None:
-            bit_generator = generator()
-            with open('seed.pkl', 'wb') as f:
-                pickle.dump(bit_generator.seed_seq.entropy, f)
-        else:
-            if isinstance(seed, str):
-                with open(seed, 'rb') as f:
-                    bit_generator = generator(seed = pickle.load(f))
-            else:
-                bit_generator = generator(seed = seed)
-    else:
+    # Default to single core, else grab the mpi rank.
+    rank = 0
+    if world is not None:
         rank = world.rank
-        if seed is None:
-            bit_generator = generator()
-            # Broadcast the seed to all ranks.
-            seed = world.bcast(bit_generator.seed_seq.entropy, root=0)
-        else:
+
+    if rank == 0:
+        if seed is not None:
             if isinstance(seed, str):
                 with open(seed, 'rb') as f:
                     seed = pickle.load(f)
+            assert isinstance(seed, int), TypeError("Seed {} must have type python int (not numpy)".format(seed))
 
-        bit_generator = generator(seed = seed)
+        else: # No seed, generate
+            bit_generator = generator()
+            seed = bit_generator.seed_seq.entropy
+            if rank == 0: # Dump the seed to disk if rank 0.
+                with open('seed.pkl', 'wb') as f:
+                    pickle.dump(seed, f)
 
-        if world.rank == 0:
-            with open('seed.pkl', 'wb') as f:
-                pickle.dump(bit_generator.seed_seq.entropy, f)
+    if world is not None:
+        # Broadcast the seed to all ranks.
+        seed = world.bcast(seed, root=0)
 
+    bit_generator = generator(seed = seed)
+
+    if world is not None:
         bit_generator = bit_generator.jumped(world.rank)
 
     return Generator(bit_generator)

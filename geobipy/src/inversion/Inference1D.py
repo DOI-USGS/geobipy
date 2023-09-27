@@ -258,7 +258,6 @@ class Inference1D(myObject):
                                                         "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
         self.options['prng'] = value
-        self.seed = self.options['prng'].bit_generator.state['state']['state']
 
     @property
     def rank(self):
@@ -540,7 +539,7 @@ class Inference1D(myObject):
             remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
 
         except:
-            print('singularity line={} fid={} seed={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.seed, self.iteration, self.rank))
+            print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))
             # raise Exception('')
             return True
 

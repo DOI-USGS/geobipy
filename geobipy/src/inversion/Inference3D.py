@@ -202,7 +202,6 @@ class Inference3D(myObject):
                                                         "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
         self._prng = value
-        self.seed = self._prng.bit_generator.state['state']['state']
 
     @property
     def seed(self):

@@ -128,7 +128,7 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
 
     data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
-    prng = get_prng(time, seed=seed)
+    prng = get_prng(seed=seed)
 
     inference3d = Inference3D(data=data, prng=prng, debug=debug)
 
@@ -174,7 +174,7 @@ def parallel_mpi(inputFile, output_directory, skipHDF5, seed=None):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    prng = get_prng(MPI.Wtime, seed=seed, world=world)
+    prng = get_prng(seed=seed, world=world)
 
     inference3d = Inference3D(data, world=world, prng=prng)
     inference3d.create_hdf5(directory=output_directory, **kwargs)
