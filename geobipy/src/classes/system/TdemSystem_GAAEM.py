@@ -34,7 +34,8 @@ try:
             self.off_time = self.windows.centre
             self.read_components(system_filename)
             self.filename = system_filename
-            self.string = open(system_filename, 'r').readlines()
+            with open(system_filename, 'r') as f:
+                self.string = f.readlines()
 
         def __deepcopy__(self, memo={}):
             return None
