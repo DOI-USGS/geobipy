@@ -423,6 +423,12 @@ class Model(myObject):
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
         dSigma = -dot(inverse_hessian, gradient)
+
+        # Bound the step
+        mask = abs(dSigma) > 7.0
+        sn = sign(dSigma)
+        dSigma[mask] = sn[mask] * 7.0
+
         mean = exp(nplog(remapped_model.values) + dSigma)
 
         perturbed_model = deepcopy(remapped_model)
@@ -708,13 +714,17 @@ class Model(myObject):
 
         # todo:
         # replace the par.priorDerivative with appropriate gradient
-
         if not observation is None:
             # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
             gradient += observation.prior_derivative(order=1)
 
         # Compute the stochastic newton offset.
         SN_step_from_perturbed = -dot(self.values.proposal.variance, gradient)
+
+        # Bound the step
+        mask = abs(SN_step_from_perturbed) > 7.0
+        sn = sign(SN_step_from_perturbed)
+        SN_step_from_perturbed[mask] = sn[mask] * 7.0
 
         prng = self.values.proposal.prng
         # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
