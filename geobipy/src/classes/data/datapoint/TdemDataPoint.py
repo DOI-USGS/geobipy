@@ -737,7 +737,7 @@ class TdemDataPoint(EmDataPoint):
                 if tmp is not None:
                     for j in range(self.nSystems):
                         others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
-                        tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
+                        tmp[1].get_shared_y_axes().joined(tmp[1], *tmp[others])
                 ax.append(tmp)
                 i += 1
 
