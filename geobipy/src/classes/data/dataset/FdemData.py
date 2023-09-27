@@ -659,14 +659,14 @@ class FdemData(Data):
             elif cTmp in ['magnetic']:
                 magnetic = 'magnetic'
 
-            elif any([label in cTmp for label in ('i_', 'in_phase')]):
+            elif any([label in cTmp for label in ('cpi', 'i_', 'in_phase')]):
 
                 if 'err' in cTmp:
                     in_err.append(channel)
                 else:
                     inPhase.append(channel)
 
-            elif any([label in cTmp for label in ('q_', 'quad')]):
+            elif any([label in cTmp for label in ('cpq', 'q_', 'quad')]):
                 if 'err' in cTmp:
                     quad_err.append(channel)
                 else:
