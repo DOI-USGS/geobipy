@@ -534,13 +534,10 @@ class Inference1D(myObject):
         if self.ignore_likelihood:
             observation = None
 
-        # print("initial model values", self.model.values)
         try:
             remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
-
         except:
             print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))
-            # raise Exception('')
             return True
 
         # Propose a new data point, using assigned proposal distributions
@@ -725,8 +722,7 @@ class Inference1D(myObject):
                 print(tmp, flush=True)
 
             # Test resetting of the inversion.
-            if not self.burned_in:
-
+            if not self.burned_in and self.update_plot_every > 1:
                 if self.acceptance_percent == 0.0:
                     self._n_zero_acceptance += 1
 
