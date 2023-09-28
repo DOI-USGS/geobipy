@@ -708,18 +708,17 @@ class RectilinearMesh1D(Mesh):
         x = self.widths.copy()
 
         # Sort out infinity here
-        f = 1.0
         if self.open_left:
             if self.nCells == 2:
-                x[0] = f * x[-1]
+                x[0] = x[-1]
             else:
-                x[0] = f * (x[1]**2.0 / x[2])
+                x[0] = (x[1]**2.0 / x[2])
 
         if self.open_right:
             if self.nCells == 2:
-                x[-1] = f * x[0]
+                x[-1] = x[0]
             else:
-                x[-1] = f * (x[-2]**2.0 / x[-3])
+                x[-1] = (x[-2]**2.0 / x[-3])
 
         return diag(x/(self.nCells * mean(x)))
 
