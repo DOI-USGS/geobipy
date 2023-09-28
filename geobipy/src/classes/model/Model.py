@@ -415,19 +415,14 @@ class Model(myObject):
 
         if not observation is None:
             # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
-            tmp = observation.prior_derivative(order=1)
-            gradient += tmp
+            gradient += observation.prior_derivative(order=1)
+
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
         dSigma = -dot(inverse_hessian, gradient)
-
-        # Bound the step
-        mask = abs(dSigma) > 7.0
-        sn = sign(dSigma)
-        dSigma[mask] = sn[mask] * 7.0
 
         mean = exp(nplog(remapped_model.values) + dSigma)
 
@@ -667,7 +662,7 @@ class Model(myObject):
 
         return probability
 
-    def proposal_probabilities(self, remappedModel, observation=None):
+    def proposal_probabilities(self, remapped_model, observation=None):
         """Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
@@ -709,7 +704,6 @@ class Model(myObject):
 
         # Compute the gradient according to the perturbed parameters and data residual
         # This is Wm'Wm(sigma - sigma_ref)
-        # gradient = self.prior_derivative(order=1)
         gradient = self.prior_derivative(order=1)
 
         # todo:
@@ -719,25 +713,20 @@ class Model(myObject):
             gradient += observation.prior_derivative(order=1)
 
         # Compute the stochastic newton offset.
-        SN_step_from_perturbed = -dot(self.values.proposal.variance, gradient)
-
-        # Bound the step
-        mask = abs(SN_step_from_perturbed) > 7.0
-        sn = sign(SN_step_from_perturbed)
-        SN_step_from_perturbed[mask] = sn[mask] * 7.0
+        dSigma = -dot(self.values.proposal.variance, gradient)
 
         prng = self.values.proposal.prng
         # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
         # # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
         # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvLogNormal', exp(nplog(self.values) + SN_step_from_perturbed), self.values.proposal.variance, linearSpace=True, prng=prng)
+        tmp = Distribution('MvLogNormal', exp(nplog(self.values) + dSigma), self.values.proposal.variance, linearSpace=True, prng=prng)
         # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
         # Probability of jumping from our perturbed parameter values to the unperturbed values.
-        proposal = tmp.probability(x=remappedModel.values, log=True)
+        proposal = tmp.probability(x=remapped_model.values, log=True)
 
         # This is the forward proposal. Evaluate the new proposed values given a mean of the old values
         # and variance using perturbed data
-        tmp = Distribution('MvLogNormal', remappedModel.values, self.values.proposal.variance, linearSpace=True, prng=prng)
+        tmp = Distribution('MvLogNormal', remapped_model.values, self.values.proposal.variance, linearSpace=True, prng=prng)
         proposal1 = tmp.probability(x=self.values, log=True)
 
         action = self.mesh.action[0]
