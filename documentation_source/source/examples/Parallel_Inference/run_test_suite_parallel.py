@@ -59,7 +59,7 @@ def parallel_mpi(data_type, model_type, output_directory):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    prng = myMPI.get_prng(MPI.Wtime, world=world)
+    prng = myMPI.get_prng(world=world)
 
     inference3d = Inference3D(data, prng=prng, world=world)
     inference3d.create_hdf5(directory=output_directory, **kwargs)
