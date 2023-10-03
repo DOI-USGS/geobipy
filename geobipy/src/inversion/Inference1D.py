@@ -541,8 +541,8 @@ class Inference1D(myObject):
 
         # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         try:
-            # remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
-            remapped_model, test_model = self.model.perturb(observation, 0.1, self.high_variance, self.covariance_scaling)
+            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
+            # remapped_model, test_model = self.model.perturb(observation, 0.1, self.high_variance, self.covariance_scaling)
             # remapped_model, test_model = self.model.perturb(observation, 0.1, 2.0, self.covariance_scaling)
         except:
             print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))

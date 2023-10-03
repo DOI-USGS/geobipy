@@ -400,8 +400,9 @@ class Model(myObject):
         dprint('action', remapped_model.mesh.action)
 
         if observation is not None:
-            if remapped_model.mesh.action[0] != 'none':
-                observation.sensitivity(remapped_model)
+            # if remapped_model.mesh.action[0] != 'none':
+            observation.forward(remapped_model)
+            observation.sensitivity(remapped_model, model_changed=False)
 
         # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
 
@@ -733,13 +734,13 @@ class Model(myObject):
         # # replace the par.priorDerivative with appropriate gradient
         # if not observation is None:
         #     # observation.forward(self)
-        #     # observation.sensitivity(self, model_changed=False)
+        #     observation.sensitivity(self, model_changed=False)
         #     # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
         #     gradient += observation.prior_derivative(order=1)
 
         # # inv(J'Wd'WdJ + Wm'Wm)
-        # # inverse_hessian = self.compute_local_inverse_hessian(observation)
-        # inverse_hessian = self.values.proposal.variance
+        # inverse_hessian = self.compute_local_inverse_hessian(observation)
+        # # inverse_hessian = self.values.proposal.variance
 
         # dprint('  gradient', gradient)
         # dprint('  variance', diag(self.values.proposal.variance))
