@@ -71,7 +71,7 @@ class world3D(object):
         return s_[i0:i1]
 
 
-def print(aStr='', end='\n'):
+def print(aStr='', end='\n', **kwargs):
     """Prints the str to sys.stdout and flushes the buffer so that printing is immediate
 
     Parameters
@@ -171,7 +171,7 @@ def helloWorld(world):
     rank = world.rank
     orderedPrint(world, '/ {}'.format(rank + 1, size), "Hello From!")
 
-def get_prng(generator=Xoshiro256, seed=None, world=None):
+def get_prng(generator=Xoshiro256, seed=None, world=None, jump=None):
     """Generate a random seed using time and the process id
 
     Returns
@@ -198,6 +198,7 @@ def get_prng(generator=Xoshiro256, seed=None, world=None):
             if rank == 0: # Dump the seed to disk if rank 0.
                 with open('seed.pkl', 'wb') as f:
                     pickle.dump(seed, f)
+                print('Seed: {}'.format(seed), flush=True)
 
     if world is not None:
         # Broadcast the seed to all ranks.
@@ -206,7 +207,10 @@ def get_prng(generator=Xoshiro256, seed=None, world=None):
     bit_generator = generator(seed = seed)
 
     if world is not None:
-        bit_generator = bit_generator.jumped(world.rank)
+        jump = world.rank
+
+    if jump is not None:
+        bit_generator = bit_generator.jumped(jump)
 
     return Generator(bit_generator)
 
