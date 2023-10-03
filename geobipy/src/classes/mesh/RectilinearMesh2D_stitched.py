@@ -220,9 +220,9 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             sm.set_array([])
 
             if (color_kwargs['equalize']):
-                cbar = plt.colorbar(sm, extend='both', cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
+                cbar = plt.colorbar(sm, extend='both', ax=ax, cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
             else:
-                cbar = plt.colorbar(sm, cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
+                cbar = plt.colorbar(sm, ax=ax, cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
 
             if color_kwargs['clabel'] is None:
                 if (geobipy_kwargs['log']):

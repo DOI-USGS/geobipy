@@ -1,9 +1,9 @@
 from copy import deepcopy
 
 from numpy import abs, arange, argsort, argwhere, asarray, atleast_1d, complex128, cos, diag, diff, divide, dot, empty
-from numpy import exp, flip, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
+from numpy import exp, flip, full, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
 from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
-from numpy import real, s_, shape, sin, size, where, zeros
+from numpy import real, s_, shape, sin, size, squeeze, where, zeros
 from numpy import all as npall
 from numpy import log as nplog
 
