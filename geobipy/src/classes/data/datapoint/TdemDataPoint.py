@@ -1023,12 +1023,11 @@ class TdemDataPoint(EmDataPoint):
 
             self.predicted_primary_field[s] = hstack(primary)
 
-
-    def sensitivity(self, model, ix=None, modelChanged=True):
+    def sensitivity(self, model, ix=None, model_changed=True):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
         return self.sensitivity_matrix
 
     def _empymodForward(self, mod):

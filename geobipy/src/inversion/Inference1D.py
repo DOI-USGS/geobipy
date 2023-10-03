@@ -593,7 +593,7 @@ class Inference1D(myObject):
             self.model = test_model
             self.datapoint = test_datapoint
             # Reset the sensitivity locally to the newly accepted model
-            self.datapoint.sensitivity(self.model, modelChanged=False)
+            # self.datapoint.sensitivity(self.model, model_changed=False)
 
         return False
 
