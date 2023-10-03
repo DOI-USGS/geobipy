@@ -673,11 +673,19 @@ def expReal(this):
     # np.float64 = 709.0
     # np.longdouble = 11356.0
 
-    if this > 11356.0:
-        return inf
+    tol = 11356.0
 
-    return exp(longdouble(this))
+    if size(this) == 1:
+        if this > tol:
+            return inf
 
+        return exp(longdouble(this))
+
+    out = full(size(this), fill_value=inf, dtype=longdouble)
+    i = squeeze(argwhere(this <= tol))
+    tmp = longdouble(this[i])
+    out[i] = exp(tmp)
+    return out
 
 def tanh(this):
     """ Custom hyperbolic tangent, return correct overflow. """
