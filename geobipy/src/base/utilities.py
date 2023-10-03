@@ -106,6 +106,10 @@ def bresenham(x, y):
 
     return points[:j, :]
 
+def dprint(*args, **kwargs):
+    # print(*args, **kwargs)
+    return
+
 def interleave(a, b):
         """Interleave two arrays together like zip
 

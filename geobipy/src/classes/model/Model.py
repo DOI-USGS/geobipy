@@ -9,7 +9,7 @@ from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, unique, vsta
 from numpy import log as nplog
 from numpy.linalg import inv
 from matplotlib.pyplot import gcf
-from ...base.utilities import reslice
+from ...base.utilities import reslice, dprint, expReal
 from ...base import plotting
 from ..core.myObject import myObject
 from ...base.HDF import hdfRead
@@ -17,6 +17,8 @@ from ..core import StatArray
 from ..mesh.Mesh import Mesh
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
+
+import numpy as np
 
 class Model(myObject):
     """Generic model class with an attached mesh.
@@ -390,16 +392,24 @@ class Model(myObject):
 
     def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, variance_scaling=1.0):
 
+        dprint('incoming model', self.values)
+        dprint('incoming sensitivity', diag(observation.sensitivity_matrix))
+        dprint('incoming proposal distribution', self.values.proposal.mean, np.diag(self.values.proposal.variance))
         # Perturb the structure of the model
         remapped_model = self.perturb_structure()
+        dprint('action', remapped_model.mesh.action)
 
         if observation is not None:
             if remapped_model.mesh.action[0] != 'none':
                 observation.sensitivity(remapped_model)
 
+        # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
+
         # Update the local Hessian around the current model.
         # inv(J'Wd'WdJ + Wm'Wm)
         inverse_hessian = variance_scaling * remapped_model.compute_local_inverse_hessian(observation)
+
+        # print('inv Hessian', inverse_hessian)
 
         if inverse_hessian.size > 1:
             ih_max = inverse_hessian.max()
@@ -412,11 +422,13 @@ class Model(myObject):
         # This is Wm'Wm(sigma - sigma_ref)
         # Need to have the gradient be a part of this too.
         gradient = remapped_model.prior_derivative(order=1)
+        dprint('gradient', gradient)
 
         if not observation is None:
             # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
             gradient += observation.prior_derivative(order=1)
 
+        dprint('gradient', gradient)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
@@ -425,6 +437,11 @@ class Model(myObject):
         dSigma = -dot(inverse_hessian, gradient)
 
         mean = exp(nplog(remapped_model.values) + dSigma)
+
+        dprint('dSigma', exp(dSigma))
+        dprint('log values', nplog(remapped_model.values))
+        dprint('log mean', nplog(remapped_model.values) + dSigma)
+        dprint('mean', mean)
 
         perturbed_model = deepcopy(remapped_model)
 
@@ -436,7 +453,10 @@ class Model(myObject):
                                                        prng=perturbed_model.values.proposal.prng)
 
         # Generate new conductivities
-        perturbed_model.values.perturb()#imposePrior=True)
+        perturbed_model.values.perturb()
+
+        # dprint('test proposal', perturbed_model.values.proposal.mean, np.diag(perturbed_model.values.proposal.variance))
+        # dprint('perturbed values', perturbed_model.values)
 
         return remapped_model, perturbed_model
 
@@ -696,39 +716,66 @@ class Model(myObject):
             The reverse proposal probability
 
         """
-        # Evaluate the Reversible Jump Step.
-        # For the reversible jump, we need to compute the gradient from the perturbed parameter values
-        # that were generated using pertured data, using the unperturbed data.
-        # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
-        # the data residual using the perturbed parameter values.
+        # dprint('  proposal probability')
+        # # Evaluate the Reversible Jump Step.
+        # # For the reversible jump, we need to compute the gradient from the perturbed parameter values
+        # # that were generated using pertured data, using the unperturbed data.
+        # # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
+        # # the data residual using the perturbed parameter values.
 
-        # Compute the gradient according to the perturbed parameters and data residual
-        # This is Wm'Wm(sigma - sigma_ref)
-        gradient = self.prior_derivative(order=1)
+        # # Compute the gradient according to the perturbed parameters and data residual
+        # # This is Wm'Wm(sigma - sigma_ref)
+        # dprint('  values', self.values)
+        # gradient = self.prior_derivative(order=1)
+        # dprint('  gradient', gradient)
 
-        # todo:
-        # replace the par.priorDerivative with appropriate gradient
-        if not observation is None:
-            # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
-            gradient += observation.prior_derivative(order=1)
+        # # todo:
+        # # replace the par.priorDerivative with appropriate gradient
+        # if not observation is None:
+        #     # observation.forward(self)
+        #     # observation.sensitivity(self, model_changed=False)
+        #     # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
+        #     gradient += observation.prior_derivative(order=1)
 
-        # Compute the stochastic newton offset.
-        dSigma = -dot(self.values.proposal.variance, gradient)
+        # # inv(J'Wd'WdJ + Wm'Wm)
+        # # inverse_hessian = self.compute_local_inverse_hessian(observation)
+        # inverse_hessian = self.values.proposal.variance
+
+        # dprint('  gradient', gradient)
+        # dprint('  variance', diag(self.values.proposal.variance))
+        # # Compute the stochastic newton offset at the new location.
+        # dSigma = -dot(inverse_hessian, gradient)
+
+        # # mean = expReal(nplog(self.values) + dSigma)
+        # mean = exp(nplog(self.values) + dSigma)
+
+        # # if any(mean == inf) or any(mean == 0.0):
+        # #     return -inf, -inf
+
+        # dprint('dSigma', dSigma)
+        # dprint('log values', nplog(self.values))
+        # dprint('log mean', nplog(self.values) + dSigma)
+        # dprint('mean', mean)
+
+        # prng = self.values.proposal.prng
+        # # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
+        # # # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
+        # # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
+        # # tmp = Distribution('MvLogNormal', mean, self.values.proposal.variance, linearSpace=True, prng=prng)
+        # tmp = Distribution('MvLogNormal', mean, inverse_hessian, linearSpace=True, prng=prng)
+        # # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
+        # # Probability of jumping from our perturbed parameter values to the unperturbed values.
+        # proposal = tmp.probability(x=remapped_model.values, log=True)
+
+        # # This is the forward proposal. Evaluate the new proposed values given a mean of the old values
+        # # and variance using perturbed data
+        # tmp = Distribution('MvLogNormal', remapped_model.values, self.values.proposal.variance, linearSpace=True, prng=prng)
+        # proposal1 = tmp.probability(x=self.values, log=True)
 
         prng = self.values.proposal.prng
-        # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
-        # # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
-        # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvLogNormal', exp(nplog(self.values) + dSigma), self.values.proposal.variance, linearSpace=True, prng=prng)
-        # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
-        # Probability of jumping from our perturbed parameter values to the unperturbed values.
-        proposal = tmp.probability(x=remapped_model.values, log=True)
 
-        # This is the forward proposal. Evaluate the new proposed values given a mean of the old values
-        # and variance using perturbed data
-        tmp = Distribution('MvLogNormal', remapped_model.values, self.values.proposal.variance, linearSpace=True, prng=prng)
-        proposal1 = tmp.probability(x=self.values, log=True)
-
+        proposal = 1.0
+        proposal1 = 1.0
         action = self.mesh.action[0]
         if action == 'insert':
             k = self.nCells - 1
@@ -736,8 +783,8 @@ class Model(myObject):
             forward = Distribution('Uniform', 0.0, self.mesh.remainingSpace(k), prng=prng)
             reverse = Distribution('Uniform', 0.0, k, prng=prng)
 
-            proposal += reverse.probability(1, log=True)
-            proposal1 += forward.probability(0.0, log=True)
+            proposal = reverse.probability(1, log=True)
+            proposal1 = forward.probability(0.0, log=True)
 
         if action == 'delete':
             k = self.nCells
@@ -745,8 +792,8 @@ class Model(myObject):
             forward = Distribution('Uniform', 0.0, self.mesh.remainingSpace(k), prng=prng)
             reverse = Distribution('Uniform', 0.0, k, prng=prng)
 
-            proposal += forward.probability(0.0, log=True)
-            proposal1 += reverse.probability(1, log=True)
+            proposal = forward.probability(0.0, log=True)
+            proposal1 = reverse.probability(1, log=True)
 
         return proposal, proposal1
 
