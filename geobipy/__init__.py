@@ -83,7 +83,8 @@ def checkCommandArguments():
     Parser.add_argument('options_file', help='User options file')
     Parser.add_argument('output_directory', help='Output directory for results')
     Parser.add_argument('--skip_hdf5', dest='skip_hdf5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
-    Parser.add_argument('--seed', dest='seed', default=None, help='Specify a numpy seed file to fix the random number generator. Only used in serial mode.')
+    Parser.add_argument('--seed', dest='seed', default=None, help='Specify a seed file to fix the random number generator.')
+    Parser.add_argument('--jump', dest='jump', default=None, help='Specify a number to jump the PRNG by. Only used in serial mode and for debugging purposes.')
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
@@ -104,7 +105,7 @@ def checkCommandArguments():
 
     return args
 
-def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None, debug=False):
+def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None, debug=False, jump=None):
 
     from time import time
 
@@ -128,7 +129,7 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
 
     data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
-    prng = get_prng(seed=seed)
+    prng = get_prng(seed=seed, jump=jump)
 
     inference3d = Inference3D(data=data, prng=prng, debug=debug)
 
