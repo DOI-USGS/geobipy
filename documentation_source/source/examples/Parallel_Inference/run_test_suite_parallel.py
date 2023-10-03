@@ -102,10 +102,10 @@ if __name__ == '__main__':
     index = checkCommandArguments()
     sys.path.append(os.getcwd())
 
-    datas = ['tempest', 'skytem_512', 'skytem_304', 'resolve']
+    datas = ['tempest', 'skytem_512', 'resolve']
     keys = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
-    tmp = np.unravel_index(index, (4, 6))
+    tmp = np.unravel_index(index, (3, 6))
 
     data = datas[tmp[0]]
     key = keys[tmp[1]]
