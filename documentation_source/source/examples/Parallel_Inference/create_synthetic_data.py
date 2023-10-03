@@ -16,7 +16,7 @@ data_path = '..//supplementary//data'
 
 def create_model(model_type):
 
-    n_points = 119
+    n_points = 79
     zwedge = np.linspace(50.0, 1.0, n_points)
     zdeep = np.linspace(75.0, 500.0, n_points)
 
