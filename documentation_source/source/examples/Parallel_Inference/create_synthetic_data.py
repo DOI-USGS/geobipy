@@ -68,7 +68,7 @@ def make_figure(ds, model, title):
     model.pcolor(flipY=True, log=10);
     ax1.sharex(ax)
 
-    d = ds.datapoint(99); plt.subplot(splt[0, 2]); d.plot();
+    d = ds.datapoint(69); plt.subplot(splt[0, 2]); d.plot();
 
     Path(data_path+'//figures').mkdir(parents=True, exist_ok=True)
     plt.savefig(data_path+'//figures//'+title+'.png');
