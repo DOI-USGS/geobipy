@@ -236,7 +236,6 @@ def create_tempest(model, output_suffix):
     for k in range(model.x.nCells):
         mod = model[k]
 
-        print(mod.summary)
         dp.forward(mod)
         dp.secondary_field[:] = dp.predicted_secondary_field
         dp.primary_field[:] = dp.predicted_primary_field
