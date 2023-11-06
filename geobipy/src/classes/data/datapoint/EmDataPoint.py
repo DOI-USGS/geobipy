@@ -218,8 +218,8 @@ class EmDataPoint(DataPoint):
             PhiD[i] = self.data_misfit()
 
         plt.loglog(c, PhiD, **kwargs)
-        cP.xlabel(c.getNameUnits())
-        cP.ylabel('Data misfit')
+        plt.xlabel(c.getNameUnits())
+        plt.ylabel('Data misfit')
 
     def update_posteriors(self):
         """Update any attached posteriors"""

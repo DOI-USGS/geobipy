@@ -1,9 +1,9 @@
 from copy import deepcopy
 
 from numpy import abs, arange, argsort, argwhere, asarray, atleast_1d, complex128, cos, diag, diff, divide, dot, empty
-from numpy import exp, flip, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
+from numpy import exp, flip, full, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
 from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
-from numpy import real, s_, shape, sin, size, where, zeros
+from numpy import real, s_, shape, sin, size, squeeze, where, zeros
 from numpy import all as npall
 from numpy import log as nplog
 
@@ -105,6 +105,22 @@ def bresenham(x, y):
                     error += dx
 
     return points[:j, :]
+
+world_rank = 0
+print_rank = 0
+
+def init_debug_print(world=None, print_from=0):
+    global world_rank
+    global print_rank
+    print_rank = print_from
+    if world is not None:
+        world_rank = deepcopy(world.rank)
+
+def debug_print(*args, **kwargs):
+    # if world_rank == print_rank:
+    #     print(*args, flush=True, **kwargs)
+    # x = "I am here"
+    return None
 
 def interleave(a, b):
         """Interleave two arrays together like zip
@@ -673,11 +689,19 @@ def expReal(this):
     # np.float64 = 709.0
     # np.longdouble = 11356.0
 
-    if this > 11356.0:
-        return inf
+    tol = 11356.0
 
-    return exp(longdouble(this))
+    if size(this) == 1:
+        if this > tol:
+            return inf
 
+        return exp(longdouble(this))
+
+    out = full(size(this), fill_value=inf, dtype=longdouble)
+    i = squeeze(argwhere(this <= tol))
+    tmp = longdouble(this[i])
+    out[i] = exp(tmp)
+    return out
 
 def tanh(this):
     """ Custom hyperbolic tangent, return correct overflow. """

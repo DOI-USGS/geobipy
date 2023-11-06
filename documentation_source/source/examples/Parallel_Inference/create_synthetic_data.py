@@ -16,7 +16,7 @@ data_path = '..//supplementary//data'
 
 def create_model(model_type):
 
-    n_points = 119
+    n_points = 79
     zwedge = np.linspace(50.0, 1.0, n_points)
     zdeep = np.linspace(75.0, 500.0, n_points)
 
@@ -68,7 +68,7 @@ def make_figure(ds, model, title):
     model.pcolor(flipY=True, log=10);
     ax1.sharex(ax)
 
-    d = ds.datapoint(99); plt.subplot(splt[0, 2]); d.plot();
+    d = ds.datapoint(69); plt.subplot(splt[0, 2]); d.plot();
 
     Path(data_path+'//figures').mkdir(parents=True, exist_ok=True)
     plt.savefig(data_path+'//figures//'+title+'.png');
@@ -236,7 +236,6 @@ def create_tempest(model, output_suffix):
     for k in range(model.x.nCells):
         mod = model[k]
 
-        print(mod.summary)
         dp.forward(mod)
         dp.secondary_field[:] = dp.predicted_secondary_field
         dp.primary_field[:] = dp.predicted_primary_field

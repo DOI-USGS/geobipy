@@ -15,7 +15,7 @@ from ....classes.core import StatArray
 from ...model.Model import Model
 from .EmDataPoint import EmDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
-    tdem1dfwd, tdem1dsen)
+    tdem1dfwd, tdem1dsen, ga_fm_dlogc)
 from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
 from ...system.Loop_pair import Loop_pair
@@ -75,7 +75,7 @@ class TdemDataPoint(EmDataPoint):
     The same is true for the errors, and the predicted data vector.
 
     """
-    __slots__ = ('_loop_pair', '_predicted_primary_field', '_predicted_secondary_field', '_primary_field', '_secondary_field')
+    __slots__ = ('_loop_pair', '_predicted_primary_field', '_predicted_secondary_field', '_primary_field', '_secondary_field', '_centered_on')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0,
                  primary_field=None, secondary_field=None,
@@ -314,6 +314,7 @@ class TdemDataPoint(EmDataPoint):
         out._secondary_field = deepcopy(self.secondary_field)
         out._predicted_primary_field = deepcopy(self.predicted_primary_field)
         out._predicted_secondary_field = deepcopy(self.predicted_secondary_field)
+        out._centered_on = deepcopy(self._centered_on)
 
         return out
 
@@ -1023,13 +1024,39 @@ class TdemDataPoint(EmDataPoint):
 
             self.predicted_primary_field[s] = hstack(primary)
 
-
-    def sensitivity(self, model, ix=None, modelChanged=True):
+    def sensitivity(self, model, ix=None, model_changed=False):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._centered_on = model.values
         return self.sensitivity_matrix
+
+    def fm_dlogc(self, model):
+        values, J = ga_fm_dlogc(self, model)
+
+        # for i in range(self.nSystems):
+        #     fm = values[i]
+        #     iSys = self._systemIndices(i)
+        #     primary = []
+        #     secondary = []
+        #     if 'x' in self.components:
+        #         primary.append(fm.PX)
+        #         secondary.append(fm.SX)
+        #     if 'y' in self.components:
+        #         primary.append(fm.PY)
+        #         secondary.append(fm.SY)
+        #     if 'z' in self.components:
+        #         primary.append(-fm.PZ)
+        #         secondary.append(-fm.SZ)
+
+        #     self.predicted_secondary_field[iSys] = hstack(secondary)  # Store the necessary component
+
+        #     s = s_[i * self.n_components: (i * self.n_components) + self.n_components]
+
+        #     self.predicted_primary_field[s] = hstack(primary)
+
+        self._sensitivity_matrix = StatArray.StatArray(J, 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
 
     def _empymodForward(self, mod):
 

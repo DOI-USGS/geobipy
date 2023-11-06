@@ -42,6 +42,7 @@ class user_parameters(dict):
         kwargs['stochastic_newton'] = not kwargs.get('ignore_likelihood', False)
         kwargs['factor'] = float64(10.0) if kwargs.get('factor') is None else kwargs.get('factor')
         kwargs['covariance_scaling'] = float64(1.0) if kwargs.get('covariance_scaling') is None else kwargs.get('covariance_scaling')
+        # kwargs['parameter_limits'] = np.r_[1e-10, 1e10] if kwargs.get('parameter_limits') is None else kwargs.get('parameter_limits')
 
         for key, value in kwargs.items():
             self[key] = value

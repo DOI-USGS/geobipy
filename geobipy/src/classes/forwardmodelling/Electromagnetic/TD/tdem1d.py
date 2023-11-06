@@ -4,7 +4,8 @@ Leon Foks
 June 2020
 """
 from copy import deepcopy
-from numpy import hstack, size, zeros
+from numpy import hstack, size, zeros, vstack
+from .....base import utilities as cf
 from ....system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from .empymod_walktem import empymod_walktem
 
@@ -39,13 +40,13 @@ def tdem1dfwd(datapoint, model1d):
         return empymod_tdem1dfwd(datapoint, model1d)
 
 
-def tdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
+def tdem1dsen(datapoint, model1d, ix=None, model_changed=True):
 
     heightTolerance = 0.0
     if (datapoint.transmitter.z > heightTolerance):
         assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError(
             "For airborne data, system must be type TdemSystem_GAAEM")
-        return gaTdem1dsen(datapoint, model1d, ix, modelChanged)
+        return gaTdem1dsen(datapoint, model1d, ix, model_changed)
     else:
         return empymod_tdem1dsen(datapoint, model1d, ix)
 
@@ -100,16 +101,33 @@ def ga_fm_dlogc(datapoint, model1d):
 
     G = datapoint.loop_pair.Geometry
 
-    # Forward model the data for each system
-    return [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
+    # Forward model and sensitivity from each system
+    values = [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
 
-def gaTdem1dsen(datapoint, model1d, ix=None, modelChanged=True):
+    fm = [values[i][0] for i in range(datapoint.nSystems)]
+
+    # J = zeros((datapoint.nChannels, model1d.mesh.nCells.item()))
+    comps = []
+    for i in range(datapoint.nSystems):  # For each system
+        iSys = datapoint._systemIndices(i)
+        # Store the necessary component
+        if 'x' in datapoint.components:
+            comps.append(values[i][1].T)
+        if 'y' in datapoint.components:
+            comps.append(values[i][2].T)
+        if 'z' in datapoint.components:
+            comps.append(-values[i][3].T)
+
+    J = vstack(comps)
+
+    return fm, J
+
+def gaTdem1dsen(datapoint, model1d, ix=None, model_changed=True):
     """ Compute the sensitivty matrix for a 1D layered earth model,
     optionally compute the responses for only the layers in ix """
     # Unfortunately the code requires forward modelled data to compute the
     # sensitivity if the model has changed since last time
-
-    if modelChanged:
+    if model_changed:
         _ = gaTdem1dfwd(datapoint, model1d)
 
     if (ix is None):  # Generate a full matrix if the layers are not specified

@@ -15,7 +15,8 @@ import matplotlib.pyplot as plt
 from matplotlib.pyplot import Figure
 
 from ..base import plotting as cP
-from ..base import utilities as cF
+from ..base.utilities import expReal
+from ..base.utilities import debug_print as dprint
 
 import h5py
 from ..classes.core import StatArray
@@ -478,6 +479,7 @@ class Inference1D(myObject):
     def initialize_model(self, **kwargs):
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
+        # dprint('halfspace', halfspace.values)
         self.halfspace = StatArray.StatArray(halfspace.values, 'halfspace')
 
         # Create an initial model for the first iteration
@@ -527,6 +529,14 @@ class Inference1D(myObject):
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
+        import numpy as np
+        # dprint('\n\niteration', self.iteration)
+
+        # dprint('A', self.prng.random())
+        dprint('a', self.datapoint._centered_on)
+
+        # print('incoming predicted data', self.datapoint.predictedData)
+        # print('incoming model', self.model.values)
         test_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
@@ -534,25 +544,44 @@ class Inference1D(myObject):
         if self.ignore_likelihood:
             observation = None
 
-        try:
-            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
-        except:
-            print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))
-            return True
-
         # Propose a new data point, using assigned proposal distributions
         test_datapoint.perturb()
 
+        # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
+        # try:
+        remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
+        dprint('b', test_datapoint._centered_on)
+        # test predicted data and sensitivity are centered on remapped model
+        # test variance is centered on the remapped model
+        # The data errors have not been perturbed yet.
+
+            # remapped_model, test_model = self.model.perturb(observation, 0.1, self.high_variance, self.covariance_scaling)
+            # remapped_model, test_model = self.model.perturb(observation, 0.1, 2.0, self.covariance_scaling)
+        # except:
+            # print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))
+            # return True
+        # print('sensitivity after perturbing', np.diag(test_datapoint.sensitivity_matrix))
+        # print('remapped model', remapped_model.values)
+        # print('perturbed model', test_model.values)
+
+        if remapped_model is None:
+            self.accepted = False
+            return
+
+        # # Propose a new data point, using assigned proposal distributions
+        # test_datapoint.perturb()
+
         # Forward model the data from the candidate model
         test_datapoint.forward(test_model)
+        # J is now centered on the perturbed
 
-        # Compute the data misfit
         test_data_misfit = test_datapoint.data_misfit()
 
         # Evaluate the prior for the current data
         test_prior = test_datapoint.probability
         # Test for early rejection
         if (test_prior == -inf):
+            self.accepted = False
             return
 
         # Evaluate the prior for the current model
@@ -560,15 +589,17 @@ class Inference1D(myObject):
 
         # Test for early rejection
         if (test_prior == -inf):
+            self.accepted = False
             return
 
         # Compute the components of each acceptance ratio
         test_likelihood = 1.0
         observation = None
         if not self.ignore_likelihood:
-            test_likelihood =test_datapoint.likelihood(log=True)
+            test_likelihood = test_datapoint.likelihood(log=True)
             observation = test_datapoint
 
+        dprint('c', test_datapoint._centered_on)
         proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation)
 
         test_posterior = test_prior + test_likelihood
@@ -580,12 +611,14 @@ class Inference1D(myObject):
         proposal_ratio = proposal - test_proposal
 
         log_acceptance_ratio = prior_ratio + likelihood_ratio + proposal_ratio
-        acceptance_probability = cF.expReal(log_acceptance_ratio)
+        acceptance_probability = expReal(log_acceptance_ratio)
 
         # If we accept the model
         self.accepted = acceptance_probability > self.prng.uniform()
 
         if (self.accepted):
+            # dprint("\n accepted?{} \n prior:{}  {}\n likelihood:{}  {}\n proposal:{}  {}".format(self.accepted, test_prior, self.prior, test_likelihood, self.likelihood, proposal, test_proposal))
+            # Compute the data misfit
             self.data_misfit = test_data_misfit
             self.prior = test_prior
             self.likelihood = test_likelihood
@@ -593,8 +626,12 @@ class Inference1D(myObject):
             self.model = test_model
             self.datapoint = test_datapoint
             # Reset the sensitivity locally to the newly accepted model
-            self.datapoint.sensitivity(self.model, modelChanged=False)
+            self.datapoint.sensitivity(self.model, model_changed=False)
 
+        dprint('accepted', self.accepted)
+
+        # if self.iteration == 44:
+        # input('next')
         return False
 
     def infer(self, hdf_file_handle):
