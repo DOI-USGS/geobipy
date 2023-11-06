@@ -106,9 +106,21 @@ def bresenham(x, y):
 
     return points[:j, :]
 
-def dprint(*args, **kwargs):
-    # print(*args, **kwargs)
-    return
+world_rank = 0
+print_rank = 0
+
+def init_debug_print(world=None, print_from=0):
+    global world_rank
+    global print_rank
+    print_rank = print_from
+    if world is not None:
+        world_rank = deepcopy(world.rank)
+
+def debug_print(*args, **kwargs):
+    # if world_rank == print_rank:
+    #     print(*args, flush=True, **kwargs)
+    # x = "I am here"
+    return None
 
 def interleave(a, b):
         """Interleave two arrays together like zip

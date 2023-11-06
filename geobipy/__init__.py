@@ -10,7 +10,7 @@ from datetime import timedelta
 from numpy import int32
 from numpy.random import Generator
 
-# from .src.base import utilities
+from .src.base.utilities import init_debug_print, debug_print as dprint
 from .src.base import plotting
 from .src.base.MPI import get_prng
 # from .src.base import fileIO
@@ -151,6 +151,8 @@ def parallel_mpi(inputFile, output_directory, skipHDF5, seed=None):
     nRanks = world.size
     masterRank = rank == 0
 
+    init_debug_print(world=world, print_from=1)
+
     myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(nRanks))
     myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
     myMPI.rankPrint(world,'Output files will be produced at {}'.format(output_directory))
@@ -198,8 +200,9 @@ def geobipy():
     else:
         serial_geobipy(args.options_file,
                        args.output_directory,
-                       args.seed,
-                       args.index,
-                       args.fiducial,
-                       args.line_number,
-                       args.debug)
+                       seed=args.seed,
+                       index=args.index,
+                       fiducial=args.fiducial,
+                       line_number=args.line_number,
+                       debug=args.debug,
+                       jump=args.jump)

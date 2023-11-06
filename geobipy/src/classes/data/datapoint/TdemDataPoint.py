@@ -1023,7 +1023,7 @@ class TdemDataPoint(EmDataPoint):
 
             self.predicted_primary_field[s] = hstack(primary)
 
-    def sensitivity(self, model, ix=None, model_changed=True):
+    def sensitivity(self, model, ix=None, model_changed=False):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")

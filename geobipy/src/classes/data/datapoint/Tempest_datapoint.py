@@ -425,10 +425,10 @@ class Tempest_datapoint(TdemDataPoint):
 
         noLabels = kwargs.pop('nolabels', False)
 
-        if (not noLabels):
-            cP.xlabel('Time (s)')
-            cP.ylabel(cf.getNameUnits(self.predictedData))
-            cP.title(title)
+        # if (not noLabels):
+        #     kwargs['xlabel'] = 'Time (s)'
+        #     kwargs['ylabel'] = cf.getNameUnits(self.predictedData)
+        #     kwargs['title'] = title
 
         kwargs['color'] = kwargs.pop('color', cP.wellSeparated[3])
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
