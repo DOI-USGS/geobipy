@@ -75,7 +75,7 @@ class TdemDataPoint(EmDataPoint):
     The same is true for the errors, and the predicted data vector.
 
     """
-    __slots__ = ('_loop_pair', '_predicted_primary_field', '_predicted_secondary_field', '_primary_field', '_secondary_field', '_centered_on')
+    __slots__ = ('_loop_pair', '_predicted_primary_field', '_predicted_secondary_field', '_primary_field', '_secondary_field')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0,
                  primary_field=None, secondary_field=None,
@@ -314,7 +314,6 @@ class TdemDataPoint(EmDataPoint):
         out._secondary_field = deepcopy(self.secondary_field)
         out._predicted_primary_field = deepcopy(self.predicted_primary_field)
         out._predicted_secondary_field = deepcopy(self.predicted_secondary_field)
-        out._centered_on = deepcopy(self._centered_on)
 
         return out
 
@@ -1029,7 +1028,6 @@ class TdemDataPoint(EmDataPoint):
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
         self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
-        self._centered_on = model.values
         return self.sensitivity_matrix
 
     def fm_dlogc(self, model):

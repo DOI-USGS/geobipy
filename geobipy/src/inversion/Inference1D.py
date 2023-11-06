@@ -533,7 +533,6 @@ class Inference1D(myObject):
         # dprint('\n\niteration', self.iteration)
 
         # dprint('A', self.prng.random())
-        dprint('a', self.datapoint._centered_on)
 
         # print('incoming predicted data', self.datapoint.predictedData)
         # print('incoming model', self.model.values)
@@ -550,7 +549,6 @@ class Inference1D(myObject):
         # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         # try:
         remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
-        dprint('b', test_datapoint._centered_on)
         # test predicted data and sensitivity are centered on remapped model
         # test variance is centered on the remapped model
         # The data errors have not been perturbed yet.
@@ -599,7 +597,6 @@ class Inference1D(myObject):
             test_likelihood = test_datapoint.likelihood(log=True)
             observation = test_datapoint
 
-        dprint('c', test_datapoint._centered_on)
         proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation)
 
         test_posterior = test_prior + test_likelihood
