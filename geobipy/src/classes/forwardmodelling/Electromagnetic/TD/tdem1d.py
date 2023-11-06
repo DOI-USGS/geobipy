@@ -4,7 +4,8 @@ Leon Foks
 June 2020
 """
 from copy import deepcopy
-from numpy import hstack, size, zeros
+from numpy import hstack, size, zeros, vstack
+from .....base import utilities as cf
 from ....system.TdemSystem_GAAEM import TdemSystem_GAAEM
 from .empymod_walktem import empymod_walktem
 
@@ -100,8 +101,26 @@ def ga_fm_dlogc(datapoint, model1d):
 
     G = datapoint.loop_pair.Geometry
 
-    # Forward model the data for each system
-    return [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
+    # Forward model and sensitivity from each system
+    values = [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
+
+    fm = [values[i][0] for i in range(datapoint.nSystems)]
+
+    # J = zeros((datapoint.nChannels, model1d.mesh.nCells.item()))
+    comps = []
+    for i in range(datapoint.nSystems):  # For each system
+        iSys = datapoint._systemIndices(i)
+        # Store the necessary component
+        if 'x' in datapoint.components:
+            comps.append(values[i][1].T)
+        if 'y' in datapoint.components:
+            comps.append(values[i][2].T)
+        if 'z' in datapoint.components:
+            comps.append(-values[i][3].T)
+
+    J = vstack(comps)
+
+    return fm, J
 
 def gaTdem1dsen(datapoint, model1d, ix=None, model_changed=True):
     """ Compute the sensitivty matrix for a 1D layered earth model,
