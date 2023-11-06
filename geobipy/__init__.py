@@ -84,7 +84,7 @@ def checkCommandArguments():
     Parser.add_argument('output_directory', help='Output directory for results')
     Parser.add_argument('--skip_hdf5', dest='skip_hdf5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
     Parser.add_argument('--seed', dest='seed', default=None, help='Specify a seed file to fix the random number generator.')
-    Parser.add_argument('--jump', dest='jump', default=None, help='Specify a number to jump the PRNG by. Only used in serial mode and for debugging purposes.')
+    Parser.add_argument('--jump', dest='jump', default=None, type=int, help='Specify a number to jump the PRNG by. Only used in serial mode and for debugging purposes.')
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
