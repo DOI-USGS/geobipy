@@ -533,6 +533,9 @@ class FdemDataPoint(EmDataPoint):
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
         return StatArray.StatArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
+    def fm_dlogc(self, mod):
+        self.forward(mod)
+        self.sensitivity(mod)
 
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """
