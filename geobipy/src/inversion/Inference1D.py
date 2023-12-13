@@ -1146,7 +1146,6 @@ class Inference1D(myObject):
         s = s_[index, :]
 
         self.nSystems = array(hdfFile.get('nsystems'))
-        self.acceptance_x = hdfRead.readKeyFromFile(hdfFile, '', '/', 'ratex')
 
         key = 'iteration' if 'iteration' in hdfFile else 'i'
         self.iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=index)
@@ -1159,6 +1158,10 @@ class Inference1D(myObject):
 
         key = 'acceptance_rate' if 'acceptance_rate' in hdfFile else 'rate'
         self.acceptance_rate = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=s)
+
+        # Compute the x axis for acceptance since its every X iterations.
+        n = 2 * int32(self.n_markov_chains / self.update_plot_every)
+        self.acceptance_x = StatArray.StatArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
 
         self.best_datapoint = self.datapoint
 
