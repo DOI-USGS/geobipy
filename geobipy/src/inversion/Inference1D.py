@@ -1120,7 +1120,7 @@ class Inference1D(myObject):
 
 
     @classmethod
-    def fromHdf(cls, hdfFile, index=None, fiducial=None):
+    def fromHdf(cls, hdfFile, prng, index=None, fiducial=None):
 
         iNone = index is None
         fNone = fiducial is None
@@ -1140,7 +1140,8 @@ class Inference1D(myObject):
                 save_hdf5 = False,
                 save_png = False,
                 update_plot_every = array(hdfFile.get('update_plot_every', 5000)),
-                dont_initialize = True)
+                dont_initialize = True,
+                prng=prng)
         self._datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
 
         s = s_[index, :]
@@ -1166,7 +1167,7 @@ class Inference1D(myObject):
         self.best_datapoint = self.datapoint
 
         self.data_misfit_v = hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s)
-        self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active))
+        self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
 
         self.model = hdfRead.readKeyFromFile(hdfFile, '', '/', 'model', index=index)
         self.best_model = self.model

@@ -87,7 +87,7 @@ class Inference3D(myObject):
 
 
     @classmethod
-    def fromHdf(cls, grp, world=None, **kwargs):
+    def fromHdf(cls, grp, prng, world=None, **kwargs):
         # if isinstance(grp, (Path, str)):
         #     tmp = {}
         #     if world is not None:
@@ -96,13 +96,13 @@ class Inference3D(myObject):
 
         #     grp = h5py.File(grp, mode, **tmp)
 
-        lines = [Inference2D.fromHdf(file, world = world, **kwargs) for file in Inference3D._get_h5Files(grp)]
+        lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in Inference3D._get_h5Files(grp)]
 
         data = lines[0].data
         for line in lines[1:]:
             data.append(line.data)
 
-        self = cls(data, world=world)
+        self = cls(data, world=world, prng=prng)
         self.mode = kwargs.get('mode', 'r')
         self.hdf_file = grp
         self.lines = lines
@@ -111,7 +111,7 @@ class Inference3D(myObject):
     def open(self, directory, **kwargs):
         assert kwargs.get('mode', 'r') in ('r', 'r+', 'a', 'w'), ValueError("mode must be in ('r', 'r+', 'a', 'w')")
 
-        self.lines = [Inference2D.fromHdf(file, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
+        self.lines = [Inference2D.fromHdf(file, prng=self.prng, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
 
     @staticmethod
     def _get_h5Files(directory, files=None, **kwargs):
@@ -309,7 +309,7 @@ class Inference3D(myObject):
                 kwargs['comm'] = self.world
 
             with h5py.File(join(directory, '{}.h5'.format(line)), 'w', **kwargs) as f:
-                Inference2D(subset).createHdf(f, inference1d)
+                Inference2D(subset, prng=self.prng).createHdf(f, inference1d)
 
             self.print('Created hdf5 file for line {} with {} data points'.format(line, subset.nPoints))
         self.print('Created hdf5 files {} total data points'.format(self.data.nPoints))

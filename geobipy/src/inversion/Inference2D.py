@@ -5,6 +5,7 @@ from numpy import arange, argmax, argsort, asarray, divide, empty, full, isnan, 
 from numpy import log10, minimum, mean, min,max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
 from numpy import searchsorted, size, shape, sort, squeeze, unique, where, zeros
 from numpy import all as npall
+from numpy.random import Generator
 
 import h5py
 from copy import deepcopy
@@ -46,12 +47,13 @@ _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': 
 
 class Inference2D(myObject):
     """ Class to define results from EMinv1D_MCMC for a line of data """
-    def __init__(self, data, world=None):
+    def __init__(self, data, prng, world=None):
         """ Initialize the lineResults """
 
         self.world = world
 
         self.data = data
+        self.prng = prng
 
         # if (hdf5_file_path is None): return
         # # assert not system_file_path is None, Exception("Please also specify the path to the system file")
@@ -247,6 +249,21 @@ class Inference2D(myObject):
     @property
     def parameterUnits(self):
         return self.hdf_file['/model/values/posterior/mesh/y/edges'].attrs['units']
+
+    @property
+    def prng(self):
+        return self._prng
+
+    @prng.setter
+    def prng(self, value):
+        assert isinstance(value, Generator), TypeError(("prng must have type np.random.Generator.\n"
+                                                        "You can generate one using\n"
+                                                        "from numpy.random import Generator\n"
+                                                        "from numpy.random import PCG64DXSM\n"
+                                                        "Generator(bit_generator)\n\n"
+                                                        "Where bit_generator is one of the several generators from either numpy or randomgen"))
+
+        self._prng = value
 
     @cached_property
     def relativeError(self):
@@ -1080,7 +1097,7 @@ class Inference2D(myObject):
             # Get the point index
             index = self.fiducials.searchsorted(fiducial)
 
-        R = Inference1D.fromHdf(self.hdf_file, index=index)
+        R = Inference1D.fromHdf(self.hdf_file, index=index, prng=self.prng)
 
         return R
 
@@ -1957,7 +1974,7 @@ class Inference2D(myObject):
         return parent
 
     @classmethod
-    def fromHdf(cls, grp, mode = "r", world=None, **kwargs):
+    def fromHdf(cls, grp, prng, mode = "r", world=None, **kwargs):
         assert mode != 'w', ValueError("Don't use mode = 'w' when reading!")
         if isinstance(grp, (Path, str)):
             tmp = {}
@@ -1969,7 +1986,7 @@ class Inference2D(myObject):
 
         data = hdfRead.read_item(grp['data'], **kwargs)
 
-        self = cls(data, world=world)
+        self = cls(data, prng=prng, world=world)
         self.mode = mode
         self.hdf_file = grp
         return self
