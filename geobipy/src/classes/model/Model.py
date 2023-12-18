@@ -393,10 +393,6 @@ class Model(myObject):
 
     def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, variance_scaling=1.0):
 
-        dprint('incoming model', self.values)
-        dprint('incoming sensitivity', diag(observation.sensitivity_matrix))
-        dprint('incoming proposal distribution', self.values.proposal.mean, np.diag(self.values.proposal.variance))
-
         # repeat = True
         # n_tries = 0
         # limit = 3
