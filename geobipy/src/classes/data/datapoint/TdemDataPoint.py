@@ -914,9 +914,9 @@ class TdemDataPoint(EmDataPoint):
                 active = self.active[iS]
                 (abs(dD[iS][active])).plot(x=system_times[active], **kwargs)
 
-        plt.ylabel("|{}| ({})".format(dD.name, dD.units))
+        ax.set_ylabel("|{}| ({})".format(dD.name, dD.units))
 
-        cp.title(title)
+        ax.set_title(title)
 
     @property
     def probability(self):

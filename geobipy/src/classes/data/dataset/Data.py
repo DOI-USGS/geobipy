@@ -784,9 +784,11 @@ class Data(Point):
 
         kwargs['values'] = self.data[:, channel]
 
-        self.map(*args, **kwargs)
+        ax, _, _ = self.map(*args, **kwargs)
 
-        cP.title(self.channelNames[channel])
+        ax.set_title(self.channelNames[channel])
+
+        return ax
 
 
     def mapPredictedData(self, channel, system=None, *args, **kwargs):

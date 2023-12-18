@@ -888,18 +888,18 @@ class StatArray(ndarray, myObject):
 
         ax = plt.subplot(gs2[0, 0])
         self.prior.plot_pdf()
-        cP.xlabel(self.getNameUnits())
-        cP.title('Prior')
+        ax.set_xlabel(self.getNameUnits())
+        ax.set_title('Prior')
 
-        plt.subplot(gs2[1, 0], sharex=ax, sharey=ax)
+        tmp = plt.subplot(gs2[1, 0], sharex=ax, sharey=ax)
         self.proposal.plot_pdf()
-        cP.title('Proposal')
-        cP.xlabel(self.getNameUnits())
+        tmp.set_title('Proposal')
+        tmp.set_xlabel(self.getNameUnits())
 
-        plt.subplot(gs1[0, 0])
+        tmp = plt.subplot(gs1[0, 0])
         self.posterior.plot(**kwargs)
-        cP.title("Posterior")
-        cP.xlabel(self.getNameUnits())
+        tmp.set_title("Posterior")
+        tmp.set_xlabel(self.getNameUnits())
 
     @property
     def values(self):
@@ -1925,7 +1925,6 @@ class StatArray(ndarray, myObject):
                 cP.title(name)
 
     # MPI Routines
-
     def Bcast(self, world, root=0):
         """Broadcast the StatArray to every rank in the MPI communicator.
 

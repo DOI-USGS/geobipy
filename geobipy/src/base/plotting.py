@@ -1265,11 +1265,11 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
     if geobipy_kwargs['flipY']:
         ax.invert_yaxis()
 
-    plt.xscale(geobipy_kwargs['xscale'])
-    plt.yscale(geobipy_kwargs['yscale'])
+    ax.set_xscale(geobipy_kwargs['xscale'])
+    ax.set_yscale(geobipy_kwargs['yscale'])
 
-    xlabel(utilities.getNameUnits(x, 'x'))
-    ylabel(yl)
+    ax.set_xlabel(utilities.getNameUnits(x, 'x'))
+    ax.set_ylabel(yl)
     plt.margins(0.1, 0.1)
     plt.grid(True)
     return ax, f, cbar
@@ -1370,7 +1370,7 @@ def stackplot2D(x, y, labels=[], colors=tatarize, **kwargs):
     ax.set_yscale(yscale)
     ax.set_xlabel(utilities.getNameUnits(x))
     ax.set_ylabel(utilities.getNameUnits(y))
-    ax.set_margins(0.1, 0.1)
+    ax.margins(0.1, 0.1)
 
     return ax
 
