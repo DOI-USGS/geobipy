@@ -43,7 +43,7 @@ setup(name='geobipy',
         'netcdf4',
 #        'sklearn',
         'matplotlib',
-        'pyvtk',
+        'pyvista',
         'sphinx',
         'progressbar2',
         'cached-property',
@@ -52,6 +52,10 @@ setup(name='geobipy',
         'lmfit',
         'scikit-learn',
         'randomgen'
+    ],
+    extra_requires=['sphinx_gallery',
+                    "sphinx_rtd_theme"
+
     ],
     # ext_modules=[Extension(name='geobipy.src.classes.forwardmodelling.ipforward1d_fortran',
     #             extra_f90_compile_args = ['-ffree-line-length-none','-O3', '-finline-functions', '-funroll-all-loops'],
@@ -62,7 +66,6 @@ setup(name='geobipy',
     entry_points = {
         'console_scripts':[
             'geobipy=geobipy:geobipy',
-            # 'geobipy_mpi=geobipy:geobipy_mpi',
         ],
     }
 )
