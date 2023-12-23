@@ -1,10 +1,4 @@
 """
-.. module:: StatArray
-   :platform: Unix, Windows
-   :synopsis: Time domain data set
-
-.. moduleauthor:: Leon Foks
-
 """
 from copy import deepcopy
 

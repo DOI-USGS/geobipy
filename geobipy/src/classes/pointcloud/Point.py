@@ -674,9 +674,8 @@ class Point(myObject):
             Values to interpolate.  Must have size self.nPoints.
             Defaults to None.
         method : str, optional
-            * 'ct' uses Clough Tocher interpolation
+            * 'ct' uses Clough Tocher interpolation. Default
             * 'mc' uses Minimum curvature and requires pygmt to be installed.
-            Defaults to 'ct'.
         mask : float, optional
             Cells of distance mask away from points are NaN.
             Defaults to False.

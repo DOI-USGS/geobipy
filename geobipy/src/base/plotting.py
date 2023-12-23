@@ -231,23 +231,6 @@ def hillshade(arr, azimuth=30, altitude=30):
     numpy array
         A numpy array containing hillshade values.
 
-    Example
-    -------
-    .. plot::
-        >>> import matplotlib.pyplot as plt
-        >>> import rasterio as rio
-        >>> import earthpy.spatial as es
-        >>> from earthpy.io import path_to_example
-        >>> with rio.open(path_to_example('rmnp-dem.tif')) as src:
-        ...     dem = src.read()
-        >>> print(dem.shape)
-        (1, 187, 152)
-        >>> squeezed_dem = dem.squeeze() # remove first dimension
-        >>> print(squeezed_dem.shape)
-        (187, 152)
-        >>> shade = es.hillshade(squeezed_dem)
-        >>> plt.imshow(shade, cmap="Greys")
-        <matplotlib.image.AxesImage object at 0x...>
     """
     try:
         x, y = gradient(arr)

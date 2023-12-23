@@ -1,11 +1,5 @@
 """
-.. module:: myObject
-   :platform: Unix, Windows
-   :synopsis: abstract base class
-
-.. moduleauthor:: Leon Foks
-
-"""
+o"""
 
 import sys
 from abc import ABC, abstractmethod

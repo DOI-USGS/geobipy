@@ -1,10 +1,4 @@
 """
-.. module:: StatArray
-   :platform: Unix, Windows
-   :synopsis: Time domain data set
-
-.. moduleauthor:: Leon Foks
-
 """
 from numpy import allclose, asarray, atleast_1d, float64, full, hstack
 from numpy import nan, ones

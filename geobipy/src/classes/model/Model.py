@@ -71,20 +71,6 @@ class Model(myObject):
 
         Parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
 
-        .. math::
-            :label: dpdz1
-
-            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
-
-        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
-
-        .. math::
-            :label: minThickness1
-
-            h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
-
-        where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
-
         """
         # if self._gradient is None:
         #     self._gradient = StatArray.StatArray(self.mesh.nCells.item()-1, 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
@@ -233,31 +219,6 @@ class Model(myObject):
 
     def gradient_probability(self, log=True):
         """Evaluate the prior for the gradient of the parameter with depth
-
-        **Prior on the gradient of the physical parameter with depth**
-
-        If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get
-
-        .. math::
-            :label: gradient1
-
-            p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k-1} |\\boldsymbol{C}_{\\nabla_{z}}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\nabla_{z} \\boldsymbol{\sigma})^{T} \\boldsymbol{C}_{\\nabla_{z}}^{-1} (\\nabla_{z}\\boldsymbol{\sigma})}
-
-        where the parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
-
-        .. math::
-            :label: dpdz1
-
-            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
-
-        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
-
-        .. math::
-            :label: minThickness1
-
-            h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
-
-        where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
 
         Parameters
         ----------
@@ -586,80 +547,12 @@ class Model(myObject):
     def probability(self, solve_value, solve_gradient):
         """Evaluate the prior probability for the 1D Model.
 
-        The following equation describes the components of the prior that correspond to the Model1D,
-
-        .. math::
-            p(k | I)p(\\boldsymbol{z}| k, I)p(\\boldsymbol{\sigma} | k, \\boldsymbol{z}, I),
-
-        where :math:`k, I, \\boldsymbol{z}` and :math:`\\boldsymbol{\sigma}` are the number of layers, prior information, interface depth, and physical property, respectively.
-
-        The multiplication here can be turned into a summation by taking the log of the components.
-
-        **Prior on the number of layers**
-
-        Uninformative prior using a uniform distribution.
-
-        .. math::
-            :label: layers
-
-            p(k | I) =
-            \\begin{cases}
-            \\frac{1}{k_{max} - 1} & \\quad 1 \leq k \leq k_{max} \\newline
-            0 & \\quad otherwise
-            \\end{cases}.
-
-        **Prior on the layer interface depths**
-
-        We use order statistics for the prior on layer depth interfaces.
-
-        .. math::
-            :label: depth
-
-            p(\\boldsymbol{z} | k, I) = \\frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta z_{i}},
-
-        where the numerator describes the number of ways that :math:`(k - 1)` interfaces can be ordered and
-        :math:`\Delta z_{i} = (z_{max} - z_{min}) - 2 i h_{min}` describes the depth interval that is available to place a layer when there are already i interfaces in the model
-
-        **Prior on the physical parameter**
-
-        If we use a multivariate normal distribution to describe the joint prior pdf for log-parameter values in all layers we use,
-
-        .. math::
-            :label: parameter
-
-            p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k} |\\boldsymbol{C}_{\\boldsymbol{\sigma}0}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\boldsymbol{\sigma} - \\boldsymbol{\sigma}_{0})^{T} \\boldsymbol{C}_{\\boldsymbol{\sigma} 0}^{-1} (\\boldsymbol{\sigma} - \\boldsymbol{\sigma}_{0})}
-
-        **Prior on the gradient of the physical parameter with depth**
-
-        If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get
-
-        .. math::
-            :label: gradient
-
-            p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k-1} |\\boldsymbol{C}_{\\nabla_{z}}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\nabla_{z} \\boldsymbol{\sigma})^{T} \\boldsymbol{C}_{\\nabla_{z}}^{-1} (\\nabla_{z}\\boldsymbol{\sigma})}
-
-        where the parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
-
-        .. math::
-            :label: dpdz
-
-            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
-
-        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
-
-        .. math::
-            :label: minThickness
-
-            h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
-
-        where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
-
         Parameters
         ----------
         sPar : bool
-            Evaluate the prior on the parameters :eq:`parameter` in the final probability
+            Evaluate the prior on the parameters in the final probability
         sGradient : bool
-            Evaluate the prior on the parameter gradient :eq:`gradient` in the final probability
+            Evaluate the prior on the parameter gradient in the final probability
         components : bool, optional
             Return all components used in the final probability as well as the final probability
 
@@ -1008,3 +901,41 @@ class Model(myObject):
         out = cls(mesh=mesh)
         out._values = out.mesh.fromHdf_cell_values(grp, 'values', index=index, skip_posterior=skip_posterior)
         return out
+
+
+    @classmethod
+    def create_synthetic_model(cls, model_type, n_points=79):
+
+        from ..mesh.RectilinearMesh1D import RectilinearMesh1D
+        from ..mesh.RectilinearMesh2D_stitched import RectilinearMesh2D_stitched
+
+        n_points = 79
+        zwedge = np.linspace(50.0, 1.0, n_points)
+        zdeep = np.linspace(75.0, 500.0, n_points)
+
+        resistivities = {'glacial' : np.r_[100, 10, 30],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[100, 10, 1],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                        'resistive_dolomites' : np.r_[50, 500, 50],   # Glacial sediments, resistive dolomites, marine shale.
+                        'resistive_basement' : np.r_[100, 10, 10000],# Resistive Basement
+                        'coastal_salt_water' : np.r_[1, 100, 20],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[10000, 100, 1] # Antarctica glacier ice over salt water
+        }
+        conductivities = {'glacial' : np.r_[0.01, 0.1, 0.03333333],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[0.01, 0.1, 1.  ],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                        'resistive_dolomites' : np.r_[0.02, 0.002, 0.02 ],   # Glacial sediments, resistive dolomites, marine shale.
+                        'resistive_basement' : np.r_[0.01, 0.1, 0.0001],# Resistive Basement
+                        'coastal_salt_water' : np.r_[1., 0.01, 0.05],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[1.e-04, 1.e-02, 1.e+00] # Antarctica glacier ice over salt water
+        }
+
+        conductivity = StatArray.StatArray(conductivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
+
+        x = RectilinearMesh1D(centres=StatArray.StatArray(np.arange(n_points, dtype=np.float64), name='x'))
+        mesh = RectilinearMesh2D_stitched(3, x=x)
+        mesh.nCells[:] = 3
+        mesh.y_edges[:, 1] = zwedge
+        mesh.y_edges[:, 2] = zdeep
+        mesh.y_edges[:, 3] = np.inf
+        mesh.y_edges.name, mesh.y_edges.units = 'Depth', 'm'
+
+        return cls(mesh=mesh, values=np.repeat(conductivity[None, :], n_points, 0))

@@ -1566,7 +1566,6 @@ class RectilinearMesh1D(Mesh):
 
         return grp
 
-
     # def _create_hdf_2d_stitched(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
     #     if isinstance(add_axis, (int, int_)):
     #         x = arange(add_axis, dtype=float64)
