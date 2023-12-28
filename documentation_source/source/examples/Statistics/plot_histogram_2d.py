@@ -24,20 +24,20 @@ x = StatArray(np.linspace(-4.0, 4.0, 100), 'Variable 1')
 y = StatArray(np.linspace(-4.0, 4.0, 105), 'Variable 2')
 
 mesh = RectilinearMesh2D(x_edges=x, y_edges=y)
-################################################################################
+#%%
 # Instantiate
 H = Histogram(mesh)
 
-################################################################################
+#%%
 # Generate some random numbers
 a = np.random.randn(1000000)
 b = np.random.randn(1000000)
 
-################################################################################
+#%%
 # Update the histogram counts
 H.update(a, b)
 
-################################################################################
+#%%
 plt.figure()
 plt.subplot(131)
 plt.title("2D Histogram")
@@ -56,7 +56,7 @@ H.cdf(axis=1).plot()
 plt.subplot(133)
 H.cdf().plot()
 
-################################################################################
+#%%
 # We can overlay the histogram with its credible intervals
 plt.figure()
 plt.title("90% credible intervals overlain")
@@ -64,12 +64,12 @@ H.pcolor(cmap='gray_r')
 H.plotCredibleIntervals(axis=0, percent=95.0)
 _ = H.plotCredibleIntervals(axis=1, percent=95.0)
 
-################################################################################
+#%%
 # Generate marginal histograms along an axis
 h1 = H.marginalize(axis=0)
 h2 = H.marginalize(axis=1)
 
-################################################################################
+#%%
 # Note that the names of the variables are automatically displayed
 plt.figure()
 plt.suptitle("Marginals along each axis")
@@ -78,7 +78,7 @@ h1.plot()
 plt.subplot(122)
 _ = h2.plot()
 
-################################################################################
+#%%
 # Create a combination plot with marginal histograms.
 # sphinx_gallery_thumbnail_number = 3
 plt.figure()
@@ -99,12 +99,12 @@ plt.ylabel(''); plt.xlabel('')
 plt.yticks([]); plt.xticks([])
 ax[-1].spines["bottom"].set_visible(False)
 
-################################################################################
+#%%
 # Take the mean or median estimates from the histogram
 mean = H.mean()
 median = H.median()
 
-################################################################################
+#%%
 plt.figure(figsize=(9.5, 5))
 plt.suptitle("Mean, median, and credible interval overlain")
 ax = plt.subplot(121)
@@ -121,11 +121,11 @@ H.plotMedian(axis=1, color='g')
 H.plotMean(axis=1, color='y')
 plt.legend()
 
-################################################################################
+#%%
 # Get the range between credible intervals
 H.credible_range(percent=95.0)
 
-################################################################################
+#%%
 # We can map the credible range to an opacity or transparency
 H.opacity()
 H.transparency()
@@ -145,20 +145,20 @@ x = StatArray(5.0 + np.linspace(-4.0, 4.0, 100), 'Variable 1')
 y = StatArray(10.0 + np.linspace(-4.0, 4.0, 105), 'Variable 2')
 
 mesh = RectilinearMesh2D(x_edges=x, x_relative_to=5.0, y_edges=y, y_relative_to=10.0)
-################################################################################
+#%%
 # Instantiate
 H = Histogram(mesh)
 
-################################################################################
+#%%
 # Generate some random numbers
 a = np.random.randn(1000000) + 5.0
 b = np.random.randn(1000000) + 10.0
 
-################################################################################
+#%%
 # Update the histogram counts
 H.update(a, b)
 
-################################################################################
+#%%
 plt.figure()
 plt.subplot(131)
 plt.title("2D Histogram")
@@ -176,7 +176,7 @@ H.cdf(axis=1).plot()
 plt.subplot(133)
 H.cdf().plot()
 
-################################################################################
+#%%
 # We can overlay the histogram with its credible intervals
 plt.figure()
 plt.title("90% credible intervals overlain")
@@ -184,12 +184,11 @@ H.pcolor(cmap='gray_r')
 H.plotCredibleIntervals(axis=0, percent=95.0)
 _ = H.plotCredibleIntervals(axis=1, percent=95.0)
 
-###############################################################################
 # Generate marginal histograms along an axis
 h1 = H.marginalize(axis=0)
 h2 = H.marginalize(axis=1)
 
-################################################################################
+#%%
 # Note that the names of the variables are automatically displayed
 plt.figure()
 plt.suptitle("Marginals along each axis")
@@ -198,7 +197,7 @@ h1.plot()
 plt.subplot(122)
 _ = h2.plot()
 
-################################################################################
+#%%
 # Create a combination plot with marginal histograms.
 # sphinx_gallery_thumbnail_number = 3
 plt.figure()
@@ -219,12 +218,12 @@ plt.ylabel(''); plt.xlabel('')
 plt.yticks([]); plt.xticks([])
 ax[-1].spines["bottom"].set_visible(False)
 
-################################################################################
+#%%
 # Take the mean or median estimates from the histogram
 mean = H.mean()
 median = H.median()
 
-################################################################################
+#%%
 plt.figure(figsize=(9.5, 5))
 plt.suptitle("Mean, median, and credible interval overlain")
 ax = plt.subplot(121)
@@ -241,11 +240,11 @@ H.plotMedian(axis=1, color='g')
 H.plotMean(axis=1, color='y')
 plt.legend()
 
-################################################################################
+#%%
 # Get the range between credible intervals
 H.credible_range(percent=95.0)
 
-################################################################################
+#%%
 # We can map the credible range to an opacity or transparency
 H.opacity()
 H.transparency()

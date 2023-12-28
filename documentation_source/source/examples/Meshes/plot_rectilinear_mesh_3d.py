@@ -34,7 +34,7 @@ rm3.plotGrid()
 plt.subplot(233)
 rm4.plotGrid()
 
-################################################################################
+#%%
 rm2 = rm[:, 5, 5]
 rm3 = rm[5, :, 5]
 rm4 = rm[5, 5, :]
@@ -46,7 +46,7 @@ rm3.plotGrid()
 plt.subplot(236)
 rm4.plotGrid()
 
-################################################################################
+#%%
 with h5py.File('rm3d.h5', 'w') as f:
     rm.createHdf(f, 'test')
     rm.writeHdf(f, 'test')
@@ -74,11 +74,11 @@ rm3.plotGrid()
 plt.subplot(233)
 rm4.plotGrid()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 pv = rm.pyvista_plotter()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 mesh = rm.pyvista_mesh().save('rm3d_re1.vtk')
 
@@ -102,11 +102,11 @@ rm3.plotGrid()
 plt.subplot(233)
 rm4.plotGrid()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 pv = rm.pyvista_plotter()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 mesh = rm.pyvista_mesh().save('rm3d_re2.vtk')
 
@@ -134,12 +134,11 @@ rm3.plotGrid()
 plt.subplot(233)
 rm4.plotGrid()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 pv = rm.pyvista_plotter()
-pv.show()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 mesh = rm.pyvista_mesh().save('rm3d_re3.vtk')
 

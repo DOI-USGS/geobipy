@@ -1,5 +1,5 @@
-TemData
-^^^^^^^
+TempestData
+^^^^^^^^^^^
 
 .. inheritance-diagram:: geobipy.src.classes.data.dataset.TempestData
    :parts: 1

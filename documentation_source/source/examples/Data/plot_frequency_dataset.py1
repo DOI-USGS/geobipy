@@ -15,12 +15,12 @@ import numpy as np
 # Defining data using a frequency domain system
 # +++++++++++++++++++++++++++++++++++++++++++++
 
-################################################################################
+#%%
 # We can start by defining the frequencies, transmitter loops, and receiver loops
 # For each frequency we need to define a pair of loops
 frequencies = np.asarray([395.0, 822.0, 3263.0, 8199.0, 38760.0, 128755.0])
 
-################################################################################
+#%%
 # Transmitter positions are defined relative to the observation locations in the data
 # This is usually a constant offset for all data points.
 transmitters = CircularLoops(orientation=['z','z','x','z','z','z'],
@@ -33,7 +33,7 @@ transmitters = CircularLoops(orientation=['z','z','x','z','z','z'],
                              yaw = np.r_[0,0,0,0,0,0],
                              radius = np.r_[1,1,1,1,1,1])
 
-################################################################################
+#%%
 # Receiver positions are defined relative to the transmitter
 receivers = CircularLoops(orientation=['z','z','x','z','z','z'],
                              moment=np.r_[1, 1, -1, 1, 1, 1],
@@ -45,11 +45,9 @@ receivers = CircularLoops(orientation=['z','z','x','z','z','z'],
                              yaw = np.r_[0,0,0,0,0,0],
                              radius = np.r_[1,1,1,1,1,1])
 
-##############################################################################
 # Instantiate the system for the data
 system = FdemSystem(frequencies=frequencies, transmitter=transmitters, receiver=receivers)
 
-##############################################################################
 # Create some data with random co-ordinates
 x = np.random.randn(100)
 y = np.random.randn(100)
@@ -62,64 +60,64 @@ data = FdemData(x=x, y=-y, z=z, system = system)
 # +++++++++++++++++++
 # Of course measured field data is stored on disk. So instead we can read data from file.
 
-################################################################################
-dataFolder = "..//supplementary//data//"
+#%%
+dataFolder = "..//..//supplementary//data//"
 # The data file name
 dataFile = dataFolder + 'Resolve2.txt'
 # The EM system file name
 systemFile = dataFolder + 'FdemSystem2.stm'
 
-################################################################################
+#%%
 # Read in a data set from file.
 FD1 = FdemData.read_csv(dataFile, systemFile)
 
-################################################################################
+#%%
 # Take a look at the channel names
 for name in FD1.channelNames:
     print(name)
 
-# ################################################################################
+# #%%
 # # Get data points by slicing
 # FDa = FD1[10:]
 # FD1 = FD1[:10]
 
-# ################################################################################
+# #%%
 # # Append data sets together
 # FD1.append(FDa)
 
 
-# ################################################################################
+# #%%
 # # Plot the locations of the data points
 # plt.figure(figsize=(8,6))
 # _ = FD1.scatter2D();
 
-# ################################################################################
+# #%%
 # # Plot all the data along the specified line
 # plt.figure(figsize=(8,6))
 # _ = FD1.plotLine(30010.0, log=10);
 
-# ################################################################################
+# #%%
 # # Or, plot specific channels in the data
 # plt.figure(figsize=(8,6))
 # _ = FD1.plot(channels=[0,11,8], log=10, linewidth=0.5);
 
-################################################################################
+#%%
 # Read in a second data set
 FD2 = FdemData.read_csv(dataFilename=dataFolder + 'Resolve1.txt', systemFilename=dataFolder + 'FdemSystem1.stm')
 
-################################################################################
+#%%
 # We can create maps of the elevations in two separate figures
 plt.figure(figsize=(8,6))
 _ = FD1.map(dx=50.0, dy=50.0, mask = 200.0)
 plt.axis('equal');
 
-################################################################################
+#%%
 
 plt.figure(figsize=(8,6))
 _ = FD2.map(dx=50.0, dy=50.0, mask = 200.0)
 plt.axis('equal');
 
-################################################################################
+#%%
 # Or, we can plot both data sets in one figure to see their positions relative
 # to each other.
 #
@@ -130,7 +128,7 @@ plt.figure(figsize=(8,6))
 _ = FD1.scatter2D(s=1.0, c=FD1.data[:, 0])
 _ = FD2.scatter2D(s=1.0, c=FD2.data[:, 0], cmap='jet');
 
-################################################################################
+#%%
 # Or, interpolate the values to create a gridded "map". mapChannel will
 # interpolate the specified channel number.
 
@@ -138,7 +136,7 @@ plt.figure(figsize=(8,6))
 _ = FD1.mapData(channel=3, system=0, dx=200, dy=200, mask=250)
 plt.axis('equal');
 
-################################################################################
+#%%
 # Export the data to VTK
 FD1.to_vtk('FD_one.vtk')
 # FD2.to_vtk('FD_two.vtk')
@@ -147,25 +145,25 @@ FD1.to_vtk('FD_one.vtk')
 # Obtain a line from the data set
 # +++++++++++++++++++++++++++++++
 
-################################################################################
+#%%
 # Take a look at the line numbers in the dataset
 print(np.unique(FD1.lineNumber))
 
-################################################################################
+#%%
 L = FD1.line(30010.0)
 
-################################################################################
+#%%
 # A summary will now show the properties of the line.
 
 print(L.summary)
 
-################################################################################
+#%%
 # And we can scatter2D the points in the line.
 
 plt.figure(figsize=(8,6))
 _ = L.scatter2D();
 
-################################################################################
+#%%
 # We can specify the axis along which to plot.
 # xAxis can be index, x, y, z, r2d, r3d
 plt.figure(figsize=(8,6))
@@ -198,7 +196,7 @@ DataPoint = Dataset._read_record()
 
 plt.show()
 
-################################################################################
+#%%
 # File Format for frequency domain data
 # +++++++++++++++++++++++++++++++++++++
 # Here we describe the file format for frequency domain data.
@@ -236,7 +234,7 @@ plt.show()
 # ______________
 # Line fid easting northing elevation height I_380 Q_380 ... ... I_129550 Q_129550
 
-################################################################################
+#%%
 # File Format for a frequency domain system
 # +++++++++++++++++++++++++++++++++++++++++
 # .. role:: raw-html(raw)

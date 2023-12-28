@@ -1,5 +1,5 @@
-TdemDataPoint
-^^^^^^^^^^^^^
+Tempest_datapoint
+^^^^^^^^^^^^^^^^^
 
 .. inheritance-diagram:: geobipy.src.classes.data.datapoint.Tempest_datapoint
    :parts: 1

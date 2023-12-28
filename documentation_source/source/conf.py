@@ -43,7 +43,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     # 'sphinx_automodapi.automodapi',
     'sphinx_gallery.gen_gallery',
-    'sphinx.ext.autosectionlabel'
+    # 'sphinx.ext.autosectionlabel'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -372,10 +372,10 @@ sphinx_gallery_conf = {
                                        'examples/Models/',
                                        'examples/Data/',
                                        'examples/Datapoints/',
-                                       'examples/1D_Inference/',
-                                       'examples/2D_Inference/',
-                                       'examples/Parallel_Inference/',
-                                       'examples/HDF5',
+                                       'examples/Inference_1D/',
+                                       'examples/Inference_2D/',
+                                    #    'examples/Parallel_Inference/',
+                                       'examples/HDF5'
                                        ]),
     # "ignore_pattern": ExplicitOrder([r"create_model", r"inference_2d_plotting"]),
     #r"examples/Inference/resolve_options.py"
@@ -386,4 +386,5 @@ sphinx_gallery_conf = {
     'first_notebook_cell': ("%matplotlib inline\n"),
     'abort_on_example_error': True,
     'remove_config_comments': True,
+    'nested_sections': False
 }

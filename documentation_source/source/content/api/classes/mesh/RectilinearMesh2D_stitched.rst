@@ -1,5 +1,6 @@
-TopoRectilinearMesh2D
-=========================
+RectilinearMesh2D_stitched
+==========================
+
 .. inheritance-diagram:: geobipy.src.classes.mesh.RectilinearMesh2D_stitched
    :parts: 1
 

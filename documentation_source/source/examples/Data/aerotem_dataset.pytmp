@@ -15,37 +15,37 @@ from geobipy.src.classes.data.dataset.TdemData import TdemData
 # Reading in the Data
 # +++++++++++++++++++
 
-################################################################################
-dataFolder = "..//supplementary//Data//"
+#%%
+dataFolder = "..//..//supplementary//Data//"
 # The data file name
 dataFiles= dataFolder + 'aerotem.csv'
 # The EM system file name
 systemFiles= dataFolder + 'aerotem.stm'
 
-################################################################################
+#%%
 # Read in the data from file
 TD = TdemData.read_csv(dataFiles, systemFiles)
 
-################################################################################
+#%%
 # Plot the locations of the data points
 plt.figure(figsize=(8,6))
 _ = TD.scatter2D()
 
-################################################################################
+#%%
 # Plot all the data along the specified line
 plt.figure(figsize=(8,6))
 _ = TD.plotLine(0.0, log=10)
 
-################################################################################
+#%%
 # Or, plot specific channels in the data
 plt.figure(figsize=(8,6))
 _ = TD.plot(system=0, channels=[3, 5, 9], log=10)
 
-################################################################################
+#%%
 plt.figure()
 _ = TD.pcolor(system=0, log=10, xscale='log')
 
-################################################################################
+#%%
 plt.figure()
 ax = TD.scatter2D(s=1.0, c=TD.secondary_field[:, TD.channel_index(system=0, channel=6)], equalize=True, log=10)
 plt.axis('equal')
@@ -121,7 +121,7 @@ plt.show()
 # ______________
 # Line fid easting northing elevation height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw Off[0] Off[1]
 
-################################################################################
+#%%
 # File Format for a time domain system
 # ++++++++++++++++++++++++++++++++++++
 # Please see Page 13 of Ross Brodie's `instructions`_
