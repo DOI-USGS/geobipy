@@ -190,7 +190,7 @@ class RectilinearMesh1D(Mesh):
         else:
             dims = arange(ndim(self.relativeTo) + 1)
             dims = tuple(dims[dims != self.dimension])
-            return utilities._power(repeat(expand_dims(self.relativeTo, self.dimension), self.nCells, self.dimension) + expand_dims(self.centres, dims), self.log)
+            return utilities._power( expand_dims(self.centres, dims) + repeat(expand_dims(self.relativeTo, self.dimension), self.nCells, self.dimension), self.log)
 
     @centres.setter
     def centres(self, values):
@@ -231,11 +231,13 @@ class RectilinearMesh1D(Mesh):
     @property
     def edges_absolute(self):
         if self.relativeTo.size == 1:
-            return utilities._power(self.edges + self.relativeTo, self.log)
+            out = utilities._power(self.edges + self.relativeTo, self.log)
         else:
             dims = arange(ndim(self.relativeTo) + 1)
             dims = tuple(dims[dims != self.dimension])
-            return utilities._power(repeat(expand_dims(self.relativeTo, self.dimension), self.nEdges, self.dimension) + expand_dims(self.edges, dims), self.log)
+            out = utilities._power(expand_dims(self.edges, dims) + repeat(expand_dims(self.relativeTo, self.dimension), self.nEdges, self.dimension), self.log)
+
+        return out
 
     @edges.setter
     def edges(self, values):
