@@ -134,7 +134,7 @@ class Mesh(myObject):
         """
         out = self._percentile(values, 50.0, axis)
         if isinstance(out, StatArray.StatArray):
-            out.name =  "Median " + self.axis(axis).centres.name
+            out.name =  "Median " + self.axis(axis).name
         return out
 
     def _mode(self, values, axis=0):
@@ -168,7 +168,7 @@ class Mesh(myObject):
 
             out = squeeze(take_along_axis(centres, i, axis=axis))
 
-        out.name = "Mode " + self.centres(axis).name
+        out.name = "Mode " + self.axis(axis).name
         return out
 
     def _percentile(self, values, percent=95.0, axis=0):
