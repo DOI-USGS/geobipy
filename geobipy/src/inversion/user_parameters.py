@@ -2,7 +2,7 @@
 Parent handler for user defined parameters. Checks that the input user parameters match for a given data point.
 This provides a bit more robust checking when the user is new to the codes, and must modify an input parameter class file.
 """
-#from ..base import Error as Err
+from os.path import join
 from numpy import float64, asarray
 
 from ..classes.core.myObject import myObject
@@ -14,7 +14,7 @@ from ..classes.data.dataset.TempestData import TempestData
 from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
 from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
 from ..classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
-# from ..classes.statistics.Hitmap2D import Hitmap2D
+
 import numpy as np
 from ..base.utilities import isInt
 
@@ -43,6 +43,12 @@ class user_parameters(dict):
         kwargs['factor'] = float64(10.0) if kwargs.get('factor') is None else kwargs.get('factor')
         kwargs['covariance_scaling'] = float64(1.0) if kwargs.get('covariance_scaling') is None else kwargs.get('covariance_scaling')
         # kwargs['parameter_limits'] = np.r_[1e-10, 1e10] if kwargs.get('parameter_limits') is None else kwargs.get('parameter_limits')
+
+        kwargs['data_filename'] = join(kwargs['data_directory'], kwargs['data_filename'])
+        if isinstance(kwargs['system_filename'], list):
+            kwargs['system_filename'] = [join(kwargs['data_directory'], x) for x in kwargs['system_filename']]
+        else:
+            kwargs['system_filename'] = join(kwargs['data_directory'], kwargs['system_filename'])
 
         for key, value in kwargs.items():
             self[key] = value
@@ -74,7 +80,7 @@ class user_parameters(dict):
                 )
 
     @classmethod
-    def read(cls, filename):
+    def read(cls, filename, **kwargs):
         options = {}
         # Load user parameters
         with open(filename, 'r') as f:
@@ -85,5 +91,9 @@ class user_parameters(dict):
             if isinstance(value, list):
                 if not isinstance(value[0], str):
                     options[key] = asarray(value)
+
+        for key, value in kwargs.items():
+            if value is not None:
+                options[key] = value
 
         return cls(**options)
