@@ -117,7 +117,7 @@ def filter_color_kwargs(kwargs):
     defaults = {'alpha' : 1.0,
                 'alpha_color' : [1, 1, 1],
                 'cax' : None,
-                'clabel' : None,
+                'clabel' : True,
                 'clim_scaling' : None,
                 'cmap' : 'cividis',
                 'cmapIntervals' : None,
@@ -125,7 +125,8 @@ def filter_color_kwargs(kwargs):
                 'equalize' : False,
                 'nBins' : 256,
                 'orientation' : 'vertical',
-                'ticks': None}
+                'ticks' : None,
+                'wrap_clabel' : False}
 
     out, kwargs = _filter_kwargs(kwargs, defaults)
     out['cmap'] = copy(colormaps.get_cmap(out['cmap']))#, out['cmapIntervals']))
@@ -142,7 +143,6 @@ def filter_plotting_kwargs(kwargs):
                 'labels' : True,
                 'legend_size' : None,
                 'log' : None,
-                'logBins' : False,
                 'logX' : None,
                 'logY' : None,
                 'trim' : None,
@@ -151,8 +151,12 @@ def filter_plotting_kwargs(kwargs):
                 'shading' : 'auto',
                 'transpose' : False,
                 'width' : None,
-                'xscale' : 'linear',
+                'wrap_xlabel' : False,
+                'wrap_ylabel' : False,
+                'xlabel' : True,
                 'xlim' : None,
+                'xscale' : 'linear',
+                'ylabel' : True,
                 'ylim' : None,
                 'yscale': 'linear'}
 
@@ -167,7 +171,7 @@ def _filter_kwargs(kwargs, defaults):
     subset = {k: tmp.pop(k, defaults[k]) for k in defaults.keys()}
     return subset, tmp
 
-def clabel(cb, label, **kwargs):
+def clabel(cb, label, length=20, wrap=False, **kwargs):
     """Create a colourbar label with default fontsizes
 
     Parameters
@@ -178,6 +182,10 @@ def clabel(cb, label, **kwargs):
         The colourbar label
 
     """
+    if label == False:
+        return
+    if wrap:
+        label = utilities.wrap_string(label, length)
     cb.ax.set_ylabel(label, **kwargs)
 
 def generate_subplots(n, ax=None):
@@ -296,11 +304,14 @@ def bar(values, edges, line=None, **kwargs):
     if geobipy_kwargs['reciprocateX']:
         bins = 1.0 / edges
 
-    if geobipy_kwargs['logBins']:
-        bins, logLabel = utilities._log(edges, geobipy_kwargs['logBins'])
-        label = logLabel + utilities.getNameUnits(edges)
-    else:
-        label = utilities.getNameUnits(edges)
+    if geobipy_kwargs['xlabel'] != False:
+        geobipy_kwargs['xlabel'] = utilities.getNameUnits(edges)
+        # if geobipy_kwargs['logX']:
+        #     bins, logLabel = utilities._log(edges, geobipy_kwargs['logX'])
+        #     geobipy_kwargs['xlabel'] = logLabel + geobipy_kwargs['xlabel']
+
+    if geobipy_kwargs['ylabel'] != False:
+        geobipy_kwargs['ylabel'] = utilities.getNameUnits(values)
 
     i0 = 0
     i1 = size(values) - 1
@@ -324,13 +335,16 @@ def bar(values, edges, line=None, **kwargs):
 
     if (geobipy_kwargs['transpose']):
         ax.barh(centres, values, height=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
-        ax.set_ylabel(label)
-        ax.set_xlabel(utilities.getNameUnits(values))
+        xl = ylabel
+        yl = xlabel
         geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
     else:
         ax.bar(centres, values, width=width, align='center', alpha=color_kwargs['alpha'], **kwargs)
-        ax.set_xlabel(label)
-        ax.set_ylabel(utilities.getNameUnits(values))
+        xl = xlabel
+        yl = ylabel
+
+    xl(ax, geobipy_kwargs['xlabel'], wrap=geobipy_kwargs['wrap_xlabel'])
+    yl(ax, geobipy_kwargs['ylabel'], wrap=geobipy_kwargs['wrap_ylabel'])
 
     if geobipy_kwargs['flipX']:
         ax.invert_xaxis()
@@ -441,6 +455,12 @@ def pcolor(values, x=None, y=None, **kwargs):
     if geobipy_kwargs['reciprocateY']:
         my = 1.0 / my
 
+    if geobipy_kwargs['xlabel'] != False:
+        geobipy_kwargs['xlabel'] = utilities.getNameUnits(x)
+
+    if geobipy_kwargs['ylabel'] != False:
+        geobipy_kwargs['ylabel'] = utilities.getNameUnits(y)
+
     mx, _ = utilities._log(mx, geobipy_kwargs['logX'])
     my, _ = utilities._log(my, geobipy_kwargs['logY'])
 
@@ -449,8 +469,8 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     ax, pm, cb = pcolormesh(X=mx, Y=my, values=values, **kwargs)
 
-    ax.set_xlabel(utilities.getNameUnits(x))
-    ax.set_ylabel(utilities.getNameUnits(y))
+    xlabel(ax, geobipy_kwargs['xlabel'], wrap=geobipy_kwargs['wrap_xlabel'])
+    ylabel(ax, geobipy_kwargs['ylabel'], wrap=geobipy_kwargs['wrap_ylabel'])
 
     return ax, pm, cb
 
@@ -640,13 +660,12 @@ def _pcolormesh(X, Y, values, **kwargs):
         else:
             cbar = plt.colorbar(pm, cax=color_kwargs['cax'], orientation=color_kwargs['orientation'], ticks=color_kwargs['ticks'])
 
-        if color_kwargs['clabel'] is None:
+        if color_kwargs['clabel'] != False:
+            color_kwargs['clabel'] = utilities.getNameUnits(values)
             if (geobipy_kwargs['log']):
-                clabel(cbar, logLabel + utilities.getNameUnits(values))
-            else:
-                clabel(cbar, utilities.getNameUnits(values))
-        else:
-            clabel(cbar, color_kwargs['clabel'])
+                color_kwargs['clabel'] = logLabel + color_kwargs['clabel']
+
+        clabel(cbar, color_kwargs['clabel'], wrap=color_kwargs['wrap_clabel'])
 
     return ax, pm, cbar
 
@@ -901,19 +920,26 @@ def pcolor_1D(values, y=None, **kwargs):
     if geobipy_kwargs['flip']:
         ax.invert_yaxis() if geobipy_kwargs['transpose'] else ax.invert_xaxis()
 
+    if geobipy_kwargs['xlabel'] != False:
+        geobipy_kwargs['xlabel'] = utilities.getNameUnits(y)
+
     ax.set_xscale(geobipy_kwargs['xscale'])
     ax.set_yscale(geobipy_kwargs['yscale'])
 
     if geobipy_kwargs['transpose']:
-        ax.set_ylabel(utilities.getNameUnits(y))
+        xl = ylabel
+        # ax.set_ylabel(utilities.getNameUnits(y))
         ax.get_xaxis().set_ticks([])
     else:
-        ax.set_xlabel(utilities.getNameUnits(y))
+        xl = xlabel
+        # ax.set_xlabel(utilities.getNameUnits(y))
         ax.get_yaxis().set_ticks([])
 
-    if not geobipy_kwargs['xlim'] is None:
+    xl(ax, geobipy_kwargs['xlabel'], wrap=geobipy_kwargs['wrap_xlabel'])
+
+    if geobipy_kwargs['xlim'] is not None:
         ax.set_xlim(geobipy_kwargs['xlim'])
-    if not geobipy_kwargs['ylim'] is None:
+    if geobipy_kwargs['ylim'] is not None:
         ax.set_ylim(geobipy_kwargs['ylim'])
 
     if (color_kwargs['colorbar']):
@@ -924,11 +950,11 @@ def pcolor_1D(values, y=None, **kwargs):
 
         if color_kwargs['clabel'] is None:
             if (geobipy_kwargs['log']):
-                clabel(cbar, logLabel + utilities.getNameUnits(values))
+                clabel(cbar, logLabel + utilities.getNameUnits(values), wrap=color_kwargs['wrap_clabel'])
             else:
-                clabel(cbar, utilities.getNameUnits(values))
+                clabel(cbar, utilities.getNameUnits(values), wrap=color_kwargs['wrap_clabel'])
         else:
-            clabel(cbar, color_kwargs['clabel'])
+            clabel(cbar, color_kwargs['clabel'], wrap=color_kwargs['wrap_clabel'])
 
     if size(color_kwargs['alpha']) > 1:
         setAlphaPerPcolormeshPixel(pm, color_kwargs['alpha'])
@@ -1076,14 +1102,16 @@ def plot(x, y, **kwargs):
     if geobipy_kwargs['reciprocateX']:
         x = 1.0 / x
 
-    if (geobipy_kwargs['labels']):
-        xl = utilities.getNameUnits(x)
-        yl = utilities.getNameUnits(y)
+    if geobipy_kwargs['xlabel'] != False:
+        geobipy_kwargs['xlabel'] = utilities.getNameUnits(x)
+
+    if geobipy_kwargs['ylabel'] != False:
+        geobipy_kwargs['ylabel'] = utilities.getNameUnits(y)
 
     tmp = y
     if (geobipy_kwargs['log']):
         tmp, logLabel = utilities._log(y, geobipy_kwargs['log'])
-        yl = logLabel + yl
+        geobipy_kwargs['ylabel'] = logLabel + geobipy_kwargs['ylabel']
 
     pretty(ax)
 
@@ -1101,11 +1129,9 @@ def plot(x, y, **kwargs):
     ax.set_xscale(geobipy_kwargs['xscale'])
     ax.set_yscale(geobipy_kwargs['yscale'])
 
-    if (geobipy_kwargs['labels']):
-        if xl != '':
-            ax.set_xlabel(xl)
-        if yl != '':
-            ax.set_ylabel(yl)
+    xlabel(ax, geobipy_kwargs['xlabel'], wrap=geobipy_kwargs['wrap_xlabel'])
+    ylabel(ax, geobipy_kwargs['ylabel'], wrap=geobipy_kwargs['wrap_ylabel'])
+
     ax.margins(0.1, 0.1)
 
     if geobipy_kwargs['flipX']:
@@ -1214,6 +1240,7 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
     f = plt.scatter(xt, yt, c = c, cmap=color_kwargs['cmap'], **kwargs)
 
+
     yl = utilities.getNameUnits(yt)
 
     cbar = None
@@ -1225,13 +1252,13 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
 
         if color_kwargs['clabel'] is None:
             if (geobipy_kwargs['log']):
-                clabel(cbar, logLabel + utilities.getNameUnits(c))
+                clabel(cbar, logLabel + utilities.getNameUnits(c), wrap=color_kwargs['wrap_clabel'])
                 if y is None:
                     yl = logLabel + yl
             else:
-                clabel(cbar, utilities.getNameUnits(c))
+                clabel(cbar, utilities.getNameUnits(c), wrap=color_kwargs['wrap_clabel'])
         else:
-            clabel(cbar, color_kwargs['clabel'])
+            clabel(cbar, color_kwargs['clabel'], wrap=color_kwargs['wrap_clabel'])
 
     if ('s' in kwargs and not geobipy_kwargs['legend_size'] is None):
         assert (not isinstance(geobipy_kwargs['legend_size'], bool)), TypeError('sizeLegend must have type int, or array_like')
@@ -1440,3 +1467,18 @@ def pause(interval):
                 canvas.draw()
             canvas.start_event_loop(interval)
             return
+
+
+def xlabel(ax, label, length=20, wrap=False, **kwargs):
+    if label is False:
+        return
+    if wrap:
+        label = utilities.wrap_string(label, length)
+    ax.set_xlabel(label, **kwargs)
+
+def ylabel(ax, label, length=20, wrap=False, **kwargs):
+    if label is False:
+        return
+    if wrap:
+        label = utilities.wrap_string(label, length)
+    ax.set_ylabel(label, **kwargs)
