@@ -3,7 +3,7 @@ Module describing an EMData Set where channels are associated with an xyz co-ord
 """
 from copy import deepcopy
 
-from numpy import any, arange, asarray, atleast_1d, float64
+from numpy import any, arange, asarray, atleast_1d, float64, full
 from numpy import hstack, int32, isnan, nan, nanmin
 from numpy import size, sqrt, squeeze, sum, unique
 from numpy import zeros
@@ -1099,3 +1099,29 @@ class FdemData(Data):
         #                     y += "{} ".format(a)
 
         #                 f.write(y+"\n")
+
+    def create_synthetic_data(self, model, prng):
+
+        ds = FdemData(system=self.system)
+
+        ds.x = model.x.centres
+        ds.y[:] = 0.0
+        ds.z = full(model.x.nCells, fill_value=30.0)
+        ds.elevation = zeros(model.x.nCells)
+        ds.relative_error = full((model.x.nCells, 1), fill_value = 0.05)
+        ds.additive_error = full((model.x.nCells, 1), fill_value = 5)
+
+        dp = ds.datapoint(0)
+
+        model.mesh.y_edges = model.mesh.y_edges / 4.1
+
+        for k in range(model.x.nCells):
+            mod = model[k]
+            dp.forward(mod)
+            ds.data[k, :] = dp.predictedData
+
+        ds_noisy = deepcopy(ds)
+
+        ds_noisy.data += prng.normal(scale=ds.std, size=ds.data.shape)
+
+        return ds, ds_noisy
