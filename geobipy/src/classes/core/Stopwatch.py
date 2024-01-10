@@ -3,12 +3,6 @@ Module describing a Stopwatch for timing purposes
 """
 import time as tm
 
-try:
-    from mpi4py import MPI
-except:
-    pass
-
-
 class Stopwatch(object):
 
     def __init__(self, mpi=False):
