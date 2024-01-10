@@ -142,8 +142,8 @@ class Data(Point):
 
     @property
     def channel_saturation(self):
-        out = sum(self.active, axis=1) / self.nChannels
-        out.name = 'Percentage of active channels'
+        out = 100.0 * sum(self.active, axis=1) / self.nChannels
+        out.name = '% of active channels'
         out.units = '%'
         return out
 
