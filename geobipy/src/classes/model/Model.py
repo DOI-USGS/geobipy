@@ -933,9 +933,9 @@ class Model(myObject):
         x = RectilinearMesh1D(centres=StatArray.StatArray(np.arange(n_points, dtype=np.float64), name='x'))
         mesh = RectilinearMesh2D_stitched(3, x=x)
         mesh.nCells[:] = 3
-        mesh.y_edges[:, 1] = zwedge
-        mesh.y_edges[:, 2] = zdeep
-        mesh.y_edges[:, 3] = np.inf
-        mesh.y_edges.name, mesh.y_edges.units = 'Depth', 'm'
+        mesh.y_edges[:, 1] = -zwedge
+        mesh.y_edges[:, 2] = -zdeep
+        mesh.y_edges[:, 3] = -np.inf
+        mesh.y_edges.name, mesh.y_edges.units = 'Elevation', 'm'
 
         return cls(mesh=mesh, values=np.repeat(conductivity[None, :], n_points, 0))
