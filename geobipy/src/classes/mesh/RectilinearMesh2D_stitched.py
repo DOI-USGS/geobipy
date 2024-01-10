@@ -182,6 +182,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             elif nanmax(y_edges) == inf:
                 max_edge = 2.0 * max(y_edges[isfinite(y_edges)])
 
+        alpha = ndim(color_kwargs['alpha'] > 0)
+
         relativeTo = 0.0 if self.relativeTo is None else self.relativeTo
         for i in range(max(self.nCells)):
             bottom = y_edges[:, i] + relativeTo
@@ -193,13 +195,18 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             width = zeros(self.x.nCells)
             width[active] = top[active] - bottom[active]
 
-            pm = ax.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=color_kwargs['cmap'](v[:, i]), **kwargs)
+            colour = color_kwargs['cmap'](v[:, i])
+
+            if alpha:
+                colour[:, -1] = color_kwargs['alpha'][:, i]
+
+            pm = ax.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=colour, **kwargs)
 
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)
 
-        ax.set_xlabel(self.x.label)
-        ax.set_ylabel(self.y_edges.label)
+        cP.xlabel(ax, self.x.label, wrap=geobipy_kwargs['wrap_xlabel'])
+        cP.ylabel(ax, self.y_edges.label, wrap=geobipy_kwargs['wrap_ylabel'])
 
         if geobipy_kwargs['flipX']:
             ax.invert_xaxis()
@@ -224,13 +231,12 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             else:
                 cbar = plt.colorbar(sm, ax=ax, cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
 
-            if color_kwargs['clabel'] is None:
+            if color_kwargs['clabel'] != False:
+                color_kwargs['clabel'] = utilities.getNameUnits(values)
                 if (geobipy_kwargs['log']):
-                    cP.clabel(cbar, logLabel + utilities.getNameUnits(values))
-                else:
-                    cP.clabel(cbar, utilities.getNameUnits(values))
-            else:
-                cP.clabel(cbar, color_kwargs['clabel'])
+                    color_kwargs['clabel'] = logLabel + color_kwargs['clabel']
+
+            cP.clabel(cbar, color_kwargs['clabel'], wrap=color_kwargs['wrap_clabel'])
 
         return ax, pm, cbar
 
