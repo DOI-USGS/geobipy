@@ -3,6 +3,7 @@ Class to store inversion results. Contains plotting and writing to file procedur
 """
 from copy import deepcopy
 from os.path import join
+from datetime import timedelta
 
 from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
@@ -547,17 +548,17 @@ class Inference1D(myObject):
         test_datapoint.perturb()
 
         # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
-        # try:
-        remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
+        try:
+            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
         # test predicted data and sensitivity are centered on remapped model
         # test variance is centered on the remapped model
         # The data errors have not been perturbed yet.
 
             # remapped_model, test_model = self.model.perturb(observation, 0.1, self.high_variance, self.covariance_scaling)
             # remapped_model, test_model = self.model.perturb(observation, 0.1, 2.0, self.covariance_scaling)
-        # except:
-            # print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))
-            # return True
+        except:
+            print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))
+            return True
         # print('sensitivity after perturbing', np.diag(test_datapoint.sensitivity_matrix))
         # print('remapped model', remapped_model.values)
         # print('perturbed model', test_model.values)
@@ -750,8 +751,14 @@ class Inference1D(myObject):
 
         if (mod(self.iteration, self.update_plot_every) == 0):
             time_per_model = self.clk.lap() / self.update_plot_every
-            bi = "" if self.burned_in else "*"
-            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed\n" % (self.iteration, float64(self.model.nCells[0]), bi, self.acceptance_percent, time_per_model, self.clk.timeinSeconds())
+            elapsed = self.clk.timeinSeconds()
+            burned_in = "" if self.burned_in else "*"
+
+            eta = "--:--:--"
+            if self.burned_in:
+                eta = str(timedelta(seconds=int(time_per_model * (self.n_markov_chains + self.burned_in_iteration - self.iteration))))
+
+            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed, eta=%s h:m:s\n" % (self.iteration, float64(self.model.nCells[0]), burned_in, self.acceptance_percent, time_per_model, elapsed, eta)
             if (self.rank == 1):
                 print(tmp, flush=True)
 

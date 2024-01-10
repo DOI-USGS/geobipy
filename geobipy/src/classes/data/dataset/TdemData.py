@@ -1210,3 +1210,40 @@ class TdemData(Data):
                             y += "{} ".format(a)
 
                         f.write(y + "\n")
+
+    def create_synthetic_data(self, model):
+
+        ds = TdemData(system=self.system)
+
+        ds.x = model.x
+        ds.y = model.y
+        ds.z = np.full(model.x.nCells, fill_value=30.0)
+        ds.elevation = np.zeros(model.x.nCells)
+
+        ds.loop_pair.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
+                        #  pitch=0.0, roll=0.0, yaw=0.0,
+                        radius=np.full(model.x.nCells, ds.system[0].loopRadius()))
+
+        ds.loop_pair.receiver = CircularLoops(x=ds.transmitter.x -13.0,
+                        y=ds.transmitter.y + 0.0,
+                        z=ds.transmitter.z + 2.0,
+                        #  pitch=0.0, roll=0.0, yaw=0.0,
+                        radius=np.full(model.x.nCells, ds.system[0].loopRadius()))
+
+        ds.relative_error = np.full((model.x.nCells, 2), fill_value = 0.03)
+        ds.additive_error = np.full((model.x.nCells, 2), fill_value = 1e-15)
+        ds.additive_error[:, 1] = 1e-14
+
+        dp = ds.datapoint(0)
+
+        for k in range(model.x.nCells):
+            mod = model[k]
+
+            dp.forward(mod)
+            ds.secondary_field[k, :] = dp.predictedData
+
+        ds_noisy = deepcopy(ds)
+
+        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.nChannels))
+
+        return ds, ds_noisy

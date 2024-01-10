@@ -433,9 +433,9 @@ class Data(Point):
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out.data = deepcopy(self.data)
-        out.std = deepcopy(self.std)
-        out.predictedData = deepcopy(self.predictedData)
+        out._data = deepcopy(self.data, memo)
+        out._std = deepcopy(self.std, memo)
+        out._predictedData = deepcopy(self.predictedData, memo)
         return out
 
     def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):

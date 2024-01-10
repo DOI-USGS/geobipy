@@ -615,3 +615,61 @@ class TempestData(TdemData):
         out = super(TempestData, cls).fromHdf(grp, **kwargs)
         out.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
         return out
+
+    def create_synthetic_data(self, model, prng):
+
+        ds = TempestData(system=self.system)
+
+        ds.x = model.x
+        ds.y = model.y
+        ds.z = np.full(model.x.nCells, fill_value = 120.0)
+        ds.elevation = np.zeros(model.x.nCells)
+        ds.fiducial = np.arange(model.x.nCells)
+
+        ds.loop_pair.transmitter = CircularLoops(
+                        x = ds.x, y = ds.y, z = ds.z,
+                        pitch = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        roll  = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        yaw   = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        radius = np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+
+        ds.loop_pair.receiver = CircularLoops(
+                        x = ds.transmitter.x - 107.0,
+                        y = ds.transmitter.y + 0.0,
+                        z = ds.transmitter.z - 45.0,
+                        pitch = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        roll  = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        yaw   = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        radius = np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+
+        ds.relative_error = np.repeat(np.r_[0.001, 0.001][None, :], model.x.nCells, 0)
+        add_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
+                        0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
+        ds.additive_error = np.repeat(add_error[None, :], model.x.nCells, 0)
+
+        dp = ds.datapoint(0)
+
+        for k in range(model.x.nCells):
+            mod = model[k]
+
+            dp.forward(mod)
+            dp.secondary_field[:] = dp.predicted_secondary_field
+            dp.primary_field[:] = dp.predicted_primary_field
+
+            ds.primary_field[k, :] = dp.primary_field
+            ds.secondary_field[k, :] = dp.secondary_field
+
+        ds_noisy = deepcopy(ds)
+
+        # Add noise to various solvable parameters
+
+        # ds.z += np.random.uniform(low=-5.0, high=5.0, size=model.x.nCells)
+        # ds.receiver.x += np.random.normal(loc=0.0, scale=0.25**2.0, size=model.x.nCells)
+        # ds.receiver.z += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+        # ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+        # ds.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
+        # ds.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
+
+        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.nChannels))
+
+        return ds, ds_noisy
