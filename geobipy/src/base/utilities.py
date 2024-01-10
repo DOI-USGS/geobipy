@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from textwrap import wrap
+
 from numpy import abs, arange, argsort, argwhere, asarray, atleast_1d, complex128, cos, diag, diff, divide, dot, empty
 from numpy import exp, flip, full, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
 from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
@@ -807,24 +809,24 @@ def _logScalar(value, log=None):
 
     if (log == 'e'):
         tmp = nplog(value)
-        label = 'ln'
+        label = 'ln '
         return tmp, label
 
     assert log > 0, ValueError('logBase must be a positive number')
 
     if (log == 10):
         tmp = log10(value)
-        label = 'log$_{10}$'
+        label = 'log$_{10}$ '
         return tmp, label
 
     if (log == 2):
         tmp = log2(value)
-        label = 'log$_{2}$'
+        label = 'log$_{2}$ '
         return tmp, label
 
     if (log > 2):
         tmp = log10(value)/log10(log)
-        label = 'log$_{'+str(log)+'}$'
+        label = 'log$_{'+str(log)+'}$ '
         return tmp, label
 
     assert False, ValueError("log must be 'e' or a positive number")
@@ -872,24 +874,24 @@ def _logArray(values, log=None):
 
     if (log == 'e'):
         tmp[i] = nplog(values[i])
-        label = 'ln'
+        label = 'ln '
         return tmp, label
 
     assert log > 0, ValueError('logBase must be a positive number')
 
     if (log == 10):
         tmp[i] = log10(values[i])
-        label = 'log$_{10}$'
+        label = 'log$_{10}$ '
         return tmp, label
 
     if (log == 2):
         tmp[i] = log2(values[i])
-        label = 'log$_{2}$'
+        label = 'log$_{2}$ '
         return tmp, label
 
     if (log > 2):
         tmp[i] = log10(values[i])/log10(log)
-        label = 'log$_{'+str(log)+'}$'
+        label = 'log$_{'+str(log)+'}$ '
         return tmp, label
 
     assert False, ValueError("log must be 'e' or a positive number")
@@ -1125,3 +1127,6 @@ def reslice(slic, start=None, stop=None, step=None):
     ic = slic.step if step is not None else step
 
     return slice(sta, stp, ic)
+
+def wrap_string(this, length=20):
+    return "\n".join(wrap(this, length, break_long_words=False))
