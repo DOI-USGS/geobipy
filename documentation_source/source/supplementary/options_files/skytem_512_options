@@ -16,13 +16,13 @@ from os.path import join
 # General file structure information.
 # -------------------------------------------------------
 # Data folder
-data_directory = "..//..//supplementary//data"
+data_directory = "..//data//"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
-data_filename = data_directory
+data_filename = "skytem_512_glacial.csv"
 # System File Name.
-system_filename = [join(data_directory,'SkytemHM_512.stm'), join(data_directory,'SkytemLM_512.stm')]
+system_filename = ['SkytemHM_512.stm', 'SkytemLM_512.stm']
 
 # Define the data type to invert
 data_type = TdemData
@@ -172,3 +172,5 @@ parameter_limits = None
 reciprocate_parameters = True
 
 verbose = False
+
+seed = 146100583096709124601953385843316024947

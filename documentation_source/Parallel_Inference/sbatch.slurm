@@ -1,13 +1,13 @@
 #!/bin/bash
 #SBATCH --job-name=geobipy_synthetics
-#SBATCH -n 120
-#SBATCH -N 3
+#SBATCH -n 80
+#SBATCH -N 2
 #SBATCH --hint=nomultithread
 #SBATCH -p workq
 #SBATCH --account=sas
-#SBATCH --time=04:00:00
+#SBATCH --time=02:00:00
 #SBATCH -o %j.out
-#SBATCH --array=0-5
+#SBATCH --array=8,11,14,15,16,17
 module swap PrgEnv-cray/6.0.5 PrgEnv-gnu
 module load cray-hdf5-parallel cray-python cray-fftw
 

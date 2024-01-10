@@ -4,13 +4,13 @@ import numpy as np
 # General file structure information.
 # -------------------------------------------------------
 # Data folder
-data_directory = "..//..//supplementary//data"
+data_directory = "..//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
-data_filename = data_directory
+data_filename = "tempest_glacial.csv"
 # System File Name.
-system_filename = join(data_directory,'Tempest.stm')
+system_filename = 'Tempest.stm'
 
 # Define the data type to invert
 data_type = TempestData
@@ -205,3 +205,5 @@ parameter_limits = None
 reciprocate_parameters = False
 
 verbose = False
+
+seed = 146100583096709124601953385843316024947

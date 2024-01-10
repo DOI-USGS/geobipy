@@ -21,7 +21,7 @@ import shutil
 
 #%%
 # The directory where HDF files will be stored
-output_directory = "..//..//..//supplementary//time_domain_inversion//results"
+output_directory = "./test"
 #%%
 
 for filename in os.listdir(output_directory):
