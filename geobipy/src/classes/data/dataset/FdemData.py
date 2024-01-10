@@ -91,7 +91,7 @@ class FdemData(Data):
         self._powerline = StatArray.StatArray(self._nPoints, "Powerline")
         self._magnetic = StatArray.StatArray(self._nPoints, "Magnetic")
 
-        # self.channelNames = kwargs.get('channel_names', None)
+        # self.channel_names = kwargs.get('channel_names', None)
 
         self.powerline = kwargs.get('powerline', None)
         self.magnetic = kwargs.get('magnetic', None)
@@ -181,19 +181,19 @@ class FdemData(Data):
 
         self.components = None
 
-    @Data.channelNames.setter
-    def channelNames(self, values):
+    @Data.channel_names.setter
+    def channel_names(self, values):
         if values is None:
-            self._channelNames = []
+            self._channel_names = []
             for i in range(self.nSystems):
                 # Set the channel names
                 for ic in range(self.n_components):
                     for iFrequency in range(2*self.nFrequencies[i]):
-                        self._channelNames.append('{} {}'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
+                        self._channel_names.append('{} {}'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            self._channel_names = values
 
     def check(self):
         if (nanmin(self.data) <= 0.0):
@@ -284,7 +284,7 @@ class FdemData(Data):
     #     # else:
     #     #     tmp='Quadrature - Frequency: {}'.format(self.system.frequencies[channel%self.nFrequencies])
 
-    #     tmp = StatArray(self._data[:, channel], self._channelNames[channel], self._data.units)
+    #     tmp = StatArray(self._data[:, channel], self._channel_names[channel], self._data.units)
 
     #     return tmp
 
@@ -424,7 +424,7 @@ class FdemData(Data):
 
     #     # Data.mapChannel(self, channel, *args, **kwargs)
 
-    #     # cP.title(self._channelNames[channel])
+    #     # cP.title(self._channel_names[channel])
 
 
     def plot_data(self, x='index', channels=None, **kwargs):

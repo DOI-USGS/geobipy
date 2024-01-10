@@ -99,22 +99,22 @@ class TdemData(Data):
         # # Loop Offsets
         # self.loopOffset = kwargs.get('loopOffset', None)
 
-        self.channelNames = kwargs.get('channel_names')
+        self.channel_names = kwargs.get('channel_names')
 
-    @Data.channelNames.setter
-    def channelNames(self, values):
+    @Data.channel_names.setter
+    def channel_names(self, values):
         if values is None:
-            self._channelNames = []
+            self._channel_names = []
             for i in range(self.nSystems):
                 # Set the channel names
                 for ic in range(self.n_components):
                     for iTime in range(self.nTimes[i]):
                         s = 'S{}{} time {:.3e}'.format(i, self.components[ic].upper(), self.system[i].windows.centre[iTime])
-                        self._channelNames.append(s)
+                        self._channel_names.append(s)
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            self._channel_names = values
 
     @Data.data.getter
     def data(self):
@@ -844,7 +844,7 @@ class TdemData(Data):
                         std=self.std[i, :],
                         predicted_secondary_field=self.predicted_secondary_field[i, :],
                         predicted_primary_field=self.predicted_primary_field[i, :],
-                        channelNames=self.channelNames)
+                        channel_names=self.channel_names)
 
     @staticmethod
     def fileInformation():
@@ -933,11 +933,11 @@ class TdemData(Data):
         # if channels is None:
         #     i = self._systemIndices(system)
         #     ax = cP.plot(x, self.data[:, i],
-        #                  label=self.channelNames[i], **kwargs)
+        #                  label=self.channel_names[i], **kwargs)
         # else:
         #     channels = atleast_1d(self.channel_index(channels, system))
         #     for i in channels:
-        #         ax = cP.plot(x, self.data[:, i], label=self.channelNames[i], **kwargs)
+        #         ax = cP.plot(x, self.data[:, i], label=self.channel_names[i], **kwargs)
 
         # plt.xlabel(cF.getNameUnits(x))
 
@@ -958,7 +958,7 @@ class TdemData(Data):
         for i in range(self.nSystems):
             plt.subplot(self.nSystems, 1, i + 1)
             j = self._systemIndices(i)
-            kwargs['labels'] = line.channelNames[j]
+            kwargs['labels'] = line.channel_names[j]
             line.data[:, j].plot(x=x, **kwargs)
 
     def plot_predicted(self, *args, **kwargs):

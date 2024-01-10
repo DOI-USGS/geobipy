@@ -103,7 +103,7 @@ class TdemDataPoint(EmDataPoint):
         self.predicted_primary_field = predicted_primary_field
         self.predicted_secondary_field = predicted_secondary_field
 
-        self.channelNames = None
+        self.channel_names = None
 
     @property
     def active_system_indices(self):
@@ -125,24 +125,24 @@ class TdemDataPoint(EmDataPoint):
     def addressof(self):
         return super().addressof + self.loop_pair.addressof
 
-    @EmDataPoint.channelNames.setter
-    def channelNames(self, values):
+    @EmDataPoint.channel_names.setter
+    def channel_names(self, values):
         if values is None:
             if self.system is None:
-                self._channelNames = ['None']
+                self._channel_names = ['None']
                 return
 
 
-            self._channelNames = []
+            self._channel_names = []
 
             for component in self.components:
                 for i in range(self.nSystems):
                     for t in self.off_time(i):
-                        self._channelNames.append('Time {:.3e} s {}'.format(t, component))
+                        self._channel_names.append('Time {:.3e} s {}'.format(t, component))
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            self._channel_names = values
 
     @property
     def channels(self):

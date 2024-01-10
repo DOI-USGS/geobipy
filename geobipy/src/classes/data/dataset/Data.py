@@ -32,7 +32,7 @@ class Data(Point):
     """Class defining a set of Data.
 
 
-    Data(channels_per_system, x, y, z, data, std, predictedData, dataUnits, channelNames)
+    Data(channels_per_system, x, y, z, data, std, predictedData, dataUnits, channel_names)
 
     Parameters
     ----------
@@ -59,7 +59,7 @@ class Data(Point):
         * If None, zeros are assigned.
     dataUnits : str
         Units of the data.
-    channelNames : list of str, optional
+    channel_names : list of str, optional
         Names of each channel of length sum(channels_per_system)
 
     Returns
@@ -68,10 +68,10 @@ class Data(Point):
         Data class
 
     """
-    __slots__ = ('_units', '_components', '_channelNames', '_channels_per_system', '_fiducial', '_file', '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
+    __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file', '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
                  '_system', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_channels')
 
-    def __init__(self, components=None, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channelNames=None, **kwargs):
+    def __init__(self, components=None, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channel_names=None, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
@@ -96,7 +96,7 @@ class Data(Point):
         self.data = data
         self.std = std
         self.predictedData = predictedData
-        self.channelNames = channelNames
+        self.channel_names = channel_names
         # self.relative_error = None
         # self.additive_error = None
 
@@ -118,10 +118,10 @@ class Data(Point):
         out, order = super()._as_dict()
         out[self.fiducial.name.replace(' ', '_')] = self.fiducial
         out[self.lineNumber.name.replace(' ', '_')] = self.lineNumber
-        for i, name in enumerate(self.channelNames):
+        for i, name in enumerate(self.channel_names):
             out[name.replace(' ', '_')] = self.data[:, i]
 
-        return out, [self.lineNumber.name.replace(' ', '_'), self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channelNames]]
+        return out, [self.lineNumber.name.replace(' ', '_'), self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channel_names]]
 
     @property
     def active(self):
@@ -170,17 +170,17 @@ class Data(Point):
             self._additive_error[:, :] = values
 
     @property
-    def channelNames(self):
-        return self._channelNames
+    def channel_names(self):
+        return self._channel_names
 
-    @channelNames.setter
-    def channelNames(self, values):
+    @channel_names.setter
+    def channel_names(self, values):
         if values is None:
-            self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
+            self._channel_names = ['Channel {}'.format(i) for i in range(self.nChannels)]
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            self._channel_names = values
 
     def channel_index(self, channel, system):
         """Gets the data in the specified channel
@@ -395,7 +395,7 @@ class Data(Point):
     def summary(self):
         """ Display a summary of the Data """
         msg = super().summary
-        names = copy(self.channelNames)
+        names = copy(self.channel_names)
         j = arange(5, self.nChannels, 5)
         for i in range(j.size):
             names.insert(j[i]+i, '\n')
@@ -433,6 +433,9 @@ class Data(Point):
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
+        out._fiducial = deepcopy(self.fiducial, memo)
+        out._lineNumber = deepcopy(self.lineNumber, memo)
+        out._channel_names = deepcopy(self.channel_names, memo)
         out._data = deepcopy(self.data, memo)
         out._std = deepcopy(self.std, memo)
         out._predictedData = deepcopy(self.predictedData, memo)
@@ -472,7 +475,7 @@ class Data(Point):
                 r = range(self.systemOffset[system], self.systemOffset[system+1])
 
             for i in r:
-                vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channelNames[i], tmp.getNameUnits())))
+                vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channel_names[i], tmp.getNameUnits())))
 
     @staticmethod
     def _csv_channels(filename):
@@ -602,7 +605,7 @@ class Data(Point):
                    x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
                    data=self.data[i, :], std=self.std[i, :],
                    predictedData=self.predictedData[i, :],
-                   channelNames=self.channelNames)
+                   channel_names=self.channel_names)
 
     # def dataChannel(self, channel, system=0):
     #     """Gets the data in the specified channel
@@ -644,7 +647,7 @@ class Data(Point):
         assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
         return DataPoint(x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
                          data=self.data[i, :], std=self.std[i, :], predictedData=self.predictedData[i, :],
-                         channelNames=self.channelNames)
+                         channel_names=self.channel_names)
 
     def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
@@ -716,10 +719,10 @@ class Data(Point):
     #     """
 
     #     if system is None:
-    #         return StatArray.StatArray(self.predictedData[:, channel], "Predicted data {}".format(self.channelNames[channel]), self.predictedData.units)
+    #         return StatArray.StatArray(self.predictedData[:, channel], "Predicted data {}".format(self.channel_names[channel]), self.predictedData.units)
     #     else:
     #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-    #         return StatArray.StatArray(self.predictedData[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channelNames[self.systemOffset[system] + channel]), self.predictedData.units)
+    #         return StatArray.StatArray(self.predictedData[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channel_names[self.systemOffset[system] + channel]), self.predictedData.units)
 
 
     # def stdChannel(self, channel, system=None):
@@ -741,10 +744,10 @@ class Data(Point):
     #     """
 
     #     if system is None:
-    #         return StatArray.StatArray(self.std[:, channel], "Std {}".format(self.channelNames[channel]), self.std.units)
+    #         return StatArray.StatArray(self.std[:, channel], "Std {}".format(self.channel_names[channel]), self.std.units)
     #     else:
     #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-    #         return StatArray.StatArray(self.std[:, self.systemOffset[system] + channel], "Std {}".format(self.channelNames[self.systemOffset[system] + channel]), self.std.units)
+    #         return StatArray.StatArray(self.std[:, self.systemOffset[system] + channel], "Std {}".format(self.channel_names[self.systemOffset[system] + channel]), self.std.units)
 
 
     # def maketest(self, nPoints, nChannels):
@@ -786,7 +789,7 @@ class Data(Point):
 
         ax, _, _ = self.map(*args, **kwargs)
 
-        ax.set_title(self.channelNames[channel])
+        ax.set_title(self.channel_names[channel])
 
         return ax
 
@@ -815,7 +818,7 @@ class Data(Point):
 
         self.map(*args, **kwargs)
 
-        cP.title(self.channelNames[channel])
+        cP.title(self.channel_names[channel])
 
 
     def mapStd(self, channel, system=None, *args, **kwargs):
@@ -842,7 +845,7 @@ class Data(Point):
 
         self.map(*args, **kwargs)
 
-        cP.title(self.channelNames[channel])
+        cP.title(self.channel_names[channel])
 
 
     def plot_data(self, x='index', channels=None, system=None, **kwargs):
@@ -891,7 +894,7 @@ class Data(Point):
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        ax = super().plot(x=x, values=self.data[:, rTmp], label=self.channelNames[rTmp], **kwargs)
+        ax = super().plot(x=x, values=self.data[:, rTmp], label=self.channel_names[rTmp], **kwargs)
 
         if legend:
             # Put a legend to the right of the current axis
@@ -970,7 +973,7 @@ class Data(Point):
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        ax = super().plot(values=self.predictedData[:, rTmp], xAxis=xAxis, label=self.channelNames[rTmp], **kwargs)
+        ax = super().plot(values=self.predictedData[:, rTmp], xAxis=xAxis, label=self.channel_names[rTmp], **kwargs)
 
         if legend:
             box = ax.get_position()

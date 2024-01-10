@@ -101,7 +101,7 @@ class TempestData(TdemData):
     def _as_dict(self):
         out, order = super()._as_dict()
 
-        for i, name in enumerate(self.channelNames):
+        for i, name in enumerate(self.channel_names):
             out[name.replace(' ', '_')] = self.secondary_field[:, i]
 
         for i, c in enumerate(self.components):
@@ -263,12 +263,12 @@ class TempestData(TdemData):
         if channels is None:
             i = self._systemIndices(system)
             ax = cP.plot(x, self.data[:, i],
-                         label=self.channelNames[i], **kwargs)
+                         label=self.channel_names[i], **kwargs)
         else:
             channels = atleast_1d(channels)
             for j, i in enumerate(channels):
                 ax = cP.plot(x, self.data[:, i],
-                             label=self.channelNames[i], **kwargs)
+                             label=self.channel_names[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
 
@@ -301,12 +301,12 @@ class TempestData(TdemData):
         if channels is None:
             i = self._systemIndices(system)
             ax = cP.plot(x, self.predictedData[:, i],
-                         label=self.channelNames[i], **kwargs)
+                         label=self.channel_names[i], **kwargs)
         else:
             channels = atleast_1d(channels)
             for j, i in enumerate(channels):
                 ax = cP.plot(x, self.predictedData[:, i],
-                             label=self.channelNames[i], **kwargs)
+                             label=self.channel_names[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
 
