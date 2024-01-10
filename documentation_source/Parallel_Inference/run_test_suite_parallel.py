@@ -5,8 +5,9 @@
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
 """
-from geobipy import StatArray
-from create_synthetic_data import create_model, create_resolve, create_skytem, create_aerotem, create_tempest
+from os.path import join
+from geobipy import StatArray, Model
+from geobipy import FdemData, TdemData, TempestData
 
 def parallel_mpi(data_type, model_type, output_directory):
 
@@ -20,25 +21,22 @@ def parallel_mpi(data_type, model_type, output_directory):
     nRanks = world.size
     masterRank = rank == 0
 
-
-    data_filename = data_type + '_' + model_type
-
     # Make the data for the given test model
-    if masterRank:
-        wedge_model = create_model(model_type)
+    # if masterRank:
+    #     wedge_model = Model.create_synthetic_model(model_type)
 
-        if data_type == 'resolve':
-            create_resolve(wedge_model, model_type)
-        elif data_type == 'skytem_512':
-            create_skytem(wedge_model, model_type, 512)
-        elif data_type == 'skytem_304':
-            create_skytem(wedge_model, model_type, 304)
-        elif data_type == 'aerotem':
-            create_aerotem(wedge_model, model_type)
-        elif data_type == 'tempest':
-            create_tempest(wedge_model, model_type)
+        # if data_type == 'resolve':
+        #     create_resolve(wedge_model, model_type)
+        # elif data_type == 'skytem_512':
+        #     create_skytem(wedge_model, model_type, 512)
+        # elif data_type == 'skytem_304':
+        #     create_skytem(wedge_model, model_type, 304)
+        # elif data_type == 'aerotem':
+        #     create_aerotem(wedge_model, model_type)
+        # elif data_type == 'tempest':
+        #     create_tempest(wedge_model, model_type)
 
-    parameter_file = "{}_options".format(data_type)
+    parameter_file = "../source/supplementary/options_files/{}_options".format(data_type)
     inputFile = pathlib.Path(parameter_file)
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
 
@@ -49,9 +47,11 @@ def parallel_mpi(data_type, model_type, output_directory):
     myMPI.rankPrint(world,'Using user input file {}'.format(parameter_file))
     myMPI.rankPrint(world,'Output files will be produced at {}'.format(output_directory))
 
-
-    kwargs = user_parameters.read(inputFile)
-    kwargs['data_filename'] = kwargs['data_filename'] + '//' + data_filename + '.csv'
+    kwargs = user_parameters.read(inputFile, n_markov_chains = 100000,
+                                             update_plot_every = 5000,
+                                             data_directory = "..//source//supplementary//data",
+                                             data_filename = data_type + '_' + model_type + '.csv'
+                                             )
 
     # Everyone needs the system classes read in early.
     data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
@@ -59,7 +59,7 @@ def parallel_mpi(data_type, model_type, output_directory):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    prng = myMPI.get_prng(world=world)
+    prng = myMPI.get_prng(seed=kwargs['seed'], world=world)
 
     inference3d = Inference3D(data, prng=prng, world=world)
     inference3d.create_hdf5(directory=output_directory, **kwargs)
@@ -103,17 +103,17 @@ if __name__ == '__main__':
     sys.path.append(os.getcwd())
 
     datas = ['tempest', 'skytem_512', 'resolve']
-    keys = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
+    models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
     tmp = np.unravel_index(index, (3, 6))
 
     data = datas[tmp[0]]
-    key = keys[tmp[1]]
+    model = models[tmp[1]]
 
     #%%
     # The directory where HDF files will be stored
     #%%
-    file_path = os.path.join(data, key)
+    file_path = os.path.join(data, model)
     Path(file_path).mkdir(parents=True, exist_ok=True)
 
     for filename in os.listdir(file_path):
@@ -123,9 +123,4 @@ if __name__ == '__main__':
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-    #%%
-    # The parameter file defines the set of user parameters needed to run geobipy.
-
-    #%%
-
-    parallel_mpi(data, key, file_path)
+    parallel_mpi(data, model, file_path)

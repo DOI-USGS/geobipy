@@ -15,13 +15,13 @@
 # General file structure information.
 # -------------------------------------------------------
 # Data folder
-data_directory = "..//..//supplementary//data"
+data_directory = "..//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name. If there are multiple, encompass them with [ ].
-data_filename = data_directory
+data_filename = "resolve_glacial.csv"
 # System File Name. If there are multiple, encompass them with [ ].
-system_filename = data_directory + "//FdemSystem2.stm"
+system_filename = "FdemSystem2.stm"
 
 # Define the data type to invert
 data_type = FdemData
@@ -167,3 +167,5 @@ parameter_limits = None
 reciprocate_parameters = True
 
 verbose = False
+
+seed = 146100583096709124601953385843316024947
