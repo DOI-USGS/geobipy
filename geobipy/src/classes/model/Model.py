@@ -936,6 +936,6 @@ class Model(myObject):
         mesh.y_edges[:, 1] = -zwedge
         mesh.y_edges[:, 2] = -zdeep
         mesh.y_edges[:, 3] = -np.inf
-        mesh.y_edges.name, mesh.y_edges.units = 'Elevation', 'm'
+        mesh.y_edges.name, mesh.y_edges.units = 'Height', 'm'
 
         return cls(mesh=mesh, values=np.repeat(conductivity[None, :], n_points, 0))
