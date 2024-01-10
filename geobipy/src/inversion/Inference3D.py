@@ -262,11 +262,11 @@ class Inference3D(myObject):
         if self.parallel_access:
             from mpi4py import MPI
 
-            # Split off a master communicator.
+            # Split off a single core communicator.
             single_rank_comm = self.world.Create(self.world.Get_group().Incl([0]))
 
             if (single_rank_comm != MPI.COMM_NULL):
-                # Instantiate a new blank inference3d linked to the master
+                # Instantiate a new blank inference3d linked to the head rank
                 inference3d = Inference3D(self.data, prng=Generator(PCG64DXSM()), world=single_rank_comm)
                 # Create the hdf5 files
                 inference3d._create_HDF5_dataset(directory, **kwargs)
@@ -469,14 +469,14 @@ class Inference3D(myObject):
 
         t0 = MPI.Wtime()
 
-        # Carryout the master-worker tasks
+        # Carryout the head-worker tasks
         if (world.rank == 0):
             self._infer_mpi_master_task(**options)
         else:
             self._infer_mpi_worker_task(**options)
 
     def _infer_mpi_master_task(self, **options):
-        """ Define a Send Recv Send procedure on the master """
+        """ Define a Send Recv Send procedure on the head rank """
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
@@ -509,7 +509,7 @@ class Inference3D(myObject):
         # Start a timer
         t0 = MPI.Wtime()
 
-        myMPI.print("Initial data points sent. Master is now waiting for requests")
+        myMPI.print("Initial data points sent. Head rank is now waiting for requests")
 
         # Now wait to send indices out to the workers as they finish until the entire data set is finished
         while nFinished < nPoints:
@@ -583,7 +583,7 @@ class Inference3D(myObject):
                 myMPI.print("datapoint {} {} failed to converge".format(datapoint.lineNumber, datapoint.fiducial))
                 # save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)
 
-            # Ping the Master to request a new index
+            # Ping the head rank to request a new index
             world.send('requesting', dest=0)
 
             # Wait till you are told whether to continue or not
@@ -1235,7 +1235,7 @@ class Inference3D(myObject):
     def loop_over(self, *args, **kwargs):
         """Generate a loop range.
 
-        Tracks progress on the master rank only if parallel.
+        Tracks progress on the head rank only if parallel.
 
         Parameters
         ----------
@@ -1320,7 +1320,7 @@ class Inference3D(myObject):
         mixture = mixPearson(a, a, a, a)
         mixture.createHdf(hdf_file, 'fits', add_axis=(self.nPoints, self.lines[0].mesh.y.nCells))
 
-        if rank == 0:  ## Master Task
+        if rank == 0:  ## Head rank
             nFinished = 0
             nSent = 0
 
@@ -1339,7 +1339,7 @@ class Inference3D(myObject):
 
             t0 = MPI.Wtime()
 
-            myMPI.print("Initial posteriors sent. Master is now waiting for requests")
+            myMPI.print("Initial posteriors sent. Head rank is now waiting for requests")
 
             # Now wait to send indices out to the workers as they finish until the entire data set is finished
             while nFinished < self.nPoints:
