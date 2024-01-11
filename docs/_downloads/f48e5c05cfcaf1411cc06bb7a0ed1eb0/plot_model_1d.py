@@ -29,7 +29,7 @@ mod = Model(mesh = mesh, values=par)
 plt.figure()
 mod.plotGrid(transpose=True, flip=True)
 
-################################################################################
+#%%
 # Randomness and Model Perturbations
 # ++++++++++++++++++++++++++++++++++
 # We can set the priors on the 1D model by assigning minimum and maximum layer
@@ -37,7 +37,11 @@ mod.plotGrid(transpose=True, flip=True)
 # the number of cells in the model, a new depth interface, new parameter values
 # and the vertical gradient of those parameters.
 # The halfSpaceValue is used as a reference value for the parameter prior.
-prng = np.random.RandomState(0)
+from numpy.random import Generator
+from numpy.random import PCG64DXSM
+generator = PCG64DXSM(seed=0)
+prng = Generator(generator)
+
 # Set the priors
 mod.set_priors(value_mean=0.01,
               min_edge=1.0,
@@ -47,30 +51,30 @@ mod.set_priors(value_mean=0.01,
               solve_gradient=True,
               prng=prng)
 
-################################################################################
+#%%
 # We can evaluate the prior of the model using depths only
 print('Log probability of the Model given its priors: ', mod.probability(False, False))
 # Or with priors on its parameters, and parameter gradient with depth.
 print('Log probability of the Model given its priors: ', mod.probability(True, True))
 
-################################################################################
+#%%
 # To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
 # a layer interface
 pProposal = Distribution('LogNormal', 0.01, np.log(2.0)**2.0, linearSpace=True, prng=prng)
 mod.set_proposals(probabilities=[0.25, 0.25, 0.5, 0.25], proposal=pProposal, prng=prng)
 
-################################################################################
+#%%
 # We can then perturb the layers of the model
 remapped, perturbed = mod.perturb()
 
-################################################################################
+#%%
 fig = plt.figure(figsize=(8, 6))
 ax = plt.subplot(121)
 mod.pcolor(transpose=True, flip=True, log=10)  # , grid=True)
 ax = plt.subplot(122)
 perturbed.pcolor(transpose=True, flip=True, log=10)  # , grid=True)
 
-################################################################################
+#%%
 # We can evaluate the prior of the model using depths only
 print('Log probability of the Model given its priors: ',perturbed.probability(False, False))
 # Or with priors on its parameters, and parameter gradient with depth.
@@ -97,7 +101,7 @@ mod.set_posteriors()
 
 mod0 = deepcopy(mod)
 
-################################################################################
+#%%
 # Now we randomly perturb the model, and update its posteriors.
 mod.update_posteriors()
 for i in range(1001):
@@ -108,7 +112,7 @@ for i in range(1001):
 
     mod = perturbed
 
-################################################################################
+#%%
 # We can now plot the posteriors of the model.
 #
 # Remember in this case, we are simply perturbing the model structure and parameter values

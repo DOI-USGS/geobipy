@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_examples_Models_plot_model_3d.py>`
+        :ref:`Go to the end <sphx_glr_download_examples_Models_plot_model_3d.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -24,7 +24,7 @@ This 3D rectilinear model defines a grid with straight cell boundaries.
 
 .. GENERATED FROM PYTHON SOURCE LINES 9-24
 
-.. code-block:: default
+.. code-block:: Python
 
     from geobipy import StatArray
     from geobipy import RectilinearMesh3D
@@ -56,7 +56,7 @@ This 3D rectilinear model defines a grid with straight cell boundaries.
 
 .. GENERATED FROM PYTHON SOURCE LINES 25-33
 
-.. code-block:: default
+.. code-block:: Python
 
     from geobipy import StatArray
     from geobipy import RectilinearMesh3D
@@ -79,7 +79,7 @@ Specify some cell centres in x and y
 
 .. GENERATED FROM PYTHON SOURCE LINES 35-60
 
-.. code-block:: default
+.. code-block:: Python
 
     x = StatArray(np.arange(10.0), 'Easting', 'm')
     y = StatArray(np.arange(15.0), 'Northing', 'm')
@@ -120,13 +120,13 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<AxesSubplot: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x7ff5b1cd3bb0>, <matplotlib.colorbar.Colorbar object at 0x7ff5b1cd20b0>)
+    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x7fbf544e80a0>, <matplotlib.colorbar.Colorbar object at 0x7fbf544eb100>)
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 61-72
 
-.. code-block:: default
+.. code-block:: Python
 
     model2 = model[:, 5, 5]
     model3 = model[5, :, 5]
@@ -153,13 +153,13 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    <AxesSubplot: xlabel='Depth (m)'>
+    <Axes: xlabel='Depth (m)'>
 
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 73-101
 
-.. code-block:: default
+.. code-block:: Python
 
     with h5py.File('model3d.h5', 'w') as f:
         model.createHdf(f, 'test')
@@ -203,7 +203,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<AxesSubplot: xlabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x7ff5a3c2cfd0>, <matplotlib.colorbar.Colorbar object at 0x7ff5a3c2f4c0>)
+    (<Axes: xlabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x7fbf531d48e0>, <matplotlib.colorbar.Colorbar object at 0x7fbf531d5f30>)
 
 
 
@@ -213,7 +213,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 103-105
 
-.. code-block:: default
+.. code-block:: Python
 
     pv = model.pyvista_plotter()
 
@@ -230,7 +230,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 107-127
 
-.. code-block:: default
+.. code-block:: Python
 
     model.pyvista_mesh().save('model3d_re1.vtk')
 
@@ -266,7 +266,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<AxesSubplot: xlabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x7ff5a4854610>, <matplotlib.colorbar.Colorbar object at 0x7ff5a4856b90>)
+    (<Axes: xlabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x7fbf62995a50>, <matplotlib.colorbar.Colorbar object at 0x7fbf62995930>)
 
 
 
@@ -276,7 +276,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 129-131
 
-.. code-block:: default
+.. code-block:: Python
 
     pv = model.pyvista_plotter()
 
@@ -293,7 +293,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 133-155
 
-.. code-block:: default
+.. code-block:: Python
 
     model.pyvista_mesh().save('model3d_re2.vtk')
 
@@ -331,7 +331,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<AxesSubplot: >, <matplotlib.collections.QuadMesh object at 0x7ff594440850>, <matplotlib.colorbar.Colorbar object at 0x7ff594440400>)
+    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x7fbf62977460>, <matplotlib.colorbar.Colorbar object at 0x7fbf629755d0>)
 
 
 
@@ -341,7 +341,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 157-159
 
-.. code-block:: default
+.. code-block:: Python
 
     pv = model.pyvista_plotter()
 
@@ -358,7 +358,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 161-172
 
-.. code-block:: default
+.. code-block:: Python
 
     model.pyvista_mesh().save('model3d_re3.vtk')
 
@@ -381,7 +381,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.931 seconds)
+   **Total running time of the script:** (0 minutes 0.908 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_3d.py:
@@ -390,14 +390,13 @@ We can plot the mesh in 3D!
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: plot_model_3d.ipynb <plot_model_3d.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_model_3d.py <plot_model_3d.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_model_3d.ipynb <plot_model_3d.ipynb>`
 
 
 .. only:: html

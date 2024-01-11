@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_examples_Models_plot_model_2d.py>`
+        :ref:`Go to the end <sphx_glr_download_examples_Models_plot_model_2d.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -24,7 +24,7 @@ This 2D rectilinear model defines a grid with straight cell boundaries.
 
 .. GENERATED FROM PYTHON SOURCE LINES 9-17
 
-.. code-block:: default
+.. code-block:: Python
 
     from geobipy import StatArray
     from geobipy import RectilinearMesh2D
@@ -47,7 +47,7 @@ Specify some cell centres in x and y
 
 .. GENERATED FROM PYTHON SOURCE LINES 19-56
 
-.. code-block:: default
+.. code-block:: Python
 
     x = StatArray(np.arange(11.0), 'Easting', 'm')
     y = StatArray(np.arange(11.0), 'Northing', 'm')
@@ -72,7 +72,7 @@ Specify some cell centres in x and y
     plt.axis('equal')
 
 
-    # ################################################################################
+    # #%%
     # # We can plot the mesh in 3D!
     # pv = rm.pyvista_plotter()
     # pv.show()
@@ -113,7 +113,7 @@ Specify some cell centres in x and y
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  0.261 seconds)
+   **Total running time of the script:** (0 minutes 0.249 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_2d.py:
@@ -122,14 +122,13 @@ Specify some cell centres in x and y
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: plot_model_2d.ipynb <plot_model_2d.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_model_2d.py <plot_model_2d.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_model_2d.ipynb <plot_model_2d.ipynb>`
 
 
 .. only:: html

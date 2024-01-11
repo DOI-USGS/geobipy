@@ -73,7 +73,7 @@ FD1 = FdemData.read_csv(dataFile, systemFile)
 
 #%%
 # Take a look at the channel names
-for name in FD1.channelNames:
+for name in FD1.channel_names:
     print(name)
 
 # #%%

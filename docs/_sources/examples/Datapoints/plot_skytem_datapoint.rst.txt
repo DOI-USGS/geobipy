@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_examples_Datapoints_plot_skytem_datapoint.py>`
+        :ref:`Go to the end <sphx_glr_download_examples_Datapoints_plot_skytem_datapoint.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -21,17 +21,7 @@
 Skytem Datapoint Class
 ----------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-25
-
-There are three ways in which to create a time domain datapoint
-
-1) :ref:`Instantiating a time domain datapoint`
-
-2) :ref:`Reading a datapoint from a file`
-
-3) :ref:`Obtaining a datapoint from a dataset`
-
-Once instantiated, see :ref:`Using a time domain datapoint`
+.. GENERATED FROM PYTHON SOURCE LINES 7-15
 
 Credits:
 We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
@@ -42,9 +32,9 @@ https://empymod.github.io/
 
 Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBIPy
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-44
+.. GENERATED FROM PYTHON SOURCE LINES 17-46
 
-.. code-block:: default
+.. code-block:: Python
 
     from os.path import join
     import numpy as np
@@ -61,33 +51,19 @@ Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBI
     from geobipy import StatArray
     from geobipy import Distribution
 
-    dataFolder = "..//supplementary//Data//"
+    dataFolder = "..//..//supplementary//data//"
 
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 45-51
-
-Obtaining a datapoint from a dataset
-++++++++++++++++++++++++++++++++++++
-More often than not, our observed data is stored in a file on disk.
-We can read in a dataset and pull datapoints from it.
-
-For more information about the time domain data set, see :ref:`Time domain dataset`
-
-.. GENERATED FROM PYTHON SOURCE LINES 51-57
-
-.. code-block:: default
-
+    # Obtaining a datapoint from a dataset
+    # ++++++++++++++++++++++++++++++++++++
+    # More often than not, our observed data is stored in a file on disk.
+    # We can read in a dataset and pull datapoints from it.
+    #
+    # For more information about the time domain data set, see :ref:`Time domain dataset`
 
     # The data file name
-    dataFile=dataFolder + 'skytem_saline_clay.csv'
+    dataFile=dataFolder + 'skytem_512_saline_clay.csv'
     # The EM system file name
-    systemFile=[dataFolder + 'SkytemHM-SLV.stm', dataFolder + 'SkytemLM-SLV.stm']
+    systemFile=[dataFolder + 'SkytemHM_512.stm', dataFolder + 'SkytemLM_512.stm']
 
 
 
@@ -96,14 +72,14 @@ For more information about the time domain data set, see :ref:`Time domain datas
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-60
+.. GENERATED FROM PYTHON SOURCE LINES 47-49
 
 Initialize and read an EM data set
 Prepare the dataset so that we can read a point at a time.
 
-.. GENERATED FROM PYTHON SOURCE LINES 60-66
+.. GENERATED FROM PYTHON SOURCE LINES 49-55
 
-.. code-block:: default
+.. code-block:: Python
 
     Dataset = TdemData._initialize_sequential_reading(dataFile, systemFile)
     # Get a datapoint from the file.
@@ -118,18 +94,18 @@ Prepare the dataset so that we can read a point at a time.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 67-69
+.. GENERATED FROM PYTHON SOURCE LINES 56-58
 
 Using a time domain datapoint
 +++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-72
+.. GENERATED FROM PYTHON SOURCE LINES 60-61
 
 We can define a 1D layered earth model, and use it to predict some data
 
-.. GENERATED FROM PYTHON SOURCE LINES 72-75
+.. GENERATED FROM PYTHON SOURCE LINES 61-64
 
-.. code-block:: default
+.. code-block:: Python
 
     par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
     mod = Model(RectilinearMesh1D(edges=np.r_[0, 75.0, np.inf]), values=par)
@@ -141,13 +117,13 @@ We can define a 1D layered earth model, and use it to predict some data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-77
+.. GENERATED FROM PYTHON SOURCE LINES 65-66
 
 Forward model the data
 
-.. GENERATED FROM PYTHON SOURCE LINES 77-79
+.. GENERATED FROM PYTHON SOURCE LINES 66-68
 
-.. code-block:: default
+.. code-block:: Python
 
     tdp.forward(mod)
 
@@ -158,9 +134,9 @@ Forward model the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 80-88
+.. GENERATED FROM PYTHON SOURCE LINES 69-77
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.subplot(121)
@@ -179,12 +155,19 @@ Forward model the data
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:354: RuntimeWarning: divide by zero encountered in log
+      additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-93
 
-.. code-block:: default
+.. GENERATED FROM PYTHON SOURCE LINES 78-82
+
+.. code-block:: Python
 
     plt.figure()
     tdp.plotDataResidual(yscale='log', xscale='log')
@@ -208,13 +191,13 @@ Forward model the data
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-95
+.. GENERATED FROM PYTHON SOURCE LINES 83-84
 
 Compute the sensitivity matrix for a given model
 
-.. GENERATED FROM PYTHON SOURCE LINES 95-99
+.. GENERATED FROM PYTHON SOURCE LINES 84-88
 
-.. code-block:: default
+.. code-block:: Python
 
     J = tdp.sensitivity(mod)
     plt.figure()
@@ -232,21 +215,25 @@ Compute the sensitivity matrix for a given model
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-104
+.. GENERATED FROM PYTHON SOURCE LINES 89-91
 
-Attaching statistical descriptors to the datapoint
-++++++++++++++++++++++++++++++++++++++++++++++++++
+Attaching statistical descriptors to the skytem datapoint
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-Set values of relative and additive error for both systems.
+.. GENERATED FROM PYTHON SOURCE LINES 91-102
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-109
+.. code-block:: Python
 
-.. code-block:: default
+    from numpy.random import Generator
+    from numpy.random import PCG64DXSM
+    generator = PCG64DXSM(seed=0)
+    prng = Generator(generator)
 
+    # Set values of relative and additive error for both systems.
     tdp.relative_error = np.r_[0.05, 0.05]
     tdp.additive_error = np.r_[1e-14, 1e-13]
     # Define a multivariate log normal distribution as the prior on the predicted data.
-    tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
+    tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
 
 
 
@@ -255,17 +242,17 @@ Set values of relative and additive error for both systems.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-111
+.. GENERATED FROM PYTHON SOURCE LINES 103-104
 
 This allows us to evaluate the likelihood of the predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-115
+.. GENERATED FROM PYTHON SOURCE LINES 104-108
 
-.. code-block:: default
+.. code-block:: Python
 
     print(tdp.likelihood(log=True))
     # Or the misfit
-    print(tdp.dataMisfit())
+    print(tdp.data_misfit())
 
 
 
@@ -275,19 +262,19 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -189787.1239057012
-    381606.3047007519
+    -324824.70759632764
+    652129.2354668385
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-117
+.. GENERATED FROM PYTHON SOURCE LINES 109-110
 
 Plot the misfits for a range of half space conductivities
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-121
+.. GENERATED FROM PYTHON SOURCE LINES 110-114
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
@@ -311,13 +298,13 @@ Plot the misfits for a range of half space conductivities
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 122-123
+.. GENERATED FROM PYTHON SOURCE LINES 115-116
 
 We can perform a quick search for the best fitting half space
 
-.. GENERATED FROM PYTHON SOURCE LINES 123-130
+.. GENERATED FROM PYTHON SOURCE LINES 116-123
 
-.. code-block:: default
+.. code-block:: Python
 
     halfspace = tdp.find_best_halfspace()
 
@@ -344,15 +331,15 @@ We can perform a quick search for the best fitting half space
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-132
+.. GENERATED FROM PYTHON SOURCE LINES 124-125
 
 Compute the misfit between observed and predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 132-134
+.. GENERATED FROM PYTHON SOURCE LINES 125-127
 
-.. code-block:: default
+.. code-block:: Python
 
-    print(tdp.dataMisfit())
+    print(tdp.data_misfit())
 
 
 
@@ -362,26 +349,46 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    11320.946425443677
+    19992.94964076136
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 135-137
+.. GENERATED FROM PYTHON SOURCE LINES 128-130
 
 We can attach priors to the height of the datapoint,
 the relative error multiplier, and the additive error noise floor
 
-.. GENERATED FROM PYTHON SOURCE LINES 137-144
+.. GENERATED FROM PYTHON SOURCE LINES 130-137
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Define the distributions used as priors.
-    z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0)
-    relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
-    additivePrior = Distribution('Uniform', min=np.r_[1e-16, 1e-16], max=np.r_[1e-10, 1e-10], log=True)
-    tdp.set_priors(relative_error_prior=relativePrior, additive_error_prior=additivePrior, z_prior=z_prior)
+    z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
+    relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5], prng=prng)
+    additivePrior = Distribution('Uniform', min=np.r_[1e-16, 1e-16], max=np.r_[1e-10, 1e-10], log=True, prng=prng)
+    tdp.set_priors(relative_error_prior=relativePrior, additive_error_prior=additivePrior, z_prior=z_prior, prng=prng)
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 138-139
+
+In order to perturb our solvable parameters, we need to attach proposal distributions
+
+.. GENERATED FROM PYTHON SOURCE LINES 139-144
+
+.. code-block:: Python
+
+    z_proposal = Distribution('Normal', mean=tdp.z, variance = 0.01, prng=prng)
+    relativeProposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-7, prng=prng)
+    additiveProposal = Distribution('MvLogNormal', mean=tdp.additive_error, variance=2.5e-3, linearSpace=True, prng=prng)
+    tdp.set_proposals(relativeProposal, additiveProposal, z_proposal=z_proposal, prng=prng)
 
 
 
@@ -392,31 +399,11 @@ the relative error multiplier, and the additive error noise floor
 
 .. GENERATED FROM PYTHON SOURCE LINES 145-146
 
-In order to perturb our solvable parameters, we need to attach proposal distributions
-
-.. GENERATED FROM PYTHON SOURCE LINES 146-151
-
-.. code-block:: default
-
-    z_proposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
-    relativeProposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-7)
-    additiveProposal = Distribution('MvLogNormal', mean=tdp.additive_error, variance=2.5e-3, linearSpace=True)
-    tdp.set_proposals(relativeProposal, additiveProposal, z_proposal=z_proposal)
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 152-153
-
 With priorss set we can auto generate the posteriors
 
-.. GENERATED FROM PYTHON SOURCE LINES 153-155
+.. GENERATED FROM PYTHON SOURCE LINES 146-148
 
-.. code-block:: default
+.. code-block:: Python
 
     tdp.set_posteriors()
 
@@ -427,14 +414,14 @@ With priorss set we can auto generate the posteriors
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 156-158
+.. GENERATED FROM PYTHON SOURCE LINES 149-151
 
 Perturb the datapoint and record the perturbations
 Note we are not using the priors to accept or reject perturbations.
 
-.. GENERATED FROM PYTHON SOURCE LINES 158-163
+.. GENERATED FROM PYTHON SOURCE LINES 151-156
 
-.. code-block:: default
+.. code-block:: Python
 
     for i in range(10):
         tdp.perturb()
@@ -448,13 +435,13 @@ Note we are not using the priors to accept or reject perturbations.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 164-165
+.. GENERATED FROM PYTHON SOURCE LINES 157-158
 
 Plot the posterior distributions
 
-.. GENERATED FROM PYTHON SOURCE LINES 165-169
+.. GENERATED FROM PYTHON SOURCE LINES 158-162
 
-.. code-block:: default
+.. code-block:: Python
 
     tdp.plot_posteriors(overlay=tdp)
 
@@ -472,7 +459,7 @@ Plot the posterior distributions
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 170-247
+.. GENERATED FROM PYTHON SOURCE LINES 163-240
 
 File Format for a time domain datapoint
 +++++++++++++++++++++++++++++++++++++++
@@ -556,7 +543,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  3.317 seconds)
+   **Total running time of the script:** (0 minutes 3.346 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_skytem_datapoint.py:
@@ -565,14 +552,13 @@ Example data files are contained in
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: plot_skytem_datapoint.ipynb <plot_skytem_datapoint.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_skytem_datapoint.py <plot_skytem_datapoint.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_skytem_datapoint.ipynb <plot_skytem_datapoint.ipynb>`
 
 
 .. only:: html

@@ -3,14 +3,35 @@
 
 .. _sphx_glr_examples_Inference_sg_execution_times:
 
+
 Computation times
 =================
-**10:02.471** total execution time for **examples_Inference** files:
+**00:00.000** total execution time for 0 files **from examples/Inference**:
 
-+----------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Inference_plot_inference_1d_resolve.py` (``plot_inference_1d_resolve.py``) | 05:02.241 | 0.0 MB |
-+----------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Inference_plot_inference_1d_skytem.py` (``plot_inference_1d_skytem.py``)   | 02:42.600 | 0.0 MB |
-+----------------------------------------------------------------------------------------------------+-----------+--------+
-| :ref:`sphx_glr_examples_Inference_plot_inference_1d_aerotem.py` (``plot_inference_1d_aerotem.py``) | 02:17.631 | 0.0 MB |
-+----------------------------------------------------------------------------------------------------+-----------+--------+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - N/A
+     - N/A
+     - N/A

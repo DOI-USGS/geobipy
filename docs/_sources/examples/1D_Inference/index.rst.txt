@@ -1,0 +1,86 @@
+
+
+.. _sphx_glr_examples_1D_Inference:
+
+1D Inference
+============
+
+There are a couple of ways to run an inference using geobipy, the first is via command line using
+
+.. code-block:: bash
+
+    geobipy skytem_options.py <output folder>
+
+The other is with a python script similar to the examples in this folder.
+In both cases, you will need to write an options file (also shown in these examples)
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Running GeoBIPy to invert Resolve data">
+
+.. only:: html
+
+  .. image:: /examples/1D_Inference/images/thumb/sphx_glr_plot_inference_1d_resolve_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_1D_Inference_plot_inference_1d_resolve.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Running GeoBIPy to invert Resolve data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Running GeoBIPy to invert Skytem data">
+
+.. only:: html
+
+  .. image:: /examples/1D_Inference/images/thumb/sphx_glr_plot_inference_1d_skytem_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_1D_Inference_plot_inference_1d_skytem.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Running GeoBIPy to invert Skytem data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Running GeoBIPy to invert Tempest data">
+
+.. only:: html
+
+  .. image:: /examples/1D_Inference/images/thumb/sphx_glr_plot_inference_1d_tempest_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_1D_Inference_plot_inference_1d_tempest.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Running GeoBIPy to invert Tempest data</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/1D_Inference/plot_inference_1d_resolve
+   /examples/1D_Inference/plot_inference_1d_skytem
+   /examples/1D_Inference/plot_inference_1d_tempest
+

@@ -1,5 +1,5 @@
-TemData
-^^^^^^^
+TdemData
+^^^^^^^^
 
 .. inheritance-diagram:: geobipy.src.classes.data.dataset.TdemData
    :parts: 1

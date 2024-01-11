@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py>`
+        :ref:`Go to the end <sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -24,7 +24,7 @@ This 3D rectilinear mesh defines a grid with straight cell boundaries.
 
 .. GENERATED FROM PYTHON SOURCE LINES 9-16
 
-.. code-block:: default
+.. code-block:: Python
 
     from geobipy import StatArray
     from geobipy import RectilinearMesh3D
@@ -46,7 +46,7 @@ Specify some cell centres in x and y
 
 .. GENERATED FROM PYTHON SOURCE LINES 18-37
 
-.. code-block:: default
+.. code-block:: Python
 
     x = StatArray(np.arange(10.0), 'Easting', 'm')
     y = StatArray(np.arange(15.0), 'Northing', 'm')
@@ -81,7 +81,7 @@ Specify some cell centres in x and y
 
 .. GENERATED FROM PYTHON SOURCE LINES 38-49
 
-.. code-block:: default
+.. code-block:: Python
 
     rm2 = rm[:, 5, 5]
     rm3 = rm[5, :, 5]
@@ -108,7 +108,7 @@ Specify some cell centres in x and y
 
 .. GENERATED FROM PYTHON SOURCE LINES 50-77
 
-.. code-block:: default
+.. code-block:: Python
 
     with h5py.File('rm3d.h5', 'w') as f:
         rm.createHdf(f, 'test')
@@ -155,7 +155,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 79-81
 
-.. code-block:: default
+.. code-block:: Python
 
     pv = rm.pyvista_plotter()
 
@@ -172,7 +172,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 83-105
 
-.. code-block:: default
+.. code-block:: Python
 
     mesh = rm.pyvista_mesh().save('rm3d_re1.vtk')
 
@@ -214,7 +214,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 107-109
 
-.. code-block:: default
+.. code-block:: Python
 
     pv = rm.pyvista_plotter()
 
@@ -231,7 +231,7 @@ We can plot the mesh in 3D!
 
 .. GENERATED FROM PYTHON SOURCE LINES 111-137
 
-.. code-block:: default
+.. code-block:: Python
 
     mesh = rm.pyvista_mesh().save('rm3d_re2.vtk')
 
@@ -275,12 +275,11 @@ We can plot the mesh in 3D!
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-142
+.. GENERATED FROM PYTHON SOURCE LINES 139-141
 
-.. code-block:: default
+.. code-block:: Python
 
     pv = rm.pyvista_plotter()
-    pv.show()
 
 
 
@@ -289,13 +288,13 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 143-144
+.. GENERATED FROM PYTHON SOURCE LINES 142-143
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 144-155
+.. GENERATED FROM PYTHON SOURCE LINES 143-154
 
-.. code-block:: default
+.. code-block:: Python
 
     mesh = rm.pyvista_mesh().save('rm3d_re3.vtk')
 
@@ -318,7 +317,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 2 minutes  36.755 seconds)
+   **Total running time of the script:** (0 minutes 3.318 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py:
@@ -327,14 +326,13 @@ We can plot the mesh in 3D!
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: plot_rectilinear_mesh_3d.ipynb <plot_rectilinear_mesh_3d.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_rectilinear_mesh_3d.py <plot_rectilinear_mesh_3d.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_rectilinear_mesh_3d.ipynb <plot_rectilinear_mesh_3d.ipynb>`
 
 
 .. only:: html

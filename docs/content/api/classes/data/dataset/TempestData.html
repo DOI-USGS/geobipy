@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TempestData &mdash; GeoBIPy 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="Datapoint classes" href="../datapoint/datapointrst.html" />
+    <link rel="prev" title="TdemData" href="TdemData.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../core/core.html">Core classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../data.html">Data classes</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="dataset.html">Dataset classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../datapoint/datapointrst.html">Datapoint classes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="../data.html">Data classes</a></li>
+          <li class="breadcrumb-item"><a href="dataset.html">Dataset classes</a></li>
+      <li class="breadcrumb-item active">TempestData</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/content/api/classes/data/dataset/TempestData.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tempestdata">
+<h1>TempestData<a class="headerlink" href="#tempestdata" title="Link to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../../_images/inheritance-286563f696f03256a99b8a899d9f39d17a4154ed.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.TempestData" usemap="#inheritance92a4e4a9a8" class="inheritance graphviz" /></div>
+<map id="inheritance92a4e4a9a8" name="inheritance92a4e4a9a8">
+<area shape="rect" id="node4" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
+<area shape="rect" id="node2" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="371,5,443,32"/>
+<area shape="rect" id="node5" href="TdemData.html#geobipy.src.classes.data.dataset.TdemData.TdemData" target="_top" title="Time domain electro magnetic data set" alt="" coords="491,5,573,32"/>
+<area shape="rect" id="node3" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="251,5,323,32"/>
+<area shape="rect" id="node6" href="#geobipy.src.classes.data.dataset.TempestData.TempestData" target="_top" title="Time domain electro magnetic data set" alt="" coords="621,5,720,32"/>
+</map><dl class="py class" id="module-geobipy.src.classes.data.dataset.TempestData">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.dataset.TempestData.</span></span><span class="sig-name descname"><span class="pre">TempestData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData" title="Link to this definition"></a></dt>
+<dd><p>Time domain electro magnetic data set</p>
+<p>A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.</p>
+<p>TdemData(nPoints=1, nTimes=[1], nSystems=1)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nPoints</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of soundings in the data file</p></li>
+<li><p><strong>nTimes</strong> (<em>array</em><em> of </em><em>ints</em><em>, </em><em>optional</em>) – Array of size nSystemsx1 containing the number of time gates in each system</p></li>
+<li><p><strong>nSystem</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of measurement systems</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Time domain data set</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="TdemData.html#geobipy.src.classes.data.dataset.TdemData.TdemData" title="geobipy.src.classes.data.dataset.TdemData.TdemData">TdemData</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-func docutils literal notranslate"><span class="pre">read()</span></code></dt><dd><p>For information on file format</p>
+</dd>
+</dl>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.additive_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">additive_error</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.additive_error" title="Link to this definition"></a></dt>
+<dd><p>The data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.fromHdf">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.fromHdf" title="Link to this definition"></a></dt>
+<dd><p>Reads the object from a HDF group</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.plot_data">
+<span class="sig-name descname"><span class="pre">plot_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.plot_data" title="Link to this definition"></a></dt>
+<dd><p>Plots the data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> (<em>int</em>) – System to plot</p></li>
+<li><p><strong>channels</strong> (<em>sequence</em><em> of </em><em>ints</em>) – Channels to plot</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.plot_predicted">
+<span class="sig-name descname"><span class="pre">plot_predicted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">system</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xAxis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'index'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.plot_predicted" title="Link to this definition"></a></dt>
+<dd><p>Plots the data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> (<em>int</em>) – System to plot</p></li>
+<li><p><strong>channels</strong> (<em>sequence</em><em> of </em><em>ints</em>) – Channels to plot</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.read_csv">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.read_csv" title="Link to this definition"></a></dt>
+<dd><p>Reads the data and system parameters from file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataFilename</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – Time domain data file names</p></li>
+<li><p><strong>systemFilename</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – Time domain system file names</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>File Format</p>
+<p>The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.</p>
+<p><strong>Required columns</strong></p>
+<dl class="simple">
+<dt>line</dt><dd><p>Line number for the data point</p>
+</dd>
+<dt>id or fid</dt><dd><p>Id number of the data point, these be unique</p>
+</dd>
+<dt>x or northing or n</dt><dd><p>Northing co-ordinate of the data point</p>
+</dd>
+<dt>y or easting or e</dt><dd><p>Easting co-ordinate of the data point</p>
+</dd>
+<dt>z or dtm or dem_elev or dem_np or topo</dt><dd><p>Elevation of the ground at the data point</p>
+</dd>
+<dt>alt or laser or bheight</dt><dd><p>Altitude of the transmitter coil</p>
+</dd>
+<dt>Off[0] to Off[nWindows-1]  (with the number and brackets)</dt><dd><p>The measurements for each time specified in the accompanying system file under Receiver Window Times</p>
+</dd>
+</dl>
+<p><strong>Optional columns</strong></p>
+<p>If any loop orientation columns are omitted the loop is assumed to be horizontal.</p>
+<dl class="simple">
+<dt>TxPitch</dt><dd><p>Pitch of the transmitter loop</p>
+</dd>
+<dt>TxRoll</dt><dd><p>Roll of the transmitter loop</p>
+</dd>
+<dt>TxYaw</dt><dd><p>Yaw of the transmitter loop</p>
+</dd>
+<dt>RxPitch</dt><dd><p>Pitch of the receiver loop</p>
+</dd>
+<dt>RxRoll</dt><dd><p>Roll of the receiver loop</p>
+</dd>
+<dt>RxYaw</dt><dd><p>Yaw of the receiver loop</p>
+</dd>
+<dt>OffErr[0] to ErrOff[nWindows-1]</dt><dd><p>Error estimates for the data</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">INFORMATION</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.read_netcdf">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_netcdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataFilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">systemFilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.read_netcdf" title="Link to this definition"></a></dt>
+<dd><p>Reads the data and system parameters from file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataFilename</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – Time domain data file names</p></li>
+<li><p><strong>systemFilename</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – Time domain system file names</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>File Format
+The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.</p>
+<p><strong>Required columns</strong></p>
+<dl class="simple">
+<dt>line</dt><dd><p>Line number for the data point</p>
+</dd>
+<dt>id or fid</dt><dd><p>Id number of the data point, these be unique</p>
+</dd>
+<dt>x or northing or n</dt><dd><p>Northing co-ordinate of the data point</p>
+</dd>
+<dt>y or easting or e</dt><dd><p>Easting co-ordinate of the data point</p>
+</dd>
+<dt>z or dtm or dem_elev or dem_np or topo</dt><dd><p>Elevation of the ground at the data point</p>
+</dd>
+<dt>alt or laser or bheight</dt><dd><p>Altitude of the transmitter coil</p>
+</dd>
+<dt>Off[0] to Off[nWindows-1]  (with the number and brackets)</dt><dd><p>The measurements for each time specified in the accompanying system file under Receiver Window Times</p>
+</dd>
+</dl>
+<p><strong>Optional columns</strong>
+If any loop orientation columns are omitted the loop is assumed to be horizontal.</p>
+<dl class="simple">
+<dt>TxPitch</dt><dd><p>Pitch of the transmitter loop</p>
+</dd>
+<dt>TxRoll</dt><dd><p>Roll of the transmitter loop</p>
+</dd>
+<dt>TxYaw</dt><dd><p>Yaw of the transmitter loop</p>
+</dd>
+<dt>RxPitch</dt><dd><p>Pitch of the receiver loop</p>
+</dd>
+<dt>RxRoll</dt><dd><p>Roll of the receiver loop</p>
+</dd>
+<dt>RxYaw</dt><dd><p>Yaw of the receiver loop</p>
+</dd>
+<dt>OffErr[0] to ErrOff[nWindows-1]</dt><dd><p>Error estimates for the data</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">INFORMATION</span></code></p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.relative_error">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">relative_error</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.relative_error" title="Link to this definition"></a></dt>
+<dd><p>The data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.single">
+<span class="sig-name descname"><span class="pre">single</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.single" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="../datapoint/Tempest_dataPoint.html#geobipy.src.classes.data.datapoint.Tempest_datapoint.Tempest_datapoint" title="geobipy.src.classes.data.datapoint.Tempest_datapoint.Tempest_datapoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tempest_datapoint</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="TdemData.html" class="btn btn-neutral float-left" title="TdemData" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../datapoint/datapointrst.html" class="btn btn-neutral float-right" title="Datapoint classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -39,6 +39,8 @@ def create_resolve(model, output_suffix):
     title = 'resolve_'+output_suffix
     prng = get_prng(seed=0)
 
+    model.mesh.y_edges = model.mesh.y_edges / 4.1
+
     ds = FdemData(system=data_path+'//resolve.stm')
     ds_clean, ds_noisy = ds.create_synthetic_data(model, prng)
     ds_clean.write_csv(data_path+'//{}_clean.csv'.format(title))

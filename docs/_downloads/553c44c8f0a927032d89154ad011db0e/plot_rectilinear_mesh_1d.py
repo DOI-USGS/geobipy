@@ -17,11 +17,11 @@ import h5py
 # Instantiate a new 1D rectilinear mesh by specifying cell centres, edges, or widths.
 x = StatArray(np.cumsum(np.arange(0.0, 10.0)), 'Depth', 'm')
 
-################################################################################
+#%%
 # Cell edges
 rm = RectilinearMesh1D(edges=x, centres=None, widths=None)
 
-################################################################################
+#%%
 # We can plot the grid of the mesh
 # Or Pcolor the mesh showing. An array of cell values is used as the colour.
 arr = StatArray(np.random.randn(*rm.shape), "Name", "Units")
@@ -31,7 +31,6 @@ _ = rm.plotGrid(transpose=True, flip=True)
 plt.subplot(122)
 _ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
 
-###############################################################################
 # Mask the mesh cells by a distance
 rm_masked, indices, arr2 = rm.mask_cells(2.0, values=arr)
 p+=1; plt.figure(p)
@@ -77,10 +76,9 @@ _ = rm2.pcolor(np.repeat(arr[None, :], 10, 0), grid=True, flipY=True)
 # Here we use edges
 x = StatArray(np.logspace(-3, 3, 10), 'Depth', 'm')
 
-################################################################################
+#%%
 rm = RectilinearMesh1D(edges=x, log=10)
 
-###############################################################################
 # We can plot the grid of the mesh
 # Or Pcolor the mesh showing. An array of cell values is used as the colour.
 p+=1; plt.figure(p)
@@ -129,10 +127,10 @@ _ = rm2.pcolor(np.repeat(arr[None, :], 10, 0), grid=True, flipY=True)
 # Here we use edges
 x = StatArray(np.arange(11.0), 'Deviation', 'm')
 
-################################################################################
+#%%
 rm = RectilinearMesh1D(edges=x, relativeTo=5.0)
 
-################################################################################
+#%%
 # We can plot the grid of the mesh
 # Or Pcolor the mesh showing. An array of cell values is used as the colour.
 p+=1; plt.figure(p)
@@ -183,7 +181,7 @@ n_cells = 2
 widths = StatArray(np.full(n_cells, fill_value=10.0), 'test')
 rm = RectilinearMesh1D(widths=widths, relativeTo=0.0)
 
-################################################################################
+#%%
 # Randomness and Model Perturbations
 # ++++++++++++++++++++++++++++++++++
 # We can set the priors on the 1D model by assigning minimum and maximum layer
@@ -191,18 +189,22 @@ rm = RectilinearMesh1D(widths=widths, relativeTo=0.0)
 # the number of cells in the model, a new depth interface, new parameter values
 # and the vertical gradient of those parameters.
 # The halfSpaceValue is used as a reference value for the parameter prior.
-prng = np.random.RandomState()
+from numpy.random import Generator
+from numpy.random import PCG64DXSM
+generator = PCG64DXSM(seed=0)
+prng = Generator(generator)
+
 # Set the priors
 rm.set_priors(min_edge = 1.0,
               max_edge = 150.0,
               max_cells = 30,
               prng = prng)
 
-################################################################################
+#%%
 # We can evaluate the prior of the model using depths only
 print('Log probability of the Mesh given its priors: ', rm.probability)
 
-################################################################################
+#%%
 # To propose new meshes, we specify the probabilities of creating, removing, perturbing, and not changing
 # an edge interface
 # Here we force the creation of a layer.
@@ -211,13 +213,13 @@ rm.set_posteriors()
 
 rm0 = deepcopy(rm)
 
-################################################################################
+#%%
 # We can then perturb the layers of the model
 for i in range(1000):
     rm = rm.perturb()
     rm.update_posteriors()
 
-################################################################################
+#%%
 p+=1; fig = plt.figure(p)
 ax = rm._init_posterior_plots(fig)
 
@@ -240,7 +242,7 @@ p+=1; fig = plt.figure(p)
 ax = rm1._init_posterior_plots(fig)
 rm1.plot_posteriors(axes=ax)
 
-################################################################################
+#%%
 # Expanded
 with h5py.File('rm1d.h5', 'w') as f:
     tmp = rm.pad(rm.max_cells)

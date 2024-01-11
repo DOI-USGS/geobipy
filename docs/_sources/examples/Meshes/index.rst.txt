@@ -2,6 +2,7 @@
 
 .. _sphx_glr_examples_Meshes:
 
+======
 Meshes
 ======
 
@@ -18,7 +19,7 @@ Meshes
 .. only:: html
 
   .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_1d_thumb.png
-    :alt: 1D Rectilinear Mesh
+    :alt:
 
   :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py`
 
@@ -35,7 +36,7 @@ Meshes
 .. only:: html
 
   .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_2d_thumb.png
-    :alt: 2D Rectilinear Mesh
+    :alt:
 
   :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py`
 
@@ -52,7 +53,7 @@ Meshes
 .. only:: html
 
   .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_3d_thumb.png
-    :alt: 3D Rectilinear Mesh
+    :alt:
 
   :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_3d.py`
 

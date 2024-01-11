@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_examples_Statistics_plot_histogram_1d.py>`
+        :ref:`Go to the end <sphx_glr_download_examples_Statistics_plot_histogram_1d.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -26,7 +26,7 @@ saving as HDF5
 
 .. GENERATED FROM PYTHON SOURCE LINES 10-17
 
-.. code-block:: default
+.. code-block:: Python
 
     from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
     import h5py
@@ -49,7 +49,7 @@ Histogram with regular bins
 
 .. GENERATED FROM PYTHON SOURCE LINES 20-24
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Create regularly spaced bins
@@ -68,7 +68,7 @@ Set the histogram using the bins, and update
 
 .. GENERATED FROM PYTHON SOURCE LINES 26-28
 
-.. code-block:: default
+.. code-block:: Python
 
     H = Histogram(mesh=mesh)
 
@@ -85,7 +85,7 @@ We can update the histogram with some new values
 
 .. GENERATED FROM PYTHON SOURCE LINES 30-43
 
-.. code-block:: default
+.. code-block:: Python
 
     H.update(np.random.randn(1000), trim=True)
 
@@ -114,7 +114,7 @@ We can update the histogram with some new values
  .. code-block:: none
 
 
-    <AxesSubplot: xlabel='bins (m)', ylabel='Cumulative Density Function'>
+    <Axes: xlabel='bins (m)', ylabel='Cumulative Density Function'>
 
 
 
@@ -124,7 +124,7 @@ Get the median, and 95% confidence values
 
 .. GENERATED FROM PYTHON SOURCE LINES 45-53
 
-.. code-block:: default
+.. code-block:: Python
 
     print(H.credible_intervals(percent=95.0))
 
@@ -147,7 +147,7 @@ Get the median, and 95% confidence values
 
  .. code-block:: none
 
-    (0.09000000000000008, -1.95, 1.71)
+    (-0.030000000000000027, -1.95, 1.9499999999999997)
 
 
 
@@ -159,7 +159,7 @@ Histogram with irregular bins
 
 .. GENERATED FROM PYTHON SOURCE LINES 56-61
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Create irregularly spaced bins
@@ -179,7 +179,7 @@ Create a named StatArray
 
 .. GENERATED FROM PYTHON SOURCE LINES 63-66
 
-.. code-block:: default
+.. code-block:: Python
 
     edges = StatArray(irregularBins, 'irregular bins')
     mesh = RectilinearMesh1D(edges = edges)
@@ -195,27 +195,13 @@ Create a named StatArray
 
 Instantiate the histogram with bin edges
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-70
+.. GENERATED FROM PYTHON SOURCE LINES 68-73
 
-.. code-block:: default
+.. code-block:: Python
 
     H = Histogram(mesh=mesh)
 
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 71-72
-
-Update the histogram
-
-.. GENERATED FROM PYTHON SOURCE LINES 72-74
-
-.. code-block:: default
-
+    # Update the histogram
     H.update((np.random.randn(10000)*20.0) - 10.0)
 
 
@@ -225,13 +211,13 @@ Update the histogram
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-76
+.. GENERATED FROM PYTHON SOURCE LINES 74-75
 
 Plot the histogram
 
-.. GENERATED FROM PYTHON SOURCE LINES 76-88
+.. GENERATED FROM PYTHON SOURCE LINES 75-87
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.subplot(211)
@@ -269,13 +255,13 @@ Plot the histogram
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-90
+.. GENERATED FROM PYTHON SOURCE LINES 88-89
 
 We can plot the histogram as a pcolor plot
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-93
+.. GENERATED FROM PYTHON SOURCE LINES 89-92
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     _ = H.pcolor(grid=True, transpose=True)
@@ -292,15 +278,15 @@ We can plot the histogram as a pcolor plot
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 94-97
+.. GENERATED FROM PYTHON SOURCE LINES 93-96
 
 Histogram with linear space entries that are logged internally
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Create some bins spaced logarithmically
 
-.. GENERATED FROM PYTHON SOURCE LINES 97-99
+.. GENERATED FROM PYTHON SOURCE LINES 96-98
 
-.. code-block:: default
+.. code-block:: Python
 
     mesh = RectilinearMesh1D(edges = StatArray(np.logspace(-5, 3), 'positive bins'), log=10)
 
@@ -311,13 +297,13 @@ Create some bins spaced logarithmically
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-101
+.. GENERATED FROM PYTHON SOURCE LINES 99-100
 
 Instantiate the Histogram with log=10
 
-.. GENERATED FROM PYTHON SOURCE LINES 101-103
+.. GENERATED FROM PYTHON SOURCE LINES 100-102
 
-.. code-block:: default
+.. code-block:: Python
 
     H = Histogram(mesh)
 
@@ -328,13 +314,13 @@ Instantiate the Histogram with log=10
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-105
+.. GENERATED FROM PYTHON SOURCE LINES 103-104
 
 The update takes in the numbers in linear space and takes their log=10
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-107
+.. GENERATED FROM PYTHON SOURCE LINES 104-106
 
-.. code-block:: default
+.. code-block:: Python
 
     H.update(10.0**(np.random.randn(1000)*2.0), trim=True)
 
@@ -345,9 +331,9 @@ The update takes in the numbers in linear space and takes their log=10
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 108-123
+.. GENERATED FROM PYTHON SOURCE LINES 107-122
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.subplot(211)
@@ -376,9 +362,9 @@ The update takes in the numbers in linear space and takes their log=10
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-125
+.. GENERATED FROM PYTHON SOURCE LINES 123-124
 
-.. code-block:: default
+.. code-block:: Python
 
     mesh = RectilinearMesh1D(edges=StatArray(np.linspace(-3.0, 3.0, 101), 'bins', 'm'))
 
@@ -388,13 +374,13 @@ The update takes in the numbers in linear space and takes their log=10
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-127
+.. GENERATED FROM PYTHON SOURCE LINES 125-126
 
 Set the histogram using the bins, and update
 
-.. GENERATED FROM PYTHON SOURCE LINES 127-129
+.. GENERATED FROM PYTHON SOURCE LINES 126-128
 
-.. code-block:: default
+.. code-block:: Python
 
     H = Histogram(mesh=mesh)
 
@@ -405,13 +391,13 @@ Set the histogram using the bins, and update
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-131
+.. GENERATED FROM PYTHON SOURCE LINES 129-130
 
 We can update the histogram with some new values
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-157
+.. GENERATED FROM PYTHON SOURCE LINES 130-156
 
-.. code-block:: default
+.. code-block:: Python
 
     H.update(np.random.randn(1000), trim=True)
 
@@ -453,31 +439,39 @@ We can update the histogram with some new values
     |   Number of Cells:
     |   |   100
     |   Cell Centres:
-    |   |   Name: bins (m) 0x7ff592df8940
+    |   |   Name: bins (m) 0x7fbfa200e340
     |   |   Shape: (100,)
     |   |   Values: [-2.97 -2.91 -2.85 ...  2.85  2.91  2.97]
-    |   |   min: -2.9699999999999998
-    |   |   max: 2.9699999999999998
+    |   |   Min: -2.9699999999999998
+    |   |   Max: 2.9699999999999998
+    |   |   has_posterior: False
+    |   
     |   Cell Edges:
-    |   |   Name: bins (m) 0x7ff592df8dc0
-    |   |    Shape: (101,)
-    |   |    Values: [-3.   -2.94 -2.88 ...  2.88  2.94  3.  ]
-    |   |    min: -3.0
-    |   |    max: 3.0
+    |   |   Name: bins (m) 0x7fbfa200d6c0
+    |   |   Shape: (101,)
+    |   |   Values: [-3.   -2.94 -2.88 ...  2.88  2.94  3.  ]
+    |   |   Min: -3.0
+    |   |   Max: 3.0
+    |   |   has_posterior: False
+    |   
     |   log:
     |   |   None
     |   relativeTo:
-    |   |   Name:  0x7ff592dad0c0
-    |   |    Shape: (1,)
-    |   |    Values: [0.]
-    |   |    min: 0.0
-    |   |    max: 0.0
-    |values:
-    |   Name: Frequency 0x7ff592df8b40
+    |   |   Name:  0x7fbfa1fb06c0
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Frequency 0x7fbfa200f2c0
     |   Shape: (100,)
-    |   Values: [1 0 1 ... 1 1 0]
-    |   min: 0
-    |   max: 82
+    |   Values: [3 2 3 ... 0 2 1]
+    |   Min: 0
+    |   Max: 87
+    |   has_posterior: False
+
 
 
 
@@ -486,7 +480,7 @@ We can update the histogram with some new values
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.342 seconds)
+   **Total running time of the script:** (0 minutes 1.293 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:
@@ -495,14 +489,13 @@ We can update the histogram with some new values
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: plot_histogram_1d.ipynb <plot_histogram_1d.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_histogram_1d.py <plot_histogram_1d.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_histogram_1d.ipynb <plot_histogram_1d.ipynb>`
 
 
 .. only:: html
