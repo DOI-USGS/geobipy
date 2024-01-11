@@ -16,10 +16,12 @@ def readme():
     with open('README.rst', encoding='utf-8', mode='r') as f:
         return f.read()
 
+__version__ = '1.0.0'
+
 setup(name='geobipy',
     packages=find_packages(),
     scripts=[],
-    version="1.0.0",
+    version=__version__,
     description='Markov chain Monte Carlo inversion',
     long_description=readme(),
     url = 'https://github.com/DOI-USGS/geobipy',
