@@ -150,6 +150,10 @@ def serial_geobipy(input_file, output_directory, **kwargs):
     # Copy the input file to the output directory for reference.
     shutil.copy(input_file, output_directory)
 
+    index = kwargs.pop('index', None)
+    fiducial = kwargs.pop('fiducial', None)
+    line_number = kwargs.pop('line_number', None)
+
     options = user_parameters.read(input_file, **kwargs)
 
     data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
@@ -160,9 +164,9 @@ def serial_geobipy(input_file, output_directory, **kwargs):
 
     inference3d.create_hdf5(directory=output_directory, **options)
 
-    inference3d.infer(index=kwargs.get('index', None),
-                      fiducial=kwargs.get('fiducial', None),
-                      line_number=kwargs.get('line_number', None),
+    inference3d.infer(index=index,
+                      fiducial=fiducial,
+                      line_number=line_number,
                       **options)
 
 
