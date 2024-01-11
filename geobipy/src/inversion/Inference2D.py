@@ -101,7 +101,7 @@ class Inference2D(myObject):
 
     @data.setter
     def data(self, value):
-        assert isinstance(value, Data), TypeError("data must have type geobipy.Data")
+        assert isinstance(value, Data), TypeError("data must have type geobipy.Data, instead has type {}".format(type(value)))
         assert value.nPoints > 0, ValueError("Data has no value. nPoints is 0.")
         self._data = value
 
