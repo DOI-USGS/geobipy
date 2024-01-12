@@ -1,0 +1,76 @@
+
+
+.. _sphx_glr_examples_Datapoints:
+
+Datapoints
+==========
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Frequency domain datapoint">
+
+.. only:: html
+
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_resolve_datapoint_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Frequency domain datapoint</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Skytem Datapoint Class">
+
+.. only:: html
+
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_skytem_datapoint_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Skytem Datapoint Class</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Tempest Datapoint Class">
+
+.. only:: html
+
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_tempest_datapoint_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Tempest Datapoint Class</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Datapoints/plot_resolve_datapoint
+   /examples/Datapoints/plot_skytem_datapoint
+   /examples/Datapoints/plot_tempest_datapoint
+

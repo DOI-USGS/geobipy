@@ -1,0 +1,6 @@
+<map id="inheritancea4de341619" name="inheritancea4de341619">
+<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,5,77,32"/>
+<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.UniformDistribution.Uniform" target="_top" title="Class defining a uniform distribution" alt="" coords="414,5,486,32"/>
+<area shape="rect" id="node3" href="baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution" target="_top" title="Define an abstract base distribution class" alt="" coords="251,5,366,32"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="inheritance06e99732c6" name="inheritance06e99732c6">
+<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="4,4,63,26"/>
+<area shape="rect" id="node5" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="102,4,165,26"/>
+<area shape="rect" id="node2" href="datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="302,4,367,26"/>
+<area shape="rect" id="node4" href="EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" target="_top" title="Abstract EmDataPoint Class" alt="" coords="406,4,487,26"/>
+<area shape="rect" id="node3" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="204,4,263,26"/>
+<area shape="rect" id="node6" href="TdemDataPoint.html#geobipy.src.classes.data.datapoint.TdemDataPoint.TdemDataPoint" target="_top" title="Initialize a Time domain EMData Point" alt="" coords="526,4,617,26"/>
+<area shape="rect" id="node7" href="#geobipy.src.classes.data.datapoint.Tempest_datapoint.Tempest_datapoint" target="_top" title="Initialize a Tempest Time domain data point" alt="" coords="657,4,764,26"/>
+</map>

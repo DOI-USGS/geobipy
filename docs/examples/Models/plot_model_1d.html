@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1D Model with an infinite halfspace &mdash; GeoBIPy 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2D Rectilinear Model" href="plot_model_2d.html" />
+    <link rel="prev" title="3D Rectilinear Mesh" href="../Meshes/plot_rectilinear_mesh_3d.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#models">Models</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">1D Model with an infinite halfspace</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#instantiate-the-1d-model-with-a-half-space">Instantiate the 1D Model with a Half Space</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#randomness-and-model-perturbations">Randomness and Model Perturbations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#perturbing-a-model-multiple-times">Perturbing a model multiple times</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plot_model_2d.html">2D Rectilinear Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_model_3d.html">3D Rectilinear Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#inference-2d">Inference 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+      <li class="breadcrumb-item active">1D Model with an infinite halfspace</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/Models/plot_model_1d.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-examples-models-plot-model-1d-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="d-model-with-an-infinite-halfspace">
+<span id="sphx-glr-examples-models-plot-model-1d-py"></span><h1>1D Model with an infinite halfspace<a class="headerlink" href="#d-model-with-an-infinite-halfspace" title="Link to this heading"></a></h1>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">RectilinearMesh1D</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Distribution</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<section id="instantiate-the-1d-model-with-a-half-space">
+<h2>Instantiate the 1D Model with a Half Space<a class="headerlink" href="#instantiate-the-1d-model-with-a-half-space" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make a test model with 10 layers, and increasing parameter values</span>
+<span class="n">nLayers</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">par</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="n">nLayers</span><span class="p">),</span> <span class="s2">&quot;Conductivity&quot;</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\\</span><span class="s2">frac</span><span class="si">{S}{m}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">thk</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">nLayers</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">10.0</span><span class="p">))</span>
+<span class="n">thk</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">widths</span> <span class="o">=</span> <span class="n">thk</span><span class="p">)</span>
+
+<span class="n">mod</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">par</span><span class="p">)</span>
+<span class="c1"># mod = Model1D(parameters=par, widths=thk)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_model_1d_001.png" srcset="../../_images/sphx_glr_plot_model_1d_001.png" alt="plot model 1d" class = "sphx-glr-single-img"/></section>
+<section id="randomness-and-model-perturbations">
+<h2>Randomness and Model Perturbations<a class="headerlink" href="#randomness-and-model-perturbations" title="Link to this heading"></a></h2>
+<p>We can set the priors on the 1D model by assigning minimum and maximum layer
+depths and a maximum number of layers.  These are used to create priors on
+the number of cells in the model, a new depth interface, new parameter values
+and the vertical gradient of those parameters.
+The halfSpaceValue is used as a reference value for the parameter prior.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">Generator</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">PCG64DXSM</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">PCG64DXSM</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">prng</span> <span class="o">=</span> <span class="n">Generator</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+
+<span class="c1"># Set the priors</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">set_priors</span><span class="p">(</span><span class="n">value_mean</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+              <span class="n">min_edge</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+              <span class="n">max_edge</span><span class="o">=</span><span class="mf">150.0</span><span class="p">,</span>
+              <span class="n">max_cells</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+              <span class="n">solve_value</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">solve_gradient</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can evaluate the prior of the model using depths only</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Log probability of the Model given its priors: &#39;</span><span class="p">,</span> <span class="n">mod</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+<span class="c1"># Or with priors on its parameters, and parameter gradient with depth.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Log probability of the Model given its priors: &#39;</span><span class="p">,</span> <span class="n">mod</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Log probability of the Model given its priors:  -13.338200594791775
+Log probability of the Model given its priors:  -19.780269280707714
+</pre></div>
+</div>
+<p>To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
+a layer interface</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;LogNormal&#39;</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">2.0</span><span class="p">)</span><span class="o">**</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">linearSpace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">set_proposals</span><span class="p">(</span><span class="n">probabilities</span><span class="o">=</span><span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">],</span> <span class="n">proposal</span><span class="o">=</span><span class="n">pProposal</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can then perturb the layers of the model</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">remapped</span><span class="p">,</span> <span class="n">perturbed</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># , grid=True)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">perturbed</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># , grid=True)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_model_1d_002.png" srcset="../../_images/sphx_glr_plot_model_1d_002.png" alt="plot model 1d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;Axes: &gt;
+</pre></div>
+</div>
+<p>We can evaluate the prior of the model using depths only</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Log probability of the Model given its priors: &#39;</span><span class="p">,</span><span class="n">perturbed</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+<span class="c1"># Or with priors on its parameters, and parameter gradient with depth.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Log probability of the Model given its priors: &#39;</span><span class="p">,</span><span class="n">perturbed</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Log probability of the Model given its priors:  -13.338200594791775
+Log probability of the Model given its priors:  -19.03751254813826
+</pre></div>
+</div>
+</section>
+<section id="perturbing-a-model-multiple-times">
+<h2>Perturbing a model multiple times<a class="headerlink" href="#perturbing-a-model-multiple-times" title="Link to this heading"></a></h2>
+<p>In the stochasitic inference process, we perturb the model structure,
+and parameter values, multiple times.
+Each time the model is perturbed, we can record its state
+in a posterior distribution.</p>
+<p>For a 1D model, the parameter posterior is a 2D hitmap with depth in one dimension
+and the parameter value in the other.
+We also attach a 1D histogram for the number of layers,
+and a 1D histogram for the locations of interfaces.</p>
+<p>Since we have already set the priors on the Model, we can set the posteriors
+based on bins from from the priors.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mod</span><span class="o">.</span><span class="n">set_posteriors</span><span class="p">()</span>
+
+<span class="n">mod0</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we randomly perturb the model, and update its posteriors.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mod</span><span class="o">.</span><span class="n">update_posteriors</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1001</span><span class="p">):</span>
+    <span class="n">remapped</span><span class="p">,</span> <span class="n">perturbed</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
+
+    <span class="c1"># And update the model posteriors</span>
+    <span class="n">perturbed</span><span class="o">.</span><span class="n">update_posteriors</span><span class="p">()</span>
+
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">perturbed</span>
+</pre></div>
+</div>
+<p>We can now plot the posteriors of the model.</p>
+<p>Remember in this case, we are simply perturbing the model structure and parameter values
+The proposal for the parameter values is fixed and centred around a single value.
+fig = plt.figure(figsize=(8, 6))</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># plt.subplot(131)</span>
+<span class="c1"># mod.nCells.posterior.plot()</span>
+<span class="c1"># ax = plt.subplot(132)</span>
+<span class="c1"># mod.values.posterior.pcolor(cmap=&#39;gray_r&#39;, colorbar=False, flipY=True, logX=10)</span>
+<span class="c1"># plt.subplot(133, sharey=ax)</span>
+<span class="c1"># mod.mesh.edges.posterior.plot(transpose=True, flipY=True)</span>
+
+<span class="c1"># plt.figure()</span>
+<span class="c1"># mod.plot_posteriors(**{&quot;cmap&quot;: &#39;gray_r&#39;,</span>
+<span class="c1">#                   &quot;xscale&quot;: &#39;log&#39;,</span>
+<span class="c1">#                   &quot;noColorbar&quot;: True,</span>
+<span class="c1">#                   &quot;flipY&quot;: True,</span>
+<span class="c1">#                   &#39;credible_interval_kwargs&#39;:{&#39;axis&#39;: 1,</span>
+<span class="c1">#                                           &#39;reciprocate&#39;: True,</span>
+<span class="c1">#                                           &#39;xscale&#39;: &#39;log&#39;}})</span>
+<span class="c1"># mod.par.posterior.plotCredibleIntervals(xscale=&#39;log&#39;, axis=1)</span>
+
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="c1"># gs = fig.add_gridspec(nrows=1, ncols=1)</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">axes</span><span class="o">=</span><span class="n">fig</span><span class="p">,</span>
+                    <span class="n">edges_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;transpose&quot;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;flipY&quot;</span><span class="p">:</span><span class="kc">True</span>
+                    <span class="p">},</span>
+                    <span class="n">parameter_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s2">&quot;cmap&quot;</span><span class="p">:</span> <span class="s1">&#39;gray_r&#39;</span><span class="p">,</span>
+                        <span class="s2">&quot;xscale&quot;</span><span class="p">:</span> <span class="s1">&#39;log&#39;</span><span class="p">,</span>
+                        <span class="s2">&quot;colorbar&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="s2">&quot;flipY&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s1">&#39;credible_interval_kwargs&#39;</span><span class="p">:{</span>
+                              <span class="s1">&#39;reciprocate&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="c1">#   &#39;axis&#39;: 1,</span>
+                              <span class="s1">&#39;xscale&#39;</span><span class="p">:</span> <span class="s1">&#39;log&#39;</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="n">best</span> <span class="o">=</span> <span class="n">mod</span><span class="p">)</span>
+
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_model_1d_003.png" srcset="../../_images/sphx_glr_plot_model_1d_003.png" alt="plot model 1d" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.092 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-models-plot-model-1d-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/7d8af6f7b40a771fd3b189fc4fd80360/plot_model_1d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_model_1d.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/f48e5c05cfcaf1411cc06bb7a0ed1eb0/plot_model_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_model_1d.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Meshes/plot_rectilinear_mesh_3d.html" class="btn btn-neutral float-left" title="3D Rectilinear Mesh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_model_2d.html" class="btn btn-neutral float-right" title="2D Rectilinear Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

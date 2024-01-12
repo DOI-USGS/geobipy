@@ -1,0 +1,76 @@
+
+
+.. _sphx_glr_examples_Models:
+
+Models
+======
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="1D Model with an infinite halfspace">
+
+.. only:: html
+
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_1d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Models_plot_model_1d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">1D Model with an infinite halfspace</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="2D Rectilinear Model">
+
+.. only:: html
+
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_2d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Models_plot_model_2d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D Rectilinear Model</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="3D Rectilinear Model">
+
+.. only:: html
+
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_3d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Models_plot_model_3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">3D Rectilinear Model</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Models/plot_model_1d
+   /examples/Models/plot_model_2d
+   /examples/Models/plot_model_3d
+

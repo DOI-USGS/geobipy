@@ -1,0 +1,580 @@
+:orphan:
+
+########
+Examples
+########
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    </div>
+
+Distributions
+=============
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution">
+
+.. only:: html
+
+  .. image:: /examples/Distributions/images/thumb/sphx_glr_plot_distributions_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Distributions_plot_distributions.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Distribution Class</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Distributions/plot_distributions
+
+Statistics
+==========
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5">
+
+.. only:: html
+
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_1d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Statistics_plot_histogram_1d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Histogram 1D</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This 2D histogram class allows efficient updating of histograms, plotting and saving as HDF5.">
+
+.. only:: html
+
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_2d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Statistics_plot_histogram_2d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Histogram 2D</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This 3D histogram class allows efficient updating of histograms, plotting and saving as HDF5.">
+
+.. only:: html
+
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_histogram_3d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Statistics_plot_histogram_3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Histogram 3D</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us...">
+
+.. only:: html
+
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_StatArray_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Statistics_plot_StatArray.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">StatArray Class</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Statistics/plot_histogram_1d
+   /examples/Statistics/plot_histogram_2d
+   /examples/Statistics/plot_histogram_3d
+   /examples/Statistics/plot_StatArray
+
+Meshes
+======
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="1D Rectilinear Mesh">
+
+.. only:: html
+
+  .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_1d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">1D Rectilinear Mesh</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="It can be instantiated in two ways.">
+
+.. only:: html
+
+  .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_2d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D Rectilinear Mesh</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="3D Rectilinear Mesh">
+
+.. only:: html
+
+  .. image:: /examples/Meshes/images/thumb/sphx_glr_plot_rectilinear_mesh_3d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">3D Rectilinear Mesh</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Meshes/plot_rectilinear_mesh_1d
+   /examples/Meshes/plot_rectilinear_mesh_2d
+   /examples/Meshes/plot_rectilinear_mesh_3d
+
+Models
+======
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="1D Model with an infinite halfspace">
+
+.. only:: html
+
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_1d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Models_plot_model_1d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">1D Model with an infinite halfspace</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="2D Rectilinear Model">
+
+.. only:: html
+
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_2d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Models_plot_model_2d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D Rectilinear Model</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="3D Rectilinear Model">
+
+.. only:: html
+
+  .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_3d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Models_plot_model_3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">3D Rectilinear Model</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Models/plot_model_1d
+   /examples/Models/plot_model_2d
+   /examples/Models/plot_model_3d
+
+Data
+====
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    </div>
+
+Datapoints
+==========
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Frequency domain datapoint">
+
+.. only:: html
+
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_resolve_datapoint_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Frequency domain datapoint</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Skytem Datapoint Class">
+
+.. only:: html
+
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_skytem_datapoint_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Skytem Datapoint Class</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Tempest Datapoint Class">
+
+.. only:: html
+
+  .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_tempest_datapoint_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Tempest Datapoint Class</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Datapoints/plot_resolve_datapoint
+   /examples/Datapoints/plot_skytem_datapoint
+   /examples/Datapoints/plot_tempest_datapoint
+
+1D Inference
+============
+
+There are a couple of ways to run an inference using geobipy, the first is via command line using
+
+.. code-block:: bash
+
+    geobipy skytem_options.py <output folder>
+
+The other is with a python script similar to the examples in this folder.
+In both cases, you will need to write an options file (also shown in these examples)
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Running GeoBIPy to invert Resolve data">
+
+.. only:: html
+
+  .. image:: /examples/Inference_1D/images/thumb/sphx_glr_plot_inference_1d_resolve_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_resolve.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Running GeoBIPy to invert Resolve data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Running GeoBIPy to invert Skytem data">
+
+.. only:: html
+
+  .. image:: /examples/Inference_1D/images/thumb/sphx_glr_plot_inference_1d_skytem_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_skytem.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Running GeoBIPy to invert Skytem data</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Running GeoBIPy to invert Tempest data">
+
+.. only:: html
+
+  .. image:: /examples/Inference_1D/images/thumb/sphx_glr_plot_inference_1d_tempest_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_tempest.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Running GeoBIPy to invert Tempest data</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Inference_1D/plot_inference_1d_resolve
+   /examples/Inference_1D/plot_inference_1d_skytem
+   /examples/Inference_1D/plot_inference_1d_tempest
+
+Inference 2D
+============
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
+  .. image:: /examples/Inference_2D/images/thumb/sphx_glr_plot_inference_2d_resolve_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_resolve.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D Posterior analysis of Resolve inference</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
+  .. image:: /examples/Inference_2D/images/thumb/sphx_glr_plot_inference_2d_skytem_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_skytem.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D Posterior analysis of Skytem inference</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
+  .. image:: /examples/Inference_2D/images/thumb/sphx_glr_plot_inference_2d_tempest_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_tempest.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D Posterior analysis of Tempest inference</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Inference_2D/plot_inference_2d_resolve
+   /examples/Inference_2D/plot_inference_2d_skytem
+   /examples/Inference_2D/plot_inference_2d_tempest
+
+HDF 5
+=====
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory syste...">
+
+.. only:: html
+
+  .. image:: /examples/HDF5/images/thumb/sphx_glr_hdf5_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_HDF5_hdf5.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Using HDF5 within GeoBIPy</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/HDF5/hdf5
+
+
+.. only:: html
+
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
+
+    .. container:: sphx-glr-download sphx-glr-download-python
+
+      :download:`Download all examples in Python source code: examples_python.zip </examples/examples_python.zip>`
+
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download all examples in Jupyter notebooks: examples_jupyter.zip </examples/examples_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RectilinearMesh3D &mdash; GeoBIPy 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Model classes" href="../model/model.html" />
+    <link rel="prev" title="RectilinearMesh2D_stitched" href="RectilinearMesh2D_stitched.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="mesh.html">Mesh classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="RectilinearMesh1D.html">RectilinearMesh1D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RectilinearMesh2D.html">RectilinearMesh2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RectilinearMesh2D_stitched.html">RectilinearMesh2D_stitched</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">RectilinearMesh3D</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../statistics/statistics.html">Statistics classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="mesh.html">Mesh classes</a></li>
+      <li class="breadcrumb-item active">RectilinearMesh3D</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/content/api/classes/mesh/RectilinearMesh3D.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rectilinearmesh3d">
+<h1>RectilinearMesh3D<a class="headerlink" href="#rectilinearmesh3d" title="Link to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-9c864059254fcc1e3b441445a469437ee047386d.png" alt="Inheritance diagram of geobipy.src.classes.mesh.RectilinearMesh3D" usemap="#inheritanceb5cabbf6a5" class="inheritance graphviz" /></div>
+<map id="inheritanceb5cabbf6a5" name="inheritanceb5cabbf6a5">
+<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
+<area shape="rect" id="node4" href="RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges." alt="" coords="371,5,503,32"/>
+<area shape="rect" id="node5" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D" target="_top" title="Class defining a 3D rectilinear mesh with cell centres and edges." alt="" coords="551,5,683,32"/>
+</map><p id="module-geobipy.src.classes.mesh.RectilinearMesh3D">&#64;RectilinearMesh2D_Class
+Module describing a 2D Rectilinear Mesh class with x and y axes specified</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh3D.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D" title="Link to this definition"></a></dt>
+<dd><p>Class defining a 3D rectilinear mesh with cell centres and edges.</p>
+<p>Contains a simple mesh with cell edges, widths, and centre locations.
+There are two ways of instantiating the RectilinearMesh2D.
+The first is by specifying the x and y cell centres or edges. In this case,
+the abscissa is the standard x axis, and y is the ordinate. The z co-ordinates are None.
+The second is by specifyin the x, y, and z cell centres or edges. In this case,
+The mesh is a 2D plane with the ordinate parallel to z, and the “horizontal” locations
+have co-ordinates (x, y).
+This allows you to, for example, create a vertical 2D mesh that is not parallel to either the
+x or y axis, like a typical line of data.
+If x, y, and z are specified, plots can be made against distance which calculated cumulatively between points.</p>
+<p>RectilinearMesh2D([x_centres or x_edges], [y_centres or y_edges], [z_centres or z_edges])</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_centres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the centre of each cell in the “x” direction. Only x_centres or x_edges can be given.</p></li>
+<li><p><strong>x_edges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges, in the “x” direction. Only x_centres or x_edges can be given.</p></li>
+<li><p><strong>y_centres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the centre of each cell in the “y” direction. Only y_centres or y_edges can be given.</p></li>
+<li><p><strong>y_edges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges, in the “y” direction. Only y_centres or y_edges can be given.</p></li>
+<li><p><strong>z_centres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the centre of each cell in the “z” direction. Only z_centres or z_edges can be given.</p></li>
+<li><p><strong>z_edges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges, in the “z” direction. Only z_centres or z_edges can be given.</p></li>
+<li><p><strong>relativeToCentres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The relativeTo of each point at the x, y locations. Only relativeToCentres or relativeToEdges can be given, not both.
+Has shape (y.nCells, x.nCells).</p></li>
+<li><p><strong>relativeToEdges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The relativeTo of each point at the x, y locations of the edges of each cell, including the outermost edges. Only relativeToCentres or relativeToEdges can be given, not both.
+Has shape (y.nEdges, x.nEdges).</p></li>
+<li><p><strong>[</strong><strong>x</strong> (<em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for log description.</p></li>
+<li><p><strong>y</strong> (<em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for log description.</p></li>
+<li><p><strong>z</strong><strong>]</strong><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for log description.</p></li>
+<li><p><strong>[</strong><strong>x</strong> – See geobipy.RectilinearMesh1D for relativeTo description.</p></li>
+<li><p><strong>y</strong> – See geobipy.RectilinearMesh1D for relativeTo description.</p></li>
+<li><p><strong>z</strong><strong>]</strong><strong>relativeTo</strong> (<em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for relativeTo description.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – The 2D mesh.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" title="geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D">RectilinearMesh2D</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.cellIndices">
+<span class="sig-name descname"><span class="pre">cellIndices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.cellIndices" title="Link to this definition"></a></dt>
+<dd><p>Return the cell indices in x and z for two floats.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – x location</p></li>
+<li><p><strong>y</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – y location (or z location if instantiated with 3 co-ordinates)</p></li>
+<li><p><strong>clip</strong> (<em>bool</em>) – A negative index which would normally wrap will clip to 0 instead.</p></li>
+<li><p><strong>trim</strong> (<em>bool</em>) – Do not include out of axis indices. Negates clip, since they wont be included in the output.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – indices for the locations along [axis0, axis1]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.centres">
+<span class="sig-name descname"><span class="pre">centres</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.centres" title="Link to this definition"></a></dt>
+<dd><p>Ravelled cell centres</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – ravelled cell centre locations.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.createHdf">
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upcast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.createHdf" title="Link to this definition"></a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.edges">
+<span class="sig-name descname"><span class="pre">edges</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.edges" title="Link to this definition"></a></dt>
+<dd><p>Gets the cell edges in the given dimension</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.fromHdf">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_posterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.fromHdf" title="Link to this definition"></a></dt>
+<dd><p>Reads in the object from a HDF file</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.nCells">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nCells</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.nCells" title="Link to this definition"></a></dt>
+<dd><p>The number of cells in the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – Number of cells</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.nNodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nNodes</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.nNodes" title="Link to this definition"></a></dt>
+<dd><p>The number of nodes in the mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – Number of nodes</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.plotGrid">
+<span class="sig-name descname"><span class="pre">plotGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.plotGrid" title="Link to this definition"></a></dt>
+<dd><p>Plot the mesh grid lines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘x’, the horizontal axis uses self.x
+If xAxis is ‘y’, the horizontal axis uses self.y
+If xAxis is ‘r’, the horizontal axis uses sqrt(self.x^2 + self.y^2)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.pyvista_mesh">
+<span class="sig-name descname"><span class="pre">pyvista_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.pyvista_mesh" title="Link to this definition"></a></dt>
+<dd><p>Creates a pyvista plotting object linked to VTK.</p>
+<p>Use mesh.plot(show_edges=True, show_grid=True) to plot the mesh.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.ravelIndices">
+<span class="sig-name descname"><span class="pre">ravelIndices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.ravelIndices" title="Link to this definition"></a></dt>
+<dd><p>Return a global index into a 1D array given the two cell indices in x and z.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices</strong> (<em>array_like</em>) – A tuple of integer arrays, one array for each dimension.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Global index.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.shape" title="Link to this definition"></a></dt>
+<dd><p>The dimensions of the mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – Array of integers</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>array_like</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.summary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.summary" title="Link to this definition"></a></dt>
+<dd><p>Display a summary of the 3D Point Cloud</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.unravelIndex">
+<span class="sig-name descname"><span class="pre">unravelIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'C'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.unravelIndex" title="Link to this definition"></a></dt>
+<dd><p>Return local indices given a global one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices</strong> (<em>array_like</em>) – An integer array whose elements are indices into the flattened
+version of an array.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>unraveled_coords</strong> – Each array in the tuple has the same shape as the self.shape.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple of ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.writeHdf">
+<span class="sig-name descname"><span class="pre">writeHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.writeHdf" title="Link to this definition"></a></dt>
+<dd><p>Write the StatArray to an HDF object
+parent: Upper hdf file or group
+myName: object hdf name. Assumes createHdf has already been called
+create: optionally create the data set as well before writing</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.xRange">
+<span class="sig-name descname"><span class="pre">xRange</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.xRange" title="Link to this definition"></a></dt>
+<dd><p>Get the range of x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – The range of x</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.float64</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.x_centres">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_centres</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.x_centres" title="Link to this definition"></a></dt>
+<dd><p>Creates an array suitable for plt.pcolormesh for the abscissa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘x’, the horizontal xAxis uses self.x
+If xAxis is ‘y’, the horizontal xAxis uses self.y
+If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the line.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.x_edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_edges</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.x_edges" title="Link to this definition"></a></dt>
+<dd><p>Creates an array suitable for plt.pcolormesh for the ordinate</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.y_centres">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_centres</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.y_centres" title="Link to this definition"></a></dt>
+<dd><p>Creates an array suitable for plt.pcolormesh for the abscissa.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘x’, the horizontal xAxis uses self.x
+If xAxis is ‘y’, the horizontal xAxis uses self.y
+If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the line.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.y_edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_edges</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.y_edges" title="Link to this definition"></a></dt>
+<dd><p>Creates an array suitable for plt.pcolormesh for the ordinate</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.zRange">
+<span class="sig-name descname"><span class="pre">zRange</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.zRange" title="Link to this definition"></a></dt>
+<dd><p>Get the range of z</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out</strong> – The range of z</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.float64</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="RectilinearMesh2D_stitched.html" class="btn btn-neutral float-left" title="RectilinearMesh2D_stitched" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../model/model.html" class="btn btn-neutral float-right" title="Model classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
