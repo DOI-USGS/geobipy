@@ -1113,8 +1113,6 @@ class FdemData(Data):
 
         dp = ds.datapoint(0)
 
-        model.mesh.y_edges = model.mesh.y_edges / 4.1
-
         for k in range(model.x.nCells):
             mod = model[k]
             dp.forward(mod)
@@ -1122,6 +1120,6 @@ class FdemData(Data):
 
         ds_noisy = deepcopy(ds)
 
-        ds_noisy.data += prng.normal(scale=ds.std, size=ds.data.shape)
+        ds_noisy._data += prng.normal(scale=ds.std, size=ds.data.shape)
 
         return ds, ds_noisy
