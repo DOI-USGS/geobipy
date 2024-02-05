@@ -1,6 +1,6 @@
 from copy import deepcopy
 import numpy as np
-from numpy import int32
+from numpy import int32, vstack
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -26,6 +26,33 @@ class Loop_pair(Point, PointCloud3D):
 
         self.transmitter = transmitter
         self.receiver = receiver
+
+    @property
+    def x_offset(self):
+        return self._x
+
+    @x_offset.setter
+    def x_offset(self, value):
+        self._x[:] = value
+        self.receiver.x[:] = self.transmitter.x + value
+
+    @property
+    def y_offset(self):
+        return self._y
+
+    @y_offset.setter
+    def y_offset(self, value):
+        self._y[:] = value
+        self.receiver.y[:] = self.transmitter.y + value
+
+    @property
+    def z_offset(self):
+        return self._z
+
+    @z_offset.setter
+    def z_offset(self, value):
+        self._z[:] = value
+        self.receiver.z[:] = self.transmitter.z + value
 
     @property
     def addressof(self):
@@ -58,6 +85,10 @@ class Loop_pair(Point, PointCloud3D):
 
             self.receiver.nPoints = value
             self.transmitter.nPoints = value
+
+    @property
+    def offset(self):
+        return vstack([self.x, self.y ,self.z]).T
 
     @property
     def hasPosterior(self):
