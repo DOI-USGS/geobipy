@@ -84,7 +84,6 @@ class TdemData(Data):
         self._primary_field             = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
         self._predicted_primary_field   = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
 
-
         self.primary_field = kwargs.get('primary_field')
         self.secondary_field = kwargs.get('secondary_field')
         self.predicted_primary_field = kwargs.get('predicted_primary_field')
@@ -100,6 +99,17 @@ class TdemData(Data):
         # self.loopOffset = kwargs.get('loopOffset', None)
 
         self.channel_names = kwargs.get('channel_names')
+
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+        out.system = self._system
+        out._loop_pair = deepcopy(self.loop_pair, memo)
+        out._secondary_field = deepcopy(self.secondary_field, memo)
+        out._primary_field = deepcopy(self.primary_field, memo)
+
+        out._predicted_primary_field = deepcopy(self.predicted_primary_field, memo)
+        out._predicted_secondary_field = deepcopy(self.predicted_secondary_field, memo)
+        return out
 
     @Data.channel_names.setter
     def channel_names(self, values):
@@ -127,13 +137,6 @@ class TdemData(Data):
                 self._data[:, ic] = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
 
         return self._data
-
-    @property
-    def loopOffset(self):
-
-        return vstack([self.receiver.x - self.transmitter.x,
-                          self.receiver.y - self.transmitter.y,
-                          self.receiver.z - self.transmitter.z]).T
 
     @property
     def loop_pair(self):
@@ -325,7 +328,7 @@ class TdemData(Data):
         out['tx_roll'] = squeeze(asarray([x.roll for x in self.transmitter]))
         out['tx_yaw'] = squeeze(asarray([x.yaw for x in self.transmitter]))
 
-        offset = self.loopOffset
+        offset = self.loop_pair.offset
         for i, label in enumerate(['txrx_dx','txrx_dy','txrx_dz']):
             out[label] = squeeze(offset[:, i])
 
@@ -334,7 +337,6 @@ class TdemData(Data):
         out['rx_yaw'] = squeeze(asarray([x.yaw for x in self.receiver]))
 
         order = [*order[:6], 'tx_pitch', 'tx_roll', 'tx_yaw', 'txrx_dx', 'txrx_dy', 'txrx_dz', 'rx_pitch', 'rx_roll', 'rx_yaw', *order[6:]]
-
         return out, order
 
     def append(self, other):
@@ -358,7 +360,7 @@ class TdemData(Data):
         return s_[self._ravel_index[i]:self._ravel_index[i+1]]
 
     @classmethod
-    def read_csv(cls, data_filename, system_filename):
+    def read_csv(cls, data_filename, system):
         """Reads the data and system parameters from file
 
         Parameters
@@ -372,7 +374,11 @@ class TdemData(Data):
         -----
         File Format
 
-        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+        The data columns are read in according to the column names in the first line.
+        The header line should contain at least the following column names.
+        Extra columns may exist, but will be ignored.
+        In this description, the column name or its alternatives are given followed by what the name represents.
+        Optional columns are also described.
 
         **Required columns**
 
@@ -388,7 +394,7 @@ class TdemData(Data):
         y or easting or e
             Easting co-ordinate of the data point
 
-        z or dtm or dem\_elev or dem\_np or topo
+        z or dtm or dem_elev or dem_np or topo
             Elevation of the ground at the data point
 
         alt or laser or bheight
@@ -426,14 +432,14 @@ class TdemData(Data):
         """
 
         # Get the number of systems to use
-        if (isinstance(system_filename, str)):
-            system_filename = [system_filename]
+        if (isinstance(system, str)):
+            system = [system]
 
-        nSystems = len(system_filename)
+        nSystems = len(system)
 
         # assert nDatafiles == nSystems, Exception("Number of data files must match number of system files.")
 
-        self = cls(system=system_filename)
+        self = cls(system=system)
 
         self._nPoints, iC, iR, iT, iOffset, iData, iStd, iPrimary = self._csv_channels(data_filename)
 
@@ -456,6 +462,7 @@ class TdemData(Data):
             df = read_csv(data_filename, usecols=channels, skipinitialspace = True)
         except:
             df = read_csv(data_filename, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+
         df = df.replace('NaN', nan)
 
         # Assign columns to variables
@@ -1160,78 +1167,78 @@ class TdemData(Data):
         return out
 
 
-    def write(self, fileNames, std=False, predictedData=False):
+    # def write(self, fileNames, std=False, predictedData=False):
 
-        if isinstance(fileNames, str):
-            fileNames = [fileNames]
+    #     if isinstance(fileNames, str):
+    #         fileNames = [fileNames]
 
-        assert len(fileNames) == self.nSystems, ValueError(
-            "fileNames must have length equal to the number of systems {}".format(self.nSystems))
+    #     assert len(fileNames) == self.nSystems, ValueError(
+    #         "fileNames must have length equal to the number of systems {}".format(self.nSystems))
 
-        for i in range(self.nSystems):
+    #     for i in range(self.nSystems):
 
-            iSys = self._systemIndices(i)
-            # Create the header
-            header = "Line Fid Easting Northing Elevation Height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw "
+    #         iSys = self._systemIndices(i)
+    #         # Create the header
+    #         header = "Line Fid Easting Northing Elevation Height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw "
 
-            for x in range(self.nTimes[i]):
-                header += "Off[{}] ".format(x)
+    #         for x in range(self.nTimes[i]):
+    #             header += "Off[{}] ".format(x)
 
-            d = empty(self.nTimes[i])
+    #         d = empty(self.nTimes[i])
 
-            if std:
-                for x in range(self.nTimes[i]):
-                    header += "OffErr[{}] ".format(x)
-                s = empty(self.nTimes[i])
+    #         if std:
+    #             for x in range(self.nTimes[i]):
+    #                 header += "OffErr[{}] ".format(x)
+    #             s = empty(self.nTimes[i])
 
-            with open(fileNames[i], 'w') as f:
-                f.write(header+"\n")
-                with printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
-                    for j in range(self.nPoints):
+    #         with open(fileNames[i], 'w') as f:
+    #             f.write(header+"\n")
+    #             with printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
+    #                 for j in range(self.nPoints):
 
-                        x = asarray([self.lineNumber[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
-                                        self.R[j].x-self.T[j].x, self.R[j].y-self.T[j].y, self.R[j].z-self.T[j].z,
-                                        self.T[j].pitch, self.T[j].roll, self.T[j].yaw,
-                                        self.R[j].pitch, self.R[j].roll, self.R[j].yaw])
+    #                     x = asarray([self.lineNumber[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
+    #                                     self.R[j].x-self.T[j].x, self.R[j].y-self.T[j].y, self.R[j].z-self.T[j].z,
+    #                                     self.T[j].pitch, self.T[j].roll, self.T[j].yaw,
+    #                                     self.R[j].pitch, self.R[j].roll, self.R[j].yaw])
 
-                        if predictedData:
-                            d[:] = self.predictedData[j, iSys]
-                        else:
-                            d[:] = self.data[j, iSys]
+    #                     if predictedData:
+    #                         d[:] = self.predictedData[j, iSys]
+    #                     else:
+    #                         d[:] = self.data[j, iSys]
 
-                        if std:
-                            s[:] = self.std[j, iSys]
-                            x = hstack([x, d, s])
-                        else:
-                            x = hstack([x, d])
+    #                     if std:
+    #                         s[:] = self.std[j, iSys]
+    #                         x = hstack([x, d, s])
+    #                     else:
+    #                         x = hstack([x, d])
 
-                        y = ""
-                        for a in x:
-                            y += "{} ".format(a)
+    #                     y = ""
+    #                     for a in x:
+    #                         y += "{} ".format(a)
 
-                        f.write(y + "\n")
+    #                     f.write(y + "\n")
 
-    def create_synthetic_data(self, model):
+    def create_synthetic_data(self, model, prng):
 
         ds = TdemData(system=self.system)
 
-        ds.x = model.x
-        ds.y = model.y
-        ds.z = np.full(model.x.nCells, fill_value=30.0)
-        ds.elevation = np.zeros(model.x.nCells)
+        ds.x = model.x.centres
+        ds.y[:] = 0.0
+        ds.z = full(model.x.nCells, fill_value=30.0)
+        ds.elevation = zeros(model.x.nCells)
 
         ds.loop_pair.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
                         #  pitch=0.0, roll=0.0, yaw=0.0,
-                        radius=np.full(model.x.nCells, ds.system[0].loopRadius()))
+                        radius=full(model.x.nCells, ds.system[0].loopRadius()))
 
         ds.loop_pair.receiver = CircularLoops(x=ds.transmitter.x -13.0,
                         y=ds.transmitter.y + 0.0,
                         z=ds.transmitter.z + 2.0,
                         #  pitch=0.0, roll=0.0, yaw=0.0,
-                        radius=np.full(model.x.nCells, ds.system[0].loopRadius()))
+                        radius=full(model.x.nCells, ds.system[0].loopRadius()))
 
-        ds.relative_error = np.full((model.x.nCells, 2), fill_value = 0.03)
-        ds.additive_error = np.full((model.x.nCells, 2), fill_value = 1e-15)
+        ds.relative_error = full((model.x.nCells, 2), fill_value = 0.03)
+        ds.additive_error = full((model.x.nCells, 2), fill_value = 1e-15)
         ds.additive_error[:, 1] = 1e-14
 
         dp = ds.datapoint(0)
@@ -1240,7 +1247,7 @@ class TdemData(Data):
             mod = model[k]
 
             dp.forward(mod)
-            ds.secondary_field[k, :] = dp.predictedData
+            ds.secondary_field[k, :] = dp.predicted_secondary_field
 
         ds_noisy = deepcopy(ds)
 

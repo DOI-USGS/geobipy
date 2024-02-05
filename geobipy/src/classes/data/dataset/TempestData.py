@@ -1,8 +1,13 @@
 """
 """
-from numpy import allclose, asarray, atleast_1d, float64, full, hstack
-from numpy import nan, ones
-from numpy import s_, shape, size, vstack
+
+from os.path import join
+from copy import deepcopy
+import matplotlib.pyplot as plt
+
+from numpy import allclose, arange, asarray, atleast_1d, float64, full, hstack
+from numpy import nan, ones, r_, repeat
+from numpy import s_, shape, size, vstack, zeros
 from pandas import read_csv
 from matplotlib.figure import Figure
 
@@ -12,10 +17,10 @@ from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
 from ...system.CircularLoop import CircularLoop
 from ...system.CircularLoops import CircularLoops
+from ...system.Loop_pair import Loop_pair
 from ....base import plotting as cP
 
-import matplotlib.pyplot as plt
-from os.path import join
+
 import h5py
 
 
@@ -24,7 +29,7 @@ class TempestData(TdemData):
 
     A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.
 
-    TdemData(nPoints=1, nTimes=[1], nSystems=1)
+    TdemData(nPoints=1, nTimes=[1], nSxfystems=1)
 
     Parameters
     ----------
@@ -126,7 +131,11 @@ class TempestData(TdemData):
         -----
         File Format
 
-        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+        The data columns are read in according to the column names in the first line.
+        The header line should contain at least the following column names.
+        Extra columns may exist, but will be ignored. In this description,
+        the column name or its alternatives are given followed by what the name represents.
+        Optional columns are also described.
 
         **Required columns**
 
@@ -142,7 +151,7 @@ class TempestData(TdemData):
         y or easting or e
             Easting co-ordinate of the data point
 
-        z or dtm or dem\_elev or dem\_np or topo
+        z or dtm or dem_elev or dem_np or topo
             Elevation of the ground at the data point
 
         alt or laser or bheight
@@ -215,7 +224,7 @@ class TempestData(TdemData):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = CircularLoops(x=self.x,
+        self.loop_pair.transmitter = CircularLoops(x=self.x,
                                          y=self.y,
                                          z=self.z,
                                          pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
@@ -224,7 +233,7 @@ class TempestData(TdemData):
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
+        self.loop_pair.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
                                       y = self.transmitter.y + loopOffset[:, 1],
                                       z = self.transmitter.z + loopOffset[:, 2],
                                       pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
@@ -235,9 +244,9 @@ class TempestData(TdemData):
         self.secondary_field[:, :] = df[iSecondary].values
 
         # If the data error columns are given, assign them
-        self.std;
+        # self.std;
         if len(iStd) > 0:
-            self._std[:, :] = df[iStd].values
+            self.std = df[iStd].values
 
         self.check()
 
@@ -620,32 +629,34 @@ class TempestData(TdemData):
 
         ds = TempestData(system=self.system)
 
-        ds.x = model.x
-        ds.y = model.y
-        ds.z = np.full(model.x.nCells, fill_value = 120.0)
-        ds.elevation = np.zeros(model.x.nCells)
-        ds.fiducial = np.arange(model.x.nCells)
+        ds.x = model.x.centres
+        ds.y[:] = 0.0
+        ds.z = full(model.x.nCells, fill_value = 120.0)
+        ds.elevation = zeros(model.x.nCells)
+        ds.fiducial = arange(model.x.nCells)
 
-        ds.loop_pair.transmitter = CircularLoops(
+        transmitter = CircularLoops(
                         x = ds.x, y = ds.y, z = ds.z,
-                        pitch = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                        roll  = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                        yaw   = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                        radius = np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+                        pitch = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        roll  = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        yaw   = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        radius = full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-        ds.loop_pair.receiver = CircularLoops(
-                        x = ds.transmitter.x - 107.0,
-                        y = ds.transmitter.y + 0.0,
-                        z = ds.transmitter.z - 45.0,
-                        pitch = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
-                        roll  = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
-                        yaw   = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
-                        radius = np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+        receiver = CircularLoops(
+                        x = transmitter.x - 107.0,
+                        y = transmitter.y + 0.0,
+                        z = transmitter.z - 45.0,
+                        pitch = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        roll  = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        yaw   = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        radius = full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-        ds.relative_error = np.repeat(np.r_[0.001, 0.001][None, :], model.x.nCells, 0)
-        add_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
+        ds.loop_pair = Loop_pair(transmitter, receiver)
+
+        ds.relative_error = repeat(r_[0.001, 0.001][None, :], model.x.nCells, 0)
+        add_error = r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
                         0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
-        ds.additive_error = np.repeat(add_error[None, :], model.x.nCells, 0)
+        ds.additive_error = repeat(add_error[None, :], model.x.nCells, 0)
 
         dp = ds.datapoint(0)
 

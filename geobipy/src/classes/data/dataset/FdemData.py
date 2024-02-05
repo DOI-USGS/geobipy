@@ -514,7 +514,7 @@ class FdemData(Data):
         return ax
 
     @classmethod
-    def read_csv(cls, dataFilename, systemFilename):
+    def read_csv(cls, dataFilename, system):
         """Read in both the Fdem data and FDEM system files
 
         The data file is structured using columns with the first line containing header information.
@@ -539,7 +539,7 @@ class FdemData(Data):
         # Read in the EM System file
 
         # Initialize the EMData Class
-        self = cls(system=systemFilename)
+        self = cls(system=system)
 
         # assert nDatafiles == self.nSystems, Exception("Number of data files must match number of system files.")
         nPoints, iC, iData, iStd, powerline, magnetic = FdemData._csv_channels(dataFilename)

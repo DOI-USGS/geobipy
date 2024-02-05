@@ -121,7 +121,8 @@ class Data(Point):
         for i, name in enumerate(self.channel_names):
             out[name.replace(' ', '_')] = self.data[:, i]
 
-        return out, [self.lineNumber.name.replace(' ', '_'), self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channel_names]]
+        return out, [self.lineNumber.name.replace(' ', '_'),
+                     self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channel_names]]
 
     @property
     def active(self):
@@ -259,7 +260,7 @@ class Data(Point):
         """Get the difference between the predicted and observed data,
 
         .. math::
-            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
+            '\delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}'.
 
         Returns
         -------
@@ -436,6 +437,7 @@ class Data(Point):
         out._fiducial = deepcopy(self.fiducial, memo)
         out._lineNumber = deepcopy(self.lineNumber, memo)
         out._channel_names = deepcopy(self.channel_names, memo)
+        out._components = deepcopy(self.components, memo)
         out._data = deepcopy(self.data, memo)
         out._std = deepcopy(self.std, memo)
         out._predictedData = deepcopy(self.predictedData, memo)
@@ -1002,7 +1004,12 @@ class Data(Point):
         -----
         File Format
 
-        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+        The data columns are read in according to the column names in the first line.
+        The header line should contain at least the following column names.
+        Extra columns may exist, but will be ignored. In this description,
+        the column name or its alternatives are given followed by what the name represents.
+        Optional columns are also described.
+
 
         **Required columns**
 
@@ -1018,7 +1025,7 @@ class Data(Point):
         y or easting or e
             Easting co-ordinate of the data point
 
-        z or dtm or dem\_elev or dem\_np or topo
+        z or dtm or dem_elev or dem_np or topo
             Elevation of the ground at the data point
 
         alt or laser or bheight
@@ -1167,9 +1174,12 @@ class Data(Point):
     def write_csv(self, filename, **kwargs):
         kwargs['na_rep'] = 'nan'
         kwargs['index'] = False
+
         d, order = self._as_dict()
+
         kwargs['columns'] = order
         df = DataFrame(data=d)
+
         df.to_csv(filename, **kwargs)
 
 
