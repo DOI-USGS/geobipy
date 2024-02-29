@@ -11,6 +11,7 @@ from numpy import int32
 from numpy.random import Generator
 
 from .src.base.utilities import init_debug_print, debug_print as dprint
+from .src.base import utilities
 from .src.base import plotting
 from .src.base.MPI import get_prng
 # from .src.base import fileIO
