@@ -30,7 +30,7 @@ class StatArray(ndarray, myObject):
     Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an
     in-place numpy function will return a StatArray.  See the example section for more information.
 
-    StatArray(shape, name=None, units=None, \*\*kwargs)
+    StatArray(shape, name=None, units=None, **kwargs)
 
     Parameters
     ----------
@@ -1477,7 +1477,7 @@ class StatArray(ndarray, myObject):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
-        A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal.
+        A nested heirarchy will be created e.g., myName/\data, myName/\prior, and myName/\proposal.
         This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
         and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
         In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
