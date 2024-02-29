@@ -64,8 +64,6 @@ def test_tempest(model_type):
 
     assert np.allclose(ds.data, ds_check.data), ValueError("{} doesn't match".format(title))
 
-
-
 if __name__ == '__main__':
     models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
