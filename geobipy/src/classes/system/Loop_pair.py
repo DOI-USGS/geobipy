@@ -73,7 +73,7 @@ class Loop_pair(Point, PointCloud3D):
                          self.transmitter.roll.item(),
                         -self.transmitter.pitch.item(),
                         -self.transmitter.yaw.item(),
-                         self.x.item(), self.y.item(), self.z.item(),
+                         self.x_offset.item(), self.y_offset.item(), self.z_offset.item(),
                          self.receiver.roll.item(),
                         -self.receiver.pitch.item(),
                         -self.receiver.yaw.item())
