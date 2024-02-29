@@ -1,14 +1,13 @@
 """
-.. module:: StatArray
-   :platform: Unix, Windows
-   :synopsis: Time domain data set
-
-.. moduleauthor:: Leon Foks
-
 """
-from numpy import allclose, asarray, atleast_1d, float64, full, hstack
-from numpy import nan, ones
-from numpy import s_, shape, size, vstack
+
+from os.path import join
+from copy import deepcopy
+import matplotlib.pyplot as plt
+
+from numpy import allclose, arange, asarray, atleast_1d, float64, full, hstack
+from numpy import nan, ones, r_, repeat
+from numpy import s_, shape, size, vstack, zeros
 from pandas import read_csv
 from matplotlib.figure import Figure
 
@@ -18,10 +17,10 @@ from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
 from ...system.CircularLoop import CircularLoop
 from ...system.CircularLoops import CircularLoops
+from ...system.Loop_pair import Loop_pair
 from ....base import plotting as cP
 
-import matplotlib.pyplot as plt
-from os.path import join
+
 import h5py
 
 
@@ -30,7 +29,7 @@ class TempestData(TdemData):
 
     A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.
 
-    TdemData(nPoints=1, nTimes=[1], nSystems=1)
+    TdemData(nPoints=1, nTimes=[1], nSxfystems=1)
 
     Parameters
     ----------
@@ -107,7 +106,7 @@ class TempestData(TdemData):
     def _as_dict(self):
         out, order = super()._as_dict()
 
-        for i, name in enumerate(self.channelNames):
+        for i, name in enumerate(self.channel_names):
             out[name.replace(' ', '_')] = self.secondary_field[:, i]
 
         for i, c in enumerate(self.components):
@@ -132,7 +131,11 @@ class TempestData(TdemData):
         -----
         File Format
 
-        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+        The data columns are read in according to the column names in the first line.
+        The header line should contain at least the following column names.
+        Extra columns may exist, but will be ignored. In this description,
+        the column name or its alternatives are given followed by what the name represents.
+        Optional columns are also described.
 
         **Required columns**
 
@@ -148,7 +151,7 @@ class TempestData(TdemData):
         y or easting or e
             Easting co-ordinate of the data point
 
-        z or dtm or dem\_elev or dem\_np or topo
+        z or dtm or dem_elev or dem_np or topo
             Elevation of the ground at the data point
 
         alt or laser or bheight
@@ -221,7 +224,7 @@ class TempestData(TdemData):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = CircularLoops(x=self.x,
+        self.loop_pair.transmitter = CircularLoops(x=self.x,
                                          y=self.y,
                                          z=self.z,
                                          pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
@@ -230,7 +233,7 @@ class TempestData(TdemData):
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
+        self.loop_pair.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
                                       y = self.transmitter.y + loopOffset[:, 1],
                                       z = self.transmitter.z + loopOffset[:, 2],
                                       pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
@@ -241,9 +244,9 @@ class TempestData(TdemData):
         self.secondary_field[:, :] = df[iSecondary].values
 
         # If the data error columns are given, assign them
-        self.std;
+        # self.std;
         if len(iStd) > 0:
-            self._std[:, :] = df[iStd].values
+            self.std = df[iStd].values
 
         self.check()
 
@@ -269,12 +272,12 @@ class TempestData(TdemData):
         if channels is None:
             i = self._systemIndices(system)
             ax = cP.plot(x, self.data[:, i],
-                         label=self.channelNames[i], **kwargs)
+                         label=self.channel_names[i], **kwargs)
         else:
             channels = atleast_1d(channels)
             for j, i in enumerate(channels):
                 ax = cP.plot(x, self.data[:, i],
-                             label=self.channelNames[i], **kwargs)
+                             label=self.channel_names[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
 
@@ -307,12 +310,12 @@ class TempestData(TdemData):
         if channels is None:
             i = self._systemIndices(system)
             ax = cP.plot(x, self.predictedData[:, i],
-                         label=self.channelNames[i], **kwargs)
+                         label=self.channel_names[i], **kwargs)
         else:
             channels = atleast_1d(channels)
             for j, i in enumerate(channels):
                 ax = cP.plot(x, self.predictedData[:, i],
-                             label=self.channelNames[i], **kwargs)
+                             label=self.channel_names[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
 
@@ -621,3 +624,63 @@ class TempestData(TdemData):
         out = super(TempestData, cls).fromHdf(grp, **kwargs)
         out.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
         return out
+
+    def create_synthetic_data(self, model, prng):
+
+        ds = TempestData(system=self.system)
+
+        ds.x = model.x.centres
+        ds.y[:] = 0.0
+        ds.z = full(model.x.nCells, fill_value = 120.0)
+        ds.elevation = zeros(model.x.nCells)
+        ds.fiducial = arange(model.x.nCells)
+
+        transmitter = CircularLoops(
+                        x = ds.x, y = ds.y, z = ds.z,
+                        pitch = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        roll  = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        yaw   = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        radius = full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+
+        receiver = CircularLoops(
+                        x = transmitter.x - 107.0,
+                        y = transmitter.y + 0.0,
+                        z = transmitter.z - 45.0,
+                        pitch = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        roll  = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        yaw   = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        radius = full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+
+        ds.loop_pair = Loop_pair(transmitter, receiver)
+
+        ds.relative_error = repeat(r_[0.001, 0.001][None, :], model.x.nCells, 0)
+        add_error = r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
+                        0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
+        ds.additive_error = repeat(add_error[None, :], model.x.nCells, 0)
+
+        dp = ds.datapoint(0)
+
+        for k in range(model.x.nCells):
+            mod = model[k]
+
+            dp.forward(mod)
+            dp.secondary_field[:] = dp.predicted_secondary_field
+            dp.primary_field[:] = dp.predicted_primary_field
+
+            ds.primary_field[k, :] = dp.primary_field
+            ds.secondary_field[k, :] = dp.secondary_field
+
+        ds_noisy = deepcopy(ds)
+
+        # Add noise to various solvable parameters
+
+        # ds.z += np.random.uniform(low=-5.0, high=5.0, size=model.x.nCells)
+        # ds.receiver.x += np.random.normal(loc=0.0, scale=0.25**2.0, size=model.x.nCells)
+        # ds.receiver.z += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+        # ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+        # ds.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
+        # ds.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
+
+        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.nChannels))
+
+        return ds, ds_noisy

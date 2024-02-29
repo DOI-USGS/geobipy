@@ -18,7 +18,7 @@ Models
 .. only:: html
 
   .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_1d_thumb.png
-    :alt: 1D Model with an infinite halfspace
+    :alt:
 
   :ref:`sphx_glr_examples_Models_plot_model_1d.py`
 
@@ -35,7 +35,7 @@ Models
 .. only:: html
 
   .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_2d_thumb.png
-    :alt: 2D Rectilinear Model
+    :alt:
 
   :ref:`sphx_glr_examples_Models_plot_model_2d.py`
 
@@ -52,7 +52,7 @@ Models
 .. only:: html
 
   .. image:: /examples/Models/images/thumb/sphx_glr_plot_model_3d_thumb.png
-    :alt: 3D Rectilinear Model
+    :alt:
 
   :ref:`sphx_glr_examples_Models_plot_model_3d.py`
 

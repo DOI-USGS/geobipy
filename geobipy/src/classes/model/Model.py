@@ -9,7 +9,8 @@ from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, unique, vsta
 from numpy import log as nplog
 from numpy.linalg import inv
 from matplotlib.pyplot import gcf
-from ...base.utilities import reslice
+from ...base.utilities import reslice, expReal
+from ...base.utilities import debug_print as dprint
 from ...base import plotting
 from ..core.myObject import myObject
 from ...base.HDF import hdfRead
@@ -17,6 +18,8 @@ from ..core import StatArray
 from ..mesh.Mesh import Mesh
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
+
+import numpy as np
 
 class Model(myObject):
     """Generic model class with an attached mesh.
@@ -67,20 +70,6 @@ class Model(myObject):
         """Compute the gradient
 
         Parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
-
-        .. math::
-            :label: dpdz1
-
-            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
-
-        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
-
-        .. math::
-            :label: minThickness1
-
-            h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
-
-        where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
 
         """
         # if self._gradient is None:
@@ -231,31 +220,6 @@ class Model(myObject):
     def gradient_probability(self, log=True):
         """Evaluate the prior for the gradient of the parameter with depth
 
-        **Prior on the gradient of the physical parameter with depth**
-
-        If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get
-
-        .. math::
-            :label: gradient1
-
-            p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k-1} |\\boldsymbol{C}_{\\nabla_{z}}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\nabla_{z} \\boldsymbol{\sigma})^{T} \\boldsymbol{C}_{\\nabla_{z}}^{-1} (\\nabla_{z}\\boldsymbol{\sigma})}
-
-        where the parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
-
-        .. math::
-            :label: dpdz1
-
-            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
-
-        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
-
-        .. math::
-            :label: minThickness1
-
-            h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
-
-        where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
-
         Parameters
         ----------
         hmin : float64
@@ -366,7 +330,7 @@ class Model(myObject):
         assert isinstance(self.values, baseDistribution), TypeError("values must have type geobipy.basDistribution")
         return self.mesh.map_to_pdf(distribution=self.values, pdf=pdf, log=log, axis=axis)
 
-    def perturb(self, observation=None, low_variance=0.2, high_variance=1.0):
+    def perturb(self, *args, **kwargs):
         """Perturb a model's structure and parameter values.
 
         Uses a stochastic newtown approach if a datapoint is provided.
@@ -386,22 +350,34 @@ class Model(myObject):
             The model with perturbed structure and parameter values.
 
         """
-        return self.stochastic_newton_perturbation(observation, low_variance=low_variance, high_variance=high_variance)
+        return self.stochastic_newton_perturbation(*args, **kwargs)
 
-    def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf):
+    def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, variance_scaling=1.0):
 
+        # repeat = True
+        # n_tries = 0
+        # limit = 3
+
+        # while repeat:
+        #     try:
         # Perturb the structure of the model
         remapped_model = self.perturb_structure()
+        dprint('action', remapped_model.mesh.action)
 
         print('    ', remapped_model.mesh.action, flush=True)
 
         if observation is not None:
             if remapped_model.mesh.action[0] != 'none':
-                observation.sensitivity(remapped_model)
+            # observation.forward(remapped_model)
+                observation.fm_dlogc(remapped_model)
+
+        # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
 
         # Update the local Hessian around the current model.
         # inv(J'Wd'WdJ + Wm'Wm)
-        inverse_hessian = remapped_model.compute_local_inverse_hessian(observation)
+        inverse_hessian = variance_scaling * remapped_model.compute_local_inverse_hessian(observation)
+
+        # print('inv Hessian', inverse_hessian)
 
         # if inverse_hessian.size > 1:
         #     ih_max = inverse_hessian.max()
@@ -414,25 +390,30 @@ class Model(myObject):
         # This is Wm'Wm(sigma - sigma_ref)
         # Need to have the gradient be a part of this too.
         gradient = remapped_model.prior_derivative(order=1)
-        # print('    gradient a', gradient, flush=True)
+        dprint('gradient', gradient)
 
         if not observation is None:
             # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
-            tmp = observation.prior_derivative(order=1)
-            gradient += tmp
-            # print('    gradient b', tmp, flush=True)
-            # print('    gradient', gradient, flush=True)
+            gradient += observation.prior_derivative(order=1)
+
+        dprint('gradient', gradient)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
         dSigma = -dot(inverse_hessian, gradient)
+
         mean = exp(nplog(remapped_model.values) + dSigma)
         # print('    dSigma', dSigma, flush=True)
         # print('    mean', mean, flush=True)
 
         # print('    min, max variance', inverse_hessian.min(), inverse_hessian.max(), flush=True)
+
+        dprint('dSigma', exp(dSigma))
+        dprint('log values', nplog(remapped_model.values))
+        dprint('log mean', nplog(remapped_model.values) + dSigma)
+        dprint('mean', mean)
 
         perturbed_model = deepcopy(remapped_model)
 
@@ -444,18 +425,21 @@ class Model(myObject):
                                                        prng=perturbed_model.values.proposal.prng)
 
         # Generate new conductivities
-        perturbed_model.values.perturb()#imposePrior=True)
+        perturbed_model.values.perturb()
+
+        # dprint('test proposal', perturbed_model.values.proposal.mean, np.diag(perturbed_model.values.proposal.variance))
+        # dprint('perturbed values', perturbed_model.values)
 
         return remapped_model, perturbed_model
 
     def prior_derivative(self, order):
-        # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ww'WwWs)(m - mref)
+        # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ws)(m - mref)
         operator = self.values.priorDerivative(order=2)
+        operator *= self.mesh.cell_weights
+
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
             operator += dot(Wz.T, Wz)
-
-        operator *= self.mesh.cell_weights
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
@@ -561,80 +545,12 @@ class Model(myObject):
     def probability(self, solve_value, solve_gradient):
         """Evaluate the prior probability for the 1D Model.
 
-        The following equation describes the components of the prior that correspond to the Model1D,
-
-        .. math::
-            p(k | I)p(\\boldsymbol{z}| k, I)p(\\boldsymbol{\sigma} | k, \\boldsymbol{z}, I),
-
-        where :math:`k, I, \\boldsymbol{z}` and :math:`\\boldsymbol{\sigma}` are the number of layers, prior information, interface depth, and physical property, respectively.
-
-        The multiplication here can be turned into a summation by taking the log of the components.
-
-        **Prior on the number of layers**
-
-        Uninformative prior using a uniform distribution.
-
-        .. math::
-            :label: layers
-
-            p(k | I) =
-            \\begin{cases}
-            \\frac{1}{k_{max} - 1} & \\quad 1 \leq k \leq k_{max} \\newline
-            0 & \\quad otherwise
-            \\end{cases}.
-
-        **Prior on the layer interface depths**
-
-        We use order statistics for the prior on layer depth interfaces.
-
-        .. math::
-            :label: depth
-
-            p(\\boldsymbol{z} | k, I) = \\frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta z_{i}},
-
-        where the numerator describes the number of ways that :math:`(k - 1)` interfaces can be ordered and
-        :math:`\Delta z_{i} = (z_{max} - z_{min}) - 2 i h_{min}` describes the depth interval that is available to place a layer when there are already i interfaces in the model
-
-        **Prior on the physical parameter**
-
-        If we use a multivariate normal distribution to describe the joint prior pdf for log-parameter values in all layers we use,
-
-        .. math::
-            :label: parameter
-
-            p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k} |\\boldsymbol{C}_{\\boldsymbol{\sigma}0}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\boldsymbol{\sigma} - \\boldsymbol{\sigma}_{0})^{T} \\boldsymbol{C}_{\\boldsymbol{\sigma} 0}^{-1} (\\boldsymbol{\sigma} - \\boldsymbol{\sigma}_{0})}
-
-        **Prior on the gradient of the physical parameter with depth**
-
-        If instead we wish to apply a multivariate normal distribution to the gradient of the parameter with depth we get
-
-        .. math::
-            :label: gradient
-
-            p(\\boldsymbol{\sigma} | k, I) = \\left[(2\pi)^{k-1} |\\boldsymbol{C}_{\\nabla_{z}}|\\right]^{-\\frac{1}{2}} e ^{-\\frac{1}{2}(\\nabla_{z} \\boldsymbol{\sigma})^{T} \\boldsymbol{C}_{\\nabla_{z}}^{-1} (\\nabla_{z}\\boldsymbol{\sigma})}
-
-        where the parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
-
-        .. math::
-            :label: dpdz
-
-            \\nabla_{z}^{i}\sigma = \\frac{\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
-
-        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
-
-        .. math::
-            :label: minThickness
-
-            h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
-
-        where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
-
         Parameters
         ----------
         sPar : bool
-            Evaluate the prior on the parameters :eq:`parameter` in the final probability
+            Evaluate the prior on the parameters in the final probability
         sGradient : bool
-            Evaluate the prior on the parameter gradient :eq:`gradient` in the final probability
+            Evaluate the prior on the parameter gradient in the final probability
         components : bool, optional
             Return all components used in the final probability as well as the final probability
 
@@ -670,7 +586,7 @@ class Model(myObject):
 
         return probability
 
-    def proposal_probabilities(self, remappedModel, observation=None):
+    def proposal_probabilities(self, remapped_model, observation=None, structure_only=False):
         """Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
@@ -704,40 +620,68 @@ class Model(myObject):
             The reverse proposal probability
 
         """
-        # Evaluate the Reversible Jump Step.
-        # For the reversible jump, we need to compute the gradient from the perturbed parameter values
-        # that were generated using pertured data, using the unperturbed data.
-        # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
-        # the data residual using the perturbed parameter values.
+        if structure_only:
+            proposal = 1.0
+            proposal1 = 1.0
+        else:
+            dprint('  proposal probability')
+            # Evaluate the Reversible Jump Step.
+            # For the reversible jump, we need to compute the gradient from the perturbed parameter values
+            # that were generated using pertured data, using the unperturbed data.
+            # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
+            # the data residual using the perturbed parameter values.
 
-        # Compute the gradient according to the perturbed parameters and data residual
-        # This is Wm'Wm(sigma - sigma_ref)
-        # gradient = self.prior_derivative(order=1)
-        gradient = self.prior_derivative(order=1)
+            # Compute the gradient according to the perturbed parameters and data residual
+            # This is Wm'Wm(sigma - sigma_ref)
+            dprint('  values', self.values)
+            gradient = self.prior_derivative(order=1)
+            dprint('  gradient', gradient)
 
-        # todo:
-        # replace the par.priorDerivative with appropriate gradient
+            # todo:
+            # replace the par.priorDerivative with appropriate gradient
+            if not observation is None:
+                # observation.forward(self)
+                # observation.sensitivity(self, model_changed=False)
+                # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
+                gradient += observation.prior_derivative(order=1)
 
-        if not observation is None:
-            # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
-            gradient += observation.prior_derivative(order=1)
+            # inv(J'Wd'WdJ + Wm'Wm)
+            inverse_hessian = self.compute_local_inverse_hessian(observation)
+            # inverse_hessian = self.values.proposal.variance
 
-        # Compute the stochastic newton offset.
-        SN_step_from_perturbed = -dot(self.values.proposal.variance, gradient)
+            dprint('  gradient', gradient)
+            dprint('  variance', diag(self.values.proposal.variance))
+            # Compute the stochastic newton offset at the new location.
+            dSigma = -dot(inverse_hessian, gradient)
+
+            # mean = expReal(nplog(self.values) + dSigma)
+            log_values = nplog(self.values) + dSigma
+            mean = expReal(log_values)
+
+            # if any(mean == inf) or any(mean == 0.0):
+            #     return -inf, -inf
+
+            dprint('dSigma', dSigma)
+            dprint('log values', nplog(self.values))
+            dprint('log mean', nplog(self.values) + dSigma)
+            dprint('mean', mean)
+
+            prng = self.values.proposal.prng
+            # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
+            # # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
+            # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
+            # tmp = Distribution('MvLogNormal', mean, self.values.proposal.variance, linearSpace=True, prng=prng)
+            tmp = Distribution('MvLogNormal', mean, inverse_hessian, linearSpace=True, prng=prng)
+            # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
+            # Probability of jumping from our perturbed parameter values to the unperturbed values.
+            proposal = tmp.probability(x=remapped_model.values, log=True)
+
+            # This is the forward proposal. Evaluate the new proposed values given a mean of the old values
+            # and variance using perturbed data
+            tmp = Distribution('MvLogNormal', remapped_model.values, self.values.proposal.variance, linearSpace=True, prng=prng)
+            proposal1 = tmp.probability(x=self.values, log=True)
 
         prng = self.values.proposal.prng
-        # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
-        # # We don't recompute the variance using the perturbed parameters, because we need to check that we could in fact step back from
-        # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
-        tmp = Distribution('MvLogNormal', exp(nplog(self.values) + SN_step_from_perturbed), self.values.proposal.variance, linearSpace=True, prng=prng)
-        # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
-        # Probability of jumping from our perturbed parameter values to the unperturbed values.
-        proposal = tmp.probability(x=remappedModel.values, log=True)
-
-        # This is the forward proposal. Evaluate the new proposed values given a mean of the old values
-        # and variance using perturbed data
-        tmp = Distribution('MvLogNormal', remappedModel.values, self.values.proposal.variance, linearSpace=True, prng=prng)
-        proposal1 = tmp.probability(x=self.values, log=True)
 
         action = self.mesh.action[0]
         if action == 'insert':
@@ -957,3 +901,41 @@ class Model(myObject):
         out = cls(mesh=mesh)
         out._values = out.mesh.fromHdf_cell_values(grp, 'values', index=index, skip_posterior=skip_posterior)
         return out
+
+
+    @classmethod
+    def create_synthetic_model(cls, model_type, n_points=79):
+
+        from ..mesh.RectilinearMesh1D import RectilinearMesh1D
+        from ..mesh.RectilinearMesh2D_stitched import RectilinearMesh2D_stitched
+
+        n_points = 79
+        zwedge = np.linspace(50.0, 1.0, n_points)
+        zdeep = np.linspace(75.0, 500.0, n_points)
+
+        resistivities = {'glacial' : np.r_[100, 10, 30],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[100, 10, 1],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                        'resistive_dolomites' : np.r_[50, 500, 50],   # Glacial sediments, resistive dolomites, marine shale.
+                        'resistive_basement' : np.r_[100, 10, 10000],# Resistive Basement
+                        'coastal_salt_water' : np.r_[1, 100, 20],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[10000, 100, 1] # Antarctica glacier ice over salt water
+        }
+        conductivities = {'glacial' : np.r_[0.01, 0.1, 0.03333333],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[0.01, 0.1, 1.  ],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                        'resistive_dolomites' : np.r_[0.02, 0.002, 0.02 ],   # Glacial sediments, resistive dolomites, marine shale.
+                        'resistive_basement' : np.r_[0.01, 0.1, 0.0001],# Resistive Basement
+                        'coastal_salt_water' : np.r_[1., 0.01, 0.05],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[1.e-04, 1.e-02, 1.e+00] # Antarctica glacier ice over salt water
+        }
+
+        conductivity = StatArray.StatArray(conductivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
+
+        x = RectilinearMesh1D(centres=StatArray.StatArray(np.arange(n_points, dtype=np.float64), name='x'))
+        mesh = RectilinearMesh2D_stitched(3, x=x)
+        mesh.nCells[:] = 3
+        mesh.y_edges[:, 1] = -zwedge
+        mesh.y_edges[:, 2] = -zdeep
+        mesh.y_edges[:, 3] = -np.inf
+        mesh.y_edges.name, mesh.y_edges.units = 'Height', 'm'
+
+        return cls(mesh=mesh, values=np.repeat(conductivity[None, :], n_points, 0))

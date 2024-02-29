@@ -30,7 +30,7 @@ class StatArray(ndarray, myObject):
     Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an
     in-place numpy function will return a StatArray.  See the example section for more information.
 
-    StatArray(shape, name=None, units=None, \*\*kwargs)
+    StatArray(shape, name=None, units=None, **kwargs)
 
     Parameters
     ----------
@@ -888,18 +888,18 @@ class StatArray(ndarray, myObject):
 
         ax = plt.subplot(gs2[0, 0])
         self.prior.plot_pdf()
-        cP.xlabel(self.getNameUnits())
-        cP.title('Prior')
+        ax.set_xlabel(self.getNameUnits())
+        ax.set_title('Prior')
 
-        plt.subplot(gs2[1, 0], sharex=ax, sharey=ax)
+        tmp = plt.subplot(gs2[1, 0], sharex=ax, sharey=ax)
         self.proposal.plot_pdf()
-        cP.title('Proposal')
-        cP.xlabel(self.getNameUnits())
+        tmp.set_title('Proposal')
+        tmp.set_xlabel(self.getNameUnits())
 
-        plt.subplot(gs1[0, 0])
+        tmp = plt.subplot(gs1[0, 0])
         self.posterior.plot(**kwargs)
-        cP.title("Posterior")
-        cP.xlabel(self.getNameUnits())
+        tmp.set_title("Posterior")
+        tmp.set_xlabel(self.getNameUnits())
 
     @property
     def values(self):
@@ -1477,7 +1477,7 @@ class StatArray(ndarray, myObject):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
-        A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal.
+        A nested heirarchy will be created e.g., myName/\data, myName/\prior, and myName/\proposal.
         This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
         and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
         In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
@@ -1925,7 +1925,6 @@ class StatArray(ndarray, myObject):
                 cP.title(name)
 
     # MPI Routines
-
     def Bcast(self, world, root=0):
         """Broadcast the StatArray to every rank in the MPI communicator.
 

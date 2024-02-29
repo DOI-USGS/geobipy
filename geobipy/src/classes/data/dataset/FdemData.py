@@ -3,7 +3,7 @@ Module describing an EMData Set where channels are associated with an xyz co-ord
 """
 from copy import deepcopy
 
-from numpy import any, arange, asarray, atleast_1d, float64
+from numpy import any, arange, asarray, atleast_1d, float64, full
 from numpy import hstack, int32, isnan, nan, nanmin
 from numpy import size, sqrt, squeeze, sum, unique
 from numpy import zeros
@@ -91,7 +91,7 @@ class FdemData(Data):
         self._powerline = StatArray.StatArray(self._nPoints, "Powerline")
         self._magnetic = StatArray.StatArray(self._nPoints, "Magnetic")
 
-        # self.channelNames = kwargs.get('channel_names', None)
+        # self.channel_names = kwargs.get('channel_names', None)
 
         self.powerline = kwargs.get('powerline', None)
         self.magnetic = kwargs.get('magnetic', None)
@@ -181,19 +181,19 @@ class FdemData(Data):
 
         self.components = None
 
-    @Data.channelNames.setter
-    def channelNames(self, values):
+    @Data.channel_names.setter
+    def channel_names(self, values):
         if values is None:
-            self._channelNames = []
+            self._channel_names = []
             for i in range(self.nSystems):
                 # Set the channel names
                 for ic in range(self.n_components):
                     for iFrequency in range(2*self.nFrequencies[i]):
-                        self._channelNames.append('{} {}'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
+                        self._channel_names.append('{} {}'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            self._channel_names = values
 
     def check(self):
         if (nanmin(self.data) <= 0.0):
@@ -284,7 +284,7 @@ class FdemData(Data):
     #     # else:
     #     #     tmp='Quadrature - Frequency: {}'.format(self.system.frequencies[channel%self.nFrequencies])
 
-    #     tmp = StatArray(self._data[:, channel], self._channelNames[channel], self._data.units)
+    #     tmp = StatArray(self._data[:, channel], self._channel_names[channel], self._data.units)
 
     #     return tmp
 
@@ -424,7 +424,7 @@ class FdemData(Data):
 
     #     # Data.mapChannel(self, channel, *args, **kwargs)
 
-    #     # cP.title(self._channelNames[channel])
+    #     # cP.title(self._channel_names[channel])
 
 
     def plot_data(self, x='index', channels=None, **kwargs):
@@ -514,7 +514,7 @@ class FdemData(Data):
         return ax
 
     @classmethod
-    def read_csv(cls, dataFilename, systemFilename):
+    def read_csv(cls, dataFilename, system):
         """Read in both the Fdem data and FDEM system files
 
         The data file is structured using columns with the first line containing header information.
@@ -539,7 +539,7 @@ class FdemData(Data):
         # Read in the EM System file
 
         # Initialize the EMData Class
-        self = cls(system=systemFilename)
+        self = cls(system=system)
 
         # assert nDatafiles == self.nSystems, Exception("Number of data files must match number of system files.")
         nPoints, iC, iData, iStd, powerline, magnetic = FdemData._csv_channels(dataFilename)
@@ -659,14 +659,14 @@ class FdemData(Data):
             elif cTmp in ['magnetic']:
                 magnetic = 'magnetic'
 
-            elif any([label in cTmp for label in ('i_', 'in_phase')]):
+            elif any([label in cTmp for label in ('cpi', 'i_', 'in_phase')]):
 
                 if 'err' in cTmp:
                     in_err.append(channel)
                 else:
                     inPhase.append(channel)
 
-            elif any([label in cTmp for label in ('q_', 'quad')]):
+            elif any([label in cTmp for label in ('cpq', 'q_', 'quad')]):
                 if 'err' in cTmp:
                     quad_err.append(channel)
                 else:
@@ -1099,3 +1099,27 @@ class FdemData(Data):
         #                     y += "{} ".format(a)
 
         #                 f.write(y+"\n")
+
+    def create_synthetic_data(self, model, prng):
+
+        ds = FdemData(system=self.system)
+
+        ds.x = model.x.centres
+        ds.y[:] = 0.0
+        ds.z = full(model.x.nCells, fill_value=30.0)
+        ds.elevation = zeros(model.x.nCells)
+        ds.relative_error = full((model.x.nCells, 1), fill_value = 0.05)
+        ds.additive_error = full((model.x.nCells, 1), fill_value = 5)
+
+        dp = ds.datapoint(0)
+
+        for k in range(model.x.nCells):
+            mod = model[k]
+            dp.forward(mod)
+            ds.data[k, :] = dp.predictedData
+
+        ds_noisy = deepcopy(ds)
+
+        ds_noisy._data += prng.normal(scale=ds.std, size=ds.data.shape)
+
+        return ds, ds_noisy

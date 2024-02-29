@@ -1,27 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Normal distribution &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -34,14 +35,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeoBIPy
           </a>
               <div class="version">
                 1.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -59,9 +64,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="statistics.html">Statistics classes</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="Distribution.html">Distribution Wrapper</a></li>
-<li class="toctree-l4"><a class="reference internal" href="Histogram1D.html">Histogram1D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="Histogram2D.html">Histogram2D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="Hitmap2D.html">Hitmap2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Histogram.html">Histogram</a></li>
 <li class="toctree-l4"><a class="reference internal" href="baseDistribution.html">baseDistribution</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Normal distribution</a></li>
 <li class="toctree-l4"><a class="reference internal" href="MvNormalDistribution.html">MvNormal</a></li>
@@ -91,7 +94,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
           <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
           <li class="breadcrumb-item"><a href="statistics.html">Statistics classes</a></li>
@@ -106,21 +109,21 @@
            <div itemprop="articleBody">
              
   <section id="normal-distribution">
-<h1>Normal distribution<a class="headerlink" href="#normal-distribution" title="Permalink to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-75e90a0558497c20d77f7b699163fad1119c5377.png" alt="Inheritance diagram of geobipy.src.classes.statistics.NormalDistribution" usemap="#inheritance0a76c53a1d" class="inheritance graphviz" /></div>
+<h1>Normal distribution<a class="headerlink" href="#normal-distribution" title="Link to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-127b72798772cb1dec2c959bd6311b0535af3640.png" alt="Inheritance diagram of geobipy.src.classes.statistics.NormalDistribution" usemap="#inheritance0a76c53a1d" class="inheritance graphviz" /></div>
 <map id="inheritance0a76c53a1d" name="inheritance0a76c53a1d">
-<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
-<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.NormalDistribution.Normal" target="_top" title="Univariate normal distribution" alt="" coords="416,5,488,31"/>
-<area shape="rect" id="node3" href="baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution" target="_top" title="Define an abstract base distribution class" alt="" coords="252,5,368,31"/>
-</map><span class="target" id="module-geobipy.src.classes.statistics.NormalDistribution"></span><p>&#64;NormalDistribution
+<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.NormalDistribution.Normal" target="_top" title="Univariate normal distribution" alt="" coords="414,5,486,32"/>
+<area shape="rect" id="node3" href="baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution" target="_top" title="Define an abstract base distribution class" alt="" coords="251,5,366,32"/>
+</map><p id="module-geobipy.src.classes.statistics.NormalDistribution">&#64;NormalDistribution
 Module defining a normal distribution with statistical procedures</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.NormalDistribution.Normal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.NormalDistribution.</span></span><span class="sig-name descname"><span class="pre">Normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.NormalDistribution.</span></span><span class="sig-name descname"><span class="pre">Normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal" title="Link to this definition"></a></dt>
 <dd><p>Univariate normal distribution</p>
 <p>Normal(mean, variance)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mean</strong> (<em>numpy.float</em>) – The mean of the distribution</p></li>
 <li><p><strong>variance</strong> (<em>numpy.float</em>) – The variance of the distribution</p></li>
@@ -129,40 +132,40 @@ Module defining a normal distribution with statistical procedures</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.NormalDistribution.Normal.bins">
-<span class="sig-name descname"><span class="pre">bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nBins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nStd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.bins" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nBins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nStd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.bins" title="Link to this definition"></a></dt>
 <dd><p>Discretizes a range given the mean and variance of the distribution</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.NormalDistribution.Normal.cdf">
-<span class="sig-name descname"><span class="pre">cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.cdf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.cdf" title="Link to this definition"></a></dt>
 <dd><p>For a realization x, compute the probability</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.NormalDistribution.Normal.ndim">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.ndim" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.ndim" title="Link to this definition"></a></dt>
 <dd><p>Place Holder for children</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.NormalDistribution.Normal.probability">
-<span class="sig-name descname"><span class="pre">probability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.probability" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">probability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.probability" title="Link to this definition"></a></dt>
 <dd><p>For a realization x, compute the probability</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.NormalDistribution.Normal.rng">
-<span class="sig-name descname"><span class="pre">rng</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.rng" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">rng</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.NormalDistribution.Normal.rng" title="Link to this definition"></a></dt>
 <dd><p>Generate random numbers</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>N</strong> (<em>int</em><em> or </em><em>sequence</em><em> of </em><em>ints</em>) – Number of samples to generate</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>numpy.ndarray</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>out</p>
 </dd>
 </dl>

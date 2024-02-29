@@ -1,0 +1,7 @@
+<map id="inheritancede093050cf" name="inheritancede093050cf">
+<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,5,77,32"/>
+<area shape="rect" id="node5" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
+<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.Histogram2D.Histogram2D" target="_top" title="2D Histogram class that can update and plot efficiently." alt="" coords="551,5,649,32"/>
+<area shape="rect" id="node3" href="../mesh/RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges." alt="" coords="371,5,503,32"/>
+<area shape="rect" id="node4" title="Abstract Base Class" alt="" coords="251,5,323,32"/>
+</map>

@@ -15,8 +15,8 @@ import h5py
 # Reading in the Data
 # +++++++++++++++++++
 
-################################################################################
-dataFolder = "..//supplementary//data//"
+#%%
+dataFolder = "..//..//supplementary//data//"
 # The data file name
 dataFiles=dataFolder + 'skytem_304_saline_clay.csv'
 # dataFiles = dataFolder + 'Skytem.csv'
@@ -28,33 +28,33 @@ for f in systemFiles[:1]:
     txt = Path(f).read_text()
     print(txt)
 
-################################################################################
+#%%
 # Read in the data from file
 TD = TdemData.read_csv(dataFiles, systemFiles)
 
-################################################################################
+#%%
 # Plot the locations of the data points
 plt.figure(1, figsize=(8,6))
 _ = TD.scatter2D()
 
-################################################################################
+#%%
 # Plot all the data along the specified line
 plt.figure(2, figsize=(8,6))
 _ = TD.plotLine(0.0, log=10)
 
-################################################################################
+#%%
 # Or, plot specific channels in the data
 plt.figure(3, figsize=(8,6))
 _ = TD.plot_data(system=0, channels=[1, 3, 5], log=10)
 
-################################################################################
+#%%
 plt.figure(4)
 plt.subplot(211)
 _ = TD.pcolor(system=0, xscale='log', log=10)
 plt.subplot(212)
 _ = TD.pcolor(system=1, xscale='log', log=10)
 
-################################################################################
+#%%
 plt.figure(5)
 ax = TD.scatter2D(s=1.0, c=TD.secondary_field[:, TD.channel_index(system=0, channel=6)], equalize=True, log=10)
 plt.axis('equal')
@@ -76,11 +76,11 @@ plt.axis('equal')
 # # +++++++++++++++++++++++++++++++
 # line = TD.line(0.0)
 
-# ################################################################################
+# #%%
 # plt.figure(6)
 # _ = line.scatter2D(c=line.secondary_field[:, line.channel_index(system=0, channel=6)], log=10)
 
-# ################################################################################
+# #%%
 # plt.figure(7)
 # _ = line.plot(xAxis='index', log=10)
 
@@ -144,7 +144,7 @@ plt.show()
 # ______________
 # Line fid easting northing elevation height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw Off[0] Off[1]
 
-################################################################################
+#%%
 # File Format for a time domain system
 # ++++++++++++++++++++++++++++++++++++
 # Please see Page 13 of Ross Brodie's `instructions`_

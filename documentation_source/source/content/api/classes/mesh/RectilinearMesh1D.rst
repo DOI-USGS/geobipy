@@ -1,5 +1,5 @@
 RectilinearMesh1D
-=========================
+=================
 
 .. inheritance-diagram:: geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D
    :parts: 1

@@ -29,13 +29,12 @@ x = StatArray(np.arange(10.0), 'Easting', 'm')
 y = StatArray(np.arange(20.0), 'Depth', 'm')
 rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 
-################################################################################
+#%%
 # We can plot the grid lines of the mesh.
 p=0;
 plt.figure(p)
 _  = rm.plotGrid(flipY=True, linewidth=0.5)
 
-###############################################################################
 # Intersecting multisegment lines with a mesh
 arr = np.zeros(rm.shape)
 i = rm.line_indices([0.0, 3.0, 6.0, 9], [2.0, 6.0, 0.0, 10])
@@ -43,7 +42,7 @@ arr[i[:, 0], i[:, 1]] = 1
 p += 1; plt.figure(p)
 rm.pcolor(values = arr)
 
-################################################################################
+#%%
 # We can pcolor the mesh by providing cell values.
 xx, yy = np.meshgrid(rm.y.centres, rm.x.centres)
 arr = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "Values")
@@ -65,19 +64,19 @@ _ = rm.pcolor(arr, grid=True, flipY=True, linewidth=0.5)
 # plt.figure()
 # dax.pcolor(grid=True, flipY=True, linewidth=0.5)
 
-################################################################################
+#%%
 # Mask the x axis cells by a distance
 rm_masked, x_indices, z_indices, arr2 = rm.mask_cells(x_distance=0.4, values=arr)
 p += 1; plt.figure(p)
 _ = rm_masked.pcolor(StatArray(arr2), grid=True, flipY=True)
 
-################################################################################
+#%%
 # Mask the z axis cells by a distance
 rm_masked, x_indices, z_indices, arr2 = rm.mask_cells(y_distance=0.2, values=arr)
 p += 1; plt.figure(p)
 _ = rm_masked.pcolor(StatArray(arr2), grid=True, flipY=True)
 
-################################################################################
+#%%
 # Mask axes by a distance
 rm_masked, x_indices, z_indices, arr2 = rm.mask_cells(x_distance=0.4, y_distance=0.2, values=arr)
 p += 1; plt.figure(p)
@@ -87,27 +86,27 @@ x = StatArray(np.arange(10.0), 'Easting', 'm')
 y = StatArray(np.cumsum(np.arange(15.0)), 'Depth', 'm')
 rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 
-################################################################################
+#%%
 # We can perform some interval statistics on the cell values of the mesh
 # Generate some values
 a = np.repeat(np.arange(1.0, np.float64(rm.x.nCells+1))[:, np.newaxis], rm.y.nCells, 1)
 
-################################################################################
+#%%
 # Compute the mean over an interval for the mesh.
 rm.intervalStatistic(a, intervals=[6.8, 12.4], axis=0, statistic='mean')
 
-################################################################################
+#%%
 # Compute the mean over multiple intervals for the mesh.
 rm.intervalStatistic(a, intervals=[6.8, 12.4, 20.0, 40.0], axis=0, statistic='mean')
 
-################################################################################
+#%%
 # We can specify either axis
 rm.intervalStatistic(a, intervals=[2.8, 4.2], axis=1, statistic='mean')
 
-################################################################################
+#%%
 rm.intervalStatistic(a, intervals=[2.8, 4.2, 5.1, 8.4], axis=1, statistic='mean')
 
-################################################################################
+#%%
 # Slice the 2D mesh to retrieve either a 2D mesh or 1D mesh
 rm2 = rm[:5, :5]
 rm3 = rm[:5, 5]
@@ -121,7 +120,7 @@ rm3.plotGrid()
 plt.subplot(133)
 rm4.plotGrid(transpose=True)
 
-################################################################################
+#%%
 # Resample a grid
 values = StatArray(np.random.randn(*rm.shape))
 rm2, values2 = rm.resample(0.5, 0.5, values)
@@ -132,19 +131,18 @@ rm.pcolor(values)
 plt.subplot(122)
 rm2.pcolor(values2)
 
-################################################################################
+#%%
 # Axes in log space
 # +++++++++++++++++
 x = StatArray(np.logspace(-1, 4, 10), 'x')
 y = StatArray(np.logspace(0, 3, 10), 'y')
 rm = RectilinearMesh2D(x_edges=x, x_log=10, y_edges=y, y_log=10)
 
-#################################################################
 # We can plot the grid lines of the mesh.
 p += 1; plt.figure(p)
 _  = rm.plotGrid(linewidth=0.5)
 
-################################################################################
+#%%
 with h5py.File('rm2d.h5', 'w') as f:
     rm.toHdf(f, 'test')
 
@@ -158,7 +156,6 @@ rm.pcolor(arr)
 plt.subplot(212)
 rm2.pcolor(arr)
 
-################################################################################
 #%%
 # RelativeTo
 # ++++++++++

@@ -132,7 +132,10 @@ class Point(myObject):
                 self.y.name.replace(' ', '_'): self.y,
                 self.z.name.replace(' ', '_'): self.z,
                 self.elevation.name.replace(' ', '_'): self.elevation}, \
-                [self.x.name.replace(' ', '_'), self.y.name.replace(' ', '_'), self.z.name.replace(' ', '_'), self.elevation.name.replace(' ', '_')]
+                [self.x.name.replace(' ', '_'),
+                 self.y.name.replace(' ', '_'),
+                 self.z.name.replace(' ', '_'),
+                 self.elevation.name.replace(' ', '_')]
 
     @property
     def addressof(self):
@@ -674,9 +677,8 @@ class Point(myObject):
             Values to interpolate.  Must have size self.nPoints.
             Defaults to None.
         method : str, optional
-            * 'ct' uses Clough Tocher interpolation
+            * 'ct' uses Clough Tocher interpolation. Default
             * 'mc' uses Minimum curvature and requires pygmt to be installed.
-            Defaults to 'ct'.
         mask : float, optional
             Cells of distance mask away from points are NaN.
             Defaults to False.
@@ -799,13 +801,12 @@ class Point(myObject):
         try:
             from pygmt import surface
         except Exception as e:
-            print(repr(e))
-            raise Exception(("\npygmt not installed correctly.  method='mc' can only be used when pygmt is present.\n"
+            raise Exception(("{}\npygmt not installed correctly.  method='mc' can only be used when pygmt is present.\n"
                              "To install pygmt, you need to use conda environments. Installing instructions are here\n"
                              "https://www.pygmt.org/latest/install.html \n"
                              "After creating a new conda environment do\n"
                              "'pip install -c conda-forge numpy pandas xarray netcdf4 packaging gmt pygmt'\n"
-                             "Then install geobipy and its dependencies to that environment."))
+                             "Then install geobipy and its dependencies to that environment.").format(e))
 
         assert isinstance(mesh, RectilinearMesh2D), TypeError("mesh must be RectilinearMesh2D")
         assert mesh.is_regular, ValueError("Minimum curvature must interpolate to a regular mesh")

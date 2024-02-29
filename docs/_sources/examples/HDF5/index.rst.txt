@@ -18,7 +18,7 @@ HDF 5
 .. only:: html
 
   .. image:: /examples/HDF5/images/thumb/sphx_glr_hdf5_thumb.png
-    :alt: Using HDF5 within GeoBIPy
+    :alt:
 
   :ref:`sphx_glr_examples_HDF5_hdf5.py`
 

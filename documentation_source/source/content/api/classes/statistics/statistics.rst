@@ -1,13 +1,11 @@
 Statistics classes
-=================================
+==================
 
 .. toctree::
    :maxdepth: 1
 
    Distribution
-   Histogram1D
-   Histogram2D
-   Hitmap2D
+   Histogram
    baseDistribution
    NormalDistribution
    MvNormalDistribution

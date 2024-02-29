@@ -190,7 +190,7 @@ class RectilinearMesh1D(Mesh):
         else:
             dims = arange(ndim(self.relativeTo) + 1)
             dims = tuple(dims[dims != self.dimension])
-            return utilities._power(repeat(expand_dims(self.relativeTo, self.dimension), self.nCells, self.dimension) + expand_dims(self.centres, dims), self.log)
+            return utilities._power( expand_dims(self.centres, dims) + repeat(expand_dims(self.relativeTo, self.dimension), self.nCells, self.dimension), self.log)
 
     @centres.setter
     def centres(self, values):
@@ -231,11 +231,13 @@ class RectilinearMesh1D(Mesh):
     @property
     def edges_absolute(self):
         if self.relativeTo.size == 1:
-            return utilities._power(self.edges + self.relativeTo, self.log)
+            out = utilities._power(self.edges + self.relativeTo, self.log)
         else:
             dims = arange(ndim(self.relativeTo) + 1)
             dims = tuple(dims[dims != self.dimension])
-            return utilities._power(repeat(expand_dims(self.relativeTo, self.dimension), self.nEdges, self.dimension) + expand_dims(self.edges, dims), self.log)
+            out = utilities._power(expand_dims(self.edges, dims) + repeat(expand_dims(self.relativeTo, self.dimension), self.nEdges, self.dimension), self.log)
+
+        return out
 
     @edges.setter
     def edges(self, values):
@@ -410,7 +412,7 @@ class RectilinearMesh1D(Mesh):
 
         if npall(value > 0.0):
             value, _ = utilities._log(value, self.log)
-        self._relativeTo = StatArray.StatArray(value)
+        self._relativeTo = deepcopy(StatArray.StatArray(value))
 
     @property
     def shape(self):
@@ -708,18 +710,17 @@ class RectilinearMesh1D(Mesh):
         x = self.widths.copy()
 
         # Sort out infinity here
-        f = 1.0
         if self.open_left:
             if self.nCells == 2:
-                x[0] = f * x[-1]
+                x[0] = x[-1]
             else:
-                x[0] = f * (x[1]**2.0 / x[2])
+                x[0] = (x[1]**2.0 / x[2])
 
         if self.open_right:
             if self.nCells == 2:
-                x[-1] = f * x[0]
+                x[-1] = x[0]
             else:
-                x[-1] = f * (x[-2]**2.0 / x[-3])
+                x[-1] = (x[-2]**2.0 / x[-3])
 
         return diag(x/(self.nCells * mean(x)))
 
@@ -1557,7 +1558,7 @@ class RectilinearMesh1D(Mesh):
             self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
         if self._relativeTo is not None:
-            self.relativeTo.createHdf(grp, 'relativeTo', add_axis=add_axis, fillvalue=fillvalue)
+            self.relativeTo.createHdf(grp, 'relativeTo', add_axis=add_axis, fillvalue=fillvalue, withPosterior=False)
 
         # self.centres.toHdf(grp, 'centres', withPosterior=withPosterior)
         self.edges.toHdf(grp, 'edges', withPosterior=withPosterior)
@@ -1566,7 +1567,6 @@ class RectilinearMesh1D(Mesh):
         grp.create_dataset('dimension', data=data, shape=(1, ))
 
         return grp
-
 
     # def _create_hdf_2d_stitched(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
     #     if isinstance(add_axis, (int, int_)):
@@ -1628,7 +1628,7 @@ class RectilinearMesh1D(Mesh):
             self.nCells.writeHdf(grp, 'nCells',  withPosterior=withPosterior, index=index)
 
         if self._relativeTo is not None:
-            self.relativeTo.writeHdf(grp, 'relativeTo', index=index)
+            self.relativeTo.writeHdf(grp, 'relativeTo', index=index, withPosterior=False)
 
         # Edges can have a posterior
         self.edges.writeHdf(grp, 'edges',  withPosterior=withPosterior)
@@ -1636,11 +1636,10 @@ class RectilinearMesh1D(Mesh):
         # grp['dimension'][0] = self.dimension
 
     def _write_hdf_2d(self, parent, name, withPosterior=True, index=None):
-
         grp = parent.get(name)
 
         if self._relativeTo is not None:
-            self.relativeTo.writeHdf(grp, 'y/relativeTo', index=index)
+            self.relativeTo.writeHdf(grp, 'y/relativeTo', index=index, withPosterior=False)
 
         ind = None
         if self._nCells is not None:

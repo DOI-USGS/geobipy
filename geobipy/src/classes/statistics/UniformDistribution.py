@@ -17,7 +17,7 @@ from ..core import StatArray
 class Uniform(baseDistribution):
     """ Class defining a uniform distribution """
 
-    def __init__(self, min, max, log=False, prng=None):
+    def __init__(self, min=0.0, max=1.0, log=False, prng=None):
         """ Initialize a uniform distribution
         xmin:  :Minimum value
         xmax:  :Maximum value

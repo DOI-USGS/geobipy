@@ -1,7 +1,0 @@
-<map id="inheritance66f423f7ef" name="inheritance66f423f7ef">
-<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,5,77,31"/>
-<area shape="rect" id="node5" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
-<area shape="rect" id="node2" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="403,5,475,31"/>
-<area shape="rect" id="node4" href="#geobipy.src.classes.data.dataset.FdemData.FdemData" target="_top" title="Class extension to geobipy.Data defining a Fourier domain electro magnetic data set" alt="" coords="523,5,605,31"/>
-<area shape="rect" id="node3" href="../../pointcloud/PointCloud3D.html#geobipy.src.classes.pointcloud.PointCloud3D.PointCloud3D" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="252,5,355,31"/>
-</map>

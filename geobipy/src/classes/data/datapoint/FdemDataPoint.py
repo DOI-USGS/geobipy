@@ -77,7 +77,7 @@ class FdemDataPoint(EmDataPoint):
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
         # self.calibration = StatArray.StatArray([self.nChannels * 2], 'Calibration Parameters')
 
-        self.channelNames = None
+        self.channel_names = None
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
@@ -127,22 +127,22 @@ class FdemDataPoint(EmDataPoint):
         self.components = 'z'
         self.channels_per_system = 2 * self.system[0].nFrequencies
 
-    @EmDataPoint.channelNames.setter
-    def channelNames(self, values):
+    @EmDataPoint.channel_names.setter
+    def channel_names(self, values):
         if values is None:
             if self.system is None:
-                self._channelNames = ['None']
+                self._channel_names = ['None']
                 return
-            self._channelNames = []
+            self._channel_names = []
             for i in range(self.nSystems):
                 # Set the channel names
                 if not self.system[i] is None:
                     for iFrequency in range(2*self.nFrequencies[i]):
-                        self._channelNames.append('{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
+                        self._channel_names.append('{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            self._channel_names = values
 
     @property
     def nFrequencies(self):
@@ -533,6 +533,9 @@ class FdemDataPoint(EmDataPoint):
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
         return StatArray.StatArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
+    def fm_dlogc(self, mod):
+        self.forward(mod)
+        self.sensitivity(mod)
 
     def _forward1D(self, mod):
         """ Forward model the data from a 1D layered earth model """

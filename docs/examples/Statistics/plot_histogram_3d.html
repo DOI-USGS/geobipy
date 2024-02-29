@@ -1,27 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Histogram 3D &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -34,14 +35,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoBIPy
           </a>
               <div class="version">
                 1.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -51,30 +56,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../index.html#distribtions">Distribtions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Histogram 3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_StatArray.html">StatArray Class</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#inference">Inference</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../Distributions/index.html">Distribtions</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="index.html">Statistics</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Histogram 3D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="plot_StatArray.html">StatArray Class</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../Meshes/index.html">Meshes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../Models/index.html">Models</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../Data/index.html">Data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../Datapoints/index.html">Datapoints</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../Inference/index.html">Inference</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../HDF5/index.html">HDF 5</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#inference-2d">Inference 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
 </ul>
 </li>
 </ul>
@@ -92,9 +88,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
-          <li class="breadcrumb-item"><a href="index.html">Statistics</a></li>
       <li class="breadcrumb-item active">Histogram 3D</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../_sources/examples/Statistics/plot_histogram_3d.rst.txt" rel="nofollow"> View page source</a>
@@ -107,14 +102,14 @@
              
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
-<p>Click <a class="reference internal" href="#sphx-glr-download-examples-statistics-plot-histogram-3d-py"><span class="std std-ref">here</span></a>
+<p><a class="reference internal" href="#sphx-glr-download-examples-statistics-plot-histogram-3d-py"><span class="std std-ref">Go to the end</span></a>
 to download the full example code</p>
 </div>
 <section class="sphx-glr-example-title" id="histogram-3d">
-<span id="sphx-glr-examples-statistics-plot-histogram-3d-py"></span><h1>Histogram 3D<a class="headerlink" href="#histogram-3d" title="Permalink to this heading"></a></h1>
+<span id="sphx-glr-examples-statistics-plot-histogram-3d-py"></span><h1>Histogram 3D<a class="headerlink" href="#histogram-3d" title="Link to this heading"></a></h1>
 <p>This 3D histogram class allows efficient updating of histograms, plotting and
 saving as HDF5.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">geobipy</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">geobipy</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Histogram</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -123,7 +118,7 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <p>Create some histogram bins in x and y</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="s1">&#39;Variable 1&#39;</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="s1">&#39;Variable 1&#39;</span><span class="p">)</span>
 <span class="n">y</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="s1">&#39;Variable 2&#39;</span><span class="p">)</span>
 <span class="n">z</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="s1">&#39;Variable 3&#39;</span><span class="p">)</span>
 
@@ -131,21 +126,21 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <p>Instantiate</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Generate some random numbers</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="c1"># x = np.asarray([a, b, c])</span>
 </pre></div>
 </div>
 <p>Update the histogram counts</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Slice half way along each dimension&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -154,7 +149,7 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_histogram_3d_001.png" srcset="../../_images/sphx_glr_plot_histogram_3d_001.png" alt="Slice half way along each dimension" class = "sphx-glr-single-img"/><p>Generate marginal histograms along an axis</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Marginals along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -162,7 +157,7 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_histogram_3d_002.png" srcset="../../_images/sphx_glr_plot_histogram_3d_002.png" alt="Marginals along each axis" class = "sphx-glr-single-img"/><p>Take the mean estimate from the histogram</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Mean along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -170,13 +165,13 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_histogram_3d_003.png" srcset="../../_images/sphx_glr_plot_histogram_3d_003.png" alt="Mean along each axis" class = "sphx-glr-single-img"/><p>Take the median estimate from the histogram</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Median along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
 
-<span class="c1"># ################################################################################</span>
+<span class="c1"># #%%</span>
 <span class="c1"># # We can map the credible range to an opacity or transparency</span>
 <span class="c1"># H.opacity()</span>
 <span class="c1"># H.transparency()</span>
@@ -206,21 +201,21 @@ saving as HDF5.</p>
 <li><img src="../../_images/sphx_glr_plot_histogram_3d_005.png" srcset="../../_images/sphx_glr_plot_histogram_3d_005.png" alt="3.60" class = "sphx-glr-multi-img"/></li>
 </ul>
 <p>Instantiate</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Generate some random numbers</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="c1"># x = np.asarray([a, b, c])</span>
 </pre></div>
 </div>
 <p>Update the histogram counts</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Slice half way along each dimension&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -229,7 +224,7 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_histogram_3d_006.png" srcset="../../_images/sphx_glr_plot_histogram_3d_006.png" alt="Slice half way along each dimension" class = "sphx-glr-single-img"/><p>Generate marginal histograms along an axis</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Marginals along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -237,7 +232,7 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_histogram_3d_007.png" srcset="../../_images/sphx_glr_plot_histogram_3d_007.png" alt="Marginals along each axis" class = "sphx-glr-single-img"/><p>Take the mean estimate from the histogram</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Mean along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -245,13 +240,13 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_histogram_3d_008.png" srcset="../../_images/sphx_glr_plot_histogram_3d_008.png" alt="Mean along each axis" class = "sphx-glr-single-img"/><p>Take the median estimate from the histogram</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Median along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
 
-<span class="c1"># ################################################################################</span>
+<span class="c1"># #%%</span>
 <span class="c1"># # We can map the credible range to an opacity or transparency</span>
 <span class="c1"># H.opacity()</span>
 <span class="c1"># H.transparency()</span>
@@ -267,13 +262,13 @@ saving as HDF5.</p>
 <li><img src="../../_images/sphx_glr_plot_histogram_3d_009.png" srcset="../../_images/sphx_glr_plot_histogram_3d_009.png" alt="Median along each axis" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_histogram_3d_010.png" srcset="../../_images/sphx_glr_plot_histogram_3d_010.png" alt="3.60" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  5.902 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.325 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-3d-py">
-<div class="sphx-glr-download sphx-glr-download-python docutils container">
-<p><a class="reference download internal" download="" href="../../_downloads/3bf606a1e1bcade69bb1094393e978cd/plot_histogram_3d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_histogram_3d.py</span></code></a></p>
-</div>
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/93e086b68a2d08aac2f637ab24f17e8a/plot_histogram_3d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_histogram_3d.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/3bf606a1e1bcade69bb1094393e978cd/plot_histogram_3d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_histogram_3d.py</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_examples_HDF5_hdf5.py>`
+        :ref:`Go to the end <sphx_glr_download_examples_HDF5_hdf5.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -19,7 +19,7 @@
 
 
 Using HDF5 within GeoBIPy
------------------------------------------------
+-------------------------
 
 Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory systems.
 A common bottleneck with large parallel algorithms is the input output of information to disk.
@@ -29,21 +29,20 @@ Each object within GeoBIPy has a create_hdf, write_hdf, and read_hdf routine.
 
 .. GENERATED FROM PYTHON SOURCE LINES 12-16
 
-.. code-block:: default
+.. code-block:: Python
 
     import numpy as np
     import h5py
     from geobipy import StatArray
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 17-19
+.. GENERATED FROM PYTHON SOURCE LINES 17-18
 
 StatArray
-+++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 19-34
+.. GENERATED FROM PYTHON SOURCE LINES 18-33
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Instantiate a StatArray
@@ -61,7 +60,7 @@ StatArray
     print('y', y)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 35-40
+.. GENERATED FROM PYTHON SOURCE LINES 34-39
 
 There are actually steps within the "toHdf" function.
 First, space is created within the HDF file and second, the data is written to that space
@@ -69,9 +68,9 @@ These functions are split because during the execution of a parallel enabled pro
 all the space within the HDF file needs to be allocated before we can write to the file
 using multiple cores.
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-53
+.. GENERATED FROM PYTHON SOURCE LINES 39-52
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Write the StatArray to a HDF file.
@@ -87,16 +86,16 @@ using multiple cores.
     print('y', y)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-58
+.. GENERATED FROM PYTHON SOURCE LINES 53-57
 
 The create and write HDF methods also allow extra space to be allocated so that
 the extra memory can be written later, perhaps by multiple cores.
 Here we specify space for 2 arrays, the memory is stored contiguously as a numpy array.
 We then write to only the first index.
 
-.. GENERATED FROM PYTHON SOURCE LINES 58-72
+.. GENERATED FROM PYTHON SOURCE LINES 57-71
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Write the StatArray to a HDF file.
@@ -113,13 +112,13 @@ We then write to only the first index.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-74
+.. GENERATED FROM PYTHON SOURCE LINES 72-73
 
 The duplication can also be a shape.
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-87
+.. GENERATED FROM PYTHON SOURCE LINES 73-86
 
-.. code-block:: default
+.. code-block:: Python
 
 
     # Write the StatArray to a HDF file.
@@ -135,13 +134,13 @@ The duplication can also be a shape.
     print('y', y)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 88-89
+.. GENERATED FROM PYTHON SOURCE LINES 87-88
 
 Similarly, we can duplicate a 2D array with an extra 2D duplication
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-101
+.. GENERATED FROM PYTHON SOURCE LINES 88-100
 
-.. code-block:: default
+.. code-block:: Python
 
 
     x = StatArray(np.random.randn(2, 2), name = 'an Array', units = 'some units')
@@ -157,25 +156,19 @@ Similarly, we can duplicate a 2D array with an extra 2D duplication
     print('x', x)
     print('y', y)
 
-.. rst-class:: sphx-glr-timing
-
-   **Total running time of the script:** ( 0 minutes  0.000 seconds)
-
-
 .. _sphx_glr_download_examples_HDF5_hdf5.py:
 
 .. only:: html
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: hdf5.ipynb <hdf5.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: hdf5.py <hdf5.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: hdf5.ipynb <hdf5.ipynb>`
 
 
 .. only:: html

@@ -1,0 +1,78 @@
+System Begin
+	Name = SkyTEMLM_ElkHills
+	Type = Time Domain
+	Transmitter Begin
+		NumberOfTurns = 1
+		PeakCurrent   = 1
+		LoopArea      = 1
+		BaseFrequency = 210.0
+		WaveformDigitisingFrequency = 3440640
+		WaveFormCurrent Begin
+-8.00E-04	0.00E+00
+-7.65E-04	6.34E-02
+-6.28E-04	2.50E-01
+-4.35E-04	4.75E-01
+-9.22E-05	8.90E-01
+0.00E+00	1.00E+00
+2.20E-07	9.97E-01
+4.90E-07	9.80E-01
+1.09E-06	9.10E-01
+1.69E-06	8.16E-01
+3.31E-06	5.37E-01
+3.90E-06	4.47E-01
+4.47E-06	3.70E-01
+5.50E-06	2.56E-01
+6.58E-06	1.68E-01
+7.27E-06	1.26E-01
+8.01E-06	9.08E-02
+9.68E-06	4.08E-02
+1.17E-05	1.30E-02
+1.46E-05	0.00E+00
+1.581E-03	0.00E+00
+
+		WaveFormCurrent End
+	Transmitter End
+Receiver Begin
+	NumberOfWindows = 19
+	WindowWeightingScheme = AreaUnderCurve
+	WindowTimes Begin
+1.828E-05	2.285E-05
+2.328E-05	2.885E-05
+2.928E-05	3.685E-05
+3.728E-05	4.685E-05
+4.728E-05	5.985E-05
+6.027E-05	7.587E-05
+7.627E-05	9.587E-05
+9.627E-05	1.209E-04
+1.213E-04	1.519E-04
+1.523E-04	1.919E-04
+1.923E-04	2.429E-04
+2.433E-04	3.059E-04
+3.063E-04	3.869E-04
+3.873E-04	4.879E-04
+4.883E-04	6.149E-04
+6.153E-04	7.759E-04
+7.763E-04	9.779E-04
+9.783E-04	1.233E-03
+1.233E-03	1.555E-03
+
+	WindowTimes End
+		LowPassFilter Begin
+			CutOffFrequency = 300000 210000
+			Order           = 1       2
+		LowPassFilter End
+	Receiver End
+	ForwardModelling Begin
+		//TX loop area is was 340.82 m^2 -> r = sqrt(340.82/pi)
+		ModellingLoopRadius = 10.416
+		OutputType = dB/dt
+		XOutputScaling = 0
+		YOutputScaling = 0
+		ZOutputScaling = 1
+		SecondaryFieldNormalisation  =  none
+		FrequenciesPerDecade = 5
+		NumberOfAbsiccaInHankelTransformEvaluation = 21
+	ForwardModelling End
+System End
+
+

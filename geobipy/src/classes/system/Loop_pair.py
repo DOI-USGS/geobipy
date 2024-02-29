@@ -1,6 +1,6 @@
 from copy import deepcopy
 import numpy as np
-from numpy import int32
+from numpy import int32, vstack
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -28,6 +28,33 @@ class Loop_pair(Point, PointCloud3D):
         self.receiver = receiver
 
     @property
+    def x_offset(self):
+        return self._x
+
+    @x_offset.setter
+    def x_offset(self, value):
+        self._x[:] = value
+        self.receiver.x[:] = self.transmitter.x + value
+
+    @property
+    def y_offset(self):
+        return self._y
+
+    @y_offset.setter
+    def y_offset(self, value):
+        self._y[:] = value
+        self.receiver.y[:] = self.transmitter.y + value
+
+    @property
+    def z_offset(self):
+        return self._z
+
+    @z_offset.setter
+    def z_offset(self, value):
+        self._z[:] = value
+        self.receiver.z[:] = self.transmitter.z + value
+
+    @property
     def addressof(self):
         msg = super().addressof
         msg += "transmitter:\n{}".format(("|   "+self.transmitter.addressof.replace("\n", "\n|   "))[:-4])
@@ -46,7 +73,7 @@ class Loop_pair(Point, PointCloud3D):
                          self.transmitter.roll.item(),
                         -self.transmitter.pitch.item(),
                         -self.transmitter.yaw.item(),
-                         self.x.item(), self.y.item(), self.z.item(),
+                         self.x_offset.item(), self.y_offset.item(), self.z_offset.item(),
                          self.receiver.roll.item(),
                         -self.receiver.pitch.item(),
                         -self.receiver.yaw.item())
@@ -58,6 +85,10 @@ class Loop_pair(Point, PointCloud3D):
 
             self.receiver.nPoints = value
             self.transmitter.nPoints = value
+
+    @property
+    def offset(self):
+        return vstack([self.x, self.y ,self.z]).T
 
     @property
     def hasPosterior(self):
@@ -231,15 +262,15 @@ class Loop_pair(Point, PointCloud3D):
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         grp = super().createHdf(parent, name, withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.transmitter.createHdf(grp, 'transmitter', add_axis=add_axis, fillvalue=fillvalue)
-        self.receiver.createHdf(grp, 'receiver', add_axis=add_axis, fillvalue=fillvalue)
+        self.transmitter.createHdf(grp, 'transmitter', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.receiver.createHdf(grp, 'receiver', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
     def writeHdf(self, parent, name, withPosterior=True, index=None):
         super().writeHdf(parent, name, withPosterior, index)
 
         grp = parent[name]
-        self.transmitter.writeHdf(grp, 'transmitter', index=index)
-        self.receiver.writeHdf(grp, 'receiver', index=index)
+        self.transmitter.writeHdf(grp, 'transmitter', withPosterior=withPosterior, index=index)
+        self.receiver.writeHdf(grp, 'receiver', withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None):

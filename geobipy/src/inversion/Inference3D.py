@@ -11,8 +11,7 @@ from numpy import full, hstack, int32, int64, log10, logical_not, linspace, load
 from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, uint64, unique, vstack, where, zeros
 from numpy import all as npall
 
-from numpy.random import Generator
-from randomgen import Xoshiro256
+from numpy.random import Generator, PCG64DXSM
 
 from datetime import timedelta
 import matplotlib.pyplot as plt
@@ -88,7 +87,7 @@ class Inference3D(myObject):
 
 
     @classmethod
-    def fromHdf(cls, grp, world=None, **kwargs):
+    def fromHdf(cls, grp, prng, world=None, **kwargs):
         # if isinstance(grp, (Path, str)):
         #     tmp = {}
         #     if world is not None:
@@ -97,13 +96,13 @@ class Inference3D(myObject):
 
         #     grp = h5py.File(grp, mode, **tmp)
 
-        lines = [Inference2D.fromHdf(file, world = world, **kwargs) for file in Inference3D._get_h5Files(grp)]
+        lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in Inference3D._get_h5Files(grp)]
 
         data = lines[0].data
         for line in lines[1:]:
             data.append(line.data)
 
-        self = cls(data, world=world)
+        self = cls(data, world=world, prng=prng)
         self.mode = kwargs.get('mode', 'r')
         self.hdf_file = grp
         self.lines = lines
@@ -112,7 +111,7 @@ class Inference3D(myObject):
     def open(self, directory, **kwargs):
         assert kwargs.get('mode', 'r') in ('r', 'r+', 'a', 'w'), ValueError("mode must be in ('r', 'r+', 'a', 'w')")
 
-        self.lines = [Inference2D.fromHdf(file, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
+        self.lines = [Inference2D.fromHdf(file, prng=self.prng, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
 
     @staticmethod
     def _get_h5Files(directory, files=None, **kwargs):
@@ -203,7 +202,6 @@ class Inference3D(myObject):
                                                         "Where bit_generator is one of the several generators from either numpy or randomgen"))
 
         self._prng = value
-        self.seed = self._prng.bit_generator.seed_seq.entropy
 
     @property
     def seed(self):
@@ -264,12 +262,12 @@ class Inference3D(myObject):
         if self.parallel_access:
             from mpi4py import MPI
 
-            # Split off a master communicator.
+            # Split off a single core communicator.
             single_rank_comm = self.world.Create(self.world.Get_group().Incl([0]))
 
             if (single_rank_comm != MPI.COMM_NULL):
-                # Instantiate a new blank inference3d linked to the master
-                inference3d = Inference3D(self.data, prng=Generator(Xoshiro256()), world=single_rank_comm)
+                # Instantiate a new blank inference3d linked to the head rank
+                inference3d = Inference3D(self.data, prng=Generator(PCG64DXSM()), world=single_rank_comm)
                 # Create the hdf5 files
                 inference3d._create_HDF5_dataset(directory, **kwargs)
 
@@ -311,7 +309,7 @@ class Inference3D(myObject):
                 kwargs['comm'] = self.world
 
             with h5py.File(join(directory, '{}.h5'.format(line)), 'w', **kwargs) as f:
-                Inference2D(subset).createHdf(f, inference1d)
+                Inference2D(subset, prng=self.prng).createHdf(f, inference1d)
 
             self.print('Created hdf5 file for line {} with {} data points'.format(line, subset.nPoints))
         self.print('Created hdf5 files {} total data points'.format(self.data.nPoints))
@@ -417,7 +415,7 @@ class Inference3D(myObject):
             line.uncache('additiveError')
         return out
 
-    def infer(self, seed=None, index=None, fiducial=None, line_number=None, **options):
+    def infer(self, index=None, fiducial=None, line_number=None, **options):
 
         if self.parallel_access:
             self.infer_mpi(**options)
@@ -471,14 +469,14 @@ class Inference3D(myObject):
 
         t0 = MPI.Wtime()
 
-        # Carryout the master-worker tasks
+        # Carryout the head-worker tasks
         if (world.rank == 0):
             self._infer_mpi_master_task(**options)
         else:
             self._infer_mpi_worker_task(**options)
 
     def _infer_mpi_master_task(self, **options):
-        """ Define a Send Recv Send procedure on the master """
+        """ Define a Send Recv Send procedure on the head rank """
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
@@ -511,7 +509,7 @@ class Inference3D(myObject):
         # Start a timer
         t0 = MPI.Wtime()
 
-        myMPI.print("Initial data points sent. Master is now waiting for requests")
+        myMPI.print("Initial data points sent. Head rank is now waiting for requests")
 
         # Now wait to send indices out to the workers as they finish until the entire data set is finished
         while nFinished < nPoints:
@@ -585,7 +583,7 @@ class Inference3D(myObject):
                 myMPI.print("datapoint {} {} failed to converge".format(datapoint.lineNumber, datapoint.fiducial))
                 # save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)
 
-            # Ping the Master to request a new index
+            # Ping the head rank to request a new index
             world.send('requesting', dest=0)
 
             # Wait till you are told whether to continue or not
@@ -1237,7 +1235,7 @@ class Inference3D(myObject):
     def loop_over(self, *args, **kwargs):
         """Generate a loop range.
 
-        Tracks progress on the master rank only if parallel.
+        Tracks progress on the head rank only if parallel.
 
         Parameters
         ----------
@@ -1322,7 +1320,7 @@ class Inference3D(myObject):
         mixture = mixPearson(a, a, a, a)
         mixture.createHdf(hdf_file, 'fits', add_axis=(self.nPoints, self.lines[0].mesh.y.nCells))
 
-        if rank == 0:  ## Master Task
+        if rank == 0:  ## Head rank
             nFinished = 0
             nSent = 0
 
@@ -1341,7 +1339,7 @@ class Inference3D(myObject):
 
             t0 = MPI.Wtime()
 
-            myMPI.print("Initial posteriors sent. Master is now waiting for requests")
+            myMPI.print("Initial posteriors sent. Head rank is now waiting for requests")
 
             # Now wait to send indices out to the workers as they finish until the entire data set is finished
             while nFinished < self.nPoints:

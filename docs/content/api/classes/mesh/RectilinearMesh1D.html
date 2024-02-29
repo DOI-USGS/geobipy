@@ -1,27 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RectilinearMesh1D &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -35,14 +36,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../../index.html" class="icon icon-home"> GeoBIPy
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeoBIPy
           </a>
               <div class="version">
                 1.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -58,7 +63,8 @@
 <li class="toctree-l3 current"><a class="reference internal" href="mesh.html">Mesh classes</a><ul class="current">
 <li class="toctree-l4 current"><a class="current reference internal" href="#">RectilinearMesh1D</a></li>
 <li class="toctree-l4"><a class="reference internal" href="RectilinearMesh2D.html">RectilinearMesh2D</a></li>
-<li class="toctree-l4"><a class="reference internal" href="TopoRectilinearMesh2D.html">TopoRectilinearMesh2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RectilinearMesh2D_stitched.html">RectilinearMesh2D_stitched</a></li>
+<li class="toctree-l4"><a class="reference internal" href="RectilinearMesh3D.html">RectilinearMesh3D</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
@@ -85,7 +91,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
           <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
           <li class="breadcrumb-item"><a href="mesh.html">Mesh classes</a></li>
@@ -100,21 +106,21 @@
            <div itemprop="articleBody">
              
   <section id="rectilinearmesh1d">
-<h1>RectilinearMesh1D<a class="headerlink" href="#rectilinearmesh1d" title="Permalink to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-fe525f15c0103bb8b675884510c8d8c709ef53bf.png" alt="Inheritance diagram of geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" usemap="#inheritancef15b3b6232" class="inheritance graphviz" /></div>
+<h1>RectilinearMesh1D<a class="headerlink" href="#rectilinearmesh1d" title="Link to this heading"></a></h1>
+<div class="graphviz"><img src="../../../../_images/inheritance-fbcbab5f4f1af2527248286e74b8ace6d4173b15.png" alt="Inheritance diagram of geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" usemap="#inheritancef15b3b6232" class="inheritance graphviz" /></div>
 <map id="inheritancef15b3b6232" name="inheritancef15b3b6232">
-<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
-<area shape="rect" id="node4" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" target="_top" title="Class defining a 1D rectilinear mesh with cell centres and edges." alt="" coords="372,5,505,31"/>
-</map><span class="target" id="module-geobipy.src.classes.mesh.RectilinearMesh1D"></span><p>&#64;RectilinearMesh1D_Class
+<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
+<area shape="rect" id="node4" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" target="_top" title="Class defining a 1D rectilinear mesh with cell centres and edges." alt="" coords="371,5,503,32"/>
+</map><p id="module-geobipy.src.classes.mesh.RectilinearMesh1D">&#64;RectilinearMesh1D_Class
 Module describing a 1D Rectilinear Mesh class</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh1D.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeTo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh1D.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeTo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="Link to this definition"></a></dt>
 <dd><p>Class defining a 1D rectilinear mesh with cell centres and edges.</p>
 <p>Contains a simple 1D mesh with cell edges, widths, and centre locations.</p>
 <p>RectilinearMesh1D(centres, edges, edgesMin, edgesMax)</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>centres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the centre of each cell. Only centres, edges, or widths can be given.</p></li>
 <li><p><strong>edges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges. Only centres, edges, or widths can be given.</p></li>
@@ -124,13 +130,13 @@ Plotting is in log space.</p></li>
 <li><p><strong>relativeTo</strong> (<em>float</em><em>, </em><em>optional</em>) – If a float is given, updates will be relative to this value.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>out</strong> – The 1D mesh.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">RectilinearMesh1D</a></p>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>Exception</strong> – If both centres and edges are given.</p></li>
 <li><p><strong>TypeError</strong> – centres must be a geobipy.StatArray.</p></li>
@@ -140,20 +146,20 @@ Plotting is in log space.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.cellIndex">
-<span class="sig-name descname"><span class="pre">cellIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.cellIndex" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cellIndex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.cellIndex" title="Link to this definition"></a></dt>
 <dd><p>Get the index to the cell that each value in values falls in.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> (<em>array_like</em>) – The values to find the cell indices for</p></li>
 <li><p><strong>clip</strong> (<em>bool</em>) – A negative index which would normally wrap will clip to 0 and self.bins.size instead.</p></li>
 <li><p><strong>trim</strong> (<em>bool</em>) – Do not include out of axis indices. Negates clip, since they wont be included in the output.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>out</strong> – The cell indices</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array_like</p>
 </dd>
 </dl>
@@ -161,7 +167,7 @@ Plotting is in log space.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.createHdf">
-<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upcast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.createHdf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upcast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.createHdf" title="Link to this definition"></a></dt>
 <dd><p>Create the hdf group metadata in file
 parent: HDF object to create a group inside
 myName: Name of the group</p>
@@ -169,16 +175,16 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.delete_edge">
-<span class="sig-name descname"><span class="pre">delete_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.delete_edge" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">delete_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.delete_edge" title="Link to this definition"></a></dt>
 <dd><p>Delete an edge from the mesh</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>i</strong> (<em>int</em>) – The edge to remove.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>out</strong> – Mesh with edge removed.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">RectilinearMesh1D</a></p>
 </dd>
 </dl>
@@ -186,41 +192,41 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.fromHdf">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_posterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.fromHdf" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_posterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.fromHdf" title="Link to this definition"></a></dt>
 <dd><p>Reads in the object froma HDF file</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.gradient">
-<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.gradient" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.gradient" title="Link to this definition"></a></dt>
 <dd><p>Compute the gradient</p>
 <p>Parameter gradient <span class="math notranslate nohighlight">\(\nabla_{z}\sigma\)</span> at the ith layer is computed via</p>
 <div class="math notranslate nohighlight" id="equation-dpdz1">
-<span class="eqno">(1)<a class="headerlink" href="#equation-dpdz1" title="Permalink to this equation"></a></span>\[\nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}\]</div>
+<span class="eqno">(1)<a class="headerlink" href="#equation-dpdz1" title="Link to this equation"></a></span>\[\nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(\sigma_{i+1}\)</span> and <span class="math notranslate nohighlight">\(\sigma_{i}\)</span> are the log-parameters on either side of an interface, <span class="math notranslate nohighlight">\(h_{i}\)</span> is the log-thickness of the ith layer, and <span class="math notranslate nohighlight">\(h_{min}\)</span> is the minimum log thickness defined by</p>
 <div class="math notranslate nohighlight" id="equation-minthickness1">
-<span class="eqno">(2)<a class="headerlink" href="#equation-minthickness1" title="Permalink to this equation"></a></span>\[h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}\]</div>
+<span class="eqno">(2)<a class="headerlink" href="#equation-minthickness1" title="Link to this equation"></a></span>\[h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(k_{max}\)</span> is a maximum number of layers, set to be far greater than the expected final solution.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.hdfName">
-<span class="sig-name descname"><span class="pre">hdfName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.hdfName" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">hdfName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.hdfName" title="Link to this definition"></a></dt>
 <dd><p>Reprodicibility procedure</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.in_bounds">
-<span class="sig-name descname"><span class="pre">in_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.in_bounds" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">in_bounds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.in_bounds" title="Link to this definition"></a></dt>
 <dd><p>Return whether values are inside the cell edges</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>values</strong> (<em>array_like</em>) – Check if these are inside left &lt;= values &lt; right.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>out</strong> – Are the values inside.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>bools</p>
 </dd>
 </dl>
@@ -228,16 +234,16 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.insert_edge">
-<span class="sig-name descname"><span class="pre">insert_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.insert_edge" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">insert_edge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.insert_edge" title="Link to this definition"></a></dt>
 <dd><p>Insert a new edge.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<em>numpy.float64</em>) – Location at which to insert a new edge</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>out</strong> – Mesh with inserted edge.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>geobipy.RectilinearMesh1D</p>
 </dd>
 </dl>
@@ -245,12 +251,12 @@ myName: Name of the group</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.map_to_pdf">
-<span class="sig-name descname"><span class="pre">map_to_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.map_to_pdf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">map_to_pdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distribution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.map_to_pdf" title="Link to this definition"></a></dt>
 <dd><p>Creates a Hitmap from the model given the variance of each layer.</p>
 <p>For each depth, creates a normal distribution with a mean equal to the interpolated parameter
 at that depth and variance specified with variance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>variance</strong> (<em>array_like</em>) – The variance of each layer</p></li>
 <li><p><strong>Hitmap</strong> (<em>geobipy.Hitmap</em>) – Hitmap to convert the model to.
@@ -262,18 +268,18 @@ Must be instantiated before calling so that the model can be interpolated correc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.mask_cells">
-<span class="sig-name descname"><span class="pre">mask_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.mask_cells" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mask_cells</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.mask_cells" title="Link to this definition"></a></dt>
 <dd><p>Mask cells by a distance.</p>
 <p>If the edges of the cell are further than distance away, extra cells are inserted such that
 the cell’s new edges are at distance away from the centre.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>distance</strong> (<em>float</em>) – Distance to mask</p></li>
 <li><p><strong>values</strong> (<em>array_like</em><em>, </em><em>optional</em>) – If given, values will be remapped to the masked mesh.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>out</strong> (<em>RectilinearMesh1D</em>) – Masked mesh</p></li>
 <li><p><strong>indices</strong> (<em>ints</em>) – Location of the original centres in the expanded mesh</p></li>
@@ -286,16 +292,16 @@ the cell’s new edges are at distance away from the centre.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.pad">
-<span class="sig-name descname"><span class="pre">pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.pad" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.pad" title="Link to this definition"></a></dt>
 <dd><p>Copies the properties of a mesh including all priors or proposals, but pads memory to the given size</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>size</strong> (<em>int</em>) – Create memory upto this size.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>out</strong> – Padded mesg</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">RectilinearMesh1D</a></p>
 </dd>
 </dl>
@@ -303,11 +309,11 @@ the cell’s new edges are at distance away from the centre.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.pcolor">
-<span class="sig-name descname"><span class="pre">pcolor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.pcolor" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pcolor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.pcolor" title="Link to this definition"></a></dt>
 <dd><p>Create a pseudocolour plot.</p>
 <p>Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> (<em>array_like</em>) – The value of each cell.</p></li>
 <li><p><strong>alpha</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
@@ -339,7 +345,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.perturb">
-<span class="sig-name descname"><span class="pre">perturb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.perturb" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">perturb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.perturb" title="Link to this definition"></a></dt>
 <dd><p>Perturb the mesh</p>
 <p>Generates a new mesh by perturbing the current mesh based on four probabilities.
 The probabilities correspond to
@@ -352,10 +358,10 @@ The probabilities correspond to
 If the new cell width test fails, the birth or perturbation tries again. If the cycle fails after 10 tries, the entire process begins again
 such that a death, or no change is possible thus preventing any never-ending cycles.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>out</strong> – The perturbed mesh</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">RectilinearMesh1D</a></p>
 </dd>
 </dl>
@@ -372,10 +378,10 @@ such that a death, or no change is possible thus preventing any never-ending cyc
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.piecewise_constant_interpolate">
-<span class="sig-name descname"><span class="pre">piecewise_constant_interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.piecewise_constant_interpolate" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">piecewise_constant_interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.piecewise_constant_interpolate" title="Link to this definition"></a></dt>
 <dd><p>Interpolate values of the cells to another RectilinearMesh in a piecewise constant manner.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>values</strong> (<em>geobipy.StatArray</em>) – The values to interpolate. Has size self.nCells</p></li>
 <li><p><strong>mesh</strong> (<em>geobipy.RectilinearMeshND for N = 1</em><em>, </em><em>2</em><em>, </em><em>3.</em>) – A mesh to interpolate to.
@@ -384,10 +390,10 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 <li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – Axis to interpolate the value to.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>out</strong> – The interpolated values at the cell centres of the other mesh.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>array</p>
 </dd>
 </dl>
@@ -395,10 +401,10 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plot" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plot" title="Link to this definition"></a></dt>
 <dd><p>Plots values using the mesh as a line</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>reciprocateX</strong> (<em>bool</em><em>, </em><em>optional</em>) – Take the reciprocal of the x axis</p></li>
 <li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’</p></li>
@@ -413,7 +419,7 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plotGrid">
-<span class="sig-name descname"><span class="pre">plotGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plotGrid" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">plotGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plotGrid" title="Link to this definition"></a></dt>
 <dd><p>Plot the grid lines of the mesh.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -426,7 +432,7 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.probability">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">probability</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.probability" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">probability</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.probability" title="Link to this definition"></a></dt>
 <dd><p>Evaluate the prior probability for the mesh.</p>
 <p>The following equation describes the components of the prior that correspond to the Model1D,</p>
 <div class="math notranslate nohighlight">
@@ -434,10 +440,10 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 <p>where <span class="math notranslate nohighlight">\(k, I, \boldsymbol{e}\)</span> are the number of cells, prior information, edge location respectively.</p>
 <p>The multiplication here can be turned into a summation by taking the log of the components.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>components</strong> (<em>bool</em><em>, </em><em>optional</em>) – Return all components used in the final probability as well as the final probability</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><strong>probability</strong> (<em>numpy.float64</em>) – The probability</p></li>
 <li><p><strong>components</strong> (<em>array_like, optional</em>) – Return the components of the probability, i.e. the individually evaluated priors as a second return argument if comonents=True on input.</p></li>
@@ -449,19 +455,19 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.range">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">range</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.range" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">range</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.range" title="Link to this definition"></a></dt>
 <dd><p>Get the difference between end edges.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.set_priors">
-<span class="sig-name descname"><span class="pre">set_priors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_cells_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.set_priors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_priors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_cells_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.set_priors" title="Link to this definition"></a></dt>
 <dd><p>Setup the priors of the mesh.</p>
 <p>By default the following priors are set unless explictly specified.</p>
 <p><strong>Prior on the number of cells</strong></p>
 <p>Uninformative prior using a uniform distribution.</p>
 <div class="math notranslate nohighlight" id="equation-layers">
-<span class="eqno">(3)<a class="headerlink" href="#equation-layers" title="Permalink to this equation"></a></span>\[p(k | I) =
+<span class="eqno">(3)<a class="headerlink" href="#equation-layers" title="Link to this equation"></a></span>\[p(k | I) =
 \begin{cases}
 \frac{1}{k_{max} - 1} &amp; \quad 1 \leq k \leq k_{max} \newline
 0 &amp; \quad otherwise
@@ -469,11 +475,11 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 <p><strong>Prior on the cell edges</strong></p>
 <p>We use order statistics for the prior on cell edges.</p>
 <div class="math notranslate nohighlight" id="equation-depth">
-<span class="eqno">(4)<a class="headerlink" href="#equation-depth" title="Permalink to this equation"></a></span>\[p(\boldsymbol{e} | k, I) = \frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta e_{i}},\]</div>
+<span class="eqno">(4)<a class="headerlink" href="#equation-depth" title="Link to this equation"></a></span>\[p(\boldsymbol{e} | k, I) = \frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta e_{i}},\]</div>
 <p>where the numerator describes the number of ways that <span class="math notranslate nohighlight">\((k - 1)\)</span> interfaces can be ordered and
 <span class="math notranslate nohighlight">\(\Delta e_{i} = (e_{max} - e_{min}) - 2 i h_{min}\)</span> describes the interval that is available to place an edge when there are already i edges in the model</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>min_edge</strong> (<em>float64</em>) – Minimum edge possible</p></li>
 <li><p><strong>max_edge</strong> (<em>float64</em>) – Maximum edge possible</p></li>
@@ -496,10 +502,10 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.set_proposals">
-<span class="sig-name descname"><span class="pre">set_proposals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">probabilities</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.set_proposals" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">set_proposals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">probabilities</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.set_proposals" title="Link to this definition"></a></dt>
 <dd><p>Setup the proposal distibution.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>probabilities</strong> (<em>array_like</em>) – Probability of birth, death, perturb, and no change for the model
 e.g. probabilities = [0.5, 0.25, 0.15, 0.1]</p></li>
@@ -519,13 +525,13 @@ e.g. probabilities = [0.5, 0.25, 0.15, 0.1]</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.summary">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.summary" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">summary</span></span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.summary" title="Link to this definition"></a></dt>
 <dd><p>Summary of self</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.unperturb">
-<span class="sig-name descname"><span class="pre">unperturb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.unperturb" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">unperturb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.unperturb" title="Link to this definition"></a></dt>
 <dd><p>After a mesh has had its structure perturbed, remap back its previous state. Used for the reversible jump McMC step.</p>
 </dd></dl>
 

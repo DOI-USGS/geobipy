@@ -16,10 +16,12 @@ def readme():
     with open('README.rst', encoding='utf-8', mode='r') as f:
         return f.read()
 
+__version__ = '2.0.0'
+
 setup(name='geobipy',
     packages=find_packages(),
     scripts=[],
-    version="1.0.0",
+    version=__version__,
     description='Markov chain Monte Carlo inversion',
     long_description=readme(),
     url = 'https://github.com/DOI-USGS/geobipy',
@@ -41,9 +43,9 @@ setup(name='geobipy',
         'numba',
         'pandas',
         'netcdf4',
-        'sklearn',
+#        'sklearn',
         'matplotlib',
-        'pyvtk',
+        'pyvista',
         'sphinx',
         'progressbar2',
         'cached-property',
@@ -52,6 +54,10 @@ setup(name='geobipy',
         'lmfit',
         'scikit-learn',
         'randomgen'
+    ],
+    extra_requires=['sphinx_gallery',
+                    "sphinx_rtd_theme"
+
     ],
     # ext_modules=[Extension(name='geobipy.src.classes.forwardmodelling.ipforward1d_fortran',
     #             extra_f90_compile_args = ['-ffree-line-length-none','-O3', '-finline-functions', '-funroll-all-loops'],
@@ -62,7 +68,6 @@ setup(name='geobipy',
     entry_points = {
         'console_scripts':[
             'geobipy=geobipy:geobipy',
-            # 'geobipy_mpi=geobipy:geobipy_mpi',
         ],
     }
 )

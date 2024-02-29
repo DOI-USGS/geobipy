@@ -1,8 +1,0 @@
-<map id="inheritance205783337d" name="inheritance205783337d">
-<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,5,77,31"/>
-<area shape="rect" id="node6" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,5,204,31"/>
-<area shape="rect" id="node2" href="datapoint.html#geobipy.src.classes.data.datapoint.DataPoint.DataPoint" target="_top" title="Class defines a data point." alt="" coords="372,5,452,31"/>
-<area shape="rect" id="node4" href="EmDataPoint.html#geobipy.src.classes.data.datapoint.EmDataPoint.EmDataPoint" target="_top" title="Abstract EmDataPoint Class" alt="" coords="500,5,600,31"/>
-<area shape="rect" id="node3" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="252,5,324,31"/>
-<area shape="rect" id="node5" href="#geobipy.src.classes.data.datapoint.FdemDataPoint.FdemDataPoint" target="_top" title="Class defines a Frequency domain electromagnetic data point." alt="" coords="648,5,761,31"/>
-</map>

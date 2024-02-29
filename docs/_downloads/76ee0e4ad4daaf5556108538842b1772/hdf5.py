@@ -1,6 +1,6 @@
 """
 Using HDF5 within GeoBIPy
------------------------------------------------
+-------------------------
 
 Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory systems.
 A common bottleneck with large parallel algorithms is the input output of information to disk.
@@ -13,9 +13,8 @@ import numpy as np
 import h5py
 from geobipy import StatArray
 
-################################################################################
+#%%
 # StatArray
-# +++++++++
 
 # Instantiate a StatArray
 x = StatArray(np.arange(10.0), name = 'an Array', units = 'some units')
@@ -31,7 +30,7 @@ with h5py.File("x.h5", 'r') as f:
 print('x', x)
 print('y', y)
 
-################################################################################
+#%%
 # There are actually steps within the "toHdf" function.
 # First, space is created within the HDF file and second, the data is written to that space
 # These functions are split because during the execution of a parallel enabled program,
@@ -50,7 +49,7 @@ with h5py.File("x.h5", 'r') as f:
 print('x', x)
 print('y', y)
 
-################################################################################
+#%%
 # The create and write HDF methods also allow extra space to be allocated so that
 # the extra memory can be written later, perhaps by multiple cores.
 # Here we specify space for 2 arrays, the memory is stored contiguously as a numpy array.
@@ -69,7 +68,7 @@ print('x', x)
 print('y', y)
 
 
-################################################################################
+#%%
 # The duplication can also be a shape.
 
 # Write the StatArray to a HDF file.
@@ -84,7 +83,7 @@ with h5py.File("x.h5", 'r') as f:
 print('x', x)
 print('y', y)
 
-################################################################################
+#%%
 # Similarly, we can duplicate a 2D array with an extra 2D duplication
 
 x = StatArray(np.random.randn(2, 2), name = 'an Array', units = 'some units')

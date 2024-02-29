@@ -18,7 +18,7 @@ Distributions
 .. only:: html
 
   .. image:: /examples/Distributions/images/thumb/sphx_glr_plot_distributions_thumb.png
-    :alt: Distribution Class
+    :alt:
 
   :ref:`sphx_glr_examples_Distributions_plot_distributions.py`
 

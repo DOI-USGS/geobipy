@@ -19,7 +19,7 @@ nC0 = int32(120)
 nC1 = int32(140)
 
 from numba import jit
-_numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': False}
+_numba_settings = {'nopython': True, 'nogil': False, 'fastmath': False, 'cache': False}
 
 @jit(**_numba_settings)
 def nbFdem1dfwd(tid, frequencies, tHeight, rHeight, moments, rx, separation, w0, lamda0, lamda02, w1, lamda1, lamda12, scale, conductivity, susceptibility, permeability, thickness):

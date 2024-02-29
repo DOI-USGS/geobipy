@@ -15,7 +15,7 @@ from ....classes.core import StatArray
 from ...model.Model import Model
 from .EmDataPoint import EmDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
-    tdem1dfwd, tdem1dsen)
+    tdem1dfwd, tdem1dsen, ga_fm_dlogc)
 from ...system.SquareLoop import SquareLoop
 from ...system.CircularLoop import CircularLoop
 from ...system.Loop_pair import Loop_pair
@@ -103,7 +103,7 @@ class TdemDataPoint(EmDataPoint):
         self.predicted_primary_field = predicted_primary_field
         self.predicted_secondary_field = predicted_secondary_field
 
-        self.channelNames = None
+        self.channel_names = None
 
     @property
     def active_system_indices(self):
@@ -119,30 +119,30 @@ class TdemDataPoint(EmDataPoint):
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray.StatArray(values, r'$\epsilon_{Additive}$', self.units)
 
     @property
     def addressof(self):
         return super().addressof + self.loop_pair.addressof
 
-    @EmDataPoint.channelNames.setter
-    def channelNames(self, values):
+    @EmDataPoint.channel_names.setter
+    def channel_names(self, values):
         if values is None:
             if self.system is None:
-                self._channelNames = ['None']
+                self._channel_names = ['None']
                 return
 
 
-            self._channelNames = []
+            self._channel_names = []
 
             for component in self.components:
                 for i in range(self.nSystems):
                     for t in self.off_time(i):
-                        self._channelNames.append('Time {:.3e} s {}'.format(t, component))
+                        self._channel_names.append('Time {:.3e} s {}'.format(t, component))
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            self._channel_names = values
 
     @property
     def channels(self):
@@ -737,7 +737,7 @@ class TdemDataPoint(EmDataPoint):
                 if tmp is not None:
                     for j in range(self.nSystems):
                         others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
-                        tmp[1].get_shared_y_axes().join(tmp[1], *tmp[others])
+                        tmp[1].get_shared_y_axes().joined(tmp[1], *tmp[others])
                 ax.append(tmp)
                 i += 1
 
@@ -914,9 +914,9 @@ class TdemDataPoint(EmDataPoint):
                 active = self.active[iS]
                 (abs(dD[iS][active])).plot(x=system_times[active], **kwargs)
 
-        plt.ylabel("|{}| ({})".format(dD.name, dD.units))
+        ax.set_ylabel("|{}| ({})".format(dD.name, dD.units))
 
-        cp.title(title)
+        ax.set_title(title)
 
     @property
     def probability(self):
@@ -1023,13 +1023,38 @@ class TdemDataPoint(EmDataPoint):
 
             self.predicted_primary_field[s] = hstack(primary)
 
-
-    def sensitivity(self, model, ix=None, modelChanged=True):
+    def sensitivity(self, model, ix=None, model_changed=False):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, modelChanged), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
         return self.sensitivity_matrix
+
+    def fm_dlogc(self, model):
+        values, J = ga_fm_dlogc(self, model)
+
+        # for i in range(self.nSystems):
+        #     fm = values[i]
+        #     iSys = self._systemIndices(i)
+        #     primary = []
+        #     secondary = []
+        #     if 'x' in self.components:
+        #         primary.append(fm.PX)
+        #         secondary.append(fm.SX)
+        #     if 'y' in self.components:
+        #         primary.append(fm.PY)
+        #         secondary.append(fm.SY)
+        #     if 'z' in self.components:
+        #         primary.append(-fm.PZ)
+        #         secondary.append(-fm.SZ)
+
+        #     self.predicted_secondary_field[iSys] = hstack(secondary)  # Store the necessary component
+
+        #     s = s_[i * self.n_components: (i * self.n_components) + self.n_components]
+
+        #     self.predicted_primary_field[s] = hstack(primary)
+
+        self._sensitivity_matrix = StatArray.StatArray(J, 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
 
     def _empymodForward(self, mod):
 

@@ -26,8 +26,6 @@ def Distribution(distributionType, *args, **kwargs):
     distributionType : str or subclass of baseDistribution
         If distributionType is str, choose between {Normal, MvNormal, Uniform, Gamma, Order, Categorical}
         if distributionType is subclass of baseDistribution, a copy is made
-    \*args : See the documentation for each distribution type to determine what *args could be
-    \*\*kwargs : See the documentation for each distribution type to determine what key words could be
 
     Returns
     -------
@@ -59,10 +57,6 @@ def Distribution(distributionType, *args, **kwargs):
     geobipy.src.classes.statistics.CategoricalDistribution
 
     """
-
-    #if (not 'prng' in kwargs):
-    #    kwargs['prng'] = RandomState()
-
     if (isinstance(distributionType, baseDistribution)):
         return deepcopy(distributionType)
 

@@ -33,12 +33,12 @@ class EmDataPoint(DataPoint):
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
                        components=None, channels_per_system=None,
                        data=None, std=None, predictedData=None,
-                       channelNames=None,
+                       channel_names=None,
                        lineNumber=0.0, fiducial=0.0, **kwargs):
 
         super().__init__(x = x, y = y, z = z, elevation = elevation,
                          data = data, std = std, predictedData = predictedData,
-                         channelNames=channelNames, lineNumber=lineNumber, fiducial=fiducial, **kwargs)
+                         channel_names=channel_names, lineNumber=lineNumber, fiducial=fiducial, **kwargs)
 
     @property
     def active(self):
@@ -218,8 +218,8 @@ class EmDataPoint(DataPoint):
             PhiD[i] = self.data_misfit()
 
         plt.loglog(c, PhiD, **kwargs)
-        cP.xlabel(c.getNameUnits())
-        cP.ylabel('Data misfit')
+        plt.xlabel(c.getNameUnits())
+        plt.ylabel('Data misfit')
 
     def update_posteriors(self):
         """Update any attached posteriors"""

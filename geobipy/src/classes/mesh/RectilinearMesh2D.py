@@ -80,7 +80,6 @@ class RectilinearMesh2D(Mesh):
         The 2D mesh.
 
     """
-
     def __init__(self, x=None, y=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 

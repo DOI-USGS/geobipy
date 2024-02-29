@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py>`
+        :ref:`Go to the end <sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -21,17 +21,7 @@
 Tempest Datapoint Class
 -----------------------
 
-.. GENERATED FROM PYTHON SOURCE LINES 7-25
-
-There are three ways in which to create a time domain datapoint
-
-1) :ref:`Instantiating a time domain datapoint`
-
-2) :ref:`Reading a datapoint from a file`
-
-3) :ref:`Obtaining a datapoint from a dataset`
-
-Once instantiated, see :ref:`Using a time domain datapoint`
+.. GENERATED FROM PYTHON SOURCE LINES 7-15
 
 Credits:
 We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
@@ -42,9 +32,9 @@ https://empymod.github.io/
 
 Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBIPy
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-41
+.. GENERATED FROM PYTHON SOURCE LINES 17-54
 
-.. code-block:: default
+.. code-block:: Python
 
     from os.path import join
     import numpy as np
@@ -56,30 +46,17 @@ Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBI
     from geobipy import Model
     from geobipy import StatArray
     from geobipy import Distribution
+    from geobipy import get_prng
 
-    dataFolder = "..//supplementary//data//"
+    dataFolder = "..//..//supplementary//data//"
     # dataFolder = "source//examples//supplementary//Data"
 
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 42-48
-
-Obtaining a datapoint from a dataset
-++++++++++++++++++++++++++++++++++++
-More often than not, our observed data is stored in a file on disk.
-We can read in a dataset and pull datapoints from it.
-
-For more information about the time domain data set, see :ref:`Time domain dataset`
-
-.. GENERATED FROM PYTHON SOURCE LINES 48-63
-
-.. code-block:: default
-
+    # Obtaining a tempest datapoint from a dataset
+    # ++++++++++++++++++++++++++++++++++++++++++++
+    # More often than not, our observed data is stored in a file on disk.
+    # We can read in a dataset and pull datapoints from it.
+    #
+    # For more information about the time domain data set, see :ref:`Time domain dataset`
 
     # The data file name
     dataFile = dataFolder + 'tempest_saline_clay.csv'
@@ -94,6 +71,7 @@ For more information about the time domain data set, see :ref:`Time domain datas
     plt.figure()
     tdp.plot()
 
+    prng = get_prng(seed=146100583096709124601953385843316024947)
 
 
 
@@ -104,134 +82,149 @@ For more information about the time domain data set, see :ref:`Time domain datas
    :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-
-    <AxesSubplot: title={'center': 'Time Domain EM Data'}, xlabel='Time (s)', ylabel='Data (fT)'>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 64-66
+.. GENERATED FROM PYTHON SOURCE LINES 55-57
 
-Using a time domain datapoint
-+++++++++++++++++++++++++++++
+Using a tempest domain datapoint
+++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-69
+.. GENERATED FROM PYTHON SOURCE LINES 59-60
 
 We can define a 1D layered earth model, and use it to predict some data
 
-.. GENERATED FROM PYTHON SOURCE LINES 69-72
+.. GENERATED FROM PYTHON SOURCE LINES 60-67
 
-.. code-block:: default
+.. code-block:: Python
 
-    par = StatArray(np.r_[1/50.0, 1/100.0, 1/1000.0, 1/5.0, 1/1000.0, 1/800.0], "Conductivity", "$\frac{S}{m}$")
-    mod = Model(mesh=RectilinearMesh1D(edges=np.r_[0, 20.0, 50.0, 100.0, 150.0, 250.0, np.inf]), values=par)
+    par = StatArray(np.r_[0.01, 0.1, 1.], "Conductivity", "$\frac{S}{m}$")
+    mod = Model(mesh=RectilinearMesh1D(edges=np.r_[0.0, 50.0, 75.0, np.inf]), values=par)
 
-
-
-
-
-
+    par = StatArray(np.logspace(-3, 3, 30), "Conductivity", "$\frac{S}{m}$")
+    e = np.linspace(0, 350, 31); e[-1] = np.inf
+    mod = Model(mesh=RectilinearMesh1D(edges=e), values=par)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 73-74
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 68-69
 
 Forward model the data
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-76
+.. GENERATED FROM PYTHON SOURCE LINES 69-108
 
-.. code-block:: default
+.. code-block:: Python
 
     tdp.forward(mod)
 
+    print('primary', tdp.primary_field)
+    print('sx', tdp.secondary_field[:15])
+    print('sz', tdp.secondary_field[15:])
+
+    # #%%
+    # plt.figure()
+    # plt.subplot(121)
+    # _ = mod.pcolor(transpose=True)
+    # plt.subplot(122)
+    # _ = tdp.plot()
+    # _ = tdp.plot_predicted()
+    # plt.tight_layout()
+    # plt.suptitle('Model and response')
+
+    # #%%
+    # # plt.figure()
+    # # tdp.plotDataResidual(xscale='log')
+    # # plt.title('data residual')
+
+    # #%%
+    # # Compute the sensitivity matrix for a given model
+    J = tdp.sensitivity(mod)
+    # plt.figure()
+    # _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
+
+    print('J', J)
+    # print('J shape', J.shape)
+    # print('sx 0', J[:16, 0])
+
+    tdp.fm_dlogc(mod)
+
+    print('new primary', tdp.primary_field)
+    print('sx', tdp.secondary_field[:15])
+    print('sz', tdp.secondary_field[15:])
+
+    print('new J', tdp.sensitivity_matrix)
 
 
 
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 77-86
-
-.. code-block:: default
-
-    plt.figure()
-    plt.subplot(121)
-    _ = mod.pcolor(transpose=True)
-    plt.subplot(122)
-    _ = tdp.plot()
-    _ = tdp.plot_predicted()
-    plt.tight_layout()
-    plt.suptitle('Model and response')
-
-
-
-
-.. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_002.png
-   :alt: Model and response, Time Domain EM Data
-   :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_002.png
-   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
 
  .. code-block:: none
 
+    primary [34.27253219 17.55503397]
+    sx [4.50040745 2.57068627 2.01534336 ... 0.33251557 0.29674627 0.15444462]
+    sz [6.46667394 4.43233932 3.84850348 ... 1.04330666 0.76773288 0.54604945]
+    J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
+       1.13341751e-11  7.27489718e-13]
+     [ 2.09383016e-02  3.20412212e-02  4.74815387e-02 ... -1.02489023e-09
+       1.15994185e-11  7.25910166e-13]
+     [ 1.04188675e-02  1.61552555e-02  2.45575508e-02 ... -1.03167228e-09
+       1.18645190e-11  7.24296662e-13]
+     ...
+     [ 7.20880061e-05  1.13758034e-04  1.79138645e-04 ... -6.62044639e-09
+       1.91310127e-10  4.83737910e-13]
+     [ 3.95655826e-05  6.25753935e-05  9.87713313e-05 ... -6.33418159e-09
+       2.26727066e-10 -1.05451995e-12]
+     [ 1.60007270e-05  3.08385747e-05  5.05626410e-05 ... -1.28316523e-09
+       1.11041966e-10 -2.41585978e-12]]
+    new primary [34.27253219 17.55503397]
+    sx [4.50040745 2.57068627 2.01534336 ... 0.33251557 0.29674627 0.15444462]
+    sz [6.46667394 4.43233932 3.84850348 ... 1.04330666 0.76773288 0.54604945]
+    new J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
+       1.13341751e-11  7.27489718e-13]
+     [ 2.09383016e-02  3.20412212e-02  4.74815387e-02 ... -1.02489023e-09
+       1.15994185e-11  7.25910166e-13]
+     [ 1.04188675e-02  1.61552555e-02  2.45575508e-02 ... -1.03167228e-09
+       1.18645190e-11  7.24296662e-13]
+     ...
+     [ 7.20880061e-05  1.13758034e-04  1.79138645e-04 ... -6.62044639e-09
+       1.91310127e-10  4.83737910e-13]
+     [ 3.95655826e-05  6.25753935e-05  9.87713313e-05 ... -6.33418159e-09
+       2.26727066e-10 -1.05451995e-12]
+     [ 1.60007270e-05  3.08385747e-05  5.05626410e-05 ... -1.28316523e-09
+       1.11041966e-10 -2.41585978e-12]]
 
-    Text(0.5, 0.98, 'Model and response')
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 87-90
+.. GENERATED FROM PYTHON SOURCE LINES 109-111
 
-plt.figure()
-tdp.plotDataResidual(xscale='log')
-plt.title('data residual')
+Attaching statistical descriptors to the tempest datapoint
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 92-93
+.. GENERATED FROM PYTHON SOURCE LINES 111-125
 
-Compute the sensitivity matrix for a given model
+.. code-block:: Python
 
-.. GENERATED FROM PYTHON SOURCE LINES 93-97
+    from numpy.random import Generator
+    from numpy.random import PCG64DXSM
+    generator = PCG64DXSM(seed=0)
+    prng = Generator(generator)
 
-.. code-block:: default
-
-    J = tdp.sensitivity(mod)
-    plt.figure()
-    _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
-
-
-
-
-.. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_003.png
-   :alt: plot tempest datapoint
-   :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_003.png
-   :class: sphx-glr-single-img
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 98-102
-
-Attaching statistical descriptors to the datapoint
-++++++++++++++++++++++++++++++++++++++++++++++++++
-
-Set relative errors for the primary fields, and secondary fields.
-
-.. GENERATED FROM PYTHON SOURCE LINES 102-110
-
-.. code-block:: default
-
-    tdp.relative_error = np.r_[0.01, 0.05]
+    # Set relative errors for the primary fields, and secondary fields.
+    tdp.relative_error = np.r_[0.001, 0.001]
 
     # Set the additive errors for
     tdp.additive_error = np.hstack([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
                                     [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]])
     # Define a multivariate log normal distribution as the prior on the predicted data.
-    tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
+    tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
 
 
 
@@ -240,17 +233,17 @@ Set relative errors for the primary fields, and secondary fields.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-112
+.. GENERATED FROM PYTHON SOURCE LINES 126-127
 
 This allows us to evaluate the likelihood of the predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 112-116
+.. GENERATED FROM PYTHON SOURCE LINES 127-131
 
-.. code-block:: default
+.. code-block:: Python
 
     print(tdp.likelihood(log=True))
     # Or the misfit
-    print(tdp.dataMisfit())
+    print(tdp.data_misfit())
 
 
 
@@ -260,19 +253,19 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -60615.15730576242
-    121379.20759919994
+    -35698.4834358605
+    71558.40557872524
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-118
+.. GENERATED FROM PYTHON SOURCE LINES 132-133
 
 Plot the misfits for a range of half space conductivities
 
-.. GENERATED FROM PYTHON SOURCE LINES 118-123
+.. GENERATED FROM PYTHON SOURCE LINES 133-138
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.subplot(1, 2, 1)
@@ -282,9 +275,9 @@ Plot the misfits for a range of half space conductivities
 
 
 
-.. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_004.png
+.. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_002.png
    :alt: Halfspace responses
-   :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_004.png
+   :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_002.png
    :class: sphx-glr-single-img
 
 
@@ -297,13 +290,13 @@ Plot the misfits for a range of half space conductivities
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-125
+.. GENERATED FROM PYTHON SOURCE LINES 139-140
 
 We can perform a quick search for the best fitting half space
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-146
+.. GENERATED FROM PYTHON SOURCE LINES 140-161
 
-.. code-block:: default
+.. code-block:: Python
 
     halfspace = tdp.find_best_halfspace()
     print('Best half space conductivity is {} $S/m$'.format(halfspace.values))
@@ -315,16 +308,16 @@ We can perform a quick search for the best fitting half space
     tdp.plot_secondary_field()
     tdp.plot_predicted_secondary_field()
 
-    # ################################################################################
+    # #%%
     # # We can attach priors to the height of the datapoint,
     # # the relative error multiplier, and the additive error noise floor
 
     # Define the distributions used as priors.
-    relative_prior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
-    receiver_x_prior = Distribution('Uniform', min=np.float64(tdp.receiver.x) - 1.0, max=np.float64(tdp.receiver.x) + 1.0)
-    receiver_z_prior = Distribution('Uniform', min=np.float64(tdp.receiver.z) - 1.0, max=np.float64(tdp.receiver.z) + 1.0)
-    receiver_pitch_prior = Distribution('Uniform', min=tdp.receiver.pitch - 5.0, max=tdp.receiver.pitch + 5.0)
-    tdp.set_priors(relative_error_prior=relative_prior, receiver_x_prior=receiver_x_prior, receiver_z_prior=receiver_z_prior, receiver_pitch_prior=receiver_pitch_prior)
+    relative_prior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5], prng=prng)
+    receiver_x_prior = Distribution('Uniform', min=np.float64(tdp.receiver.x) - 1.0, max=np.float64(tdp.receiver.x) + 1.0, prng=prng)
+    receiver_z_prior = Distribution('Uniform', min=np.float64(tdp.receiver.z) - 1.0, max=np.float64(tdp.receiver.z) + 1.0, prng=prng)
+    receiver_pitch_prior = Distribution('Uniform', min=tdp.receiver.pitch - 5.0, max=tdp.receiver.pitch + 5.0, prng=prng)
+    tdp.set_priors(relative_error_prior=relative_prior, receiver_x_prior=receiver_x_prior, receiver_z_prior=receiver_z_prior, receiver_pitch_prior=receiver_pitch_prior, prng=prng)
 
 
 
@@ -334,16 +327,16 @@ We can perform a quick search for the best fitting half space
 
     *
 
-      .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_005.png
+      .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_003.png
          :alt: Time Domain EM Data
-         :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_005.png
+         :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_003.png
          :class: sphx-glr-multi-img
 
     *
 
-      .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_006.png
-         :alt: Secondary field
-         :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_006.png
+      .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_004.png
+         :alt: plot tempest datapoint
+         :srcset: /examples/Datapoints/images/sphx_glr_plot_tempest_datapoint_004.png
          :class: sphx-glr-multi-img
 
 
@@ -351,39 +344,43 @@ We can perform a quick search for the best fitting half space
 
  .. code-block:: none
 
-    Best half space conductivity is [0.03853529] $S/m$
+    Best half space conductivity is [0.01830738] $S/m$
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 147-148
+.. GENERATED FROM PYTHON SOURCE LINES 162-163
 
 In order to perturb our solvable parameters, we need to attach proposal distributions
 
-.. GENERATED FROM PYTHON SOURCE LINES 148-154
+.. GENERATED FROM PYTHON SOURCE LINES 163-173
 
-.. code-block:: default
+.. code-block:: Python
 
-    relative_proposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-4)
-    receiver_x_proposal = Distribution('Normal', mean=tdp.receiver.x, variance = 0.01)
-    receiver_z_proposal = Distribution('Normal', mean=tdp.receiver.z, variance = 0.01)
-    receiver_pitch_proposal = Distribution('Normal', mean=tdp.receiver.pitch, variance = 0.01)
-    tdp.set_proposals(relative_error_proposal=relative_proposal, receiver_x_proposal=receiver_x_proposal, receiver_z_proposal=receiver_z_proposal, receiver_pitch_proposal=receiver_pitch_proposal)
-
-
-
-
-
-
+    relative_proposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-4, prng=prng)
+    receiver_x_proposal = Distribution('Normal', mean=tdp.receiver.x, variance = 0.01, prng=prng)
+    receiver_z_proposal = Distribution('Normal', mean=tdp.receiver.z, variance = 0.01, prng=prng)
+    receiver_pitch_proposal = Distribution('Normal', mean=tdp.receiver.pitch, variance = 0.01, prng=prng)
+    tdp.set_proposals(relative_error_proposal=relative_proposal,
+                      receiver_x_proposal=receiver_x_proposal,
+                      receiver_z_proposal=receiver_z_proposal,
+                      receiver_pitch_proposal=receiver_pitch_proposal,
+                      solve_additive_error=True, additive_error_proposal_variance=1e-4, prng=prng)
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 155-156
 
-With priorss set we can auto generate the posteriors
 
-.. GENERATED FROM PYTHON SOURCE LINES 156-158
 
-.. code-block:: default
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 174-175
+
+With priors set we can auto generate the posteriors
+
+.. GENERATED FROM PYTHON SOURCE LINES 175-177
+
+.. code-block:: Python
 
     tdp.set_posteriors()
 
@@ -394,14 +391,14 @@ With priorss set we can auto generate the posteriors
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 159-161
+.. GENERATED FROM PYTHON SOURCE LINES 178-180
 
 Perturb the datapoint and record the perturbations
 Note we are not using the priors to accept or reject perturbations.
 
-.. GENERATED FROM PYTHON SOURCE LINES 161-165
+.. GENERATED FROM PYTHON SOURCE LINES 180-184
 
-.. code-block:: default
+.. code-block:: Python
 
     for i in range(10):
         tdp.perturb()
@@ -417,7 +414,7 @@ Note we are not using the priors to accept or reject perturbations.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  1.619 seconds)
+   **Total running time of the script:** (0 minutes 4.060 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py:
@@ -426,14 +423,13 @@ Note we are not using the priors to accept or reject perturbations.
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: plot_tempest_datapoint.ipynb <plot_tempest_datapoint.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_tempest_datapoint.py <plot_tempest_datapoint.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_tempest_datapoint.ipynb <plot_tempest_datapoint.ipynb>`
 
 
 .. only:: html

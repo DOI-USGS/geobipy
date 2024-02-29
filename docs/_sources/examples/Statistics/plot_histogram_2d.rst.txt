@@ -10,7 +10,7 @@
     .. note::
         :class: sphx-glr-download-link-note
 
-        Click :ref:`here <sphx_glr_download_examples_Statistics_plot_histogram_2d.py>`
+        :ref:`Go to the end <sphx_glr_download_examples_Statistics_plot_histogram_2d.py>`
         to download the full example code
 
 .. rst-class:: sphx-glr-example-title
@@ -26,7 +26,7 @@ saving as HDF5.
 
 .. GENERATED FROM PYTHON SOURCE LINES 11-21
 
-.. code-block:: default
+.. code-block:: Python
 
     import h5py
     import geobipy
@@ -51,7 +51,7 @@ Create some histogram bins in x and y
 
 .. GENERATED FROM PYTHON SOURCE LINES 23-27
 
-.. code-block:: default
+.. code-block:: Python
 
     x = StatArray(np.linspace(-4.0, 4.0, 100), 'Variable 1')
     y = StatArray(np.linspace(-4.0, 4.0, 105), 'Variable 2')
@@ -70,7 +70,7 @@ Instantiate
 
 .. GENERATED FROM PYTHON SOURCE LINES 29-31
 
-.. code-block:: default
+.. code-block:: Python
 
     H = Histogram(mesh)
 
@@ -87,7 +87,7 @@ Generate some random numbers
 
 .. GENERATED FROM PYTHON SOURCE LINES 33-36
 
-.. code-block:: default
+.. code-block:: Python
 
     a = np.random.randn(1000000)
     b = np.random.randn(1000000)
@@ -105,7 +105,7 @@ Update the histogram counts
 
 .. GENERATED FROM PYTHON SOURCE LINES 38-40
 
-.. code-block:: default
+.. code-block:: Python
 
     H.update(a, b)
 
@@ -118,7 +118,7 @@ Update the histogram counts
 
 .. GENERATED FROM PYTHON SOURCE LINES 41-59
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.subplot(131)
@@ -164,7 +164,7 @@ Update the histogram counts
  .. code-block:: none
 
 
-    (<AxesSubplot: xlabel='Variable 1', ylabel='Variable 2'>, <matplotlib.collections.QuadMesh object at 0x7ff5b107b370>, <matplotlib.colorbar.Colorbar object at 0x7ff5b107a0e0>)
+    (<Axes: xlabel='Variable 1', ylabel='Variable 2'>, <matplotlib.collections.QuadMesh object at 0x7fbf619a2110>, <matplotlib.colorbar.Colorbar object at 0x7fbf619a2680>)
 
 
 
@@ -174,7 +174,7 @@ We can overlay the histogram with its credible intervals
 
 .. GENERATED FROM PYTHON SOURCE LINES 61-67
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.title("90% credible intervals overlain")
@@ -200,7 +200,7 @@ Generate marginal histograms along an axis
 
 .. GENERATED FROM PYTHON SOURCE LINES 69-72
 
-.. code-block:: default
+.. code-block:: Python
 
     h1 = H.marginalize(axis=0)
     h2 = H.marginalize(axis=1)
@@ -218,7 +218,7 @@ Note that the names of the variables are automatically displayed
 
 .. GENERATED FROM PYTHON SOURCE LINES 74-81
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.suptitle("Marginals along each axis")
@@ -246,7 +246,7 @@ sphinx_gallery_thumbnail_number = 3
 
 .. GENERATED FROM PYTHON SOURCE LINES 84-102
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     gs = gridspec.GridSpec(5, 5)
@@ -284,7 +284,7 @@ Take the mean or median estimates from the histogram
 
 .. GENERATED FROM PYTHON SOURCE LINES 104-107
 
-.. code-block:: default
+.. code-block:: Python
 
     mean = H.mean()
     median = H.median()
@@ -298,7 +298,7 @@ Take the mean or median estimates from the histogram
 
 .. GENERATED FROM PYTHON SOURCE LINES 108-124
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure(figsize=(9.5, 5))
     plt.suptitle("Mean, median, and credible interval overlain")
@@ -330,7 +330,7 @@ Take the mean or median estimates from the histogram
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7ff5a3467fd0>
+    <matplotlib.legend.Legend object at 0x7fbf71b42410>
 
 
 
@@ -340,7 +340,7 @@ Get the range between credible intervals
 
 .. GENERATED FROM PYTHON SOURCE LINES 126-128
 
-.. code-block:: default
+.. code-block:: Python
 
     H.credible_range(percent=95.0)
 
@@ -353,8 +353,8 @@ Get the range between credible intervals
  .. code-block:: none
 
 
-    StatArray([3.71717172, 1.85858586, 3.31313131, ..., 3.7979798 ,
-               3.31313131, 3.95959596])
+    StatArray([5.25252525, 4.04040404, 3.23232323, ..., 4.76767677,
+               3.7979798 , 3.39393939])
 
 
 
@@ -364,7 +364,7 @@ We can map the credible range to an opacity or transparency
 
 .. GENERATED FROM PYTHON SOURCE LINES 130-148
 
-.. code-block:: default
+.. code-block:: Python
 
     H.opacity()
     H.transparency()
@@ -397,7 +397,7 @@ Instantiate
 
 .. GENERATED FROM PYTHON SOURCE LINES 150-152
 
-.. code-block:: default
+.. code-block:: Python
 
     H = Histogram(mesh)
 
@@ -414,7 +414,7 @@ Generate some random numbers
 
 .. GENERATED FROM PYTHON SOURCE LINES 154-157
 
-.. code-block:: default
+.. code-block:: Python
 
     a = np.random.randn(1000000) + 5.0
     b = np.random.randn(1000000) + 10.0
@@ -432,7 +432,7 @@ Update the histogram counts
 
 .. GENERATED FROM PYTHON SOURCE LINES 159-161
 
-.. code-block:: default
+.. code-block:: Python
 
     H.update(a, b)
 
@@ -445,7 +445,7 @@ Update the histogram counts
 
 .. GENERATED FROM PYTHON SOURCE LINES 162-179
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.subplot(131)
@@ -490,7 +490,7 @@ Update the histogram counts
  .. code-block:: none
 
 
-    (<AxesSubplot: xlabel='Variable 1', ylabel='Variable 2'>, <matplotlib.collections.QuadMesh object at 0x7ff593d72c50>, <matplotlib.colorbar.Colorbar object at 0x7ff593d73100>)
+    (<Axes: xlabel='Variable 1', ylabel='Variable 2'>, <matplotlib.collections.QuadMesh object at 0x7fbfa24cac80>, <matplotlib.colorbar.Colorbar object at 0x7fbfa24c9b70>)
 
 
 
@@ -498,15 +498,19 @@ Update the histogram counts
 
 We can overlay the histogram with its credible intervals
 
-.. GENERATED FROM PYTHON SOURCE LINES 181-187
+.. GENERATED FROM PYTHON SOURCE LINES 181-191
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.title("90% credible intervals overlain")
     H.pcolor(cmap='gray_r')
     H.plotCredibleIntervals(axis=0, percent=95.0)
     _ = H.plotCredibleIntervals(axis=1, percent=95.0)
+
+    # Generate marginal histograms along an axis
+    h1 = H.marginalize(axis=0)
+    h2 = H.marginalize(axis=1)
 
 
 
@@ -520,31 +524,13 @@ We can overlay the histogram with its credible intervals
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 188-189
-
-Generate marginal histograms along an axis
-
-.. GENERATED FROM PYTHON SOURCE LINES 189-192
-
-.. code-block:: default
-
-    h1 = H.marginalize(axis=0)
-    h2 = H.marginalize(axis=1)
-
-
-
-
-
-
-
-
-.. GENERATED FROM PYTHON SOURCE LINES 193-194
+.. GENERATED FROM PYTHON SOURCE LINES 192-193
 
 Note that the names of the variables are automatically displayed
 
-.. GENERATED FROM PYTHON SOURCE LINES 194-201
+.. GENERATED FROM PYTHON SOURCE LINES 193-200
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     plt.suptitle("Marginals along each axis")
@@ -565,14 +551,14 @@ Note that the names of the variables are automatically displayed
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 202-204
+.. GENERATED FROM PYTHON SOURCE LINES 201-203
 
 Create a combination plot with marginal histograms.
 sphinx_gallery_thumbnail_number = 3
 
-.. GENERATED FROM PYTHON SOURCE LINES 204-222
+.. GENERATED FROM PYTHON SOURCE LINES 203-221
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure()
     gs = gridspec.GridSpec(5, 5)
@@ -604,13 +590,13 @@ sphinx_gallery_thumbnail_number = 3
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 223-224
+.. GENERATED FROM PYTHON SOURCE LINES 222-223
 
 Take the mean or median estimates from the histogram
 
-.. GENERATED FROM PYTHON SOURCE LINES 224-227
+.. GENERATED FROM PYTHON SOURCE LINES 223-226
 
-.. code-block:: default
+.. code-block:: Python
 
     mean = H.mean()
     median = H.median()
@@ -622,9 +608,9 @@ Take the mean or median estimates from the histogram
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 228-244
+.. GENERATED FROM PYTHON SOURCE LINES 227-243
 
-.. code-block:: default
+.. code-block:: Python
 
     plt.figure(figsize=(9.5, 5))
     plt.suptitle("Mean, median, and credible interval overlain")
@@ -656,17 +642,17 @@ Take the mean or median estimates from the histogram
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7ff5a32622c0>
+    <matplotlib.legend.Legend object at 0x7fbf53b9a650>
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 245-246
+.. GENERATED FROM PYTHON SOURCE LINES 244-245
 
 Get the range between credible intervals
 
-.. GENERATED FROM PYTHON SOURCE LINES 246-248
+.. GENERATED FROM PYTHON SOURCE LINES 245-247
 
-.. code-block:: default
+.. code-block:: Python
 
     H.credible_range(percent=95.0)
 
@@ -679,18 +665,18 @@ Get the range between credible intervals
  .. code-block:: none
 
 
-    StatArray([4.28282828, 2.82828283, 3.71717172, ..., 4.2020202 ,
-               3.55555556, 3.55555556])
+    StatArray([3.39393939, 4.04040404, 3.31313131, ..., 3.95959596,
+               3.23232323, 3.31313131])
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 249-250
+.. GENERATED FROM PYTHON SOURCE LINES 248-249
 
 We can map the credible range to an opacity or transparency
 
-.. GENERATED FROM PYTHON SOURCE LINES 250-307
+.. GENERATED FROM PYTHON SOURCE LINES 249-306
 
-.. code-block:: default
+.. code-block:: Python
 
     H.opacity()
     H.transparency()
@@ -776,7 +762,7 @@ We can map the credible range to an opacity or transparency
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  5.988 seconds)
+   **Total running time of the script:** (0 minutes 14.930 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_2d.py:
@@ -785,14 +771,13 @@ We can map the credible range to an opacity or transparency
 
   .. container:: sphx-glr-footer sphx-glr-footer-example
 
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download Jupyter notebook: plot_histogram_2d.ipynb <plot_histogram_2d.ipynb>`
 
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_histogram_2d.py <plot_histogram_2d.py>`
-
-    .. container:: sphx-glr-download sphx-glr-download-jupyter
-
-      :download:`Download Jupyter notebook: plot_histogram_2d.ipynb <plot_histogram_2d.ipynb>`
 
 
 .. only:: html

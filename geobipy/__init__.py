@@ -8,10 +8,10 @@ import sys
 import shutil
 from datetime import timedelta
 from numpy import int32
-from randomgen import Xoshiro256
 from numpy.random import Generator
 
-# from .src.base import utilities
+from .src.base.utilities import init_debug_print, debug_print as dprint
+from .src.base import utilities
 from .src.base import plotting
 from .src.base.MPI import get_prng
 # from .src.base import fileIO
@@ -79,25 +79,26 @@ def checkCommandArguments():
     import warnings
     # warnings.filterwarnings('error')
 
-    Parser = argparse.ArgumentParser(description="GeoBIPy",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    Parser = argparse.ArgumentParser(description="GeoBIPy", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     Parser.add_argument('options_file', help='User options file')
     Parser.add_argument('output_directory', help='Output directory for results')
-    Parser.add_argument('--skip_hdf5', dest='skip_hdf5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
-    Parser.add_argument('--seed', dest='seed', default=None, help='Specify a numpy seed file to fix the random number generator. Only used in serial mode.')
+    # Parser.add_argument('--skip_hdf5', dest='skip_hdf5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
+    Parser.add_argument('--seed', dest='seed', default=None, help='Specify a seed file to fix the random number generator.')
+    Parser.add_argument('--jump', dest='jump', default=None, type=int, help='Specify a number to jump the PRNG by. Only used in serial mode and for debugging purposes.')
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
     Parser.add_argument('--fiducial', dest='fiducial', type=float, default=None, help='Invert this fiducial only. Only used in serial mode.')
     Parser.add_argument('--line', dest='line_number', type=float, default=None, help='Invert the fiducial on this line. Only used in serial mode.')
     Parser.add_argument('--verbose', dest='verbose', action='store_true', help='Throw warnings as errors.')
     Parser.add_argument('--mpi', dest='mpi', action='store_true', help='Run geobipy with MPI libraries.')
     Parser.add_argument('--debug', dest='debug', action='store_true', help='Run geobipy in debug mode.')
+    Parser.add_argument('--data_directory', default=None, help='override data_directory in parameter file.')
 
     args = Parser.parse_args()
 
     if args.seed is not None:
         if isinstance(args.seed, str):
             if not '.' in args.seed:
-                args.seed = int32(args.seed)
+                args.seed = int(args.seed)
 
     if args.verbose:
         import warnings
@@ -105,16 +106,41 @@ def checkCommandArguments():
 
     return args
 
-def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=None, line_number=None, debug=False):
+def serial_geobipy(input_file, output_directory, **kwargs):
+    """Run geobipy in serial mode. Single core.
+
+    Parameters
+    ----------
+    input_file : str
+        User parameter file
+    output_directory : str
+        Directory to place inference results
+    seed : int or str, optional
+        Integer or saved seed pkl file to fix the random seed
+    index : int, optional
+        Invert only this data point
+    fiducial : float, optional
+        Used with line_number to specify single data point to invert
+    line_number: float, optional
+        Used with fiducial to specify single data point to invert
+    jump : int, optional
+        Jump the bit generator by this amount.  Used for debugging and comparing with parallel streams.
+
+    Other Parameters
+    ----------------
+    data_directory : str
+        Override data_directory from the input_file.
+    """
+
 
     from time import time
 
     print('Running GeoBIPy in serial mode')
-    print('Using user input file {}'.format(inputFile))
+    print('Using user input file {}'.format(input_file))
     print('Output files will be produced at {}'.format(output_directory))
 
-    inputFile = pathlib.Path(inputFile)
-    assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
+    input_file = pathlib.Path(input_file)
+    assert input_file.exists(), Exception("Cannot find input file {}".format(input_file))
 
     output_directory = pathlib.Path(output_directory)
     assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
@@ -123,25 +149,32 @@ def serial_geobipy(inputFile, output_directory, seed=None, index=None, fiducial=
     makedirs(output_directory, exist_ok=True)
 
     # Copy the input file to the output directory for reference.
-    shutil.copy(inputFile, output_directory)
+    shutil.copy(input_file, output_directory)
 
-    options = user_parameters.read(inputFile)
+    index = kwargs.pop('index', None)
+    fiducial = kwargs.pop('fiducial', None)
+    line_number = kwargs.pop('line_number', None)
+
+    options = user_parameters.read(input_file, **kwargs)
 
     data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
-    prng = get_prng(time, seed=seed)
+    prng = get_prng(seed=options.get('seed', None), jump=options.get('jump', None))
 
-    inference3d = Inference3D(data=data, prng=prng, debug=debug)
+    inference3d = Inference3D(data=data, prng=prng, debug=kwargs.get('debug', False))
 
     inference3d.create_hdf5(directory=output_directory, **options)
 
-    inference3d.infer(index=index, fiducial=fiducial, line_number=line_number, **options)
+    inference3d.infer(index=index,
+                      fiducial=fiducial,
+                      line_number=line_number,
+                      **options)
 
 
-def parallel_geobipy(inputFile, outputDir, skipHDF5, seed=None):
-    parallel_mpi(inputFile, outputDir, skipHDF5, seed=seed)
+def parallel_geobipy(input_file, outputDir, **kwargs):
+    parallel_mpi(input_file, outputDir, **kwargs)
 
-def parallel_mpi(inputFile, output_directory, skipHDF5, seed=None):
+def parallel_mpi(input_file, output_directory, **kwargs):
 
     from mpi4py import MPI
     from .src.base import MPI as myMPI
@@ -151,31 +184,32 @@ def parallel_mpi(inputFile, output_directory, skipHDF5, seed=None):
     nRanks = world.size
     masterRank = rank == 0
 
+    init_debug_print(world=world, print_from=1)
+
     myMPI.rankPrint(world,'Running GeoBIPy in parallel mode with {} cores'.format(nRanks))
-    myMPI.rankPrint(world,'Using user input file {}'.format(inputFile))
+    myMPI.rankPrint(world,'Using user input file {}'.format(input_file))
     myMPI.rankPrint(world,'Output files will be produced at {}'.format(output_directory))
 
-    inputFile = pathlib.Path(inputFile)
-    assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
+    input_file = pathlib.Path(input_file)
+    assert input_file.exists(), Exception("Cannot find input file {}".format(input_file))
 
     output_directory = pathlib.Path(output_directory)
     assert output_directory.exists(), Exception("Make sure the output directory exists {}".format(output_directory))
 
-    kwargs = user_parameters.read(inputFile)
+    kwargs = user_parameters.read(input_file, **kwargs)
 
     # Everyone needs the system classes read in early.
     data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
 
-
     # Get the number of points in the file.
     if masterRank:
         # Copy the user_parameter file to the output directory
-        shutil.copy(inputFile, output_directory)
+        shutil.copy(input_file, output_directory)
 
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    prng = get_prng(MPI.Wtime, seed=seed, world=world)
+    prng = get_prng(seed=kwargs.get('seed', None), world=world)
 
     inference3d = Inference3D(data, world=world, prng=prng)
     inference3d.create_hdf5(directory=output_directory, **kwargs)
@@ -188,18 +222,21 @@ def geobipy():
     """Run the serial implementation of GeoBIPy. """
 
     args = checkCommandArguments()
+
     sys.path.append(getcwd())
 
     if args.mpi:
         parallel_geobipy(args.options_file,
                          args.output_directory,
-                         args.skip_hdf5,
-                         seed = args.seed)
+                         seed=args.seed,
+                         data_directory=args.data_directory)
     else:
         serial_geobipy(args.options_file,
                        args.output_directory,
-                       args.seed,
-                       args.index,
-                       args.fiducial,
-                       args.line_number,
-                       args.debug)
+                       seed=args.seed,
+                       index=args.index,
+                       fiducial=args.fiducial,
+                       line_number=args.line_number,
+                       debug=args.debug,
+                       jump=args.jump,
+                       data_directory=args.data_directory)

@@ -1,9 +1,11 @@
 from copy import deepcopy
 
+from textwrap import wrap
+
 from numpy import abs, arange, argsort, argwhere, asarray, atleast_1d, complex128, cos, diag, diff, divide, dot, empty
-from numpy import exp, flip, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
+from numpy import exp, flip, full, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
 from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
-from numpy import real, s_, shape, sin, size, where, zeros
+from numpy import real, s_, shape, sin, size, squeeze, where, zeros
 from numpy import all as npall
 from numpy import log as nplog
 
@@ -105,6 +107,22 @@ def bresenham(x, y):
                     error += dx
 
     return points[:j, :]
+
+world_rank = 0
+print_rank = 0
+
+def init_debug_print(world=None, print_from=0):
+    global world_rank
+    global print_rank
+    print_rank = print_from
+    if world is not None:
+        world_rank = deepcopy(world.rank)
+
+def debug_print(*args, **kwargs):
+    # if world_rank == print_rank:
+    #     print(*args, flush=True, **kwargs)
+    # x = "I am here"
+    return None
 
 def interleave(a, b):
         """Interleave two arrays together like zip
@@ -673,11 +691,19 @@ def expReal(this):
     # np.float64 = 709.0
     # np.longdouble = 11356.0
 
-    if this > 11356.0:
-        return inf
+    tol = 11356.0
 
-    return exp(longdouble(this))
+    if size(this) == 1:
+        if this > tol:
+            return inf
 
+        return exp(longdouble(this))
+
+    out = full(size(this), fill_value=inf, dtype=longdouble)
+    i = squeeze(argwhere(this <= tol))
+    tmp = longdouble(this[i])
+    out[i] = exp(tmp)
+    return out
 
 def tanh(this):
     """ Custom hyperbolic tangent, return correct overflow. """
@@ -783,24 +809,24 @@ def _logScalar(value, log=None):
 
     if (log == 'e'):
         tmp = nplog(value)
-        label = 'ln'
+        label = 'ln '
         return tmp, label
 
     assert log > 0, ValueError('logBase must be a positive number')
 
     if (log == 10):
         tmp = log10(value)
-        label = 'log$_{10}$'
+        label = 'log$_{10}$ '
         return tmp, label
 
     if (log == 2):
         tmp = log2(value)
-        label = 'log$_{2}$'
+        label = 'log$_{2}$ '
         return tmp, label
 
     if (log > 2):
         tmp = log10(value)/log10(log)
-        label = 'log$_{'+str(log)+'}$'
+        label = 'log$_{'+str(log)+'}$ '
         return tmp, label
 
     assert False, ValueError("log must be 'e' or a positive number")
@@ -848,24 +874,24 @@ def _logArray(values, log=None):
 
     if (log == 'e'):
         tmp[i] = nplog(values[i])
-        label = 'ln'
+        label = 'ln '
         return tmp, label
 
     assert log > 0, ValueError('logBase must be a positive number')
 
     if (log == 10):
         tmp[i] = log10(values[i])
-        label = 'log$_{10}$'
+        label = 'log$_{10}$ '
         return tmp, label
 
     if (log == 2):
         tmp[i] = log2(values[i])
-        label = 'log$_{2}$'
+        label = 'log$_{2}$ '
         return tmp, label
 
     if (log > 2):
         tmp[i] = log10(values[i])/log10(log)
-        label = 'log$_{'+str(log)+'}$'
+        label = 'log$_{'+str(log)+'}$ '
         return tmp, label
 
     assert False, ValueError("log must be 'e' or a positive number")
@@ -1101,3 +1127,6 @@ def reslice(slic, start=None, stop=None, step=None):
     ic = slic.step if step is not None else step
 
     return slice(sta, stp, ic)
+
+def wrap_string(this, length=20):
+    return "\n".join(wrap(this, length, break_long_words=False))

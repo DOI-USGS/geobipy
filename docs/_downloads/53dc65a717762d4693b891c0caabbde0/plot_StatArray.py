@@ -16,8 +16,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 
-plt.style.use('seaborn-pastel')
-
+# plt.style.use('seaborn-pastel')
 
 #%%
 # Instantiating a new StatArray class
@@ -73,7 +72,11 @@ print(Density.summary)
 
 # Obtain an instantiation of a random number generator.
 # This is optional, but is an important consideration for parallel programming.
-prng = np.random.RandomState()
+from numpy.random import Generator
+from numpy.random import PCG64DXSM
+generator = PCG64DXSM(seed=0)
+prng = Generator(generator)
+
 Density.prior = Distribution('Uniform', -2.0, 2.0, prng=prng)
 
 #%%
@@ -90,33 +93,33 @@ print("Class type of the proposal: ",type(Density.proposal))
 # Therefore each element is evaluated to get 3 probabilities, one for each element.
 print(Density.probability(log=False))
 
-################################################################################
+#%%
 # The univariate proposal distribution can generate random samples from itself.
 print(Density.propose())
 
-################################################################################
+#%%
 # From a sampling stand point we can either sample using only the proposal
 # Or we can only generate samples that simultaneously satisfy the prior.
 print(Density.propose(relative=True))
 
-################################################################################
+#%%
 # We can perturb the variable by drawing from the attached proposal distribution.
 
 Density.perturb()
 print(Density.summary)
 
-################################################################################
+#%%
 # Attaching a Histogram to capture the posterior distribution
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # The StatArray can perturb itself, evaluate its current probability given its priors
 # and a histogram can be attached to capture its posterior distribution.
 # As an example, lets create a Histogram class with bins generated from the prior.
 bins = Density.prior.bins()
-################################################################################
+#%%
 # Attach the histogram
 Density.posterior = Histogram(mesh = RectilinearMesh1D(edges=bins))
 
-################################################################################
+#%%
 # In an iterative sense, we can propose and evaluate new values, and update the posterior
 for i in range(1000):
     Density.perturb()
@@ -125,11 +128,11 @@ for i in range(1000):
     if p > 0.0: # This is a simple example!
         Density.update_posterior()
 
-################################################################################
+#%%
 plt.figure()
 Density.summaryPlot()
 
-################################################################################
+#%%
 # Attach a multivariate normal distribution as the prior and proposal
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #
@@ -140,14 +143,14 @@ variance = np.ones(Density.size)
 Density.prior = Distribution('MvNormal', mean, variance, prng=prng)
 
 
-################################################################################
+#%%
 # Since the prior is multivariate, the appropriate equations are used to
 # evaluate the probability for all elements in the StatArray.
 # This produces a single probability.
 
 print(Density.probability(log=False))
 
-################################################################################
+#%%
 # Attach the multivariate proposal
 
 mean = np.random.randn(Density.size)
@@ -155,7 +158,7 @@ variance = np.ones(Density.size)
 Density.proposal = Distribution('MvNormal', mean, variance, prng=prng)
 
 
-################################################################################
+#%%
 # Perturb the variables using the multivariate proposal.
 
 Density.perturb()
@@ -172,7 +175,7 @@ with h5py.File('statarray.h5', 'r') as f:
     tmp = StatArray.fromHdf(f, 'statarray', skip_posterior=False)
 
 
-################################################################################
+#%%
 # Basic manipulation
 # ++++++++++++++++++
 #
@@ -188,73 +191,73 @@ with h5py.File('statarray.h5', 'r') as f:
 x = StatArray(-np.cumsum(np.arange(10.0)))
 print(x)
 
-################################################################################
+#%%
 
 
 print(x.insert(i=[0, 9], values=[999.0, 999.0]))
 
 
-################################################################################
+#%%
 
 
 print(x.prepend(999.0))
 
 
-################################################################################
+#%%
 
 
 print(x.prepend([998.0, 999.0]))
 
 
-################################################################################
+#%%
 
 
 print(x.append([998.0, 999.0]))
 
 
-################################################################################
+#%%
 
 
 print(x.resize(14))
 
 
-################################################################################
+#%%
 
 
 print(x.delete([5,8]))
 
 
-################################################################################
+#%%
 
 
 print(x.edges())
 
 
-################################################################################
+#%%
 
 
 print(x.internalEdges())
 
 
-################################################################################
+#%%
 
 
 print(x.firstNonZero())
 
 
-################################################################################
+#%%
 
 
 print(x.lastNonZero())
 
 
-################################################################################
+#%%
 
 
 print(x.abs())
 
 
-################################################################################
+#%%
 # 2D example
 # __________
 
@@ -262,91 +265,91 @@ x = StatArray(np.asarray([[0, -2, 3],[3, 0, -1],[1, 2, 0]]))
 print(x)
 
 
-################################################################################
+#%%
 
 
 print(x.insert(i=0, values=4))
 
 
-################################################################################
+#%%
 
 
 print(x.insert(i=[2, 3], values=5, axis=1))
 
 
-################################################################################
+#%%
 
 
 print(x.insert(i=2, values=[10, 11, 12], axis=1))
 
 
-################################################################################
+#%%
 
 
 print(x.prepend(999))
 
 
-################################################################################
+#%%
 
 
 print(x.prepend([999, 998, 997], axis=1))
 
 
-################################################################################
+#%%
 
 
 print(x.append([[999, 998, 997]]))
 
 
-################################################################################
+#%%
 
 
 print(x.resize([5,5]))
 
 
-################################################################################
+#%%
 
 
 print(x.delete(5))
 
 
-################################################################################
+#%%
 
 
 print(x.delete(2, axis=0))
 
 
-################################################################################
+#%%
 
 
 print(x.firstNonZero(axis=0))
 
 
-################################################################################
+#%%
 
 
 print(x.lastNonZero(axis=0))
 
 
-################################################################################
+#%%
 
 
 print(x.firstNonZero(axis=1))
 
 
-################################################################################
+#%%
 
 
 print(x.lastNonZero(axis=1))
 
 
-################################################################################
+#%%
 
 
 print(x.abs())
 
 
-################################################################################
+#%%
 # Plotting
 # ++++++++
 #
@@ -360,27 +363,27 @@ Time = StatArray(np.linspace(0, 100, Density.size), name='Time', units='s')
 Depth = StatArray(np.random.exponential(size=Density.size), name='Depth', units='m')
 
 
-################################################################################
+#%%
 
 
 plt.figure()
 _ = Density.plot(linewidth=0.5, marker='x', markersize=1.0)
 
-################################################################################
+#%%
 # We can quickly plot a bar graph.
 
 plt.figure()
 _ = Density.bar()
 
 
-################################################################################
+#%%
 # We can scatter the contents of the StatArray if it is 1D
 
 plt.figure()
 _ = Density.scatter(alpha=0.7)
 
 
-################################################################################
+#%%
 # Histogram Equalization
 # ______________________
 #
@@ -393,7 +396,7 @@ plt.figure()
 _ = Density.scatter(alpha=0.7, equalize=True)
 
 
-################################################################################
+#%%
 # Take the log base(x) of the data
 #
 # We can also take the data to a log, log10, log2, or a custom number!
@@ -401,7 +404,7 @@ _ = Density.scatter(alpha=0.7, equalize=True)
 plt.figure()
 _ = Density.scatter(alpha=0.7,edgecolor='k',log='e') # could also use log='e', log=2, log=x) where x is the base you require
 
-################################################################################
+#%%
 # X and Y axes
 #
 # We can specify the x axis of the scatter plot.
@@ -411,7 +414,7 @@ plt.figure()
 _ = Density.scatter(x=Time, alpha=0.7, edgecolor='k')
 
 
-################################################################################
+#%%
 # Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray.
 # In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.
 # When I take the values of Density to log base 10, because I do not specify the y plotting locations, those locations are similarly affected.
@@ -428,12 +431,12 @@ plt.subplot(212, sharex=ax1)
 _ = Density.scatter(x=Time, y=Depth, alpha=0.7, edgecolor='k', log=10)
 
 
-################################################################################
+#%%
 # Point sizes
 #
 # Since the plotting functions take matplotlib keywords, I can also specify the size of each points.
 
-################################################################################
+#%%
 
 
 s = np.ceil(100*(np.abs(np.random.randn(Density.size))))
@@ -449,14 +452,14 @@ _ = Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k', legend_size=[
 
 
 
-################################################################################
+#%%
 # Of course we can still take the log, or equalize the colour histogram
 
 plt.figure()
 _ = Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor='k',equalize=True,log=10)
 
 
-################################################################################
+#%%
 # Typically pcolor only works with 2D arrays. The StatArray has a pcolor method that will pcolor a 1D array
 
 plt.figure()
@@ -470,7 +473,7 @@ plt.subplot(224)
 _ = Density.pcolor(y=Time, log=10, equalize=True)
 
 
-################################################################################
+#%%
 # We can add grid lines, and add opacity to each element in the pcolor image
 #
 # This is useful if the colour values need to be scaled by another variable e.g. variance.
@@ -484,21 +487,21 @@ a = np.linspace(1.0, 0.0, Density.size)
 _ = Density.pcolor(grid=True, alpha=a, cmap='jet')
 
 
-################################################################################
+#%%
 # We can plot a histogram of the StatArray
 
 plt.figure()
 _ = Density.hist(100)
 
 
-################################################################################
+#%%
 # We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can include compression.  They allow quick and easy access to parts of the file, and can also be written to and read from in parallel!
 
 with h5py.File('1Dtest.h5','w') as f:
     Density.toHdf(f,'test')
 
 
-################################################################################
+#%%
 # We can then read the StatArray from the file
 # Here x is a new variable, that is read in from the hdf5 file we just wrote.
 
@@ -508,14 +511,14 @@ x[2] = 5.0 # Change one of the values in x
 print('x has its own memory allocated (not a reference/pointer)? ', id(x) != id(Density))
 
 
-################################################################################
+#%%
 # We can also define a 2D array
 
 Density = StatArray(np.random.randn(50,100),"Density","$\frac{g}{cc}$")
 Density.summary
 
 
-################################################################################
+#%%
 # The StatArray Class's functions work whether it is 1D or 2D
 #
 # We can still do a histogram
@@ -524,14 +527,14 @@ plt.figure()
 _ = Density.hist()
 
 
-################################################################################
+#%%
 # And we can use pcolor to plot the 2D array
 
 plt.figure()
 _ = Density.pcolor()
 
 
-################################################################################
+#%%
 # The StatArray comes with extra plotting options
 #
 # Here we specify the x and y axes for the 2D array using two other 1D StatArrays
@@ -542,7 +545,7 @@ y = StatArray(np.arange(51),name='y Axis',units = 'elephants')
 _ = Density.pcolor(x=x, y=y)
 
 
-################################################################################
+#%%
 # We can plot using a log10 scale, in this case, we have values that are less
 # than or equal to 0.0.  Plotting with the log option will by default mask any
 # of those values, and will let you know that it has done so!
@@ -551,7 +554,7 @@ plt.figure()
 _ = Density.pcolor(x=x,y=y,log=2)
 
 
-################################################################################
+#%%
 # A neat trick with colourmaps is histogram equalization.
 # This approach forces all colours in the image to have an equal amount.
 # This distorts the colours, but can really highlight the lower and higher
@@ -561,20 +564,20 @@ plt.figure()
 _ = Density.pcolor(x=x, y=y, equalize=True)
 
 
-################################################################################
+#%%
 # We can equalize the log10 plot too :)
 
 plt.figure()
 _ = Density.pcolor(x=x,y=y,equalize=True, log=10)
 
 
-################################################################################
+#%%
 # We can add opacity to each pixel in the image
 
 a = StatArray(np.random.random(Density.shape), 'Opacity from 0.0 to 1.0')
 
 
-################################################################################
+#%%
 
 
 plt.figure()
@@ -586,7 +589,7 @@ plt.subplot(133, sharex=ax1, sharey=ax1)
 _ = a.pcolor(x=x, y=y, flipY=True)
 
 
-################################################################################
+#%%
 # If the array potentially has a lot of white space around the edges, we can trim the image
 
 Density[:10, :] = 0.0
@@ -600,7 +603,7 @@ plt.subplot(122)
 _ = Density.pcolor(trim=0.0)
 
 
-################################################################################
+#%%
 # Create a stacked area plot of a 2D StatArray
 
 A = StatArray(np.abs(np.random.randn(13,100)), name='Variable', units="units")

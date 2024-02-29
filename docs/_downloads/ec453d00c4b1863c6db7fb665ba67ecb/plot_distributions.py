@@ -11,10 +11,15 @@ from geobipy import plotting as cP
 import matplotlib.pyplot as plt
 import numpy as np
 
+from numpy.random import Generator
+from numpy.random import PCG64DXSM
+generator = PCG64DXSM(seed=0)
+prng = Generator(generator)
+
 #%%
 # Univariate Normal Distribution
 # ++++++++++++++++++++++++++++++
-D = Distribution('Normal', 0.0, 1.0)
+D = Distribution('Normal', 0.0, 1.0, prng=prng)
 
 # Get the bins of the Distribution from +- 4 standard deviations of the mean
 bins = D.bins()
@@ -33,11 +38,11 @@ plt.plot(bins, pdf)
 #%%
 # Multivariate Normal Distribution
 # ++++++++++++++++++++++++++++++++
-D = Distribution('MvNormal',[0.0,1.0,2.0],[1.0,1.0,1.0])
+D = Distribution('MvNormal',[0.0,1.0,2.0],[1.0,1.0,1.0], prng=prng)
 D.rng()
 
 
-################################################################################
+#%%
 # Uniform Distribution
-D = Distribution('Uniform', 0.0, 1.0)
+D = Distribution('Uniform', 0.0, 1.0, prng=prng)
 D.bins()

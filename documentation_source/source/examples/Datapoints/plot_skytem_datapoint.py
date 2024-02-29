@@ -4,16 +4,6 @@ Skytem Datapoint Class
 """
 
 #%%
-# There are three ways in which to create a time domain datapoint
-#
-# 1) :ref:`Instantiating a time domain datapoint`
-#
-# 2) :ref:`Reading a datapoint from a file`
-#
-# 3) :ref:`Obtaining a datapoint from a dataset`
-#
-# Once instantiated, see :ref:`Using a time domain datapoint`
-#
 # Credits:
 # We would like to thank Ross Brodie at Geoscience Australia for his airborne time domain forward modeller
 # https://github.com/GeoscienceAustralia/ga-aem
@@ -39,9 +29,8 @@ from geobipy import Model
 from geobipy import StatArray
 from geobipy import Distribution
 
-dataFolder = "..//supplementary//data//"
+dataFolder = "..//..//supplementary//data//"
 
-###############################################################################
 # Obtaining a datapoint from a dataset
 # ++++++++++++++++++++++++++++++++++++
 # More often than not, our observed data is stored in a file on disk.
@@ -54,7 +43,7 @@ dataFile=dataFolder + 'skytem_512_saline_clay.csv'
 # The EM system file name
 systemFile=[dataFolder + 'SkytemHM_512.stm', dataFolder + 'SkytemLM_512.stm']
 
-################################################################################
+#%%
 # Initialize and read an EM data set
 # Prepare the dataset so that we can read a point at a time.
 Dataset = TdemData._initialize_sequential_reading(dataFile, systemFile)
@@ -63,20 +52,20 @@ tdp = Dataset._read_record()
 
 Dataset._file.close()
 
-################################################################################
+#%%
 # Using a time domain datapoint
 # +++++++++++++++++++++++++++++
 
-################################################################################
+#%%
 # We can define a 1D layered earth model, and use it to predict some data
 par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
 mod = Model(RectilinearMesh1D(edges=np.r_[0, 75.0, np.inf]), values=par)
 
-################################################################################
+#%%
 # Forward model the data
 tdp.forward(mod)
 
-################################################################################
+#%%
 plt.figure()
 plt.subplot(121)
 _ = mod.pcolor()
@@ -85,40 +74,44 @@ _ = tdp.plot()
 _ = tdp.plot_predicted()
 plt.tight_layout()
 
-################################################################################
+#%%
 plt.figure()
 tdp.plotDataResidual(yscale='log', xscale='log')
 plt.title('new')
 
-################################################################################
+#%%
 # Compute the sensitivity matrix for a given model
 J = tdp.sensitivity(mod)
 plt.figure()
 _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
 
-################################################################################
-# Attaching statistical descriptors to the datapoint
-# ++++++++++++++++++++++++++++++++++++++++++++++++++
-#
+#%%
+# Attaching statistical descriptors to the skytem datapoint
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+from numpy.random import Generator
+from numpy.random import PCG64DXSM
+generator = PCG64DXSM(seed=0)
+prng = Generator(generator)
+
 # Set values of relative and additive error for both systems.
 tdp.relative_error = np.r_[0.05, 0.05]
 tdp.additive_error = np.r_[1e-14, 1e-13]
 # Define a multivariate log normal distribution as the prior on the predicted data.
-tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0)
+tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
 
-################################################################################
+#%%
 # This allows us to evaluate the likelihood of the predicted data
 print(tdp.likelihood(log=True))
 # Or the misfit
-print(tdp.dataMisfit())
+print(tdp.data_misfit())
 
-################################################################################
+#%%
 # Plot the misfits for a range of half space conductivities
 plt.figure()
 _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
 plt.title("Halfspace responses")
 
-################################################################################
+#%%
 # We can perform a quick search for the best fitting half space
 halfspace = tdp.find_best_halfspace()
 
@@ -127,32 +120,32 @@ plt.figure()
 _ = tdp.plot()
 _ = tdp.plot_predicted()
 
-################################################################################
+#%%
 # Compute the misfit between observed and predicted data
-print(tdp.dataMisfit())
+print(tdp.data_misfit())
 
-################################################################################
+#%%
 # We can attach priors to the height of the datapoint,
 # the relative error multiplier, and the additive error noise floor
 
 # Define the distributions used as priors.
-z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0)
-relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5])
-additivePrior = Distribution('Uniform', min=np.r_[1e-16, 1e-16], max=np.r_[1e-10, 1e-10], log=True)
-tdp.set_priors(relative_error_prior=relativePrior, additive_error_prior=additivePrior, z_prior=z_prior)
+z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
+relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5], prng=prng)
+additivePrior = Distribution('Uniform', min=np.r_[1e-16, 1e-16], max=np.r_[1e-10, 1e-10], log=True, prng=prng)
+tdp.set_priors(relative_error_prior=relativePrior, additive_error_prior=additivePrior, z_prior=z_prior, prng=prng)
 
-################################################################################
+#%%
 # In order to perturb our solvable parameters, we need to attach proposal distributions
-z_proposal = Distribution('Normal', mean=tdp.z, variance = 0.01)
-relativeProposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-7)
-additiveProposal = Distribution('MvLogNormal', mean=tdp.additive_error, variance=2.5e-3, linearSpace=True)
-tdp.set_proposals(relativeProposal, additiveProposal, z_proposal=z_proposal)
+z_proposal = Distribution('Normal', mean=tdp.z, variance = 0.01, prng=prng)
+relativeProposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-7, prng=prng)
+additiveProposal = Distribution('MvLogNormal', mean=tdp.additive_error, variance=2.5e-3, linearSpace=True, prng=prng)
+tdp.set_proposals(relativeProposal, additiveProposal, z_proposal=z_proposal, prng=prng)
 
-################################################################################
+#%%
 # With priorss set we can auto generate the posteriors
 tdp.set_posteriors()
 
-################################################################################
+#%%
 # Perturb the datapoint and record the perturbations
 # Note we are not using the priors to accept or reject perturbations.
 for i in range(10):
@@ -160,7 +153,7 @@ for i in range(10):
     tdp.update_posteriors()
 
 
-################################################################################
+#%%
 # Plot the posterior distributions
 tdp.plot_posteriors(overlay=tdp)
 

@@ -388,12 +388,15 @@ class Histogram(Model):
         """
         percentile = self.mesh._percentile(values=self.pmf.values, percent=percent, axis=axis)
 
+
         if size(percent) == 1:
-            return Model(self.mesh.remove_axis(axis), values=percentile)
+            out = Model(self.mesh.remove_axis(axis), values=percentile)
         else:
             mesh = deepcopy(self.mesh)
             mesh.axis(axis).centres = StatArray(percent, 'percent', '%')
-            return Model(mesh, values=percentile)
+            out = Model(mesh, values=percentile)
+
+        return out
 
     def pcolor(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')

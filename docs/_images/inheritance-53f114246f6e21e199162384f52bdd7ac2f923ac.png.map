@@ -1,6 +1,0 @@
-<map id="inheritancef4d5cd9044" name="inheritancef4d5cd9044">
-<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="5,5,77,31"/>
-<area shape="rect" id="node2" href="#geobipy.src.classes.system.EmLoop.EmLoop" target="_top" title="Defines a loop in an EM system e.g. transmitter or reciever" alt="" coords="372,5,444,31"/>
-<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="Abstract base class" alt="" coords="125,31,204,56"/>
-<area shape="rect" id="node3" href="../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="252,31,324,56"/>
-</map>

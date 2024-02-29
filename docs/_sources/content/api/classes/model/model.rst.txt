@@ -5,4 +5,3 @@ Model classes
    :maxdepth: 1
 
    Model_
-   Model1D

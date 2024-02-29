@@ -57,7 +57,7 @@ model3.pcolor()
 plt.subplot(233)
 model4.pcolor()
 
-################################################################################
+#%%
 model2 = model[:, 5, 5]
 model3 = model[5, :, 5]
 model4 = model[5, 5, :]
@@ -69,7 +69,7 @@ model3.pcolor()
 plt.subplot(236)
 model4.pcolor()
 
-################################################################################
+#%%
 with h5py.File('model3d.h5', 'w') as f:
     model.createHdf(f, 'test')
     model.writeHdf(f, 'test')
@@ -98,11 +98,11 @@ model3.pcolor()
 plt.subplot(233)
 model4.pcolor()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 pv = model.pyvista_plotter()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 model.pyvista_mesh().save('model3d_re1.vtk')
 
@@ -124,11 +124,11 @@ model3.pcolor()
 plt.subplot(233)
 model4.pcolor()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 pv = model.pyvista_plotter()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 model.pyvista_mesh().save('model3d_re2.vtk')
 
@@ -152,11 +152,11 @@ model3.pcolor()
 plt.subplot(233)
 model4.pcolor()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 pv = model.pyvista_plotter()
 
-################################################################################
+#%%
 # We can plot the mesh in 3D!
 model.pyvista_mesh().save('model3d_re3.vtk')
 

@@ -21,11 +21,11 @@ import matplotlib.pyplot as plt
 # Create regularly spaced bins
 mesh = RectilinearMesh1D(edges=StatArray(np.linspace(-3.0, 3.0, 101), 'bins', 'm'))
 
-################################################################################
+#%%
 # Set the histogram using the bins, and update
 H = Histogram(mesh=mesh)
 
-################################################################################
+#%%
 # We can update the histogram with some new values
 H.update(np.random.randn(1000), trim=True)
 
@@ -40,7 +40,7 @@ H.pmf.bar()
 plt.subplot(224)
 H.cdf().bar()
 
-################################################################################
+#%%
 # Get the median, and 95% confidence values
 print(H.credible_intervals(percent=95.0))
 
@@ -58,20 +58,19 @@ H.plotMedian()
 x = np.cumsum(np.arange(10, dtype=np.float64))
 irregularBins = np.hstack([-x[::-1], x[1:]])
 
-################################################################################
+#%%
 # Create a named StatArray
 edges = StatArray(irregularBins, 'irregular bins')
 mesh = RectilinearMesh1D(edges = edges)
 
-################################################################################
+#%%
 # Instantiate the histogram with bin edges
 H = Histogram(mesh=mesh)
 
-###############################################################################
 # Update the histogram
 H.update((np.random.randn(10000)*20.0) - 10.0)
 
-################################################################################
+#%%
 # Plot the histogram
 plt.figure()
 plt.subplot(211)
@@ -85,7 +84,7 @@ H.plotCredibleIntervals()
 H.plotMean()
 H.plotMedian()
 
-################################################################################
+#%%
 # We can plot the histogram as a pcolor plot
 plt.figure()
 _ = H.pcolor(grid=True, transpose=True)
@@ -96,15 +95,15 @@ _ = H.pcolor(grid=True, transpose=True)
 # Create some bins spaced logarithmically
 mesh = RectilinearMesh1D(edges = StatArray(np.logspace(-5, 3), 'positive bins'), log=10)
 
-################################################################################
+#%%
 # Instantiate the Histogram with log=10
 H = Histogram(mesh)
 
-################################################################################
+#%%
 # The update takes in the numbers in linear space and takes their log=10
 H.update(10.0**(np.random.randn(1000)*2.0), trim=True)
 
-################################################################################
+#%%
 plt.figure()
 plt.subplot(211)
 _ = H.plot()
@@ -120,13 +119,13 @@ plt.subplot(212)
 _ = H1.plot()
 
 
-################################################################################
+#%%
 mesh = RectilinearMesh1D(edges=StatArray(np.linspace(-3.0, 3.0, 101), 'bins', 'm'))
-################################################################################
+#%%
 # Set the histogram using the bins, and update
 H = Histogram(mesh=mesh)
 
-################################################################################
+#%%
 # We can update the histogram with some new values
 H.update(np.random.randn(1000), trim=True)
 

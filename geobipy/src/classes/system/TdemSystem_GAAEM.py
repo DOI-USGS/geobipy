@@ -34,7 +34,8 @@ try:
             self.off_time = self.windows.centre
             self.read_components(system_filename)
             self.filename = system_filename
-            self.string = open(system_filename, 'r').readlines()
+            with open(system_filename, 'r') as f:
+                self.string = f.readlines()
 
         def __deepcopy__(self, memo={}):
             return None
@@ -123,9 +124,9 @@ except Exception as e:
 
         def __init__(self, *args, **kwargs):
             h = ("\nCould not import the time domain forward modeller from GA_AEM. \n"
-                 "\n{0}\n"
                  "Please see the package's README for instructions on how to install it \n"
-                 "Check that you have loaded the compiler that was used to compile the forward modeller\n").format(err)
+                 "Check that you have loaded the compiler that was used to compile the forward modeller\n")
             print(Warning(h))
 
     print(e)
+    raise Exception(e)

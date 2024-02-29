@@ -45,23 +45,6 @@ class Categorical(baseDistribution):
     def nEvents(self):
         return self.probabilities.size
 
-    def get_event(self, index):
-        """Return the event name for a given index
-
-        Parameters
-        ----------
-        index : ints
-            Event id from 0 to nEvents - 1
-
-        Returns
-        -------
-        out : list of str
-            Names of the events
-
-        """
-        return [self.events[i] for i in index]
-
-
     def probability(self, x):
         out = empty(x)
         n = size(x)
@@ -69,7 +52,6 @@ class Categorical(baseDistribution):
             out[i] = self._probabilities[i]
 
         return out
-
 
     def __deepcopy__(self):
         """Create a deepcopy

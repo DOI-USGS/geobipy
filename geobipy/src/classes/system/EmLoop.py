@@ -408,11 +408,11 @@ class EmLoop(Point, ABC):
         super().writeHdf(parent, name, withPosterior, index)
 
         grp = parent[name]
-        self.pitch.writeHdf(grp, 'pitch', index=index)
-        self.roll.writeHdf(grp, 'roll', index=index)
-        self.yaw.writeHdf(grp, 'yaw', index=index)
-        self.moment.writeHdf(grp, 'moment', index=index)
-        self._orientation.writeHdf(grp, 'orientation', index=index)
+        self.pitch.writeHdf(grp, 'pitch', withPosterior=withPosterior, index=index)
+        self.roll.writeHdf(grp, 'roll', withPosterior=withPosterior, index=index)
+        self.yaw.writeHdf(grp, 'yaw', withPosterior=withPosterior, index=index)
+        self.moment.writeHdf(grp, 'moment', withPosterior=withPosterior, index=index)
+        self._orientation.writeHdf(grp, 'orientation', withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None):

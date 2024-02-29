@@ -7,7 +7,7 @@ from numpy.linalg import norm
 from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
 from numpy import int32, int64, prod, reshape, unravel_index, s_, size
 from numpy import ndim as npndim
-from numpy.random import Generator
+from numpy.random import Generator, PCG64DXSM
 from randomgen import Xoshiro256
 import numpy as np
 from ..classes.core import StatArray
@@ -71,7 +71,7 @@ class world3D(object):
         return s_[i0:i1]
 
 
-def print(aStr='', end='\n'):
+def print(aStr='', end='\n', **kwargs):
     """Prints the str to sys.stdout and flushes the buffer so that printing is immediate
 
     Parameters
@@ -106,7 +106,7 @@ def rankPrint(world, aStr="", end='\n', rank=0):
     if (world.rank == rank):
         if not isinstance(aStr, str):
             aStr = str(aStr)
-        print(aStr, end)
+        print(aStr, end, flush=True)
 
 
 def banner(world, aStr=None, end='\n', rank=0):
@@ -131,7 +131,7 @@ def banner(world, aStr=None, end='\n', rank=0):
     rankPrint(world, aStr="=" * 78, end=end, rank=rank)
 
 
-def orderedPrint(world, this, title=None):
+def ordered_print(world, this, title=None):
     """Prints numbers from each rank in order of rank
 
     This routine will print an item from each rank in order of rank.
@@ -169,44 +169,51 @@ def helloWorld(world):
     """
     size = world.size
     rank = world.rank
-    orderedPrint(world, '/ {}'.format(rank + 1, size), "Hello From!")
+    ordered_print(world, '/ {}'.format(rank + 1, size), "Hello From!")
 
-def get_prng(timeFunction, seed=None, world=None):
-    """Generate a random seed using time and the process id
+def get_prng(generator=Xoshiro256, seed=None, jump=None, world=None):
+    """Generate an independent prng.
 
     Returns
     -------
-    seed : int
-        The seed on each core
+    seed : int or file, optional
+        The seed of the bit generator.
+    jump : int, optional
+        Jump the bit generator by this amount
+    world : mpi4py.MPI.COMM_WORLD, optional
+        MPI communicator, will jump each bit generator by world.rank
 
     """
-    if world is None:
-        if seed is None:
-            bit_generator = Xoshiro256()
-            pickle.dump(bit_generator.seed_seq.entropy, open('seed.pkl', 'wb'))
-        else:
+    # Default to single core, else grab the mpi rank.
+    rank = 0
+    if world is not None:
+        rank = world.rank
+
+    if rank == 0:
+        if seed is not None: # Seed is a file.
             if isinstance(seed, str):
-                bit_generator = Xoshiro256(seed = pickle.load(open(seed, 'rb')))
-            else:
-                bit_generator = Xoshiro256(seed = seed)
+                with open(seed, 'rb') as f:
+                    seed = pickle.load(f)
+            assert isinstance(seed, int), TypeError("Seed {} must have type python int (not numpy)".format(seed))
 
-    else:
+        else: # No seed, generate one
+            bit_generator = generator()
+            seed = bit_generator.seed_seq.entropy
+            with open('seed.pkl', 'wb') as f:
+                pickle.dump(seed, f)
+            print('Seed: {}'.format(seed), flush=True)
 
-        if seed is None:
-            bit_generator = Xoshiro256()
-            # Broadcast the seed to all ranks.
-            seed = world.bcast(bit_generator.seed_seq.entropy, root=0)
-        else:
-            if isinstance(seed, str):
-                bit_generator = Xoshiro256(seed = pickle.load(open(seed, 'rb')))
-                seed = bit_generator.seed_seq.entropy
+    if world is not None:
+        # Broadcast the seed to all ranks.
+        seed = world.bcast(seed, root=0)
 
-        bit_generator = Xoshiro256(seed = seed)
+    bit_generator = generator(seed = seed)
 
-        if world.rank == 0:
-            pickle.dump(bit_generator.seed_seq.entropy, open('seed.pkl', 'wb'))
+    if world is not None:
+        jump = world.rank
 
-        bit_generator.jumped(world.rank)
+    if jump is not None:
+        bit_generator = bit_generator.jumped(jump)
 
     return Generator(bit_generator)
 
@@ -324,6 +331,8 @@ def _isendDtype(value, dest, world):
         tmp = str(value.dtype)  # Try to get the dtype attribute
     except:
         tmp = str(value.__class__.__name__)  # Otherwise use the type finder
+    if tmp == 'int':
+        tmp = 'int32'
     world.send(tmp, dest=dest)
     return tmp
 

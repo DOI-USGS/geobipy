@@ -54,16 +54,16 @@ class DataPoint(Point):
         * If None, initialized with zeros.
     units : str, optional
         Units of the data.  Default is "ppm".
-    channelNames : list of str, optional
+    channel_names : list of str, optional
         Names of each channel of length sum(nChannelsPerSystem)
 
     """
-    __slots__ = ('_units', '_data', '_std', '_predictedData', '_lineNumber', '_fiducial', '_channelNames',
+    __slots__ = ('_units', '_data', '_std', '_predictedData', '_lineNumber', '_fiducial', '_channel_names',
                  '_relative_error', '_additive_error', '_sensitivity_matrix', '_components')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
                        data=None, std=None, predictedData=None,
-                       units=None, channelNames=None,
+                       units=None, channel_names=None,
                        lineNumber=0.0, fiducial=0.0, **kwargs):
         """ Initialize the Data class """
 
@@ -82,7 +82,7 @@ class DataPoint(Point):
 
         self.fiducial = fiducial
 
-        self.channelNames = channelNames
+        self.channel_names = channel_names
 
         self.relative_error = None
         self.additive_error = None
@@ -142,16 +142,16 @@ class DataPoint(Point):
         return msg
 
     @property
-    def channelNames(self):
-        return self._channelNames
+    def channel_names(self):
+        return self._channel_names
 
-    @channelNames.setter
-    def channelNames(self, values):
+    @channel_names.setter
+    def channel_names(self, values):
         if values is None:
-            self._channelNames = ['Channel {}'.format(i) for i in range(self.nChannels)]
+            self._channel_names = ['Channel {}'.format(i) for i in range(self.nChannels)]
         else:
-            assert len(values) == self.nChannels, Exception("Length of channelNames must equal total number of channels {}".format(self.nChannels))
-            self._channelNames = values
+            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            self._channel_names = values
 
     @property
     def fiducial(self):
@@ -322,7 +322,7 @@ class DataPoint(Point):
         out._predictedData = deepcopy(self.predictedData, memo)
         out._lineNumber = deepcopy(self.lineNumber, memo)
         out._fiducial = deepcopy(self.fiducial, memo)
-        out._channelNames = deepcopy(self.channelNames, memo)
+        out._channel_names = deepcopy(self.channel_names, memo)
 
         out._sensitivity_matrix = deepcopy(self._sensitivity_matrix)
 
@@ -716,7 +716,7 @@ class DataPoint(Point):
     def summary(self):
         """ Print a summary of the EMdataPoint """
         msg = super().summary
-        names = copy(self.channelNames)
+        names = copy(self.channel_names)
         j = arange(5, self.nChannels, 5)
         for i in range(j.size):
             names.insert(j[i]+i, '\n')

@@ -18,7 +18,7 @@ Datapoints
 .. only:: html
 
   .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_resolve_datapoint_thumb.png
-    :alt: Frequency domain datapoint
+    :alt:
 
   :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py`
 
@@ -35,7 +35,7 @@ Datapoints
 .. only:: html
 
   .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_skytem_datapoint_thumb.png
-    :alt: Skytem Datapoint Class
+    :alt:
 
   :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py`
 
@@ -52,7 +52,7 @@ Datapoints
 .. only:: html
 
   .. image:: /examples/Datapoints/images/thumb/sphx_glr_plot_tempest_datapoint_thumb.png
-    :alt: Tempest Datapoint Class
+    :alt:
 
   :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py`
 

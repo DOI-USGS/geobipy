@@ -1,27 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Running GeoBIPy &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-        <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="../../_static/doctools.js"></script>
-        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -34,14 +35,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> GeoBIPy
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoBIPy
           </a>
               <div class="version">
                 1.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -70,7 +75,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="getting_started.html">Getting Started</a></li>
       <li class="breadcrumb-item active">Running GeoBIPy</li>
       <li class="wy-breadcrumbs-aside">
@@ -83,14 +88,14 @@
            <div itemprop="articleBody">
              
   <section id="running-geobipy">
-<h1>Running GeoBIPy<a class="headerlink" href="#running-geobipy" title="Permalink to this heading"></a></h1>
+<h1>Running GeoBIPy<a class="headerlink" href="#running-geobipy" title="Link to this heading"></a></h1>
 <p>There are two methods of running GeoBIPy from the command line once it is installed.
 For the serial version the following can be used</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>geobipySerial &lt;userParameterFile&gt; &lt;Output Folder&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>geobipySerial<span class="w"> </span>&lt;userParameterFile&gt;<span class="w"> </span>&lt;Output<span class="w"> </span>Folder&gt;
 </pre></div>
 </div>
 <p>For a parallel installed version use the following, (replace the MPI redirect with whatever is suitable for your machine)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun geobipyParallel &lt;userParameterFile&gt; &lt;Output Folder&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpirun<span class="w"> </span>geobipyParallel<span class="w"> </span>&lt;userParameterFile&gt;<span class="w"> </span>&lt;Output<span class="w"> </span>Folder&gt;
 </pre></div>
 </div>
 <p>In both cases, &lt;Output Folder&gt; specifies where the HDF5 files will be written, while the &lt;userParameterFile&gt; is a python script that contains the customizable parameters for GeoBIPy.
@@ -112,7 +117,7 @@ Below is an example scipt that you can use for reference.</p>
 <span class="c1"># General file structure information.</span>
 <span class="c1"># -------------------------------------------------------</span>
 <span class="c1"># Data folder</span>
-<span class="n">data_directory</span> <span class="o">=</span> <span class="s2">&quot;..//supplementary//data&quot;</span>
+<span class="n">data_directory</span> <span class="o">=</span> <span class="s2">&quot;..//..//supplementary//data&quot;</span>
 <span class="c1"># The data_filename and system_filename options are single strings for single system dataset,</span>
 <span class="c1"># or a list of str for multi-system datasets like Skytem.</span>
 <span class="c1"># Data File Name. If there are multiple, encompass them with [ ].</span>
