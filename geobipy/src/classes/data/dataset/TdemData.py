@@ -1062,6 +1062,7 @@ class TdemData(Data):
         if 'system_filename' in kwargs:
             system_filename = kwargs['system_filename']
             if not isinstance(system_filename, list): system_filename = [system_filename]
+            nSystems = len(system_filename)
 
         systems = [None]*nSystems
         for i in range(nSystems):
