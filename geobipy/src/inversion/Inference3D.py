@@ -8,10 +8,12 @@ import time
 from pprint import pprint
 from numpy import atleast_1d, arange, argsort, argwhere, asarray, column_stack, cumsum, divide, empty, exp, float64
 from numpy import full, hstack, int32, int64, log10, logical_not, linspace, load, max, nan,  nanmin, nanmax, newaxis
-from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, uint64, unique, vstack, where, zeros
+from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, uint8, uint64, unique, vstack, where, zeros
 from numpy import all as npall
 
 from numpy.random import Generator, PCG64DXSM
+
+from queue import Queue
 
 from datetime import timedelta
 import matplotlib.pyplot as plt
@@ -484,8 +486,15 @@ class Inference3D(myObject):
         # Prep the data for point by point reading
         self.data = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
-        # Set the total number of data points
         nPoints = self.data.nPoints
+
+        restarted_points = zeros(nPoints, dtype=uint8)
+        current_index_on_rank = zeros(self.world.size, dtype=int32)
+
+        # Create a queue of datapoint indices to handle restarting
+        queue = Queue()
+        for i in range(nPoints):
+            queue.put_nowait(i)
 
         nFinished = 0
         nSent = 0
@@ -503,6 +512,7 @@ class Inference3D(myObject):
             else:
                 world.send(True, dest=iWorker)
                 datapoint.Isend(dest=iWorker, world=world)
+                current_index_on_rank[iWorker] = nSent
 
             nSent += 1
 
@@ -512,10 +522,13 @@ class Inference3D(myObject):
         myMPI.print("Initial data points sent. Head rank is now waiting for requests")
 
         # Now wait to send indices out to the workers as they finish until the entire data set is finished
-        while nFinished < nPoints:
+        while nFinished < queue.qsize():
+
+            nPoints = queue.qsize()
+
             # Wait for a worker to request the next data point
             status = MPI.Status()
-            dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
+            failed,  = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
             requestingRank = status.Get_source()
 
             nFinished += 1
@@ -584,7 +597,7 @@ class Inference3D(myObject):
                 # save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)
 
             # Ping the head rank to request a new index
-            world.send('requesting', dest=0)
+            world.send(failed, dest=0)
 
             # Wait till you are told whether to continue or not
             continueRunning = world.recv(source=0)
