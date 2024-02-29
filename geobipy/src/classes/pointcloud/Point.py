@@ -132,7 +132,10 @@ class Point(myObject):
                 self.y.name.replace(' ', '_'): self.y,
                 self.z.name.replace(' ', '_'): self.z,
                 self.elevation.name.replace(' ', '_'): self.elevation}, \
-                [self.x.name.replace(' ', '_'), self.y.name.replace(' ', '_'), self.z.name.replace(' ', '_'), self.elevation.name.replace(' ', '_')]
+                [self.x.name.replace(' ', '_'),
+                 self.y.name.replace(' ', '_'),
+                 self.z.name.replace(' ', '_'),
+                 self.elevation.name.replace(' ', '_')]
 
     @property
     def addressof(self):
