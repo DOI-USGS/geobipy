@@ -545,7 +545,7 @@ class Inference1D(myObject):
             observation = None
 
         # Propose a new data point, using assigned proposal distributions
-        test_datapoint.perturb()
+        # test_datapoint.perturb()
 
         # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         try:
@@ -568,7 +568,7 @@ class Inference1D(myObject):
             return
 
         # # Propose a new data point, using assigned proposal distributions
-        # test_datapoint.perturb()
+        test_datapoint.perturb()
 
         # Forward model the data from the candidate model
         test_datapoint.forward(test_model)
@@ -722,11 +722,16 @@ class Inference1D(myObject):
         if (not self.burned_in):
             target_misfit = sum(self.datapoint.active)
 
-            # if self.data_misfit < target_misfit:
-            if (self.iteration > 10000) and (isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2)):
-                self._n_target_hits += 1
+            # # if self.data_misfit < target_misfit:
+            # if (self.iteration > 10000) and (isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2)):
+            #     self._n_target_hits += 1
 
-            if ((self.iteration > 10000) and (self.relative_chi_squared_fit < 1.0)) or ((self.iteration > 10000) and (self._n_target_hits > 1000)):
+            # converged = (((self.iteration > 10000) and (self.relative_chi_squared_fit < 1.0)) or
+            #              ((self.iteration > 10000) and (self._n_target_hits > 1000)))
+
+            converged = (self.iteration > 5000) and (self.data_misfit < target_misfit)
+
+            if converged:
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
                 self.best_iteration = self.iteration
