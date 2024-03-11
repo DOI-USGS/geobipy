@@ -431,7 +431,13 @@ class Inference3D(myObject):
         r = range(nPoints)
         if index is None:
             if fiducial is not None:
-                index = squeeze(argwhere((self.data.lineNumber == line_number) & (self.data.fiducial == fiducial)))
+
+                tmp = (self.data.fiducial == fiducial)
+
+                if unique(self.data.lineNumber).size > 1:
+                    tmp = tmp & (self.data.lineNumber == line_number)
+
+                index = squeeze(argwhere(tmp))
 
                 nPoints = 1
                 r = range(index, index+1)
