@@ -433,6 +433,7 @@ class Model(myObject):
 
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
+            Wz = Wz / self.gradient.prior.std[0, 0]
             operator += dot(Wz.T, Wz)
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
