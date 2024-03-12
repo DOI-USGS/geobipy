@@ -771,16 +771,23 @@ class Inference1D(myObject):
                 print(tmp, flush=True)
 
             # Test resetting of the inversion.
-            if not self.burned_in and self.update_plot_every > 1:
-                if self.acceptance_percent == 0.0:
-                    self._n_zero_acceptance += 1
+            if self.update_plot_every > 1:
+                if not self.burned_in:
+                    if self.acceptance_percent == 0.0:
+                        self._n_zero_acceptance += 1
 
-                    # Reset if we have 3 zero acceptances
-                    if self._n_zero_acceptance == self.reset_limit:
-                        self.reset()
+                        # Reset if we have 3 zero acceptances
+                        if self._n_zero_acceptance == self.reset_limit:
+                            self.reset()
+                            self._n_zero_acceptance = 0
+                    else:
                         self._n_zero_acceptance = 0
                 else:
-                    self._n_zero_acceptance = 0
+                    if self.acceptance_percent == 0.0:
+                        self.low_variance = -inf
+                        self.high_variance = inf
+
+
 
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.kwargs['multiplier']
