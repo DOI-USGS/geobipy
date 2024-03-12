@@ -1235,7 +1235,7 @@ class Inference2D(myObject):
     def plot_k_layers(self, **kwargs):
         """ Plot the number of layers in the best model for each data point """
         post = self.model.nCells.posterior
-        post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        post.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
         ax, _, _ = post.plot(overlay=self.model.nCells, axis=1)
         ax.set_title('P(# of Layers)')
 
@@ -1284,7 +1284,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
 
         opacity = self.opacity()
-        opacity.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        opacity.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(opacity, **kwargs); kwargs['alpha'] = mask
 
@@ -1300,7 +1300,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'hot')
 
         entropy = self.entropy
-        entropy.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        entropy.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(entropy, **kwargs); kwargs['alpha'] = mask
 
@@ -1325,7 +1325,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
 
         interfaces = self.interface_probability()
-        interfaces.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        interfaces.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(interfaces, **kwargs); kwargs['alpha'] = mask
 
@@ -1341,7 +1341,7 @@ class Inference2D(myObject):
             post = self.relativeErrorPosteriors
 
         kwargs['trim'] = kwargs.get('trim', 0.0)
-        post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        post.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         post.pcolor(**kwargs)
 
@@ -1486,7 +1486,7 @@ class Inference2D(myObject):
         return out
 
     def plot_best_model(self, **kwargs):
-        self.model.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        self.model.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         kwargs['mask_by_confidence'] = False
         kwargs['mask_by_doi'] = False
@@ -1587,7 +1587,7 @@ class Inference2D(myObject):
 
         model = self.mean_parameters()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
@@ -1597,7 +1597,7 @@ class Inference2D(myObject):
 
         model = self.compute_median_parameter()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
@@ -1607,7 +1607,7 @@ class Inference2D(myObject):
 
         model = self.compute_mode_parameter()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
