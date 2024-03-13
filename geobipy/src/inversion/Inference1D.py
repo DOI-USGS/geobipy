@@ -7,7 +7,7 @@ from datetime import timedelta
 
 from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
-from numpy import max, min, log, array, full, longdouble, exp, maximum
+from numpy import max, min, log, array, full, longdouble, exp, maximum, sqrt
 
 from numpy.random import Generator
 from numpy.linalg import norm
@@ -545,7 +545,7 @@ class Inference1D(myObject):
             observation = None
 
         # Propose a new data point, using assigned proposal distributions
-        # test_datapoint.perturb()
+        test_datapoint.perturb()
 
         # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         try:
@@ -568,7 +568,7 @@ class Inference1D(myObject):
             return
 
         # # Propose a new data point, using assigned proposal distributions
-        test_datapoint.perturb()
+        # test_datapoint.perturb()
 
         # Forward model the data from the candidate model
         test_datapoint.forward(test_model)
