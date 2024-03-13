@@ -1033,7 +1033,10 @@ class RectilinearMesh1D(Mesh):
                 tries = 0
                 while (not suitable_width):  # Continue while the new layer is smaller than the minimum
                     # Get the new edge
-                    new_edge = exp(prng.uniform(low=nplog(self.min_edge), high=nplog(self.max_edge), size=1))
+                    # new_edge = exp(prng.uniform(low=nplog(self.min_edge), high=nplog(self.max_edge), size=1))
+                    # new_edge = prng.uniform(low=self.min_edge, high=self.max_edge, size=1)
+                    new_edge = self.edges.proposal.rng(size=1)
+
                     # Insert the new depth
                     i = self.edges.searchsorted(new_edge)
                     z = self.edges.insert(i, new_edge)
@@ -1497,6 +1500,12 @@ class RectilinearMesh1D(Mesh):
                                             probabilities,
                                             ['insert', 'delete', 'perturb', 'none'],
                                             prng=kwargs.get('prng', None))
+
+        self.edges.proposal = Distribution('Uniform',
+                                           min=self.min_edge,
+                                           max=self.max_edge,
+                                           log=True,
+                                           prng=kwargs.get('prng', None))
 
     def unperturb(self):
         """After a mesh has had its structure perturbed, remap back its previous state. Used for the reversible jump McMC step.
