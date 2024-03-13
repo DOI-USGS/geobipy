@@ -36,6 +36,8 @@ class Model(myObject):
 
         self.value_bounds = None
         # self._inverse_hessian = None
+        self.value_weight = None
+        self.gradient_weight = None
 
     def __getitem__(self, slic):
         mesh = self.mesh[slic]
@@ -49,7 +51,9 @@ class Model(myObject):
 
         out._values = deepcopy(self.values, memo=memo)
         out._gradient = deepcopy(self._gradient, memo=memo)
-        out.value_bounds = deepcopy(self.value_bounds)
+        out.value_bounds = deepcopy(self.value_bounds, memo=memo)
+        out.value_weight = deepcopy(self.value_weight, memo=memo)
+        out.gradient_weight = deepcopy(self.gradient_weight, memo=memo)
         # out._inverse_hessian = deepcopy(self._inverse_hessian, memo=memo)
 
         # if len(self.__values) > 1:
@@ -369,6 +373,12 @@ class Model(myObject):
             # observation.forward(remapped_model)
                 observation.fm_dlogc(remapped_model)
 
+        remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
+
+        if remapped_model.nCells > 1:
+            v = remapped_model.gradient.prior.variance[0,0]+remapped_model.gradient_weight.rng(1)
+            remapped_model.gradient.prior.variance = np.diag(np.full(remapped_model.nCells.item()-1, fill_value=v))
+
         # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
 
         # Update the local Hessian around the current model.
@@ -449,8 +459,10 @@ class Model(myObject):
             remapped_model.value_bounds = self.value_bounds
         if remapped_model.values.hasPrior:
             remapped_model.values.prior.ndim = remapped_model.nCells.item()
+            remapped_model.value_weight = deepcopy(self.value_weight)
         if remapped_model.gradient.hasPrior:
             remapped_model.gradient.prior.ndim = maximum(1, remapped_model.nCells-1)
+            remapped_model.gradient_weight = deepcopy(self.gradient_weight)
 
         return remapped_model
 
@@ -823,6 +835,10 @@ class Model(myObject):
             proposal = Distribution('MvLogNormal', mean=self.values, variance=local_variance, linearSpace=True, prng=kwargs.get('prng', None))
 
         self.values.proposal = proposal
+
+        self.value_weight = Distribution("Normal", mean=0.0, variance=0.005, prng=kwargs.get('prng', None))
+        self.gradient_weight = Distribution("Normal", mean=0.0, variance=0.005, prng=kwargs.get('prng', None))
+
 
     def take_along_axis(self, i, axis):
         s = [s_[:] for j in range(self.ndim)]
