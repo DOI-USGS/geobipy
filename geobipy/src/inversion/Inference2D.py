@@ -13,6 +13,7 @@ from cached_property import cached_property
 from datetime import timedelta
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
+from ..classes.statistics import get_prng
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.mixPearson import mixPearson
 from ..classes.statistics.Histogram import Histogram
@@ -2006,7 +2007,7 @@ class Inference2D(myObject):
         return parent
 
     @classmethod
-    def fromHdf(cls, grp, prng, mode = "r", world=None, **kwargs):
+    def fromHdf(cls, grp, mode = "r", world=None, **kwargs):
         assert mode != 'w', ValueError("Don't use mode = 'w' when reading!")
         if isinstance(grp, (Path, str)):
             tmp = {}
@@ -2017,6 +2018,8 @@ class Inference2D(myObject):
             grp = h5py.File(grp, mode, **tmp)
 
         data = hdfRead.read_item(grp['data'], **kwargs)
+
+        prng = kwargs.get('prng', get_prng())
 
         self = cls(data, prng=prng, world=world)
         self.mode = mode
