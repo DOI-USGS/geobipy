@@ -24,7 +24,7 @@ class baseDistribution(myObject):
 
     @prng.setter
     def prng(self, value):
-        from ...base.MPI import get_prng
+        # from ...base.MPI import get_prng
 
         # if value is None:
         #     import time
