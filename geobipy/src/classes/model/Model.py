@@ -370,13 +370,12 @@ class Model(myObject):
 
         if observation is not None:
             if remapped_model.mesh.action[0] != 'none':
-            # observation.forward(remapped_model)
                 observation.fm_dlogc(remapped_model)
 
         remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
 
         if remapped_model.nCells > 1:
-            v = remapped_model.gradient.prior.variance[0,0]+remapped_model.gradient_weight.rng(1)
+            v = remapped_model.gradient.prior.variance[0,0] + remapped_model.gradient_weight.rng(1)
             remapped_model.gradient.prior.variance = np.diag(np.full(remapped_model.nCells.item()-1, fill_value=v))
 
         # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
@@ -388,7 +387,7 @@ class Model(myObject):
         # print('inv Hessian', inverse_hessian)
 
         if inverse_hessian.size > 1:
-            ih_max = inverse_hessian.max()
+            ih_max = abs(inverse_hessian).max()
             if ih_max < low_variance:
                 inverse_hessian *= (low_variance / ih_max)
             elif ih_max > high_variance:
@@ -445,7 +444,6 @@ class Model(myObject):
             Wz = self.mesh.gradient_operator
             # print(f'{Wz.shape=}')
             # print(f'{self.gradient.prior.variance.shape=}')
-            # Wz = Wz / self.gradient.prior.std[0, 0]
 
             operator += dot(Wz.T, dot(self.gradient.priorDerivative(order=2), Wz))
 
@@ -830,7 +828,6 @@ class Model(myObject):
         geobipy.Model1D.perturb : For a description of the perturbation cycle.
 
         """
-
         self.mesh.set_proposals(**kwargs)
 
         if proposal is None:
