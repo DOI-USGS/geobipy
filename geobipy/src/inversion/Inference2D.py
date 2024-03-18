@@ -2007,7 +2007,7 @@ class Inference2D(myObject):
         return parent
 
     @classmethod
-    def fromHdf(cls, grp, mode = "r", world=None, **kwargs):
+    def fromHdf(cls, grp, prng, mode = "r", world=None, **kwargs):
         assert mode != 'w', ValueError("Don't use mode = 'w' when reading!")
         if isinstance(grp, (Path, str)):
             tmp = {}
@@ -2019,7 +2019,7 @@ class Inference2D(myObject):
 
         data = hdfRead.read_item(grp['data'], **kwargs)
 
-        prng = kwargs.get('prng', get_prng())
+        # prng = kwargs.get('prng', get_prng())
 
         self = cls(data, prng=prng, world=world)
         self.mode = mode
