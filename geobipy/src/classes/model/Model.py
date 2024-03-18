@@ -837,12 +837,22 @@ class Model(myObject):
             local_variance = self.local_variance(kwargs.get('observation', None))
 
             # Instantiate the proposal for the parameters.
-            proposal = Distribution('MvLogNormal', mean=self.values, variance=local_variance, linearSpace=True, prng=kwargs.get('prng', None))
+            proposal = Distribution('MvLogNormal',
+                                    mean=self.values,
+                                    variance=local_variance,
+                                    linearSpace=True,
+                                    prng=kwargs.get('prng', None))
 
         self.values.proposal = proposal
 
-        self.value_weight = Distribution("Normal", mean=0.0, variance=0.005, prng=kwargs.get('prng', None))
-        self.gradient_weight = Distribution("Normal", mean=0.0, variance=0.005, prng=kwargs.get('prng', None))
+        self.value_weight = Distribution("Normal",
+                                         mean=0.0,
+                                         variance=0.01,
+                                         prng=kwargs.get('prng', None))
+        self.gradient_weight = Distribution("Normal",
+                                         mean=0.0,
+                                         variance=0.01,
+                                         prng=kwargs.get('prng', None))
 
 
     def take_along_axis(self, i, axis):
