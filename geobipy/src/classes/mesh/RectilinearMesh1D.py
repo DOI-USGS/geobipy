@@ -256,6 +256,16 @@ class RectilinearMesh1D(Mesh):
             self._nCells[0] = self.centres.size
 
     @property
+    def edge_to_edge(self):
+
+        b = self.edges[-2] if self.open_right else self.edges[-1]
+        a = self.edges[1] if self.open_left else self.edges[0]
+
+        return b - a
+
+
+
+    @property
     def plotting_centres(self):
         return self.plotting_edges.internalEdges()
 
@@ -708,21 +718,24 @@ class RectilinearMesh1D(Mesh):
             return ones((1, 1))
 
         x = self.widths.copy()
+        e2e = 0.5 * self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = (x[1]**2.0 / x[2])
+                # x[0] = (x[1]**2.0 / x[2])
+                x[0] = x[1] - e2e #**2.0 / x[2]
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = (x[-2]**2.0 / x[-3])
+                # x[-1] = (x[-2]**2.0 / x[-3])
+                x[-1] = x[-2] + e2e #**2.0 / x[-3]
 
-        return diag(x/(self.nCells * mean(x)))
+        return diag(x/(self.nCells))# * mean(x)))
 
     @property
     def gradient_operator(self):
@@ -732,25 +745,39 @@ class RectilinearMesh1D(Mesh):
 
         x = self.widths.copy()
 
+        # print(f'{self.edge_to_edge=}')
+        e2e = 0.5 * self.edge_to_edge
+
         # Sort out infinity here
         if self.open_left:
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = x[1]**2.0 / x[2]
+                x[0] = x[1] - e2e #**2.0 / x[2]
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = x[-2]**2.0 / x[-3]
+                x[-1] = x[-2] + e2e #**2.0 / x[-3]
 
-        s = sqrt(x / mean(x))
+        # s = sqrt(x / mean(x))
 
         centre_to_centre = 0.5*(x[:-1] + x[1:])
 
-        tmp = s[1:] / (centre_to_centre * self.nCells - 1)
-        return diags([-tmp, tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item())).toarray()
+        # print(f'{centre_to_centre=}')
+
+
+        tmp = 1.0 / (centre_to_centre * (self.nCells - 1)) #s[1:] / (centre_to_centre * self.nCells - 1)
+        out = diags([-tmp, tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item())).toarray()
+
+        # print(f'{self.edges=}')
+        # print(f'{self.widths=}')
+        # print(f'{out=}')
+
+        # input('fdsfs')
+
+        return out
 
     def in_bounds(self, values):
         """Return whether values are inside the cell edges

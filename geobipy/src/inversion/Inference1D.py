@@ -763,9 +763,10 @@ class Inference1D(myObject):
             # Test resetting of the inversion.
             if self.update_plot_every > 1:
                 if not self.burned_in:
-                    if self.acceptance_percent == 0.0:
-
+                    if self.acceptance_percent < 5.0:
+                        print(f'Acceptance: {self.acceptance_percent}')
                         print(f'Zero acceptance. Proposal variance min/max: {self.model.values.proposal.variance.min()}/{self.model.values.proposal.variance.max()}')
+                    if self.acceptance_percent == 0.0:
 
                         self._n_zero_acceptance += 1
 

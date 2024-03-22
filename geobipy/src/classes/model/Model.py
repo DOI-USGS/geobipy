@@ -281,7 +281,7 @@ class Model(myObject):
             vals = observation.prior_derivative(order=2)
             hessian += vals
 
-        return hessian
+        return 2.0 * hessian
 
     def local_variance(self, observation=None):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
@@ -356,6 +356,23 @@ class Model(myObject):
         """
         return self.stochastic_newton_perturbation(*args, **kwargs)
 
+    def stochastic_newton_gradient(self, observation=None):
+        # Compute the gradient according to the perturbed parameters and data residual
+        # This is Wm'Wm(sigma - sigma_ref)
+        dprint('  values', self.values)
+        gradient = self.prior_derivative(order=1)
+        dprint('  gradient', gradient)
+
+        # todo:
+        # replace the par.priorDerivative with appropriate gradient
+        if not observation is None:
+            # observation.forward(self)
+            # observation.sensitivity(self, model_changed=False)
+            # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
+            gradient += observation.prior_derivative(order=1)
+
+        return 0.5 * gradient
+
     def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, variance_scaling=1.0):
 
         # repeat = True
@@ -386,12 +403,12 @@ class Model(myObject):
 
         # print('inv Hessian', inverse_hessian)
 
-        if inverse_hessian.size > 1:
-            ih_max = abs(inverse_hessian).max()
-            if ih_max < low_variance:
-                inverse_hessian *= (low_variance / ih_max)
-            elif ih_max > high_variance:
-                inverse_hessian *= (high_variance / ih_max)
+        # if inverse_hessian.size > 1:
+        #     ih_max = abs(inverse_hessian).max()
+        #     if ih_max < low_variance:
+        #         inverse_hessian *= (low_variance / ih_max)
+        #     elif ih_max > high_variance:
+        #         inverse_hessian *= (high_variance / ih_max)
 
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)
@@ -409,7 +426,7 @@ class Model(myObject):
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        dSigma = -dot(inverse_hessian, gradient)
+        dSigma = -dot(inverse_hessian, 0.5 * gradient)
 
         mean = exp(nplog(remapped_model.values) + dSigma)
 
@@ -662,10 +679,10 @@ class Model(myObject):
             dprint('  gradient', gradient)
             dprint('  variance', diag(self.values.proposal.variance))
             # Compute the stochastic newton offset at the new location.
-            dSigma = -dot(inverse_hessian, gradient)
+            dSigma = -dot(inverse_hessian, 0.5 * gradient)
 
             # mean = expReal(nplog(self.values) + dSigma)
-            log_values = nplog(self.values) + dSigma
+            log_values = nplog(self.values) - dSigma
             mean = expReal(log_values)
 
             # if any(mean == inf) or any(mean == 0.0):
