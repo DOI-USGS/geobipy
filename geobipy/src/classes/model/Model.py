@@ -359,9 +359,9 @@ class Model(myObject):
     def stochastic_newton_gradient(self, observation=None):
         # Compute the gradient according to the perturbed parameters and data residual
         # This is Wm'Wm(sigma - sigma_ref)
-        dprint('  values', self.values)
+        # dprint('  values', self.values)
         gradient = self.prior_derivative(order=1)
-        dprint('  gradient', gradient)
+        # dprint('  gradient', gradient)
 
         # todo:
         # replace the par.priorDerivative with appropriate gradient
@@ -413,14 +413,16 @@ class Model(myObject):
         # Proposing new parameter values
         # This is Wm'Wm(sigma - sigma_ref)
         # Need to have the gradient be a part of this too.
-        gradient = remapped_model.prior_derivative(order=1)
-        dprint('gradient', gradient)
+        # gradient = remapped_model.prior_derivative(order=1)
+        # dprint('gradient', gradient)
 
-        if not observation is None:
-            # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
-            gradient += observation.prior_derivative(order=1)
+        # if not observation is None:
+        #     # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
+        #     gradient += observation.prior_derivative(order=1)
 
-        dprint('gradient', gradient)
+        # dprint('gradient', gradient)
+
+        gradient = remapped_model.stochastic_newton_gradient(observation=observation)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
@@ -660,17 +662,19 @@ class Model(myObject):
 
             # Compute the gradient according to the perturbed parameters and data residual
             # This is Wm'Wm(sigma - sigma_ref)
-            dprint('  values', self.values)
-            gradient = self.prior_derivative(order=1)
-            dprint('  gradient', gradient)
+            # dprint('  values', self.values)
+            # gradient = self.prior_derivative(order=1)
+            # dprint('  gradient', gradient)
 
-            # todo:
-            # replace the par.priorDerivative with appropriate gradient
-            if not observation is None:
-                # observation.forward(self)
-                # observation.sensitivity(self, model_changed=False)
-                # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
-                gradient += observation.prior_derivative(order=1)
+            # # todo:
+            # # replace the par.priorDerivative with appropriate gradient
+            # if not observation is None:
+            #     # observation.forward(self)
+            #     # observation.sensitivity(self, model_changed=False)
+            #     # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
+            #     gradient += observation.prior_derivative(order=1)
+
+            gradient = self.stochastic_newton_gradient(observation=observation)
 
             # inv(J'Wd'WdJ + Wm'Wm)
             inverse_hessian = self.compute_local_inverse_hessian(observation)
@@ -679,7 +683,7 @@ class Model(myObject):
             dprint('  gradient', gradient)
             dprint('  variance', diag(self.values.proposal.variance))
             # Compute the stochastic newton offset at the new location.
-            dSigma = -dot(inverse_hessian, 0.5 * gradient)
+            dSigma = -dot(inverse_hessian, gradient)
 
             # mean = expReal(nplog(self.values) + dSigma)
             log_values = nplog(self.values) - dSigma
