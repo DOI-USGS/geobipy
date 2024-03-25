@@ -188,7 +188,7 @@ class Model(myObject):
     def cellIndices(self, values, clip=True):
         return self.mesh.cellIndices(values, clip=clip)
 
-    def compute_local_inverse_hessian(self, observation=None):
+    def local_inverse_hessian(self, observation=None):
         """Generate a localized Hessian matrix using
         a dataPoint and the current realization of the Model1D.
 
@@ -281,7 +281,7 @@ class Model(myObject):
             vals = observation.prior_derivative(order=2)
             hessian += vals
 
-        return 2.0 * hessian
+        return hessian
 
     def local_variance(self, observation=None):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
@@ -356,7 +356,7 @@ class Model(myObject):
         """
         return self.stochastic_newton_perturbation(*args, **kwargs)
 
-    def stochastic_newton_gradient(self, observation=None):
+    def local_gradient(self, observation=None):
         # Compute the gradient according to the perturbed parameters and data residual
         # This is Wm'Wm(sigma - sigma_ref)
         # dprint('  values', self.values)
@@ -371,7 +371,7 @@ class Model(myObject):
             # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
             gradient += observation.prior_derivative(order=1)
 
-        return 0.5 * gradient
+        return gradient
 
     def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, variance_scaling=1.0):
 
@@ -389,68 +389,39 @@ class Model(myObject):
             if remapped_model.mesh.action[0] != 'none':
                 observation.fm_dlogc(remapped_model)
 
-        remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
+        # remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
 
-        if remapped_model.nCells > 1:
-            v = remapped_model.gradient.prior.variance[0,0] + remapped_model.gradient_weight.rng(1)
-            remapped_model.gradient.prior.variance = np.diag(np.full(remapped_model.nCells.item()-1, fill_value=v))
+        # if remapped_model.nCells > 1:
+        #     v = remapped_model.gradient.prior.variance[0,0] + remapped_model.gradient_weight.rng(1)
+        #     remapped_model.gradient.prior.variance = np.diag(np.full(remapped_model.nCells.item()-1, fill_value=v))
 
         # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
 
         # Update the local Hessian around the current model.
         # inv(J'Wd'WdJ + Wm'Wm)
-        inverse_hessian = variance_scaling * remapped_model.compute_local_inverse_hessian(observation)
+        inverse_hessian = variance_scaling * remapped_model.local_inverse_hessian(observation)
+        gradient = remapped_model.local_gradient(observation=observation)
 
-        # print('inv Hessian', inverse_hessian)
-
-        # if inverse_hessian.size > 1:
-        #     ih_max = abs(inverse_hessian).max()
-        #     if ih_max < low_variance:
-        #         inverse_hessian *= (low_variance / ih_max)
-        #     elif ih_max > high_variance:
-        #         inverse_hessian *= (high_variance / ih_max)
-
-        # Proposing new parameter values
-        # This is Wm'Wm(sigma - sigma_ref)
-        # Need to have the gradient be a part of this too.
-        # gradient = remapped_model.prior_derivative(order=1)
-        # dprint('gradient', gradient)
-
-        # if not observation is None:
-        #     # The gradient is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
-        #     gradient += observation.prior_derivative(order=1)
-
-        # dprint('gradient', gradient)
-
-        gradient = remapped_model.stochastic_newton_gradient(observation=observation)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = 0.5 * inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        dSigma = -dot(inverse_hessian, 0.5 * gradient)
+        Pk = -dot(inverse_hessian, gradient)
 
-        mean = exp(nplog(remapped_model.values) + dSigma)
+        mean = exp(nplog(remapped_model.values) + (0.75 * Pk))
 
-        dprint('dSigma', exp(dSigma))
-        dprint('log values', nplog(remapped_model.values))
-        dprint('log mean', nplog(remapped_model.values) + dSigma)
-        dprint('mean', mean)
+
 
         perturbed_model = deepcopy(remapped_model)
-
         # Assign a proposal distribution for the parameter using the mean and variance.
         perturbed_model.values.proposal = Distribution('MvLogNormal',
                                                        mean=mean,
                                                        variance=inverse_hessian,
                                                        linearSpace=True,
                                                        prng=perturbed_model.values.proposal.prng)
-
         # Generate new conductivities
         perturbed_model.values.perturb()
-
-        # dprint('test proposal', perturbed_model.values.proposal.mean, np.diag(perturbed_model.values.proposal.variance))
-        # dprint('perturbed values', perturbed_model.values)
 
         return remapped_model, perturbed_model
 
@@ -674,10 +645,10 @@ class Model(myObject):
             #     # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
             #     gradient += observation.prior_derivative(order=1)
 
-            gradient = self.stochastic_newton_gradient(observation=observation)
+            gradient = self.local_gradient(observation=observation)
 
             # inv(J'Wd'WdJ + Wm'Wm)
-            inverse_hessian = self.compute_local_inverse_hessian(observation)
+            inverse_hessian = self.local_inverse_hessian(observation)
             # inverse_hessian = self.values.proposal.variance
 
             dprint('  gradient', gradient)
@@ -686,7 +657,7 @@ class Model(myObject):
             dSigma = -dot(inverse_hessian, gradient)
 
             # mean = expReal(nplog(self.values) + dSigma)
-            log_values = nplog(self.values) - dSigma
+            log_values = nplog(self.values) - (0.75 * dSigma)
             mean = expReal(log_values)
 
             # if any(mean == inf) or any(mean == 0.0):

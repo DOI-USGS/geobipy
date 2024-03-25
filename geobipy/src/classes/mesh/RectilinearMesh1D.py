@@ -726,16 +726,17 @@ class RectilinearMesh1D(Mesh):
                 x[0] = x[-1]
             else:
                 # x[0] = (x[1]**2.0 / x[2])
-                x[0] = x[1] - e2e #**2.0 / x[2]
+                x[0] = x[1] - e2e
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
                 # x[-1] = (x[-2]**2.0 / x[-3])
-                x[-1] = x[-2] + e2e #**2.0 / x[-3]
+                x[-1] = x[-2] + e2e
 
-        return diag(x/(self.nCells))# * mean(x)))
+        # return diag(x/(self.nCells * mean(x)))
+        return diag(x/(self.nCells))
 
     @property
     def gradient_operator(self):
@@ -753,22 +754,24 @@ class RectilinearMesh1D(Mesh):
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = x[1] - e2e #**2.0 / x[2]
+                # x[0] = x[1]**2.0 / x[2]
+                x[0] = x[1] - e2e
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = x[-2] + e2e #**2.0 / x[-3]
-
-        # s = sqrt(x / mean(x))
+                # x[-1] = x[-2]**2.0 / x[-3]
+                x[-1] = x[-2] + e2e
 
         centre_to_centre = 0.5*(x[:-1] + x[1:])
 
         # print(f'{centre_to_centre=}')
 
 
-        tmp = 1.0 / (centre_to_centre * (self.nCells - 1)) #s[1:] / (centre_to_centre * self.nCells - 1)
+        # s = sqrt(x / mean(x))
+        # tmp = s[1:] / (centre_to_centre * self.nCells - 1)
+        tmp = 1.0 / (centre_to_centre * (self.nCells - 1))
         out = diags([-tmp, tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item())).toarray()
 
         # print(f'{self.edges=}')
