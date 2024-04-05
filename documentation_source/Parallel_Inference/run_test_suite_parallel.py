@@ -8,6 +8,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 from os.path import join
 from geobipy import StatArray, Model
 from geobipy import FdemData, TdemData, TempestData
+from geobipy import get_prng
 
 def parallel_mpi(data_type, model_type, output_directory):
 
@@ -59,7 +60,7 @@ def parallel_mpi(data_type, model_type, output_directory):
     # Start keeping track of time.
     t0 = MPI.Wtime()
 
-    prng = myMPI.get_prng(seed=kwargs['seed'], world=world)
+    prng = get_prng(seed=kwargs['seed'], world=world)
 
     inference3d = Inference3D(data, prng=prng, world=world)
     inference3d.create_hdf5(directory=output_directory, **kwargs)
