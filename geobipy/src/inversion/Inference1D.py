@@ -480,6 +480,7 @@ class Inference1D(myObject):
     def initialize_model(self, **kwargs):
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
+
         # dprint('halfspace', halfspace.values)
         self.halfspace = StatArray.StatArray(halfspace.values, 'halfspace')
 
@@ -546,11 +547,11 @@ class Inference1D(myObject):
             observation = None
 
         # Propose a new data point, using assigned proposal distributions
-        test_datapoint.perturb()
+        # test_datapoint.perturb()
 
         # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         try:
-            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
+            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, alpha = self.covariance_scaling)
         except:
             print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
             return True
@@ -560,12 +561,12 @@ class Inference1D(myObject):
             return
 
         # # Propose a new data point, using assigned proposal distributions
-        # test_datapoint.perturb()
+        test_datapoint.perturb()
 
         # Forward model the data from the candidate model
         test_datapoint.forward(test_model)
-        # J is now centered on the perturbed
 
+        # J is now centered on the perturbed
         test_data_misfit = test_datapoint.data_misfit()
         dprint(f"{test_data_misfit=}")
 
@@ -591,7 +592,7 @@ class Inference1D(myObject):
             test_likelihood = test_datapoint.likelihood(log=True)
             observation = test_datapoint
 
-        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation)
+        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation, alpha = self.covariance_scaling)
 
         test_posterior = test_prior + test_likelihood
 
@@ -616,9 +617,11 @@ class Inference1D(myObject):
             self.model = test_model
             self.datapoint = test_datapoint
             # Reset the sensitivity locally to the newly accepted model
-            self.datapoint.sensitivity(self.model, model_changed=False)
+            # self.datapoint.sensitivity(self.model, model_changed=False)
 
         dprint('accepted', self.accepted)
+
+        # input('NEXT')
 
         return False
 
