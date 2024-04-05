@@ -1068,7 +1068,7 @@ class Inference2D(myObject):
 
         out = Histogram.fromHdf(self.hdf_file['/model/values/posterior'], index=index)
 
-        out.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        out.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
@@ -1104,20 +1104,20 @@ class Inference2D(myObject):
         return R
 
 
-    def axis(self, axis):
-        if axis == 'index':
-            ax = StatArray.StatArray(arange(self.nPoints, dtype=float64), 'Index')
-        elif axis == 'fiducial':
-            ax = self.fiducial
-        elif axis == 'x':
-            ax = self.x
-        elif axis == 'y':
-            ax = self.y
-        elif axis == 'z':
-            ax = self.mesh.y
-        elif axis == 'distance':
-            ax = StatArray.StatArray(sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
-        return ax
+    # def axis(self, axis):
+    #     if axis == 'index':
+    #         ax = StatArray.StatArray(arange(self.nPoints, dtype=float64), 'Index')
+    #     elif axis == 'fiducial':
+    #         ax = self.fiducial
+    #     elif axis == 'x':
+    #         ax = self.x
+    #     elif axis == 'y':
+    #         ax = self.y
+    #     elif axis == 'z':
+    #         ax = self.mesh.y
+    #     elif axis == 'distance':
+    #         ax = StatArray.StatArray(sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
+    #     return ax
 
     # def x_axis(self, axis, centres=False):
 
@@ -1170,7 +1170,7 @@ class Inference2D(myObject):
 
     def plot_burned_in(self, **kwargs):
 
-        x = self.axis(kwargs.pop('x', 'x'))
+        x = self.data.axis(kwargs.pop('x', 'x'))
         cmap = plt.get_cmap(kwargs.pop('cmap', 'cividis'))
 
         ax = kwargs.pop('ax', plt.gca())
@@ -1186,7 +1186,7 @@ class Inference2D(myObject):
 
     def plot_channel_saturation(self, **kwargs):
 
-        kwargs['x'] = kwargs.pop('x', 'x')
+        kwargs['x'] = kwargs.get('x', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
@@ -1644,7 +1644,7 @@ class Inference2D(myObject):
     def plot_percentile(self, percent, **kwargs):
         posterior = self.parameter_posterior()
 
-        posterior.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        posterior.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         percentile = posterior.percentile(percent, axis=1)
 
@@ -2007,7 +2007,7 @@ class Inference2D(myObject):
         return parent
 
     @classmethod
-    def fromHdf(cls, grp, mode = "r", world=None, **kwargs):
+    def fromHdf(cls, grp, prng, mode = "r", world=None, **kwargs):
         assert mode != 'w', ValueError("Don't use mode = 'w' when reading!")
         if isinstance(grp, (Path, str)):
             tmp = {}
@@ -2019,7 +2019,7 @@ class Inference2D(myObject):
 
         data = hdfRead.read_item(grp['data'], **kwargs)
 
-        prng = kwargs.get('prng', get_prng())
+        # prng = kwargs.get('prng', get_prng())
 
         self = cls(data, prng=prng, world=world)
         self.mode = mode

@@ -575,9 +575,26 @@ class Point(myObject):
         sp = 0.5 * spacing
         return arange(bounds[0] - sp, bounds[1] + (2*sp), spacing)
 
-    def distance(self, other, **kwargs):
-        """Get the Lp norm distance between two points. """
-        return norm(asarray([self.x, self.y, self.z]) - asarray([other.x, other.y, other.z]), **kwargs)
+    # def distance(self, other, **kwargs):
+    #     """Get the Lp norm distance between two points. """
+    #     return norm(asarray([self.x, self.y, self.z]) - asarray([other.x, other.y, other.z]), **kwargs)
+
+    @property
+    def distance_2d(self):
+        r = diff(self.x)**2.0
+        r += diff(self.y)**2.0
+        distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+        distance[1:] = cumsum(sqrt(r))
+        return distance
+
+    @property
+    def distance_3d(self):
+        r = diff(self.x)**2.0
+        r += diff(self.y)**2.0
+        r += diff(self.z)**2.0
+        distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+        distance[1:] = cumsum(sqrt(r))
+        return distance
 
     def move(self, dx, dy, dz):
         """ Move the point by [dx,dy,dz] """
@@ -619,7 +636,7 @@ class Point(myObject):
     #     assert 0 <= index <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
     #     return Point(self.x[index], self.y[index], self.z[index], self.elevation[index])
 
-    def getXAxis(self, xAxis='x'):
+    def x_axis(self, xAxis='x'):
         """Obtain the xAxis against which to plot values.
 
         Parameters
@@ -648,18 +665,9 @@ class Point(myObject):
         elif xAxis == 'z':
             return self.z
         elif xAxis == 'r2d':
-            r = diff(self.x)**2.0
-            r += diff(self.y)**2.0
-            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
-            distance[1:] = cumsum(sqrt(r))
-            return distance
+            return self.distance_2d
         elif xAxis == 'r3d':
-            r = diff(self.x)**2.0
-            r += diff(self.y)**2.0
-            r += diff(self.z)**2.0
-            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
-            distance[1:] = cumsum(sqrt(r))
-            return distance
+            return self.distance_3d
 
 
     def interpolate(self, dx=None, dy=None, mesh=None, values=None , method='mc', mask = False, clip = True, i=None, block=False, **kwargs):
@@ -910,7 +918,7 @@ class Point(myObject):
         geobipy.plotting.plot : For additional keyword arguments
 
         """
-        x = self.getXAxis(x)
+        x = self.x_axis(x)
         ax = cP.plot(x, values, **kwargs)
         return ax
 

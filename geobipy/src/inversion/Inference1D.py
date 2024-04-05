@@ -480,6 +480,7 @@ class Inference1D(myObject):
     def initialize_model(self, **kwargs):
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
+
         # dprint('halfspace', halfspace.values)
         self.halfspace = StatArray.StatArray(halfspace.values, 'halfspace')
 
@@ -531,12 +532,13 @@ class Inference1D(myObject):
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
         import numpy as np
-        # dprint('\n\niteration', self.iteration)
+        dprint(f'\n\n{self.iteration=}')
 
-        # dprint('A', self.prng.random())
+        dprint(f'{self.prng.random()=}')
 
-        # print('incoming predicted data', self.datapoint.predictedData)
-        # print('incoming model', self.model.values)
+        dprint(f'incoming {self.datapoint.data=}')
+        dprint(f'incoming {self.datapoint.predictedData=}')
+        dprint(f'incoming {self.model.values=}')
         test_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
@@ -545,36 +547,28 @@ class Inference1D(myObject):
             observation = None
 
         # Propose a new data point, using assigned proposal distributions
-        test_datapoint.perturb()
+        # test_datapoint.perturb()
 
         # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         try:
-            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
-        # test predicted data and sensitivity are centered on remapped model
-        # test variance is centered on the remapped model
-        # The data errors have not been perturbed yet.
-
-            # remapped_model, test_model = self.model.perturb(observation, 0.1, self.high_variance, self.covariance_scaling)
-            # remapped_model, test_model = self.model.perturb(observation, 0.1, 2.0, self.covariance_scaling)
+            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, alpha = self.covariance_scaling)
         except:
-            print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))
+            print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
             return True
-        # print('sensitivity after perturbing', np.diag(test_datapoint.sensitivity_matrix))
-        # print('remapped model', remapped_model.values)
-        # print('perturbed model', test_model.values)
 
         if remapped_model is None:
             self.accepted = False
             return
 
         # # Propose a new data point, using assigned proposal distributions
-        # test_datapoint.perturb()
+        test_datapoint.perturb()
 
         # Forward model the data from the candidate model
         test_datapoint.forward(test_model)
-        # J is now centered on the perturbed
 
+        # J is now centered on the perturbed
         test_data_misfit = test_datapoint.data_misfit()
+        dprint(f"{test_data_misfit=}")
 
         # Evaluate the prior for the current data
         test_prior = test_datapoint.probability
@@ -598,7 +592,7 @@ class Inference1D(myObject):
             test_likelihood = test_datapoint.likelihood(log=True)
             observation = test_datapoint
 
-        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation)
+        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation, alpha = self.covariance_scaling)
 
         test_posterior = test_prior + test_likelihood
 
@@ -615,7 +609,6 @@ class Inference1D(myObject):
         self.accepted = acceptance_probability > self.prng.uniform()
 
         if (self.accepted):
-            # dprint("\n accepted?{} \n prior:{}  {}\n likelihood:{}  {}\n proposal:{}  {}".format(self.accepted, test_prior, self.prior, test_likelihood, self.likelihood, proposal, test_proposal))
             # Compute the data misfit
             self.data_misfit = test_data_misfit
             self.prior = test_prior
@@ -624,12 +617,12 @@ class Inference1D(myObject):
             self.model = test_model
             self.datapoint = test_datapoint
             # Reset the sensitivity locally to the newly accepted model
-            self.datapoint.sensitivity(self.model, model_changed=False)
+            # self.datapoint.sensitivity(self.model, model_changed=False)
 
         dprint('accepted', self.accepted)
 
-        # if self.iteration == 44:
-        # input('next')
+        # input('NEXT')
+
         return False
 
     def infer(self, hdf_file_handle):
@@ -773,7 +766,11 @@ class Inference1D(myObject):
             # Test resetting of the inversion.
             if self.update_plot_every > 1:
                 if not self.burned_in:
+                    if self.acceptance_percent < 5.0:
+                        print(f'Acceptance: {self.acceptance_percent}')
+                        print(f'Zero acceptance. Proposal variance min/max: {self.model.values.proposal.variance.min()}/{self.model.values.proposal.variance.max()}')
                     if self.acceptance_percent == 0.0:
+
                         self._n_zero_acceptance += 1
 
                         # Reset if we have 3 zero acceptances
@@ -786,8 +783,6 @@ class Inference1D(myObject):
                     if self.acceptance_percent == 0.0:
                         self.low_variance = -inf
                         self.high_variance = inf
-
-
 
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.kwargs['multiplier']
@@ -1012,12 +1007,12 @@ class Inference1D(myObject):
                     clear(ax)
             else:
                 this.cla()
+
         self._n_resets += 1
         self.initialize(self.datapoint)
         if self.interactive_plot:
             for ax in self.ax:
                 clear(ax)
-            # self._init_posterior_plots(fig=self.fig)
 
         self.clk.restart()
 
