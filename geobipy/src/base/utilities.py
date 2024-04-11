@@ -121,7 +121,6 @@ def init_debug_print(world=None, print_from=0):
 def debug_print(*args, **kwargs):
     # if world_rank == print_rank:
     #     print(*args, flush=True, **kwargs)
-    # x = "I am here"
     return None
 
 def interleave(a, b):

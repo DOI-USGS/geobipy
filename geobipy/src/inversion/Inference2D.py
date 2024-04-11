@@ -13,6 +13,7 @@ from cached_property import cached_property
 from datetime import timedelta
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
+from ..classes.statistics import get_prng
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.mixPearson import mixPearson
 from ..classes.statistics.Histogram import Histogram
@@ -1067,7 +1068,7 @@ class Inference2D(myObject):
 
         out = Histogram.fromHdf(self.hdf_file['/model/values/posterior'], index=index)
 
-        out.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        out.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
@@ -1103,20 +1104,20 @@ class Inference2D(myObject):
         return R
 
 
-    def axis(self, axis):
-        if axis == 'index':
-            ax = StatArray.StatArray(arange(self.nPoints, dtype=float64), 'Index')
-        elif axis == 'fiducial':
-            ax = self.fiducial
-        elif axis == 'x':
-            ax = self.x
-        elif axis == 'y':
-            ax = self.y
-        elif axis == 'z':
-            ax = self.mesh.y
-        elif axis == 'distance':
-            ax = StatArray.StatArray(sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
-        return ax
+    # def axis(self, axis):
+    #     if axis == 'index':
+    #         ax = StatArray.StatArray(arange(self.nPoints, dtype=float64), 'Index')
+    #     elif axis == 'fiducial':
+    #         ax = self.fiducial
+    #     elif axis == 'x':
+    #         ax = self.x
+    #     elif axis == 'y':
+    #         ax = self.y
+    #     elif axis == 'z':
+    #         ax = self.mesh.y
+    #     elif axis == 'distance':
+    #         ax = StatArray.StatArray(sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
+    #     return ax
 
     # def x_axis(self, axis, centres=False):
 
@@ -1169,7 +1170,7 @@ class Inference2D(myObject):
 
     def plot_burned_in(self, **kwargs):
 
-        x = self.axis(kwargs.pop('x', 'x'))
+        x = self.data.axis(kwargs.pop('x', 'x'))
         cmap = plt.get_cmap(kwargs.pop('cmap', 'cividis'))
 
         ax = kwargs.pop('ax', plt.gca())
@@ -1185,7 +1186,7 @@ class Inference2D(myObject):
 
     def plot_channel_saturation(self, **kwargs):
 
-        kwargs['x'] = kwargs.pop('x', 'x')
+        kwargs['x'] = kwargs.get('x', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
@@ -1235,7 +1236,7 @@ class Inference2D(myObject):
     def plot_k_layers(self, **kwargs):
         """ Plot the number of layers in the best model for each data point """
         post = self.model.nCells.posterior
-        post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        post.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
         ax, _, _ = post.plot(overlay=self.model.nCells, axis=1)
         ax.set_title('P(# of Layers)')
 
@@ -1284,7 +1285,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
 
         opacity = self.opacity()
-        opacity.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        opacity.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(opacity, **kwargs); kwargs['alpha'] = mask
 
@@ -1300,7 +1301,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'hot')
 
         entropy = self.entropy
-        entropy.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        entropy.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(entropy, **kwargs); kwargs['alpha'] = mask
 
@@ -1325,7 +1326,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
 
         interfaces = self.interface_probability()
-        interfaces.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        interfaces.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(interfaces, **kwargs); kwargs['alpha'] = mask
 
@@ -1341,7 +1342,7 @@ class Inference2D(myObject):
             post = self.relativeErrorPosteriors
 
         kwargs['trim'] = kwargs.get('trim', 0.0)
-        post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        post.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         post.pcolor(**kwargs)
 
@@ -1486,7 +1487,7 @@ class Inference2D(myObject):
         return out
 
     def plot_best_model(self, **kwargs):
-        self.model.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        self.model.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         kwargs['mask_by_confidence'] = False
         kwargs['mask_by_doi'] = False
@@ -1587,7 +1588,7 @@ class Inference2D(myObject):
 
         model = self.mean_parameters()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
@@ -1597,7 +1598,7 @@ class Inference2D(myObject):
 
         model = self.compute_median_parameter()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
@@ -1607,7 +1608,7 @@ class Inference2D(myObject):
 
         model = self.compute_mode_parameter()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
@@ -1643,7 +1644,7 @@ class Inference2D(myObject):
     def plot_percentile(self, percent, **kwargs):
         posterior = self.parameter_posterior()
 
-        posterior.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        posterior.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         percentile = posterior.percentile(percent, axis=1)
 
@@ -2017,6 +2018,8 @@ class Inference2D(myObject):
             grp = h5py.File(grp, mode, **tmp)
 
         data = hdfRead.read_item(grp['data'], **kwargs)
+
+        # prng = kwargs.get('prng', get_prng())
 
         self = cls(data, prng=prng, world=world)
         self.mode = mode

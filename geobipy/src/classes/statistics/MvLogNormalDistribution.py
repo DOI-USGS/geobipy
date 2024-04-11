@@ -82,6 +82,11 @@ class MvLogNormal(MvNormal):
 
         return super().probability(x=x, log=log, axis=axis)
 
+    def mahalanobis(self, x):
+        if self.linearSpace:
+            x = nplog(x)
+        return super().mahalanobis(x=x)
+
     def bins(self, nBins=99, nStd=4.0, axis=None, relative=False):
         """Discretizes a range given the mean and variance of the distribution
 

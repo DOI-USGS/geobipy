@@ -20,9 +20,9 @@ data_directory = "..//data//"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name.
-data_filename = "skytem_512_glacial.csv"
+data_filename = "skytem_glacial.csv"
 # System File Name.
-system_filename = ['SkytemHM_512.stm', 'SkytemLM_512.stm']
+system_filename = ['SkytemHM.stm', 'SkytemLM.stm']
 
 # Define the data type to invert
 data_type = TdemData

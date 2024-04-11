@@ -27,6 +27,7 @@ from scipy import interpolate
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
+brodie = False
 
 class RectilinearMesh1D(Mesh):
     """Class defining a 1D rectilinear mesh with cell centres and edges.
@@ -254,6 +255,16 @@ class RectilinearMesh1D(Mesh):
 
         if self._nCells is not None:
             self._nCells[0] = self.centres.size
+
+    @property
+    def edge_to_edge(self):
+
+        b = self.edges[-2] if self.open_right else self.edges[-1]
+        a = self.edges[1] if self.open_left else self.edges[0]
+
+        return b - a
+
+
 
     @property
     def plotting_centres(self):
@@ -708,21 +719,22 @@ class RectilinearMesh1D(Mesh):
             return ones((1, 1))
 
         x = self.widths.copy()
+        e2e = 0.5 * self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = (x[1]**2.0 / x[2])
+                x[0] = (x[1]**2.0 / x[2]) if brodie else x[1] - e2e
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = (x[-2]**2.0 / x[-3])
+                x[-1] = (x[-2]**2.0 / x[-3]) if brodie else x[-2] + e2e
 
-        return diag(x/(self.nCells * mean(x)))
+        return diag(x/(self.nCells * mean(x))) if brodie else diag(x/(self.nCells))
 
     @property
     def gradient_operator(self):
@@ -732,25 +744,31 @@ class RectilinearMesh1D(Mesh):
 
         x = self.widths.copy()
 
+        e2e = 0.5 * self.edge_to_edge
+
         # Sort out infinity here
         if self.open_left:
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = x[1]**2.0 / x[2]
+                x[0] = x[1]**2.0 / x[2] if brodie else x[1] - e2e
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = x[-2]**2.0 / x[-3]
-
-        s = sqrt(x / mean(x))
+                x[-1] = x[-2]**2.0 / x[-3] if brodie else x[-2] + e2e
 
         centre_to_centre = 0.5*(x[:-1] + x[1:])
 
-        tmp = s[1:] / (centre_to_centre * self.nCells - 1)
-        return diags([-tmp, tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item())).toarray()
+        if brodie:
+            s = sqrt(x / mean(x))
+            tmp = s[1:] / (centre_to_centre * (self.nCells - 1))
+        else:
+            tmp = 1.0 / (centre_to_centre * (self.nCells - 1))
+        out = diags([-tmp, tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item())).toarray()
+
+        return out
 
     def in_bounds(self, values):
         """Return whether values are inside the cell edges
@@ -1033,7 +1051,10 @@ class RectilinearMesh1D(Mesh):
                 tries = 0
                 while (not suitable_width):  # Continue while the new layer is smaller than the minimum
                     # Get the new edge
-                    new_edge = exp(prng.uniform(low=nplog(self.min_edge), high=nplog(self.max_edge), size=1))
+                    # new_edge = exp(prng.uniform(low=nplog(self.min_edge), high=nplog(self.max_edge), size=1))
+                    # new_edge = prng.uniform(low=self.min_edge, high=self.max_edge, size=1)
+                    new_edge = self.edges.proposal.rng(size=1)
+
                     # Insert the new depth
                     i = self.edges.searchsorted(new_edge)
                     z = self.edges.insert(i, new_edge)
@@ -1497,6 +1518,12 @@ class RectilinearMesh1D(Mesh):
                                             probabilities,
                                             ['insert', 'delete', 'perturb', 'none'],
                                             prng=kwargs.get('prng', None))
+
+        self.edges.proposal = Distribution('Uniform',
+                                           min=self.min_edge,
+                                           max=self.max_edge,
+                                           log=True,
+                                           prng=kwargs.get('prng', None))
 
     def unperturb(self):
         """After a mesh has had its structure perturbed, remap back its previous state. Used for the reversible jump McMC step.

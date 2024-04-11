@@ -216,7 +216,7 @@ class DataPoint(Point):
 
     @property
     def n_active_channels(self):
-        return self.active.size
+        return self.active.sum()
 
     @property
     def nChannels(self):

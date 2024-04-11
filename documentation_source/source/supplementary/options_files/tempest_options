@@ -10,7 +10,7 @@ data_directory = "..//data"
 # Data File Name.
 data_filename = "tempest_glacial.csv"
 # System File Name.
-system_filename = 'Tempest.stm'
+system_filename = 'tempest.stm'
 
 # Define the data type to invert
 data_type = TempestData
