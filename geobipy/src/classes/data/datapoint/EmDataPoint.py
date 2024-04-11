@@ -192,7 +192,7 @@ class EmDataPoint(DataPoint):
 
         #     self.calibrate()
 
-    def plotHalfSpaceResponses(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100, **kwargs):
+    def plot_halfspace_responses(self, minConductivity=-4.0, maxConductivity=2.0, nSamples=100, **kwargs):
         """Plots the reponses of different half space models.
 
         Parameters
