@@ -639,15 +639,15 @@ class Model(myObject):
             dfk = self.local_gradient(observation=observation)
 
             # inv(J'Wd'WdJ + Wm'Wm)
-            H = self.local_inverse_hessian(observation)
-            # inverse_hessian = self.values.proposal.variance
+            # H = self.local_inverse_hessian(observation)
+            H = self.values.proposal.variance
 
             # Compute the stochastic newton offset at the new location.
             pk = -dot(H, dfk)
 
-            # mean = expReal(nplog(self.values) + dSigma)
             log_values = nplog(self.values) - alpha * (pk)
             mean = expReal(log_values)
+            # mean = self.values
 
             # if any(mean == inf) or any(mean == 0.0):
             #     return -inf, -inf
