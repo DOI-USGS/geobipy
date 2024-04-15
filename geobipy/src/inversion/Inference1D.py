@@ -97,6 +97,7 @@ class Inference1D(myObject):
         """ Initialize the results of the inversion """
 
         self.posterior_fig = None
+        self.debug_fig = None
 
         self.world = world
 
@@ -329,7 +330,7 @@ class Inference1D(myObject):
 
     @update_plot_every.setter
     def update_plot_every(self, value):
-        self.options['update_plot_every'] = int32(1)
+        self.options['update_plot_every'] = int32(value)
 
     @property
     def world(self):
@@ -453,6 +454,10 @@ class Inference1D(myObject):
         self.best_posterior = self.posterior
         self.best_iteration = int64(0)
 
+        self.prior_ratio_v = StatArray.StatArray(full(2 * self.n_markov_chains, fill_value=nan, dtype=float64), name='Prior Ratio')
+        self.proposal_ratio_v = StatArray.StatArray(full(2 * self.n_markov_chains, fill_value=nan, dtype=float64), name='Proposal Ratio')
+        self.likelihood_ratio_v = StatArray.StatArray(full(2 * self.n_markov_chains, fill_value=nan, dtype=float64), name='Likelihood Ratio')
+
     def initialize_datapoint(self, datapoint, **kwargs):
 
         self.datapoint = datapoint
@@ -530,9 +535,11 @@ class Inference1D(myObject):
         dprint(f'incoming {self.datapoint.predictedData=}')
         dprint(f'incoming {self.model.values=}')
         test_datapoint = deepcopy(self.datapoint)
-        print(test_datapoint.sensitivity_matrix.addressof)
+        dprint(test_datapoint.sensitivity_matrix.addressof)
 
-        # print(test_datapoint.addressof)
+        self.prior_ratio = None
+        self.likelihood_ratio = None
+        self.proposal_ratio = None
 
         # Perturb the current model
         observation = test_datapoint
@@ -563,12 +570,12 @@ class Inference1D(myObject):
         test_data_misfit = test_datapoint.data_misfit()
         dprint(f"{test_data_misfit=}")
 
-        print('test misfit', test_data_misfit, flush=True)
+        dprint('test misfit', test_data_misfit, flush=True)
 
         # Evaluate the prior for the current data
         test_prior = test_datapoint.probability
 
-        print('test prior a', test_prior, flush=True)
+        dprint('test prior a', test_prior, flush=True)
 
         # Test for early rejection
         if (test_prior == -inf):
@@ -578,7 +585,7 @@ class Inference1D(myObject):
         # Evaluate the prior for the current model
         tmp = test_model.probability(self.solve_parameter, self.solve_gradient)
         test_prior += tmp
-        print('test prior b', tmp, flush=True)
+        dprint('test prior b', tmp, flush=True)
 
         # Test for early rejection
         if (test_prior == -inf):
@@ -596,25 +603,25 @@ class Inference1D(myObject):
 
         test_posterior = test_prior + test_likelihood
 
-        prior_ratio = test_prior - self.prior
+        self.prior_ratio = test_prior - self.prior
+        self.likelihood_ratio = test_likelihood - self.likelihood
+        self.proposal_ratio = proposal - test_proposal
 
-        likelihood_ratio = test_likelihood - self.likelihood
-
-        proposal_ratio = proposal - test_proposal
-
-        log_acceptance_ratio = prior_ratio + likelihood_ratio + proposal_ratio
+        log_acceptance_ratio = self.prior_ratio + self.likelihood_ratio + self.proposal_ratio
         acceptance_probability = expReal(log_acceptance_ratio)
 
         # If we accept the model
         self.accepted = acceptance_probability > self.prng.uniform()
 
-        print('test likelihood', test_likelihood, flush=True)
-        print('proposal, test_proposal', proposal, test_proposal, flush=True)
-        print('test_posterior', test_posterior, flush=True)
-        print('prior ratio', prior_ratio, flush=True)
-        print('likelihood ratio', likelihood_ratio,flush=True)
-        print('proposal ratio', proposal_ratio, flush=True)
-        print('accepted', self.accepted, flush=True)
+        # print(f'{self.prior_ratio=}\n{self.likelihood_ratio=}\n{self.proposal_ratio=}\n{log_acceptance_ratio=}\n{acceptance_probability=}\n{self.accepted=}\n')
+
+        dprint('test likelihood', test_likelihood, flush=True)
+        dprint('proposal, test_proposal', proposal, test_proposal, flush=True)
+        dprint('test_posterior', test_posterior, flush=True)
+        dprint('prior ratio', self.prior_ratio, flush=True)
+        dprint('likelihood ratio', self.likelihood_ratio,flush=True)
+        dprint('proposal ratio', self.proposal_ratio, flush=True)
+        dprint('accepted', self.accepted, flush=True)
 
 
         if (self.accepted):
@@ -647,6 +654,7 @@ class Inference1D(myObject):
 
         if self.interactive_plot:
             self._init_posterior_plots()
+            self._init_debug_plots()
             plt.show(block=False)
 
         self.clk.start()
@@ -664,6 +672,9 @@ class Inference1D(myObject):
                                      fig=self.posterior_fig,
                                      title="Fiducial {}".format(self.datapoint.fiducial),
                                      increment=self.update_plot_every)
+                self.plot_debug(axes=self.debug_ax,
+                                fig=self.debug_fig,
+                                increment=self.update_plot_every)
 
             Go = not failed and (self.iteration <= self.n_markov_chains + self.burned_in_iteration)
 
@@ -719,6 +730,11 @@ class Inference1D(myObject):
         self.iteration += 1
 
         self.data_misfit_v[self.iteration - 1] = self.data_misfit
+
+        sm = 100 * (abs(self.prior_ratio) + abs(self.proposal_ratio) + abs(self.likelihood_ratio))
+        self.prior_ratio_v[self.iteration - 1] = self.prior_ratio / sm
+        self.proposal_ratio_v[self.iteration - 1] = self.proposal_ratio / sm
+        self.likelihood_ratio_v[self.iteration - 1] = self.likelihood_ratio / sm
 
         # Check the fit of the chi square distribution with theoretical
         self.relative_chi_squared_fit = norm(self.data_misfit_v.posterior.pdf.values - self.chisquare_pdf)/self.norm_chisquare
@@ -837,6 +853,27 @@ class Inference1D(myObject):
 
         return fig, ax
 
+    def _init_debug_plots(self, gs=None, **kwargs):
+        """ Initialize the plotting region """
+        # Setup the figure region. The figure window is split into a 4x3
+        # region. Columns are able to span multiple rows
+        fig  = kwargs.get('fig', plt.gcf())
+        if gs is None:
+            fig = kwargs.pop('fig', plt.figure(facecolor='white', figsize=(16, 9)))
+            gs = fig
+
+        if isinstance(gs, Figure):
+            gs.clf()
+            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+
+        gs = gs.subgridspec(2, 1)
+
+        self.debug_fig = fig
+        self.debug_ax = [fig.add_subplot(gs[i]) for i in range(2)]
+
+        return self.debug_fig, self.debug_ax
+
+
     def plot_posteriors(self, axes=None, title="", increment=None, **kwargs):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
@@ -901,6 +938,59 @@ class Inference1D(myObject):
         if self.posterior_fig is not None:
             self.posterior_fig.canvas.draw()
             self.posterior_fig.canvas.flush_events()
+
+        cP.pause(1e-9)
+
+    def plot_debug(self, axes=None, increment=None, **kwargs):
+        """ Updates the figures for MCMC Inversion """
+        # Plots that change with every iteration
+        if self.iteration == 0:
+            return
+
+        if axes is None:
+            fig = kwargs.pop('fig', self.debug_fig)
+            axes = fig
+            if fig is None:
+                fig, axes = self._init_debug_plots()
+
+        if not isinstance(axes, list):
+            fig, axes = self._init_debug_plots(axes)
+
+        plot = True
+        if increment is not None:
+            if (mod(self.iteration, increment) != 0):
+                plot = False
+
+        if not plot:
+            return
+
+        ax = self.debug_ax[0]
+        ax.cla()
+        self.acceptance_v.plot(self.iRange, i=s_[:self.iteration], ax=ax, linestyle='none', marker='.')
+
+        ax = self.debug_ax[1]
+        ax.cla()
+        self.prior_ratio_v.plot(self.iRange, i=s_[:self.iteration], ax=ax, marker='s', markersize=2.0, color='r', linestyle='none', label='prior ratio', alpha=0.3)
+        self.proposal_ratio_v.plot(self.iRange, i=s_[:self.iteration], ax=ax, marker='s', markersize=2.0, color='b', linestyle='none', label='proposal ratio', alpha=0.3)
+        self.likelihood_ratio_v.plot(self.iRange, i=s_[:self.iteration], ax=ax, marker='s', markersize=2.0, color='g', linestyle='none', label='likelihood ratio', alpha=0.3)
+        ax.hlines(0.0, xmin=0, xmax=self.iteration, color='k')
+        ax.set_ylabel('')
+        ax.legend()
+
+        # ax = self.debug_ax[2]
+        # ax.cla()
+
+        # self.prior_ratio_v.plot(self.iRange, i=s_[:self.iteration], ax=ax, marker='s', markersize=1.0, color='r', linestyle='none', label='prior ratio', alpha=0.4)
+        # self.proposal_ratio_v.plot(self.iRange, i=s_[:self.iteration], ax=ax, marker='s', markersize=1.0, color='b', linestyle='none', label='proposal ratio', alpha=0.4)
+        # self.likelihood_ratio_v.plot(self.iRange, i=s_[:self.iteration], ax=ax, marker='s', markersize=1.0, color='g', linestyle='none', label='likelihood ratio', alpha=0.4)
+        # ax.hlines(0.0, xmin=0, xmax=self.iteration)
+        # ax.set_ylabel('')
+
+        # ax.set_ylim([-2.0, 2.0])
+
+        if self.debug_fig is not None:
+            self.debug_fig.canvas.draw()
+            self.debug_fig.canvas.flush_events()
 
         cP.pause(1e-9)
 
