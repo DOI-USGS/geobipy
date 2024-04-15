@@ -415,7 +415,7 @@ class Model(myObject):
         # This is the equivalent to the full newton gradient of the deterministic objective function.
         # delta sigma = inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(f(remapped) - dObserved) + Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
-        mean = expReal(nplog(remapped_model.values) + alpha * pk)
+        mean = expReal(nplog(remapped_model.values) + (alpha * pk))
 
         perturbed_model = deepcopy(remapped_model)
         # Assign a proposal distribution for the parameter using the mean and variance.
@@ -622,10 +622,8 @@ class Model(myObject):
             The reverse proposal probability
 
         """
-        if structure_only:
-            proposal = 1.0
-            proposal1 = 1.0
-        else:
+        proposal = 1.0; proposal1 = 1.0
+        if self.mesh.action[0] in ['insert', 'delete']:
             dprint('  proposal probability')
             # Evaluate the Reversible Jump Step.
             # For the reversible jump, we need to compute the gradient from the perturbed parameter values
@@ -639,15 +637,15 @@ class Model(myObject):
             dfk = self.local_gradient(observation=observation)
 
             # inv(J'Wd'WdJ + Wm'Wm)
-            H = self.local_inverse_hessian(observation)
-            # inverse_hessian = self.values.proposal.variance
+            # H = self.local_inverse_hessian(observation)
+            H = self.values.proposal.variance
 
             # Compute the stochastic newton offset at the new location.
             pk = -dot(H, dfk)
 
-            # mean = expReal(nplog(self.values) + dSigma)
             log_values = nplog(self.values) - alpha * (pk)
             mean = expReal(log_values)
+            # mean = self.values
 
             # if any(mean == inf) or any(mean == 0.0):
             #     return -inf, -inf
@@ -667,26 +665,10 @@ class Model(myObject):
             tmp = Distribution('MvLogNormal', remapped_model.values, self.values.proposal.variance, linearSpace=True, prng=prng)
             proposal1 = tmp.probability(x=self.values, log=True)
 
-        prng = self.values.proposal.prng
+        # p0, p1 = self.mesh.proposal_probability()
 
-        action = self.mesh.action[0]
-        if action == 'insert':
-            k = self.nCells - 1
-
-            forward = Distribution('Uniform', 0.0, self.mesh.remainingSpace(k), prng=prng)
-            reverse = Distribution('Uniform', 0.0, k, prng=prng)
-
-            proposal += reverse.probability(1, log=True)
-            proposal1 += forward.probability(0.0, log=True)
-
-        if action == 'delete':
-            k = self.nCells
-
-            forward = Distribution('Uniform', 0.0, self.mesh.remainingSpace(k), prng=prng)
-            reverse = Distribution('Uniform', 0.0, k, prng=prng)
-
-            proposal += forward.probability(0.0, log=True)
-            proposal1 += reverse.probability(1, log=True)
+        # proposal += p0
+        # proposal1 += p1
 
         return proposal, proposal1
 

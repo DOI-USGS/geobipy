@@ -96,7 +96,7 @@ class Inference1D(myObject):
                  **kwargs):
         """ Initialize the results of the inversion """
 
-        self.fig = None
+        self.posterior_fig = None
 
         self.world = world
 
@@ -444,16 +444,6 @@ class Inference1D(myObject):
 
         self.iRange = StatArray.StatArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
 
-        # Initialize the index for the best model
-        # self.iBestV = StatArray.StatArray(2*self.n_markov_chains, name='Iteration of best model')
-
-        # Initialize the doi
-        # self.doi = model.par.posterior.yBinCentres[0]
-
-        # self.meanInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
-        # self.bestInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
-        # self.opacityInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
-
         # Initialize time in seconds
         self.inference_time = float64(0.0)
 
@@ -651,8 +641,8 @@ class Inference1D(myObject):
             self.update()
 
             if self.interactive_plot:
-                self.plot_posteriors(axes=self.ax,
-                                     fig=self.fig,
+                self.plot_posteriors(axes=self.posterior_ax,
+                                     fig=self.posterior_fig,
                                      title="Fiducial {}".format(self.datapoint.fiducial),
                                      increment=self.update_plot_every)
 
@@ -684,7 +674,7 @@ class Inference1D(myObject):
             self.writeHdf(hdf_file_handle)
 
         if self.save_png:
-            self.plot_posteriors(axes = self.ax, fig=self.fig)
+            self.plot_posteriors(axes = self.posterior_ax, fig=self.posterior_fig)
             self.toPNG('.', self.datapoint.fiducial)
 
         return failed
@@ -824,7 +814,7 @@ class Inference1D(myObject):
             plt.show(block=False)
             plt.interactive(True)
 
-        self.fig, self.ax = fig, ax
+        self.posterior_fig, self.posterior_ax = fig, ax
 
         return fig, ax
 
@@ -835,63 +825,65 @@ class Inference1D(myObject):
             return
 
         if axes is None:
-            fig = kwargs.pop('fig', self.fig)
+            fig = kwargs.pop('fig', self.posterior_fig)
             axes = fig
             if fig is None:
                 fig, axes = self._init_posterior_plots()
 
         if not isinstance(axes, list):
-            axes = self._init_posterior_plots(axes)
+            fig, axes = self._init_posterior_plots(axes)
 
         plot = True
         if increment is not None:
             if (mod(self.iteration, increment) != 0):
                 plot = False
 
-        if plot:
-            self._plotAcceptanceVsIteration()
+        if not plot:
+            return
 
-            # Update the data misfit vs iteration
-            self._plotMisfitVsIteration()
+        self._plotAcceptanceVsIteration()
 
-            overlay = self.best_model if self.burned_in else self.model
+        # Update the data misfit vs iteration
+        self._plotMisfitVsIteration()
 
-            self.model.plot_posteriors(
-                axes=self.ax[2],
-                # ncells_kwargs={
-                #     'normalize': True},
-                edges_kwargs={
-                    'transpose': True,
-                    'trim': False},
-                values_kwargs={
-                    'colorbar': False,
-                    'flipY': True,
-                    'xscale': 'log',
-                    'credible_interval_kwargs': {
-                    }
-                },
-                overlay=overlay)
+        overlay = self.best_model if self.burned_in else self.model
 
-            overlay = self.best_datapoint if self.burned_in else self.datapoint
+        self.model.plot_posteriors(
+            axes=self.posterior_ax[2],
+            # ncells_kwargs={
+            #     'normalize': True},
+            edges_kwargs={
+                'transpose': True,
+                'trim': False},
+            values_kwargs={
+                'colorbar': False,
+                'flipY': True,
+                'xscale': 'log',
+                'credible_interval_kwargs': {
+                }
+            },
+            overlay=overlay)
 
-            self.datapoint.plot_posteriors(
-                axes=self.ax[3],
-                # height_kwargs={
-                #     'normalize': True},
-                data_kwargs={},
-                # rel_error_kwargs={
-                #     'normalize': True},
-                # add_error_kwargs={
-                #     'normalize': True},
-                overlay=overlay)
+        overlay = self.best_datapoint if self.burned_in else self.datapoint
 
-            self.fig.suptitle(title)
+        self.datapoint.plot_posteriors(
+            axes=self.posterior_ax[3],
+            # height_kwargs={
+            #     'normalize': True},
+            data_kwargs={},
+            # rel_error_kwargs={
+            #     'normalize': True},
+            # add_error_kwargs={
+            #     'normalize': True},
+            overlay=overlay)
 
-            if self.fig is not None:
-                self.fig.canvas.draw()
-                self.fig.canvas.flush_events()
+        self.posterior_fig.suptitle(title)
 
-            cP.pause(1e-9)
+        if self.posterior_fig is not None:
+            self.posterior_fig.canvas.draw()
+            self.posterior_fig.canvas.flush_events()
+
+        cP.pause(1e-9)
 
     def _plotAcceptanceVsIteration(self, **kwargs):
         """ Plots the acceptance percentage against iteration. """
@@ -902,7 +894,7 @@ class Inference1D(myObject):
         # i_positive = argwhere(acceptance_rate > 0.0)
         # i_zero = argwhere(acceptance_rate == 0.0)
 
-        kwargs['ax'] = kwargs.get('ax', self.ax[0][0])
+        kwargs['ax'] = kwargs.get('ax', self.posterior_ax[0][0])
         kwargs['marker'] = kwargs.get('marker', 'o')
         kwargs['alpha'] = kwargs.get('alpha', 0.7)
         kwargs['linestyle'] = kwargs.get('linestyle', 'none')
@@ -912,29 +904,15 @@ class Inference1D(myObject):
 
         self.acceptance_rate.plot(x=self.acceptance_x, i=i, color='k', **kwargs)
 
-
-        # (self.acceptance_v/self.iteration).plot(x=self.iRange, i=s_[:self.iteration], color='k', **kwargs)
-        # self.acceptance_v[i_zero].plot(x=self.iRange[i_zero], color='r', **kwargs)
-
-        # self.ax[0][0].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-
-        # kwargs['ax'] = kwargs.get('ax', self.ax[0][1])
-
-        # self.ax[0][1].spines["right"].set_visible(True)
-
-        # self.ax[0][1].tick_params(axis='y')
-
     def _plotMisfitVsIteration(self, **kwargs):
         """ Plot the data misfit against iteration. """
 
         m = kwargs.pop('marker', '.')
-        # ms = kwargs.pop('markersize', 1)
         a = kwargs.pop('alpha', 0.7)
         ls = kwargs.pop('linestyle', 'none')
         c = kwargs.pop('color', 'k')
-        # lw = kwargs.pop('linewidth', 1)
 
-        ax = self.ax[1][0]
+        ax = self.posterior_ax[1][0]
         ax.cla()
         tmp_ax = self.data_misfit_v.plot(self.iRange, i=s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, ax=ax, **kwargs)
         ax.set_ylabel('Data Misfit')
@@ -954,7 +932,7 @@ class Inference1D(myObject):
 
         self.data_misfit_v.posterior.update(self.data_misfit_v[maximum(0, self.iteration-self.update_plot_every):self.iteration], trim=True)
 
-        ax = self.ax[1][1]
+        ax = self.posterior_ax[1][1]
         ax.cla()
 
         misfit_ax, _, _ = self.data_misfit_v.posterior.plot(transpose=True, ax=ax, normalize=True, **kwargs)
@@ -987,9 +965,9 @@ class Inference1D(myObject):
 
     def toPNG(self, directory, fiducial, dpi=300):
        """ save a png of the results """
-       self.fig.set_size_inches(19, 11)
+       self.posterior_fig.set_size_inches(19, 11)
        figName = join(directory, '{}.png'.format(fiducial))
-       self.fig.savefig(figName, dpi=dpi)
+       self.posterior_fig.savefig(figName, dpi=dpi)
 
     def read(self, fileName, system_file_path, fiducial=None, index=None):
         """ Reads a data point's results from HDF5 file """
@@ -1011,7 +989,7 @@ class Inference1D(myObject):
         self._n_resets += 1
         self.initialize(self.datapoint)
         if self.interactive_plot:
-            for ax in self.ax:
+            for ax in self.posterior_ax:
                 clear(ax)
 
         self.clk.restart()

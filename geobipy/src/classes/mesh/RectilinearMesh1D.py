@@ -356,8 +356,8 @@ class RectilinearMesh1D(Mesh):
         self._min_width = value
         if value is None:
             self._min_width = (self.max_edge - self.min_edge) / (2.0 * self.max_cells)
-            if self._min_width > self.min_edge:
-                self._min_edge = self._min_width
+            # if self._min_width > self.min_edge:
+            #     self._min_edge = self._min_width
 
     @property
     def nCells(self):
@@ -1364,8 +1364,36 @@ class RectilinearMesh1D(Mesh):
         probability = self.nCells.probability(log=True)
 
         # Probability of depth given nCells
-        probability += self.edges.probability(x=self.nCells.item()-1, log=True)
+        # probability += self.edges.probability(x=self.nCells.item()-1, log=True)
+
         return probability
+
+    def proposal_probability(self):
+
+        prng = self.nCells.prior.prng
+        action = self.action[0]
+
+        proposal = 1.0
+        proposal1 = 1.0
+        if action == 'insert':
+            k = self.nCells - 1
+
+            forward = Distribution('Uniform', 0.0, self.remainingSpace(k), prng=prng)
+            reverse = Distribution('Uniform', 0.0, k, prng=prng)
+
+            proposal = reverse.probability(1, log=True)
+            proposal1 = forward.probability(0.0, log=True)
+
+        if action == 'delete':
+            k = self.nCells
+
+            forward = Distribution('Uniform', 0.0, self.remainingSpace(k), prng=prng)
+            reverse = Distribution('Uniform', 0.0, k, prng=prng)
+
+            proposal = forward.probability(0.0, log=True)
+            proposal1 = reverse.probability(1, log=True)
+
+        return proposal, proposal1
 
     def remainingSpace(self, n_cells):
         return (self.max_edge - self.min_edge) - (n_cells * self.min_width)
