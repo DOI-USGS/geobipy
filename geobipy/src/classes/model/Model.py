@@ -388,7 +388,7 @@ class Model(myObject):
         remapped_model = self.perturb_structure()
         dprint('action', remapped_model.mesh.action)
 
-        print('    ', remapped_model.mesh.action, flush=True)
+        dprint('    ', remapped_model.mesh.action, flush=True)
 
         if observation is not None:
             # Only J should be updated here.  The predicted data needs to be centered
