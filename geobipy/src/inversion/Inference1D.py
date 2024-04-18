@@ -756,9 +756,6 @@ class Inference1D(myObject):
             # Test resetting of the inversion.
             if self.update_plot_every > 1:
                 if not self.burned_in:
-                    if self.acceptance_percent < 5.0:
-                        print(f'Acceptance: {self.acceptance_percent}')
-                        print(f'Zero acceptance. Proposal variance min/max: {self.model.values.proposal.variance.min()}/{self.model.values.proposal.variance.max()}')
                     if self.acceptance_percent == 0.0:
 
                         self._n_zero_acceptance += 1
@@ -1019,7 +1016,6 @@ class Inference1D(myObject):
 
         parent.create_dataset('n_markov_chains', data=self.n_markov_chains)
         parent.create_dataset('nsystems', data=self.datapoint.nSystems)
-        # self.acceptance_v.toHdf(parent,'ratex')
 
         # Initialize the attributes that will be written later
         s = add_axis
@@ -1034,7 +1030,7 @@ class Inference1D(myObject):
         parent.create_dataset('invtime',  shape=(s), dtype=float, fillvalue=nan)
         parent.create_dataset('savetime',  shape=(s), dtype=float, fillvalue=nan)
 
-        self.acceptance_v.createHdf(parent,'acceptance_rate', add_axis=add_axis, fillvalue=nan)
+        self.acceptance_v.createHdf(parent, 'acceptance_rate', add_axis=add_axis, fillvalue=nan)
         self.data_misfit_v.createHdf(parent, 'phids', add_axis=add_axis, fillvalue=nan)
         self.halfspace.createHdf(parent, 'halfspace', add_axis=add_axis, fillvalue=nan)
 
@@ -1064,29 +1060,8 @@ class Inference1D(myObject):
         # Add the burned in logical
         parent['burned_in'][index] = self.burned_in
 
-        # Add the depth of investigation
-        # hdfFile['doi'][i] = self.doi()
-
         # Add the multiplierx
         parent['multiplier'][index] = self.multiplier
-
-        # Add the inversion time
-        # hdfFile['invtime'][i] = self.invTime
-
-        # Add the savetime
-#        hdfFile['savetime'][i] = self.saveTime
-
-        # Interpolate the mean and best model to the discretized hitmap
-        # hm = self.model.par.posterior
-        # self.meanInterp = StatArray.StatArray(hm.mean())
-        # self.bestInterp = StatArray.StatArray(self.best_model.piecewise_constant_interpolate(self.best_model.par, hm, axis=0))
-        # self.opacityInterp[:] = self.Hitmap.credibleRange(percent=95.0, log='e')
-
-        # # Add the interpolated mean model
-        # self.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=i)
-        # # Add the interpolated best
-        # self.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=i)
-        # # Add the interpolated opacity
 
         # Add the acceptance rate
         self.acceptance_v.writeHdf(parent, 'acceptance_rate', index=index)
@@ -1103,6 +1078,7 @@ class Inference1D(myObject):
 
         # Write the model posteriors
         self.model.writeHdf(parent,'model', index=index)
+
         # Write the highest posterior data
         self.best_model.writeHdf(parent,'model', withPosterior=False, index=index)
 
