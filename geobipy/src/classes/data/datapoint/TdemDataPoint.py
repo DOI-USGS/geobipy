@@ -1125,7 +1125,7 @@ class TdemDataPoint(EmDataPoint):
         if not 'system' in kwargs:
             # for i in range(self.nSystems):
             system = [sys.filename for sys in self.system]
-            world.isend(system, dest=dest)
+            world.isend(system, dest=dest).wait()
 
         super().Isend(dest, world)
 
