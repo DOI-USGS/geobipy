@@ -623,8 +623,7 @@ class Inference1D(myObject):
         pHDFfile: Optional HDF5 file opened using h5py.File('name.h5','w',driver='mpio', comm=world) before calling Inv_MCMC
         """
 
-        if self.datapoint.n_active_channels == 0:
-            return True
+        Go = self.datapoint.n_active_channels > 0
 
         if self.interactive_plot:
             self._init_posterior_plots()
@@ -632,8 +631,7 @@ class Inference1D(myObject):
 
         self.clk.start()
 
-        Go = True
-        failed = False
+        failed = not Go
         while (Go):
             # Accept or reject the new model
             failed = self.accept_reject()
