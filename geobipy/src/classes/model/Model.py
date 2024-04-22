@@ -647,8 +647,8 @@ class Model(myObject):
             mean = expReal(log_values)
             # mean = self.values
 
-            # if any(mean == inf) or any(mean == 0.0):
-            #     return -inf, -inf
+            if any(mean == inf) or any(mean == 0.0):
+                return -inf, -inf
 
             prng = self.values.proposal.prng
             # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
