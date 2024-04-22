@@ -1078,7 +1078,8 @@ class Inference2D(myObject):
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
 
         out.mesh.z.relativeTo = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
-        out.mesh.y.relativeTo = self.halfspace
+
+        # out.mesh.y.relativeTo = self.halfspace
 
         return out
 
