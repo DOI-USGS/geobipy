@@ -526,6 +526,8 @@ class Histogram(Model):
         else:
             out -= mn
 
+        out[isnan(out)] = 1.0
+
         return Model(self.mesh.remove_axis(axis), values=out)
 
     def update(self, *args, **kwargs):
