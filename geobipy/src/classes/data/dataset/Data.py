@@ -536,6 +536,9 @@ class Data(Point):
 
         self._read_line_fiducial(filename)
 
+    def close(self):
+        self._file.close()
+
     def _read_line_fiducial(self, filename):
 
         _, channels = Data._csv_channels(filename)
