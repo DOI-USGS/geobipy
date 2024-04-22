@@ -447,7 +447,7 @@ class Inference3D(myObject):
 
         for i in r:
             rec = i if nPoints == 1 else None
-            datapoint = self.data._read_record(record = rec)
+            datapoint = self.data._read_record(record = i)
 
             # Pass through the line results file object if a parallel file system is in use.
             iLine = self.lineNumber.searchsorted(datapoint.lineNumber)[0]
@@ -586,9 +586,8 @@ class Inference3D(myObject):
 
             failed = inference.infer(hdf_file_handle=self.lines[iLine].hdf_file)
 
-            if failed:
-                myMPI.print("datapoint {} {} failed to converge".format(datapoint.lineNumber, datapoint.fiducial))
-                # save('Converge_fail_seed_{}_{}'.format(datapoint.lineNumber, datapoint.fiducial), inference.seed)
+            if failed and inference.datapoint.n_active_channels > 0:
+                myMPI.print(f"datapoint --line={datapoint.lineNumber.item()} --fiducial={datapoint.fiducial.item()} failed to converge")
 
             # Ping the head rank to request a new index
             world.send('requesting', dest=0)
