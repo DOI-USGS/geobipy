@@ -1115,10 +1115,7 @@ def plot(x, y, **kwargs):
 
     pretty(ax)
 
-    # try:
-    ax.plot(x, y, **kwargs)
-    # except:
-    #     plt.plot(x, tmp.T, **kwargs)
+    ax.plot(x, y, alpha=color_kwargs['alpha'], **kwargs)
 
     if geobipy_kwargs['xlim'] is not None:
         ax.set_xlim(geobipy_kwargs['xlim'])
