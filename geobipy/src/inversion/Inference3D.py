@@ -447,7 +447,6 @@ class Inference3D(myObject):
 
         for i in r:
             rec = i if nPoints == 1 else None
-
             datapoint = self.data._read_record(record = rec)
 
             # Pass through the line results file object if a parallel file system is in use.
@@ -464,6 +463,8 @@ class Inference3D(myObject):
 
             eta = str(timedelta(seconds=(float64(nPoints) / float64(i+1)) * e))
             print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-i-1, nPoints, elapsed, eta))
+
+        self.data.close()
 
 
     def infer_mpi(self, **options):
