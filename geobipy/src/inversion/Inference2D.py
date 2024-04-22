@@ -315,6 +315,10 @@ class Inference2D(myObject):
     def world(self, communicator):
         self._world = communicator
 
+    def __del__(self):
+        if "_hdf_file" in self.__dict__:
+            self.hdf_file.close()
+
     def __deepcopy__(self, memo={}):
         return None
 
