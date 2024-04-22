@@ -1345,7 +1345,7 @@ class StatArray(ndarray, myObject):
 
             ax = kwargs.pop('ax')
             for i in range(self.n_posteriors):
-                ax[i].cla()
+                ax[i].set_xscale('linear'); ax[i].cla()
                 self.posterior[i].plot(overlay=overlay[i], ax=ax[i], **kwargs)
         else:
             if isinstance(ax, list):
