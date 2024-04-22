@@ -1236,6 +1236,9 @@ class RectilinearMesh1D(Mesh):
         geobipy_kwargs, kwargs = cp.filter_plotting_kwargs(kwargs)
         color_kwargs, kwargs = cp.filter_color_kwargs(kwargs)
 
+        if value.size == 1:
+            value = value.item()
+
         ax = geobipy_kwargs['ax']
 
         f = ax.axhline if geobipy_kwargs['transpose'] else ax.axvline
