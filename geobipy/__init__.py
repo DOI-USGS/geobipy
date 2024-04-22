@@ -158,6 +158,7 @@ def serial_geobipy(input_file, output_directory, **kwargs):
     options = user_parameters.read(input_file, **kwargs)
 
     data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+    data.close()
 
     prng = get_prng(seed=options.get('seed', None), jump=options.get('jump', None))
 
@@ -200,6 +201,7 @@ def parallel_mpi(input_file, output_directory, **kwargs):
 
     # Everyone needs the system classes read in early.
     data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
+    data.close()
 
     # Get the number of points in the file.
     if masterRank:
