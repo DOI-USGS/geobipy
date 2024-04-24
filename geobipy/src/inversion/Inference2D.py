@@ -1173,20 +1173,24 @@ class Inference2D(myObject):
 
     #     cP.plot(self.mesh.x, self.bestData.predictedData[:, channel], **kwargs)
 
-    def plot_burned_in(self, **kwargs):
+    def plot_burned_in(self, low=0.0, high=1.0, **kwargs):
 
         x = self.data.axis(kwargs.pop('x', 'x'))
         cmap = plt.get_cmap(kwargs.pop('cmap', 'cividis'))
 
         ax = kwargs.pop('ax', plt.gca())
 
-        ylim = (0.0, 1.0)
         if kwargs.pop('underlay', False):
             kwargs['alpha'] = kwargs.get('alpha', 0.5)
-            ylim = ax.get_ylim()
+            ylim = list(ax.get_ylim())
+        else:
+            ylim = [low, high]
 
-        plt.fill_between(x, ylim[1], ylim[0], step='mid', color=cmap(1.0), label="", **kwargs)
-        plt.fill_between(x, (ylim[1]-ylim[0])*(1-self.burned_in)+ylim[0], ylim[0], step='mid', color=cmap(0.0), label="", **kwargs)
+        ax.fill_between(x, ylim[1], ylim[0], step='mid', color=cmap(1.0), label="True", **kwargs)
+        ax.fill_between(x, (ylim[1]-ylim[0])*(1-self.burned_in)+ylim[0], ylim[0], step='mid', color=cmap(0.0), label="False", **kwargs)
+        ax.legend(title="Burned in", prop={'size': 6}, fontsize=6)
+
+        return ax
 
 
     def plot_channel_saturation(self, **kwargs):
@@ -2030,3 +2034,95 @@ class Inference2D(myObject):
         self.mode = mode
         self.hdf_file = grp
         return self
+
+
+    def plot_summary(self, **kwargs):
+
+        pp = self.parameter_posterior()
+        mm = self.mean_parameters()
+
+
+        kwargs['x'] = kwargs.get('x', 'x')
+        nrows = 3
+        fig = kwargs.pop('fig', plt.figure(figsize=(16, 4)))
+
+        gs = fig.add_gridspec(ncols=4, nrows=nrows)
+
+        ax = fig.add_subplot(gs[0, 0])
+        self.plot_burned_in(x = kwargs['x'], high=self.data.channel_saturation, ax=ax)
+        self.plot_channel_saturation(linewidth=1.0, x = kwargs['x'], ax=ax, flipX=kwargs.get('flipX', False))
+
+        ax0 = fig.add_subplot(gs[1, 0], sharex=ax)
+        self.plot_mean_model(ax=ax0, **kwargs);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax0);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax0);
+        ylim = ax0.get_ylim()
+
+        # By adding the useVariance keyword, we can make regions of lower confidence more transparent
+        ax = fig.add_subplot(gs[2, 0], sharex=ax0, sharey=ax0)
+        self.plot_mean_model(mask_by_confidence=True, ax=ax, **kwargs);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        # # We can also choose to keep parameters above the DOI opaque.
+        # self.compute_doi()
+        # fig.add_subplot(gs[3, 0])
+        # self.plot_mean_model(use_variance=True, mask_below_doi=True, **kwargs);
+        # self.plot_data_elevation(linewidth=0.3);
+        # self.plot_elevation(linewidth=0.3);
+
+
+        ax = fig.add_subplot(gs[1, 1], sharex=ax0)
+        self.plot_k_layers(x = kwargs['x'])
+
+        ax = fig.add_subplot(gs[2, 1], sharex=ax0, sharey=ax0)
+        self.plot_best_model(ax=ax, **kwargs);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        ax.set_ylim(ylim)
+
+        kwargs.pop('vmin', None)
+        kwargs.pop('vmax', None)
+
+        ax = fig.add_subplot(gs[0, 2], sharex=ax0, sharey=ax0)
+        plt.title('5%')
+        self.plot_percentile(percent=0.05, ax=ax, **kwargs)
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ax = fig.add_subplot(gs[1, 2], sharex=ax0, sharey=ax0)
+        plt.title('50%')
+        self.plot_percentile(percent=0.5, ax=ax, **kwargs)
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ax = fig.add_subplot(gs[2, 2], sharex=ax0, sharey=ax0)
+        plt.title('95%')
+        self.plot_percentile(percent=0.95, ax=ax, **kwargs)
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ################################################################################
+        # Now we can start plotting some more interesting posterior properties.
+        # How about the confidence?
+        ax = fig.add_subplot(gs[0, 3], sharex=ax0, sharey=ax0)
+        self.plot_confidence(x = kwargs['x'], ax=ax);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ################################################################################
+        # We can take the interface depth posterior for each data point,
+        # and display an interface probability cross section
+        # This posterior can be washed out, so the clim_scaling keyword lets me saturate
+        # the top and bottom 0.5% of the colour range
+        ax = fig.add_subplot(gs[1, 3], sharex=ax0, sharey=ax0)
+        plt.title('P(Interface)')
+        self.plot_interfaces(cmap='Greys', clim_scaling=0.5, x = kwargs['x'], ax=ax);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ax = fig.add_subplot(gs[2, 3], sharex=ax0, sharey=ax0)
+        self.plot_entropy(cmap='Greys', clim_scaling=0.5, x = kwargs['x'], ax=ax);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        return fig
