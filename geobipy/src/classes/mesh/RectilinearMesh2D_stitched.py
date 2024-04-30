@@ -182,7 +182,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             elif nanmax(y_edges) == inf:
                 max_edge = 2.0 * max(y_edges[isfinite(y_edges)])
 
-        alpha = ndim(color_kwargs['alpha'] > 0)
+        alpha = ndim(color_kwargs['alpha'] > 0) if color_kwargs['alpha'] is not None else False
 
         relativeTo = 0.0 if self.relativeTo is None else self.relativeTo
         for i in range(max(self.nCells)):
