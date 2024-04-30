@@ -92,6 +92,7 @@ def checkCommandArguments():
     Parser.add_argument('--mpi', dest='mpi', action='store_true', help='Run geobipy with MPI libraries.')
     Parser.add_argument('--debug', dest='debug', action='store_true', help='Run geobipy in debug mode.')
     Parser.add_argument('--data_directory', default=None, help='override data_directory in parameter file.')
+    Parser.add_argument('--data_filename', default=None, help='override data_filename in parameter file')
 
     args = Parser.parse_args()
 
@@ -231,7 +232,8 @@ def geobipy():
         parallel_geobipy(args.options_file,
                          args.output_directory,
                          seed=args.seed,
-                         data_directory=args.data_directory)
+                         data_directory=args.data_directory,
+                         data_filename=args.data_filename)
     else:
         serial_geobipy(args.options_file,
                        args.output_directory,
