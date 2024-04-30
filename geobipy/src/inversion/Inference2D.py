@@ -1192,7 +1192,6 @@ class Inference2D(myObject):
 
         return ax
 
-
     def plot_channel_saturation(self, **kwargs):
 
         kwargs['x'] = kwargs.get('x', 'x')
@@ -1578,7 +1577,7 @@ class Inference2D(myObject):
         if kwargs.pop('mask_by_confidence', False):
             mask = self.opacity().values
 
-        if kwargs.pop('mask_by_burned_in', True):
+        if kwargs.pop('mask_by_burned_in', False):
             if mask is not None:
                 mask *= self.burned_in_mask(model)
             else:
@@ -2043,40 +2042,38 @@ class Inference2D(myObject):
 
 
         kwargs['x'] = kwargs.get('x', 'x')
-        nrows = 3
-        fig = kwargs.pop('fig', plt.figure(figsize=(16, 4)))
 
-        gs = fig.add_gridspec(ncols=4, nrows=nrows)
+        axes = kwargs.get('axes', None)
+        if axes is None:
+            nrows = 3
+            fig = kwargs.pop('fig', plt.figure(figsize=(20, 10)))
 
-        ax = fig.add_subplot(gs[0, 0])
+            gs = fig.add_gridspec(ncols=2, nrows=6, hspace=2.0)
+
+            ax = fig.add_subplot(gs[0, 0])
+        else:
+            ax = axes.pop(0)
+
         self.plot_burned_in(x = kwargs['x'], high=self.data.channel_saturation, ax=ax)
-        self.plot_channel_saturation(linewidth=1.0, x = kwargs['x'], ax=ax, flipX=kwargs.get('flipX', False))
+        self.plot_channel_saturation(linewidth=1.0, x = kwargs['x'], ax=ax, flipX=kwargs.get('flipX', False), wrap_ylabel=True)
 
-        ax0 = fig.add_subplot(gs[1, 0], sharex=ax)
-        self.plot_mean_model(ax=ax0, **kwargs);
+        ax = fig.add_subplot(gs[1, 0], sharex=ax) if axes is None else axes.pop(0)
+        self.plot_k_layers(x = kwargs['x'], wrap_clabel=True)
+
+        ax0 = fig.add_subplot(gs[0, 1], sharex=ax) if axes is None else axes.pop(0)
+        self.plot_mean_model(ax=ax0, wrap_clabel=True, **kwargs);
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax0);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax0);
         ylim = ax0.get_ylim()
 
         # By adding the useVariance keyword, we can make regions of lower confidence more transparent
-        ax = fig.add_subplot(gs[2, 0], sharex=ax0, sharey=ax0)
-        self.plot_mean_model(mask_by_confidence=True, ax=ax, **kwargs);
+        ax = fig.add_subplot(gs[1, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        self.plot_mode_model(mask_by_confidence=True, ax=ax, wrap_clabel=True, **kwargs);
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
 
-        # # We can also choose to keep parameters above the DOI opaque.
-        # self.compute_doi()
-        # fig.add_subplot(gs[3, 0])
-        # self.plot_mean_model(use_variance=True, mask_below_doi=True, **kwargs);
-        # self.plot_data_elevation(linewidth=0.3);
-        # self.plot_elevation(linewidth=0.3);
-
-
-        ax = fig.add_subplot(gs[1, 1], sharex=ax0)
-        self.plot_k_layers(x = kwargs['x'])
-
-        ax = fig.add_subplot(gs[2, 1], sharex=ax0, sharey=ax0)
-        self.plot_best_model(ax=ax, **kwargs);
+        ax = fig.add_subplot(gs[2, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        self.plot_best_model(ax=ax, wrap_clabel=True, **kwargs);
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         ax.set_ylim(ylim)
@@ -2084,28 +2081,28 @@ class Inference2D(myObject):
         kwargs.pop('vmin', None)
         kwargs.pop('vmax', None)
 
-        ax = fig.add_subplot(gs[0, 2], sharex=ax0, sharey=ax0)
+        ax = fig.add_subplot(gs[3, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
         plt.title('5%')
-        self.plot_percentile(percent=0.05, ax=ax, **kwargs)
+        self.plot_percentile(percent=0.05, ax=ax, wrap_clabel=True, **kwargs)
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
 
-        ax = fig.add_subplot(gs[1, 2], sharex=ax0, sharey=ax0)
+        ax = fig.add_subplot(gs[4, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
         plt.title('50%')
-        self.plot_percentile(percent=0.5, ax=ax, **kwargs)
+        self.plot_percentile(percent=0.5, ax=ax, wrap_clabel=True, **kwargs)
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
 
-        ax = fig.add_subplot(gs[2, 2], sharex=ax0, sharey=ax0)
+        ax = fig.add_subplot(gs[5, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
         plt.title('95%')
-        self.plot_percentile(percent=0.95, ax=ax, **kwargs)
+        self.plot_percentile(percent=0.95, ax=ax, wrap_clabel=True, **kwargs)
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
 
         ################################################################################
         # Now we can start plotting some more interesting posterior properties.
         # How about the confidence?
-        ax = fig.add_subplot(gs[0, 3], sharex=ax0, sharey=ax0)
+        ax = fig.add_subplot(gs[2, 0], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
         self.plot_confidence(x = kwargs['x'], ax=ax);
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
@@ -2115,14 +2112,20 @@ class Inference2D(myObject):
         # and display an interface probability cross section
         # This posterior can be washed out, so the clim_scaling keyword lets me saturate
         # the top and bottom 0.5% of the colour range
-        ax = fig.add_subplot(gs[1, 3], sharex=ax0, sharey=ax0)
+        ax = fig.add_subplot(gs[3, 0], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
         plt.title('P(Interface)')
         self.plot_interfaces(cmap='Greys', clim_scaling=0.5, x = kwargs['x'], ax=ax);
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
 
-        ax = fig.add_subplot(gs[2, 3], sharex=ax0, sharey=ax0)
+        ax = fig.add_subplot(gs[4, 0], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
         self.plot_entropy(cmap='Greys', clim_scaling=0.5, x = kwargs['x'], ax=ax);
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        if kwargs.get('flipX', False):
+            ax.invert_xaxis()
+        if kwargs.get('flipY', False):
+            ax.invert_yaxis()
+
         return fig
