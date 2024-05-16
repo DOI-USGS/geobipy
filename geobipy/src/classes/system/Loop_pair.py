@@ -238,11 +238,7 @@ class Loop_pair(Point, PointCloud3D):
         offset_kwargs = kwargs.pop('offset_kwargs', {})
         receiver_kwargs = kwargs.pop('receiver_kwargs', {})
 
-        overlay = kwargs.get('overlay')
-        if not overlay is None:
-            transmitter_kwargs['overlay'] = overlay.transmitter
-            offset_kwargs['overlay'] = overlay.loop_pair
-            receiver_kwargs['overlay'] = overlay.receiver
+        overlay = kwargs.pop('overlay', None)
 
         i = 0
         if self.transmitter.hasPosterior:
@@ -255,6 +251,22 @@ class Loop_pair(Point, PointCloud3D):
 
         if self.receiver.hasPosterior:
             self.receiver.plot_posteriors(axes = axes[i], **receiver_kwargs)
+
+        if overlay is not None:
+            self.overlay_on_posteriors(overlay, axes, **kwargs)
+
+    def overlay_on_posteriors(self, overlay, axes, **kwargs):
+        i = 0
+        if self.transmitter.hasPosterior:
+            self.transmitter.overlay_on_posteriors(overlay=overlay.transmitter, axes = axes[i], **kwargs)
+            i += 1
+
+        if super().hasPosterior:
+            super().overlay_on_posteriors(overlay=overlay, axes = axes[i], **kwargs)
+            i += 1
+
+        if self.receiver.hasPosterior:
+            self.receiver.overlay_on_posteriors(overlay=overlay.receiver, axes = axes[i], **kwargs)
 
     @property
     def probability(self):

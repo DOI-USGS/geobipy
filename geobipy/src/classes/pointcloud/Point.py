@@ -1056,10 +1056,10 @@ class Point(myObject):
         z_kwargs = kwargs.pop('z_kwargs', {})
 
         overlay = kwargs.pop('overlay', None)
-        if not overlay is None:
-            x_kwargs['overlay'] = overlay.x
-            y_kwargs['overlay'] = overlay.y
-            z_kwargs['overlay'] = overlay.z
+        # if not overlay is None:
+        #     x_kwargs['overlay'] = overlay.x
+        #     y_kwargs['overlay'] = overlay.y
+        #     z_kwargs['overlay'] = overlay.z
 
         if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
             z_kwargs['transpose'] = z_kwargs.get('transpose', True)
@@ -1069,6 +1069,21 @@ class Point(myObject):
             if c.hasPosterior:
                 c.plot_posteriors(ax = axes[i], **kw)
                 i += 1
+
+        if overlay is not None:
+            axes = self.overlay_on_posteriors(overlay, axes)
+
+    def overlay_on_posteriors(self, overlay, axes, x_kwargs={}, y_kwargs={}, z_kwargs={}, **kwargs):
+
+        if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
+            z_kwargs['transpose'] = z_kwargs.get('transpose', True)
+
+        i = 0
+        for s, o, kw in zip([self.x, self.y, self.z], [overlay.x, overlay.y, overlay.z], [x_kwargs, y_kwargs, z_kwargs]):
+            if s.hasPosterior:
+                s.posterior.plot_overlay(value = o, ax = axes[i], **kw, **kwargs)
+                i += 1
+        return axes
 
 
     def pyvista_mesh(self):

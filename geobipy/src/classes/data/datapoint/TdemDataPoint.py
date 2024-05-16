@@ -771,13 +771,13 @@ class TdemDataPoint(EmDataPoint):
         rel_error_kwargs = kwargs.pop('rel_error_kwargs', {})
         add_error_kwargs = kwargs.pop('add_error_kwargs', {})
 
-        overlay = kwargs.get('overlay', None)
-        if not overlay is None:
-                # point_kwargs['overlay'] = overlay
-                rel_error_kwargs['overlay'] = overlay.relative_error
-                # add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
-                # add_error_kwargs['axis'] = 1
-                add_error_kwargs['overlay'] = overlay.additive_error
+        overlay = kwargs.pop('overlay', None)
+        # if not overlay is None:
+        #         # point_kwargs['overlay'] = overlay
+        #         rel_error_kwargs['overlay'] = overlay.relative_error
+        #         # add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
+        #         # add_error_kwargs['axis'] = 1
+        #         add_error_kwargs['overlay'] = overlay.additive_error
 
 
         axes[0].clear()
@@ -799,6 +799,25 @@ class TdemDataPoint(EmDataPoint):
 
         if any([x.hasPosterior for x in [self.transmitter, self.loop_pair, self.receiver]]):
             self.loop_pair.plot_posteriors(axes = axes[i], **kwargs)
+
+        if overlay is not None:
+            self.overlay_on_posteriors(overlay, axes, **kwargs)
+
+    def overlay_on_posteriors(self, overlay, axes, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
+
+        i = 1
+        if self.relative_error.hasPosterior:
+            self.relative_error.overlay_on_posteriors(overlay.relative_error, ax=axes[i], **rel_error_kwargs, **kwargs)
+            i += 1
+
+        if self.additive_error.hasPosterior:
+            add_error_kwargs['colorbar'] = False
+            self.additive_error.overlay_on_posteriors(overlay.additive_error, ax=axes[i], **add_error_kwargs, **kwargs)
+            i += 1
+
+        if any([x.hasPosterior for x in [self.transmitter, self.loop_pair, self.receiver]]):
+            self.loop_pair.overlay_on_posteriors(overlay=overlay, axes = axes[i], **kwargs)
+
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):

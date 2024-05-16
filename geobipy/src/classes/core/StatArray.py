@@ -1367,6 +1367,21 @@ class StatArray(ndarray, myObject):
             ax.cla()
             self.posterior.plot(**kwargs)
 
+    def overlay_on_posteriors(self, overlay, ax, **kwargs):
+
+        if size(ax) > 1:
+            assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(size(ax), self.n_posteriors))
+            assert len(overlay) == len(ax), ValueError("line in kwargs must have size {}".format(len(ax)))
+            # overlay = kwargs.pop('overlay', asarray([None for i in range(len(ax))]))
+
+            for i in range(self.n_posteriors):
+                self.posterior[i].plot_overlay(value=overlay[i], ax=ax[i], **kwargs)
+        else:
+            if isinstance(ax, list):
+                ax = ax[0]
+
+            self.posterior.plot_overlay(value=overlay, ax=ax, **kwargs)
+
     def scatter(self, x=None, y=None, i=None, **kwargs):
         """Create a 2D scatter plot.
 

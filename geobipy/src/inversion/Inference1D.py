@@ -141,6 +141,15 @@ class Inference1D(myObject):
         self.options['covariance_scaling'] = float64(value)
 
     @property
+    def observed_datapoint(self):
+        return self._observed_datapoint
+
+    @observed_datapoint.setter
+    def observed_datapoint(self, value):
+        assert isinstance(value, DataPoint), TypeError("observed_datapoint must have type geobipy.Datapoint")
+        self._observed_datapoint = deepcopy(value)
+
+    @property
     def datapoint(self):
         return self._datapoint
 
@@ -462,6 +471,7 @@ class Inference1D(myObject):
         # ---------------------------------------
         # Set the prior on the data
         self.datapoint.initialize(**kwargs)
+        self.observed_datapoint = deepcopy(datapoint)
         # Set the priors, proposals, and posteriors.
         self.datapoint.set_priors(**kwargs)
         self.datapoint.set_proposals(**kwargs)
@@ -871,6 +881,8 @@ class Inference1D(myObject):
             # add_error_kwargs={
             #     'normalize': True},
             overlay=overlay)
+
+        self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax[3], linecolor='k')
 
         self.posterior_fig.suptitle(title)
 

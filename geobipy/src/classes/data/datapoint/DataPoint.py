@@ -445,9 +445,9 @@ class DataPoint(Point):
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         overlay = kwargs.pop('overlay', None)
-        if not overlay is None:
-            rel_error_kwargs['overlay'] = overlay.relative_error
-            add_error_kwargs['overlay'] = overlay.additive_error
+        # if not overlay is None:
+        #     rel_error_kwargs['overlay'] = overlay.relative_error
+        #     add_error_kwargs['overlay'] = overlay.additive_error
 
         super().plot_posteriors(axes=axes[0], **kwargs)
 
@@ -464,6 +464,15 @@ class DataPoint(Point):
 
         self.relative_error.plot_posteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plot_posteriors(ax=axes[3], **add_error_kwargs)
+
+    def overlay_on_posteriors(self, overlay, axes):
+
+        super().overlay_on_posteriors(self, overlay, axes[0])
+
+        self.relative_error.overlay_on_posteriors(overlay=overlay.relative_error, ax=axes[2])
+        self.additive_error.overlay_on_posteriors(overlay=overlay.additive_error, ax=axes[3])
+
+
 
     @property
     def system_indices(self):

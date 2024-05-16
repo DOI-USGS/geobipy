@@ -418,27 +418,36 @@ class Histogram(Model):
         linecolor = kwargs.pop('linecolor', cP.wellSeparated[3])
 
         if self.ndim == 1:
-            bar = self.mesh.bar(values=values, **kwargs)
-
-            if overlay is not None:
-                kwargs['linecolor'] = linecolor
-                self.mesh.plot_line(overlay, **kwargs)
+            A = self.mesh.bar(values=values, **kwargs)
+            pm = None
+            cb = None
+            # if overlay is not None:
+            #     kwargs['linecolor'] = linecolor
+            #     self.mesh.plot_line(overlay, **kwargs)
 
             if interval_kwargs is not None:
                 self.plotCredibleIntervals(ax=kwargs['ax'], **interval_kwargs)
-            return bar, None, None
         else:
             kwargs['cmap'] = kwargs.pop('cmap', mpl.cm.Greys)
-            pc, pm, cb = self.mesh.pcolor(values=values, **kwargs)
+            A, pm, cb = self.mesh.pcolor(values=values, **kwargs)
 
-            if overlay is not None:
-                kwargs['color'] = linecolor
-                self.mesh.plot_line(overlay, **kwargs)
+            # if overlay is not None:
+            #     kwargs['color'] = linecolor
+            #     self.mesh.plot_line(overlay, **kwargs)
 
             if interval_kwargs is not None:
                 self.plotCredibleIntervals(ax=kwargs['ax'], **interval_kwargs)
 
-            return pc, pm, cb
+        if overlay is not None:
+            kwargs['color'] = linecolor
+            self.plot_overlay(overlay, **kwargs)
+
+        return A, pm, cb
+
+
+    def plot_overlay(self, value, **kwargs):
+        self.mesh.plot_line(value, **kwargs)
+
 
     def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
 
