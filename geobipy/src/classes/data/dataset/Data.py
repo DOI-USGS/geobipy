@@ -27,7 +27,6 @@ try:
 except:
     pass
 
-
 class Data(Point):
     """Class defining a set of Data.
 
@@ -68,7 +67,8 @@ class Data(Point):
         Data class
 
     """
-    __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file', '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
+    __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file',
+                 '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
                  '_system', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_channels')
 
     def __init__(self, components=None, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channel_names=None, **kwargs):
@@ -83,10 +83,12 @@ class Data(Point):
 
         self._fiducial = StatArray.StatArray(arange(self.nPoints), "Fiducial")
         self._lineNumber = StatArray.StatArray(self.nPoints, "Line number")
+
         shp = (self._nPoints, self.nChannels)
         self._data = StatArray.StatArray(shp, "Data", self.units)
         self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
         self._std = StatArray.StatArray(ones(shp), "std", self.units)
+
         shp = (self.nPoints, self.nSystems)
         self._relative_error = StatArray.StatArray(full(shp, fill_value=0.01), "Relative error", "%")
         self._additive_error = StatArray.StatArray(shp, "Additive error", self.units)
@@ -441,6 +443,8 @@ class Data(Point):
         out._data = deepcopy(self.data, memo)
         out._std = deepcopy(self.std, memo)
         out._predictedData = deepcopy(self.predictedData, memo)
+        out._relative_error = deepcopy(self.relative_error, memo)
+        out._additive_error = deepcopy(self._additive_error, memo)
         return out
 
     def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):
@@ -571,12 +575,18 @@ class Data(Point):
         return s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
     def append(self, other):
+
+        self._relative_error = self.relative_error.append(other.relative_error)
+        self._additive_error = self.additive_error.append(other.additive_error)
+
         super().append(other)
-        self.fiducial = hstack([self.fiducial, other.fiducial])
-        self.lineNumber = hstack([self.lineNumber, other.lineNumber])
-        self.data = vstack([self.data, other.data])
-        self.predictedData = vstack([self.predictedData, other.predictedData])
-        self.std = vstack([self.std, other.std])
+        self._fiducial = self._fiducial.append(other.fiducial)
+        self._lineNumber = self._lineNumber.append(other.lineNumber)
+        self._data = self._data.append(other.data, axis=0)
+        self._predictedData = self._predictedData.append(other.predictedData, axis=0)
+        self._std = self._std.append(other.std, axis=0)
+
+        return self
 
     def check_line_numbers(self):
 
@@ -1174,10 +1184,8 @@ class Data(Point):
 
         self = super(Data, cls).fromHdf(grp, **kwargs)
 
-        if 'fiducial' in grp:
-            self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
-        if 'line_number' in grp:
-            self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
+        self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
+        self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
 
         self.data = StatArray.StatArray.fromHdf(grp['data'])
         self.std = StatArray.StatArray.fromHdf(grp['std'])

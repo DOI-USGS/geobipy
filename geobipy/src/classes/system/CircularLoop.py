@@ -33,6 +33,8 @@ class CircularLoop(EmLoop):
 
     """
 
+    __slots__ = ('_radius')
+
     def __init__(self, x=None, y=None, z=None, elevation=None, orientation=None, moment=None, pitch=None, roll=None, yaw=None, radius=None, **kwargs):
         """ Initialize a loop in an EM system """
 
@@ -63,7 +65,6 @@ class CircularLoop(EmLoop):
 
             self._radius[:] = values
 
-
     @property
     def summary(self):
         """Print a summary"""
@@ -83,6 +84,13 @@ class CircularLoop(EmLoop):
         out = super().__deepcopy__(memo)
         out._radius = deepcopy(self.radius, memo=memo)
         return out
+
+    def append(self, other):
+
+        super().append(other)
+        self._radius = self._radius.append(other.radius)
+
+        return self
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file

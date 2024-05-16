@@ -19,15 +19,17 @@ class EmLoop(Point, ABC):
 
     """
 
+    __slots__ = ('_orientation', '_moment', '_pitch', '_roll', '_yaw')
+
     def __init__(self, x=None, y=None, z=None, elevation=None, orientation=None, moment=None, pitch=None, roll=None, yaw=None, **kwargs):
 
         super().__init__(x, y, z, elevation, **kwargs)
 
         self._orientation = StatArray.StatArray(self.nPoints, "Orientation", "", dtype=int32)
-        self._moment = StatArray.StatArray(self._nPoints, "Moment", "")
-        self._pitch = StatArray.StatArray(self._nPoints, "Pitch", "$^{o}$")
-        self._roll = StatArray.StatArray(self._nPoints, "Roll", "$^{o}$")
-        self._yaw = StatArray.StatArray(self._nPoints, "Yaw", "$^{o}$")
+        self._moment = StatArray.StatArray(self.nPoints, "Moment", "")
+        self._pitch  = StatArray.StatArray(self.nPoints, "Pitch", "$^{o}$")
+        self._roll   = StatArray.StatArray(self.nPoints, "Roll", "$^{o}$")
+        self._yaw    = StatArray.StatArray(self.nPoints, "Yaw", "$^{o}$")
 
         # Orientation of the loop dipole
         self.orientation = orientation
@@ -54,8 +56,8 @@ class EmLoop(Point, ABC):
         """
         out = super().__getitem__(i)
 
-        if not isinstance(i, slice):
-            i = unique(i)
+        # if not isinstance(i, slice):
+        #     i = unique(i)
 
         _ = self.orientation
         out._orientation = self._orientation[i]
@@ -203,6 +205,19 @@ class EmLoop(Point, ABC):
         out._roll = deepcopy(self.roll, memo=memo)
         out._yaw = deepcopy(self.yaw, memo=memo)
         return out
+
+    def append(self, other):
+
+        super().append(other)
+
+        self._orientation = self._orientation.append(other._orientation)
+        self._moment = self._moment.append(other.moment)
+        self._pitch = self._pitch.append(other.pitch)
+        self._roll = self._roll.append(other.roll)
+        self._yaw = self._yaw.append(other.yaw)
+
+        return self
+
 
     def perturb(self):
         """Propose a new point given the attached propsal distributions

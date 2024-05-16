@@ -128,7 +128,7 @@ class TdemData(Data):
 
     @Data.data.getter
     def data(self):
-        if size(self._data, 0) == 0:
+        if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
             self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
 
         for j in range(self.nSystems):
@@ -267,7 +267,7 @@ class TdemData(Data):
 
     @Data.std.getter
     def std(self):
-        if size(self._std, 0) == 0:
+        if (size(self._std, 0) == 0) or (self._std.shape[0] != self.nPoints):
             self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
@@ -330,11 +330,15 @@ class TdemData(Data):
 
     def append(self, other):
 
-        super().append(self, other)
+        self._primary_field = self._primary_field.append(other.primary_field, axis=0)
+        self._secondary_field = self._secondary_field.append(other.secondary_field, axis=0)
 
-        # self.loopOffset = hstack([self.loopOffset, other.loopOffset])
-        self.T = hstack([self.T, other.T])
-        self.R = hstack(self.R, other.R)
+        super().append(other)
+
+        self.loop_pair = self.loop_pair.append(other.loop_pair)
+
+        return self
+
 
     # def _component_indices(self, component=0, system=0):
     #     assert component < self.n_components, ValueError("component must be < {}".format(self.n_components))
