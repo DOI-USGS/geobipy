@@ -128,7 +128,7 @@ class TdemData(Data):
 
     @Data.data.getter
     def data(self):
-        if size(self._data, 0) == 0:
+        if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
             self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
 
         for j in range(self.nSystems):
@@ -267,7 +267,7 @@ class TdemData(Data):
 
     @Data.std.getter
     def std(self):
-        if size(self._std, 0) == 0:
+        if (size(self._std, 0) == 0) or (self._std.shape[0] != self.nPoints):
             self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:

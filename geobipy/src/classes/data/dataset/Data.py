@@ -27,7 +27,6 @@ try:
 except:
     pass
 
-
 class Data(Point):
     """Class defining a set of Data.
 
@@ -83,10 +82,12 @@ class Data(Point):
 
         self._fiducial = StatArray.StatArray(arange(self.nPoints), "Fiducial")
         self._lineNumber = StatArray.StatArray(self.nPoints, "Line number")
+
         shp = (self._nPoints, self.nChannels)
         self._data = StatArray.StatArray(shp, "Data", self.units)
         self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
         self._std = StatArray.StatArray(ones(shp), "std", self.units)
+
         shp = (self.nPoints, self.nSystems)
         self._relative_error = StatArray.StatArray(full(shp, fill_value=0.01), "Relative error", "%")
         self._additive_error = StatArray.StatArray(shp, "Additive error", self.units)
@@ -441,6 +442,8 @@ class Data(Point):
         out._data = deepcopy(self.data, memo)
         out._std = deepcopy(self.std, memo)
         out._predictedData = deepcopy(self.predictedData, memo)
+        out._relative_error = deepcopy(self.relative_error, memo)
+        out._additive_error = deepcopy(self._additive_error, memo)
         return out
 
     def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):
@@ -1166,10 +1169,8 @@ class Data(Point):
 
         self = super(Data, cls).fromHdf(grp, **kwargs)
 
-        if 'fiducial' in grp:
-            self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
-        if 'line_number' in grp:
-            self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
+        self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
+        self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
 
         self.data = StatArray.StatArray.fromHdf(grp['data'])
         self.std = StatArray.StatArray.fromHdf(grp['std'])
