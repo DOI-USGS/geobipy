@@ -1,4 +1,4 @@
-from numpy import asarray, ceil, float64, int8, int32, minimum, size, unique, unravel_index
+from numpy import asarray, ceil, float64, hstack, int8, int32, minimum, size, unique, unravel_index
 from copy import deepcopy
 from matplotlib.figure import Figure
 from matplotlib.pyplot import gcf
@@ -380,15 +380,24 @@ class EmLoop(Point, ABC):
         yaw_kwargs = kwargs.pop('yaw_kwargs', {})
 
         overlay = kwargs.pop('overlay', None)
-        if not overlay is None:
-            pitch_kwargs['overlay'] = overlay.pitch
-            roll_kwargs['overlay'] = overlay.roll
-            yaw_kwargs['overlay'] = overlay.yaw
 
         i = super().n_posteriors
         for c, kw in zip([self.pitch, self.roll, self.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
             if c.hasPosterior:
                 c.plot_posteriors(ax = axes[i], **kw)
+                i += 1
+
+        if overlay is not None:
+            self.overlay_on_posteriors(overlay, axes, pitch_kwargs, roll_kwargs, yaw_kwargs)
+
+    def overlay_on_posteriors(self, overlay, axes, pitch_kwargs={}, roll_kwargs={}, yaw_kwargs={}, **kwargs):
+
+        super().overlay_on_posteriors(overlay, axes[:super().n_posteriors], **kwargs)
+
+        i = super().n_posteriors
+        for s, o, kw in zip([self.pitch, self.roll, self.yaw], [overlay.pitch, overlay.roll, overlay.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
+            if s.hasPosterior:
+                s.posterior.plot_overlay(value = o, ax = axes[i], **kw)
                 i += 1
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):

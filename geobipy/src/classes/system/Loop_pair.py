@@ -130,6 +130,21 @@ class Loop_pair(Point, PointCloud3D):
 
             self._transmitter = values
 
+    def _as_dict(self):
+
+        out = { 'tx_pitch': self.transmitter.pitch,
+                'tx_roll': self.transmitter.roll,
+                'tx_yaw': self.transmitter.yaw,
+                'txrx_dx': self.x,
+                'txrx_dy': self.y,
+                'txrx_dz': self.z,
+                'rx_pitch': self.receiver.pitch,
+                'rx_roll': self.receiver.roll,
+                'rx_yaw': self.receiver.yaw}
+        order = ['tx_pitch', 'tx_roll', 'tx_yaw', 'txrx_dx', 'txrx_dy', 'txrx_dz', 'rx_pitch', 'rx_roll', 'rx_yaw']
+        return out, order
+
+
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._transmitter = deepcopy(self.transmitter)
