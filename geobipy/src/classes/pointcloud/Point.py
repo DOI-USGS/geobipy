@@ -147,6 +147,13 @@ class Point(myObject):
         return msg
 
     @property
+    def address(self):
+        out = asarray([hex(id(self))])
+        for x in [self.x, self.y, self.z, self.elevation]:
+            out = hstack([out, squeeze(x.address)])
+        return out
+
+    @property
     def hasPosterior(self):
         return (self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior) > 0
 

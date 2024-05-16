@@ -74,6 +74,14 @@ class EmLoop(Point, ABC):
         return msg
 
     @property
+    def address(self):
+        out = super().address
+        for x in [self.pitch, self.roll, self.yaw]:
+            out = hstack([out, x.address.flatten()])
+
+        return out
+
+    @property
     def hasPosterior(self):
         return self.n_posteriors > 0
 

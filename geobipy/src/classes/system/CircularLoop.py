@@ -71,6 +71,14 @@ class CircularLoop(EmLoop):
         msg += "radius:\n{}".format("|   "+(self.radius.summary.replace("\n", "\n|   "))[:-4])
         return msg
 
+    @property
+    def address(self):
+        out = super().address
+        for x in [self.radius]:
+            out = hstack([out, x.address.flatten()])
+
+        return out
+
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._radius = deepcopy(self.radius, memo=memo)

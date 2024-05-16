@@ -125,6 +125,14 @@ class TdemDataPoint(EmDataPoint):
     def addressof(self):
         return super().addressof + self.loop_pair.addressof
 
+    @property
+    def address(self):
+        out = super().address
+        for x in [self.loop_pair]:
+            out = hstack([out, x.address.flatten()])
+
+        return out
+
     @EmDataPoint.channel_names.setter
     def channel_names(self, values):
         if values is None:

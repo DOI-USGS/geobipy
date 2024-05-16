@@ -142,6 +142,14 @@ class DataPoint(Point):
         return msg
 
     @property
+    def address(self):
+        out = super().address
+        for x in [self.data, self.predictedData, self.std, self.line_number, self.fiducial, self.relative_error, self.additive_error]:
+            out = hstack([out, x.address.flatten()])
+
+        return out
+
+    @property
     def channel_names(self):
         return self._channel_names
 

@@ -295,6 +295,15 @@ class StatArray(ndarray, myObject):
                 msg += "Posterior:\n{}".format(("|   "+self.posterior.addressof.replace("\n", "\n|   "))[:-4])
         return msg
 
+    @property
+    def address(self):
+        out = asarray([hex(id(self))])
+        if self.hasPrior:
+            out = out.hstack([out, self.prior.address])
+        if self.hasProposal:
+            out = out.hstack([out, self.proposal.address])
+        return out
+
     def abs(self):
         """Take the absolute value.  In-place operation.
 
