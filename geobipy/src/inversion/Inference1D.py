@@ -991,6 +991,7 @@ class Inference1D(myObject):
                 for ax in this:
                     clear(ax)
             else:
+                this.set_xscale('linear')
                 this.cla()
 
         self._n_resets += 1
