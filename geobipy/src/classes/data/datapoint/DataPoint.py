@@ -137,7 +137,7 @@ class DataPoint(Point):
         msg += "fiducial:\n{}".format("|   "+(self.fiducial.addressof.replace("\n", "\n|   "))[:-4])
         msg += "relative error:\n{}".format("|   "+(self.relative_error.addressof.replace("\n", "\n|   "))[:-4])
         msg += "additive error:\n{}".format("|   "+(self.additive_error.addressof.replace("\n", "\n|   "))[:-4])
-        msg += "sensitivitiy matrix:\n{}".format("|   "+(self.sensitivity_matrix.addressof.replace("\n", "\n|   "))[:-4])
+        # msg += "sensitivitiy matrix:\n{}".format("|   "+(self.sensitivity_matrix.addressof.replace("\n", "\n|   "))[:-4])
 
         return msg
 
