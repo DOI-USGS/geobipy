@@ -1292,7 +1292,12 @@ class StatArray(ndarray, myObject):
                 i = s_[:self.shape[0], :self.shape[1]]
             j = i[axis]
 
-        return cP.plot(x[j], self[i], **kwargs)
+        smooth = kwargs.pop('smooth', None)
+        this = self[i]
+        if smooth is not None:
+            this = cf.smooth(self[i], smooth)
+
+        return cP.plot(x[j], this, **kwargs)
 
     def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
