@@ -1577,7 +1577,7 @@ class Inference2D(myObject):
         if kwargs.pop('mask_by_confidence', False):
             mask = self.opacity().values
 
-        if kwargs.pop('mask_by_burned_in', False):
+        if kwargs.pop('mask_by_burned_in', True):
             if mask is not None:
                 mask *= self.burned_in_mask(model)
             else:
@@ -2027,11 +2027,10 @@ class Inference2D(myObject):
 
         data = hdfRead.read_item(grp['data'], **kwargs)
 
-        # prng = kwargs.get('prng', get_prng())
-
         self = cls(data, prng=prng, world=world)
         self.mode = mode
         self.hdf_file = grp
+
         return self
 
 
