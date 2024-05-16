@@ -59,6 +59,8 @@ class PointCloud3D(myObject):
     def __init__(self, x=None, y=None, z=None, elevation=None):
         """ Initialize the class """
 
+        assert False, DeprecationWarning('This')
+
         # # Number of points in the cloud
         self._nPoints = 0
         # StatArray of the x co-ordinates

@@ -39,6 +39,8 @@ class CircularLoops(EmLoops):
     def __init__(self, orientation=None, moment=None, x=None, y=None, z=None, elevation=None, pitch=None, roll=None, yaw=None, radius=None, **kwargs):
         """ Initialize a loop in an EM system """
 
+        assert False, DeprecationWarning('This')
+
         super().__init__(x, y, z, elevation=elevation, orientation=orientation, moment=moment, pitch=pitch, roll=roll, yaw=yaw, **kwargs)
         # Radius of the loop
         self.radius = radius
