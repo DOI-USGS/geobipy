@@ -387,11 +387,12 @@ class Point(myObject):
 
         """
 
-        self.nPoints = self.nPoints + other.nPoints
-        self.x = hstack([self.x, other.x])
-        self.y = hstack([self.y, other.y])
-        self.z = hstack([self.z, other.z])
-        self.elevation = hstack([self.elevation, other.elevation])
+        self._nPoints = self.nPoints + other.nPoints
+        self._x = self._x.append(other.x)
+        self._y = self._y.append(other.y)
+        self._z = self._z.append(other.z)
+        self._elevation = self._elevation.append(other.elevation)
+        return self
 
     def axis(self, axis='x'):
         """Obtain the axis against which to plot values.

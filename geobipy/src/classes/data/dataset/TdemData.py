@@ -341,11 +341,15 @@ class TdemData(Data):
 
     def append(self, other):
 
-        super().append(self, other)
+        self._primary_field = self._primary_field.append(other.primary_field, axis=0)
+        self._secondary_field = self._secondary_field.append(other.secondary_field, axis=0)
 
-        # self.loopOffset = hstack([self.loopOffset, other.loopOffset])
-        self.T = hstack([self.T, other.T])
-        self.R = hstack(self.R, other.R)
+        super().append(other)
+
+        self.loop_pair = self.loop_pair.append(other.loop_pair)
+
+        return self
+
 
     # def _component_indices(self, component=0, system=0):
     #     assert component < self.n_components, ValueError("component must be < {}".format(self.n_components))

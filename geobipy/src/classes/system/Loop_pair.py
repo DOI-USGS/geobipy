@@ -136,6 +136,15 @@ class Loop_pair(Point, PointCloud3D):
         out._receiver = deepcopy(self.receiver)
         return out
 
+    def append(self, other):
+
+        super().append(other)
+
+        self.transmitter = self.transmitter.append(other.transmitter)
+        self.receiver = self.receiver.append(other.receiver)
+
+        return self
+
     def perturb(self):
         super().perturb()
         self.transmitter.perturb()

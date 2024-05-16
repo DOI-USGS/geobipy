@@ -571,12 +571,18 @@ class Data(Point):
         return s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
     def append(self, other):
+
+        self._relative_error = self.relative_error.append(other.relative_error)
+        self._additive_error = self.additive_error.append(other.additive_error)
+
         super().append(other)
-        self.fiducial = hstack([self.fiducial, other.fiducial])
-        self.lineNumber = hstack([self.lineNumber, other.lineNumber])
-        self.data = vstack([self.data, other.data])
-        self.predictedData = vstack([self.predictedData, other.predictedData])
-        self.std = vstack([self.std, other.std])
+        self._fiducial = self._fiducial.append(other.fiducial)
+        self._lineNumber = self._lineNumber.append(other.lineNumber)
+        self._data = self._data.append(other.data, axis=0)
+        self._predictedData = self._predictedData.append(other.predictedData, axis=0)
+        self._std = self._std.append(other.std, axis=0)
+
+        return self
 
     def data_misfit(self, squared=False):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data

@@ -259,8 +259,10 @@ class FdemData(Data):
 
         super().append(other)
 
-        self.powerline = hstack([self.powerline, other.powerline])
-        self.magnetic = hstack([self.magnetic, other.magnetic])
+        self.powerline = self.powerline.append(other.powerline)
+        self.magnetic = self.magnetic.append(other.magnetic)
+
+        return self
 
 
     # def getChannel(self, channel):
