@@ -436,8 +436,6 @@ class Model(myObject):
 
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
-            # print(f'{Wz.shape=}')
-            # print(f'{self.gradient.prior.variance.shape=}')
 
             operator += dot(Wz.T, dot(self.gradient.priorDerivative(order=2), Wz))
 
