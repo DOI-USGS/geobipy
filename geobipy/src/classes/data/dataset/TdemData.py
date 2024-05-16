@@ -324,20 +324,9 @@ class TdemData(Data):
     #         self._transmitter = values
     def _as_dict(self):
         out, order = super()._as_dict()
-        out['tx_pitch'] = squeeze(asarray([x.pitch for x in self.transmitter]))
-        out['tx_roll'] = squeeze(asarray([x.roll for x in self.transmitter]))
-        out['tx_yaw'] = squeeze(asarray([x.yaw for x in self.transmitter]))
-
-        offset = self.loop_pair.offset
-        for i, label in enumerate(['txrx_dx','txrx_dy','txrx_dz']):
-            out[label] = squeeze(offset[:, i])
-
-        out['rx_pitch'] = squeeze(asarray([x.pitch for x in self.receiver]))
-        out['rx_roll'] = squeeze(asarray([x.roll for x in self.receiver]))
-        out['rx_yaw'] = squeeze(asarray([x.yaw for x in self.receiver]))
-
-        order = [*order[:6], 'tx_pitch', 'tx_roll', 'tx_yaw', 'txrx_dx', 'txrx_dy', 'txrx_dz', 'rx_pitch', 'rx_roll', 'rx_yaw', *order[6:]]
-        return out, order
+        tmp, o = self.loop_pair._as_dict()
+        order = [*order[:6], *o, *order[6:]]
+        return out | tmp, order
 
     def append(self, other):
 
