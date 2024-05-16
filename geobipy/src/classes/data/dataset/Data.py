@@ -67,7 +67,8 @@ class Data(Point):
         Data class
 
     """
-    __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file', '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
+    __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file',
+                 '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
                  '_system', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_channels')
 
     def __init__(self, components=None, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channel_names=None, **kwargs):
