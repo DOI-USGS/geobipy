@@ -15,6 +15,9 @@ class EmLoops(PointCloud3D, ABC):
     single = EmLoop
 
     def __init__(self, x=None, y=None, z=None, elevation=None, orientation=None, moment=None, pitch=None, roll=None, yaw=None, **kwargs):
+
+        assert False, DeprecationWarning('This')
+
         super().__init__(x, y, z, elevation, **kwargs)
 
         # Orientation of the loop dipole
