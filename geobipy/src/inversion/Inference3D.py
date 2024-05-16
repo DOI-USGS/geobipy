@@ -3,11 +3,12 @@ Class to handle the HDF5 result files for a full data set.
 """
 from os.path import join
 from os import listdir
+from copy import deepcopy
 from pathlib import Path
 import time
 from pprint import pprint
 from numpy import atleast_1d, arange, argsort, argwhere, asarray, column_stack, cumsum, divide, empty, exp, float64
-from numpy import full, hstack, int32, int64, log10, logical_not, linspace, load, max, nan,  nanmin, nanmax, newaxis
+from numpy import full, hstack, integer, int32, int64, log10, logical_not, linspace, load, max, nan,  nanmin, nanmax, newaxis
 from numpy import unique, r_, repeat, s_, save, size, sort, squeeze, std, sum, tile, uint64, unique, vstack, where, zeros
 from numpy import all as npall
 
@@ -45,11 +46,12 @@ import progressbar
 class Inference3D(myObject):
     """ Class to define results from Inv_MCMC for a full data set """
 
-    def __init__(self, data, prng, world=None, debug=False):#directory, system_file_path, files=None, mpi_enabled=False, mode='r+', world=None):
+    def __init__(self, data, prng, world=None, global_access=True, debug=False):#directory, system_file_path, files=None, mpi_enabled=False, mode='r+', world=None):
         """ Initialize the 3D inference
         directory = directory containing folders for each line of data results
         """
         self.world = world
+        self.global_access = global_access
 
         self.data = data
 
@@ -87,31 +89,52 @@ class Inference3D(myObject):
 
 
     @classmethod
-    def fromHdf(cls, grp, prng, world=None, **kwargs):
-        # if isinstance(grp, (Path, str)):
-        #     tmp = {}
-        #     if world is not None:
-        #         tmp['driver'] = 'mpio'
-        #         tmp['comm'] = world
+    def fromHdf(cls, directory, prng, world=None, global_access=False, **kwargs):
+        """Initialize a 3D set of Inferences with HDF5 files.
 
-        #     grp = h5py.File(grp, mode, **tmp)
+        Only opens the files, data are loaded when required.
 
-        lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in Inference3D._get_h5Files(grp)]
+        Parameters
+        ----------
+        directory : str
+            The folder of h5files, each file is a line.
+        prng : numpy.Generator
+            The pseudo-random number generator to instantiate. Only used when we are inferring, not reading and plotting
+        world : mpi4p4.MPI.COMM_WORLD, optional
+            MPI communicator used for parallel processing.
+        global_access : bool, optional
+            Whether to open all hdf5 files with the communicator or chunks of files locally on each rank.
 
-        data = lines[0].data
+        """
+
+        h5_files = Inference3D._get_h5Files(directory)
+
+        if world is None:
+            lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in h5_files]
+
+        else:
+            if global_access:
+                lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in h5_files]
+            else:
+                start, chunk = loadBalance1D_shrinkingArrays(len(h5_files), world.size)
+                my_files = h5_files[start[world.rank]:start[world.rank]+chunk[world.rank]]
+                lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in my_files]
+
+        data = deepcopy(lines[0].data)
+
         for line in lines[1:]:
-            data.append(line.data)
+            t = line.data
+            data = data.append(line.data)
 
-        self = cls(data, world=world, prng=prng)
+        self = cls(data, world=world, prng=prng, global_access=global_access)
         self.mode = kwargs.get('mode', 'r')
-        self.hdf_file = grp
-        self.lines = lines
+        self._lines = lines
         return self
 
     def open(self, directory, **kwargs):
         assert kwargs.get('mode', 'r') in ('r', 'r+', 'a', 'w'), ValueError("mode must be in ('r', 'r+', 'a', 'w')")
 
-        self.lines = [Inference2D.fromHdf(file, prng=self.prng, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
+        self._lines = [Inference2D.fromHdf(file, prng=self.prng, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
 
     @staticmethod
     def _get_h5Files(directory, files=None, **kwargs):
@@ -150,8 +173,16 @@ class Inference3D(myObject):
     @data.setter
     def data(self, value):
         assert isinstance(value, Data), TypeError("data must have type geobipy.Data")
-        assert value.nPoints > 0, ValueError("Data has no value. nPoints is 0.")
         self._data = value
+
+    @property
+    def global_access(self):
+        return self._global_access
+
+    @global_access.setter
+    def global_access(self, value):
+        assert isinstance(value, bool), ValueError("global_access must have type bool")
+        self._global_access = value
 
     @property
     def world(self):
@@ -353,12 +384,14 @@ class Inference3D(myObject):
 
     @property
     def lines(self):
-        return self._lines
-
-    @lines.setter
-    def lines(self, values):
-        assert all([isinstance(x, Inference2D) for x in values]), TypeError('lines must have type geobipy.Inference2D')
-        self._lines = values
+        if self.parallel_access:
+            if self.global_access:
+                start, chunk = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+                return self._lines[start[self.rank] : start[self.rank]+chunk[self.rank]]
+            else:
+                return self._lines
+        else:
+            return self._lines
 
     @property
     def lineNumber(self):
@@ -558,7 +591,7 @@ class Inference3D(myObject):
         from ..base import MPI as myMPI
 
         lineNumber = self.lineNumber
-        Inference2D = self.lines
+        Inference2D = self._lines
         world = self.world
 
         # Initialize the worker process to go
@@ -584,7 +617,7 @@ class Inference3D(myObject):
             inference = Inference1D(prng=self.prng, world=self.world, **options)
             inference.initialize(datapoint)
 
-            failed = inference.infer(hdf_file_handle=self.lines[iLine].hdf_file)
+            failed = inference.infer(hdf_file_handle=self._lines[iLine].hdf_file)
 
             if failed and inference.datapoint.n_active_channels > 0:
                 myMPI.print(f"datapoint --line={datapoint.lineNumber.item()} --fiducial={datapoint.fiducial.item()} failed to converge")
@@ -1238,7 +1271,7 @@ class Inference3D(myObject):
 
         return squeeze(iLine), squeeze(index)
 
-    def loop_over(self, *args, **kwargs):
+    def progress_bar(self, iterable, *args, **kwargs):
         """Generate a loop range.
 
         Tracks progress on the head rank only if parallel.
@@ -1248,18 +1281,20 @@ class Inference3D(myObject):
         value : int
             Size of the loop to generate
         """
+        if isinstance(iterable, (int, integer)):
+            this = range(iterable, *args, **kwargs)
+        else:
+            this = iterable
+
+        bar = progressbar.ProgressBar()
 
         if self.parallel_access:
-            bar = range(*args, **kwargs)
-
             if self.rank == 0:
-                Bar = progressbar.ProgressBar()
-                bar = Bar(bar)
-            return bar
-
+                return bar(this)
+            else:
+                return this
         else:
-            bar = progressbar.ProgressBar()
-            return bar(range(*args, **kwargs))
+            return bar(this)
 
     @property
     def fiducials(self):
@@ -1812,6 +1847,21 @@ class Inference3D(myObject):
             values.writeHdf(f, 'marginal_probability', index=i)
 
         f.close()
+
+    def summarize_lines(self, lines=None, **kwargs):
+
+        if lines is None:
+            lines = self.lines
+
+        bar = self.progress_bar(lines)
+
+        for this in bar:
+            fig = this.plot_summary(**kwargs)
+            fig.savefig(f"{this.line_number}.png")
+            plt.close(fig)
+            this.close()
+            del this
+
 
     def scatter_z_slice_animate(self, variable, filename, **kwargs):
 
