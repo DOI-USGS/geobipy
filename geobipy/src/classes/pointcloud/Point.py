@@ -90,13 +90,14 @@ class Point(myObject):
         return out
 
     def __deepcopy__(self, memo={}):
-        result = type(self).__new__(type(self))
-        result._nPoints = self.nPoints
-        result._x = deepcopy(self.x)
-        result._y = deepcopy(self.y)
-        result._z = deepcopy(self.z)
-        result._elevation = deepcopy(self.elevation)
-        return result
+        out = type(self).__new__(type(self))
+
+        out._nPoints = self.nPoints
+        out._x = deepcopy(self.x, memo=memo)
+        out._y = deepcopy(self.y, memo=memo)
+        out._z = deepcopy(self.z, memo=memo)
+        out._elevation = deepcopy(self.elevation, memo=memo)
+        return out
 
     def __getitem__(self, i):
         """Define get item

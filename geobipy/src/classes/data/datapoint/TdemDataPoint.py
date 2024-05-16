@@ -317,11 +317,11 @@ class TdemDataPoint(EmDataPoint):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out.system = self._system
-        out._loop_pair = deepcopy(self.loop_pair)
-        out._primary_field = deepcopy(self.primary_field)
-        out._secondary_field = deepcopy(self.secondary_field)
-        out._predicted_primary_field = deepcopy(self.predicted_primary_field)
-        out._predicted_secondary_field = deepcopy(self.predicted_secondary_field)
+        out._loop_pair = deepcopy(self.loop_pair, memo=memo)
+        out._primary_field = deepcopy(self.primary_field, memo=memo)
+        out._secondary_field = deepcopy(self.secondary_field, memo=memo)
+        out._predicted_primary_field = deepcopy(self.predicted_primary_field, memo=memo)
+        out._predicted_secondary_field = deepcopy(self.predicted_secondary_field, memo=memo)
 
         return out
 
