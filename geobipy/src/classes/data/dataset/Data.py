@@ -3,7 +3,7 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 """
 from copy import copy, deepcopy
 
-from numpy import allclose, any, arange, asarray, atleast_1d, cumsum, float64, full
+from numpy import allclose, any, arange, asarray, atleast_1d, cumsum, diff, float64, full
 from numpy import hstack, int32, isnan, nan, ndim
 from numpy import ones, r_, s_, shape, size, sqrt, sum, unique
 from numpy import vstack, where, zeros
@@ -260,7 +260,7 @@ class Data(Point):
         """Get the difference between the predicted and observed data,
 
         .. math::
-            '\delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}'.
+            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
 
         Returns
         -------
@@ -578,6 +578,15 @@ class Data(Point):
         self.predictedData = vstack([self.predictedData, other.predictedData])
         self.std = vstack([self.std, other.std])
 
+    def check_line_numbers(self):
+
+        ln = unique(self.lineNumber)
+
+        import numpy as np
+        bad_lines = [l for l in ln if sum(diff(asarray(self.lineNumber == l, dtype=np.int8)) > 0) > 1]
+
+        return bad_lines
+
     def data_misfit(self, squared=False):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
@@ -684,7 +693,12 @@ class Data(Point):
 
     def line(self, line):
         """ Get the data from the given line number """
-        i = where(self.lineNumber == line)[0]
+        if size(line) > 1:
+            i = where(self.lineNumber == line[0])[0]
+            for j in range(1, size(line)):
+                i = hstack([i, where(self.lineNumber == line[j])[0]])
+        else:
+            i = where(self.lineNumber == line)[0]
         assert (i.size > 0), 'Could not get line with number {}'.format(line)
         return self[i]
 
