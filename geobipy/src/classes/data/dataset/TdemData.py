@@ -12,7 +12,6 @@ from pathlib import Path
 from pandas import read_csv
 
 from ...system.CircularLoop import CircularLoop
-from ...system.CircularLoops import CircularLoops
 from ...pointcloud.Point import Point
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
@@ -237,9 +236,9 @@ class TdemData(Data):
     # @receiver.setter
     # def receiver(self, values):
     #     if (values is None):
-    #         self._receiver = CircularLoops()
+    #         self._receiver = CircularLoop()
     #     else:
-    #         assert isinstance(values, CircularLoops), ValueError('receiver must have type geobipy.CircularLoops')
+    #         assert isinstance(values, CircularLoop), ValueError('receiver must have type geobipy.CircularLoop')
     #         if self.nPoints == 0:
     #             self.nPoints = values.nPoints
     #         assert values.nPoints == self.nPoints, ValueError("receiver must have size {}".format(self.nPoints))
@@ -314,9 +313,9 @@ class TdemData(Data):
     # def transmitter(self, values):
 
     #     if (values is None):
-    #         self._transmitter = CircularLoops()
+    #         self._transmitter = CircularLoop()
     #     else:
-    #         assert isinstance(values, CircularLoops), ValueError('transmitter must have type geobipy.CircularLoops')
+    #         assert isinstance(values, CircularLoop), ValueError('transmitter must have type geobipy.CircularLoop')
     #         if self.nPoints == 0:
     #             self.nPoints = values.nPoints
     #         assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
@@ -466,7 +465,7 @@ class TdemData(Data):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        transmitter = CircularLoops(x=self.x,
+        transmitter = CircularLoop(x=self.x,
                                     y=self.y,
                                     z=self.z,
                                     pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
@@ -475,7 +474,7 @@ class TdemData(Data):
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        receiver = CircularLoops(x = transmitter.x + loopOffset[:, 0],
+        receiver = CircularLoop(x = transmitter.x + loopOffset[:, 0],
                                  y = transmitter.y + loopOffset[:, 1],
                                  z = transmitter.z + loopOffset[:, 2],
                                  pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
@@ -1221,11 +1220,11 @@ class TdemData(Data):
         ds.z = full(model.x.nCells, fill_value=30.0)
         ds.elevation = zeros(model.x.nCells)
 
-        ds.loop_pair.transmitter = CircularLoops(x=ds.x, y=ds.y, z=ds.z,
+        ds.loop_pair.transmitter = CircularLoop(x=ds.x, y=ds.y, z=ds.z,
                         #  pitch=0.0, roll=0.0, yaw=0.0,
                         radius=full(model.x.nCells, ds.system[0].loopRadius()))
 
-        ds.loop_pair.receiver = CircularLoops(x=ds.transmitter.x -13.0,
+        ds.loop_pair.receiver = CircularLoop(x=ds.transmitter.x -13.0,
                         y=ds.transmitter.y + 0.0,
                         z=ds.transmitter.z + 2.0,
                         #  pitch=0.0, roll=0.0, yaw=0.0,

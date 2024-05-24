@@ -16,7 +16,6 @@ from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
 from ...system.CircularLoop import CircularLoop
-from ...system.CircularLoops import CircularLoops
 from ...system.Loop_pair import Loop_pair
 from ....base import plotting as cP
 
@@ -224,7 +223,7 @@ class TempestData(TdemData):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.loop_pair.transmitter = CircularLoops(x=self.x,
+        self.loop_pair.transmitter = CircularLoop(x=self.x,
                                          y=self.y,
                                          z=self.z,
                                          pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
@@ -233,7 +232,7 @@ class TempestData(TdemData):
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.loop_pair.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
+        self.loop_pair.receiver = CircularLoop(x = self.transmitter.x + loopOffset[:, 0],
                                       y = self.transmitter.y + loopOffset[:, 1],
                                       z = self.transmitter.z + loopOffset[:, 2],
                                       pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
@@ -497,7 +496,7 @@ class TempestData(TdemData):
             roll = asarray(gdf['Tx_Roll'][indices])
             yaw = asarray(gdf['Tx_Yaw'][indices])
 
-            self.transmitter = CircularLoops(x=self.x, y=self.y, z=self.z,
+            self.transmitter = CircularLoop(x=self.x, y=self.y, z=self.z,
                                              pitch=pitch, roll=roll, yaw=yaw,
                                              radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
@@ -507,7 +506,7 @@ class TempestData(TdemData):
 
             loopOffset = vstack([asarray(gdf['HSep_GPS'][indices]), asarray(gdf['TSep_GPS'][indices]), asarray(gdf['VSep_GPS'][indices])]).T
 
-            self.receiver = CircularLoops(x=self.transmitter.x + loopOffset[:, 0],
+            self.receiver = CircularLoop(x=self.transmitter.x + loopOffset[:, 0],
                                           y=self.transmitter.y + loopOffset[:, 1],
                                           z=self.transmitter.z + loopOffset[:, 2],
                                           pitch=pitch, roll=roll, yaw=yaw,
@@ -635,14 +634,14 @@ class TempestData(TdemData):
         ds.elevation = zeros(model.x.nCells)
         ds.fiducial = arange(model.x.nCells)
 
-        transmitter = CircularLoops(
+        transmitter = CircularLoop(
                         x = ds.x, y = ds.y, z = ds.z,
                         pitch = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                         roll  = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                         yaw   = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
                         radius = full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-        receiver = CircularLoops(
+        receiver = CircularLoop(
                         x = transmitter.x - 107.0,
                         y = transmitter.y + 0.0,
                         z = transmitter.z - 45.0,

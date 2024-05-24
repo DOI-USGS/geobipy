@@ -8,7 +8,7 @@ from copy import deepcopy
 from pandas import read_csv
 
 
-from .CircularLoops import CircularLoops
+from .CircularLoop import CircularLoop
 from ...classes.core.myObject import myObject
 from ...classes.core import StatArray
 
@@ -115,10 +115,10 @@ class FdemSystem(myObject):
     @receiver.setter
     def receiver(self, values):
         if values is None:
-            self._receiver = CircularLoops()
+            self._receiver = CircularLoop()
             return
 
-        assert isinstance(values, CircularLoops), ValueError('receiver must have type geobipy.CircularLoops, not {}'.format(type(values)))
+        assert isinstance(values, CircularLoop), ValueError('receiver must have type geobipy.CircularLoop, not {}'.format(type(values)))
         assert values.nPoints == self.nFrequencies, ValueError("Must have {} receivers, one for each frequency".format(self.nFrequencies))
 
         self._receiver = values
@@ -130,10 +130,10 @@ class FdemSystem(myObject):
     @transmitter.setter
     def transmitter(self, values):
         if values is None:
-            self._transmitter = CircularLoops()
+            self._transmitter = CircularLoop()
             return
 
-        assert isinstance(values, CircularLoops), ValueError('transmitter must have type geobipy.CircularLoops, not {}'.format(type(values)))
+        assert isinstance(values, CircularLoop), ValueError('transmitter must have type geobipy.CircularLoop, not {}'.format(type(values)))
         assert values.nPoints == self.nFrequencies, ValueError("Must have {} transmitters, one for each frequency".format(self.nFrequencies))
 
         self._transmitter = values
@@ -165,12 +165,12 @@ class FdemSystem(myObject):
 
         frequencies = asarray(values[:, 0], dtype=float64)
 
-        transmitters = CircularLoops(orientation = values[:, 1],
+        transmitters = CircularLoop(orientation = values[:, 1],
                                     moment = asarray(values[:, 2], dtype=float64),
                                     x = asarray(values[:, 3], dtype=float64),
                                     y = asarray(values[:, 4], dtype=float64),
                                     z = asarray(values[:, 5], dtype=float64))
-        receivers = CircularLoops(orientation = values[:, 6],
+        receivers = CircularLoop(orientation = values[:, 6],
                                     moment = asarray(values[:, 7], dtype=float64),
                                     x = asarray(values[:, 8], dtype=float64),
                                     y = asarray(values[:, 9], dtype=float64),
@@ -249,8 +249,8 @@ class FdemSystem(myObject):
     def fromHdf(cls, grp):
         """ Reads the object from a HDF file """
         frequencies = StatArray.StatArray.fromHdf(grp['freq'])
-        transmitter = CircularLoops.fromHdf(grp['T'])
-        receiver = CircularLoops.fromHdf(grp['R'])
+        transmitter = CircularLoop.fromHdf(grp['T'])
+        receiver = CircularLoop.fromHdf(grp['R'])
 
         out = cls(frequencies, transmitter, receiver)
         return out
@@ -271,8 +271,8 @@ class FdemSystem(myObject):
     @classmethod
     def Irecv(cls, source, world):
         frequencies = StatArray.StatArray.Irecv(source=source, world=world)
-        transmitter = CircularLoops.Irecv(source=source, world=world)
-        receiver = CircularLoops.Irecv(source=source, world=world)
+        transmitter = CircularLoop.Irecv(source=source, world=world)
+        receiver = CircularLoop.Irecv(source=source, world=world)
 
         return cls(frequencies, transmitter, receiver)
 
