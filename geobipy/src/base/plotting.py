@@ -36,6 +36,9 @@ def make_colourmap(seq, cname):
         matplotlib.colors.LinearSegmentedColormap.
 
     """
+    if cname in colormaps:
+        return
+
     nl = len(seq)
     dl = 1.0 / (len(seq))
     l = []
@@ -53,7 +56,7 @@ def make_colourmap(seq, cname):
             cdict['green'].append([item, g1, g2])
             cdict['blue'].append([item, b1, b2])
     myMap = mcolors.LinearSegmentedColormap(cname, cdict, 256)
-    plt.register_cmap(name=cname, cmap=myMap)
+    colormaps.register(name=cname, cmap=myMap)
     return myMap
 
 def white_to_colour(rgba, N=256):
