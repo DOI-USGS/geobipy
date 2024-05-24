@@ -395,11 +395,12 @@ class Point(myObject):
 
         """
 
+        self._x = self.x.append(other.x)
+        self._y = self.y.append(other.y)
+        self._z = self.z.append(other.z)
+        self._elevation = self.elevation.append(other.elevation)
         self._nPoints = self.nPoints + other.nPoints
-        self._x = self._x.append(other.x)
-        self._y = self._y.append(other.y)
-        self._z = self._z.append(other.z)
-        self._elevation = self._elevation.append(other.elevation)
+
         return self
 
     def axis(self, axis='x'):
