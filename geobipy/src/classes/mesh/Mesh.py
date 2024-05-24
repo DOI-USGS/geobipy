@@ -107,8 +107,6 @@ class Mesh(myObject):
                 out += re
         out = power_(out, ax.log)
 
-        out[i] = nan
-
         out.name = 'Mean ' + ax.name
         out.units = ax.units
 
