@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DataPoint &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=eafc0fe6" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=61a4c737" />
@@ -364,8 +364,10 @@ other NumPy functions like <cite>numpy.zeros</cite> and <cite>numpy.ones</cite>.
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>New code should use the <code class="docutils literal notranslate"><span class="pre">standard_normal</span></code> method of a <code class="docutils literal notranslate"><span class="pre">default_rng()</span></code>
-instance instead; please see the <span class="xref std std-ref">random-quick-start</span>.</p>
+<p>New code should use the
+<cite>~numpy.random.Generator.standard_normal</cite>
+method of a <cite>~numpy.random.Generator</cite> instance instead;
+please see the <span class="xref std std-ref">random-quick-start</span>.</p>
 </div>
 <p>If positive int_like arguments are provided, <cite>randn</cite> generates an array
 of shape <code class="docutils literal notranslate"><span class="pre">(d0,</span> <span class="pre">d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></code>, filled
@@ -406,14 +408,18 @@ no parameters were supplied.</p>
 </dl>
 </div>
 <p class="rubric">Notes</p>
-<p>For random samples from <span class="math notranslate nohighlight">\(N(\mu, \sigma^2)\)</span>, use:</p>
-<p><code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">*</span> <span class="pre">np.random.randn(...)</span> <span class="pre">+</span> <span class="pre">mu</span></code></p>
+<p>For random samples from the normal distribution with mean <code class="docutils literal notranslate"><span class="pre">mu</span></code> and
+standard deviation <code class="docutils literal notranslate"><span class="pre">sigma</span></code>, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sigma</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="o">+</span> <span class="n">mu</span>
+</pre></div>
+</div>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">()</span>
 <span class="go">2.1923875335537315  # random</span>
 </pre></div>
 </div>
-<p>Two-by-four array of samples from N(3, 6.25):</p>
+<p>Two-by-four array of samples from the normal distribution with
+mean 3 and standard deviation 2.5:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="mi">3</span> <span class="o">+</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
 <span class="go">array([[-4.49401501,  4.00950034, -1.81814867,  7.29718677],   # random</span>
 <span class="go">       [ 0.39924804,  4.68456316,  4.99394529,  4.84057254]])  # random</span>

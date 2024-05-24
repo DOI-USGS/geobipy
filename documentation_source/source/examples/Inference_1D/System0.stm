@@ -1,61 +1,83 @@
 System Begin
-	Name = Tempest-30.0Hz
+	Name = SkyTemHighMoment-ElkHills
 	Type = Time Domain
-
 	Transmitter Begin
 		NumberOfTurns = 1
-		PeakCurrent   = 0.5
+		PeakCurrent   = 1
 		LoopArea      = 1
-		BaseFrequency = 30
+		BaseFrequency = 30.0
+		WaveformDigitisingFrequency = 491520
 		WaveFormCurrent Begin
-			-0.0166666667    0.0
-			-0.0166612413    1.0
-			-0.0000054255    1.0
-			 0.0000000000    0.0
-			 0.0000054255   -1.0
-			 0.0166612413   -1.0
-			 0.0166666667    0.0
+-4.00E-03	0.00E+00
+-3.91E-03	3.17E-01
+-3.81E-03	6.30E-01
+-3.72E-03	8.79E-01
+-3.68E-03	9.61E-01
+-2.30E-03	9.74E-01
+-1.01E-03	9.88E-01
+0.00E+00	1.00E+00
+3.25E-06	9.91E-01
+1.00E-04	7.02E-01
+2.02E-04	3.78E-01
+2.82E-04	1.16E-01
+3.08E-04	2.79E-02
+3.13E-04	1.21E-02
+3.15E-04	6.61E-03
+3.17E-04	3.03E-03
+3.19E-04	0.00E+00
+0.012666667	0.00E+00
+
 		WaveFormCurrent End
-		WaveformDigitisingFrequency = 1200000
 	Transmitter End
+Receiver Begin
+	NumberOfWindows = 26
+	WindowWeightingScheme = AreaUnderCurve
+	WindowTimes Begin
+3.796E-04	3.872E-04
+3.876E-04	3.972E-04
+3.976E-04	4.102E-04
+4.106E-04	4.262E-04
+4.266E-04	4.462E-04
+4.466E-04	4.712E-04
+4.716E-04	5.022E-04
+5.026E-04	5.422E-04
+5.426E-04	5.932E-04
+5.936E-04	6.562E-04
+6.566E-04	7.372E-04
+7.376E-04	8.382E-04
+8.386E-04	9.652E-04
+9.656E-04	1.126E-03
+1.127E-03	1.328E-03
+1.329E-03	1.583E-03
+1.584E-03	1.905E-03
+1.906E-03	2.311E-03
+2.312E-03	2.822E-03
+2.823E-03	3.468E-03
+3.469E-03	4.260E-03
+4.261E-03	5.228E-03
+5.229E-03	6.413E-03
+6.414E-03	7.865E-03
+7.866E-03	9.641E-03
+9.642E-03	1.182E-02
 
-	Receiver Begin
-
-		NumberOfWindows = 15
-		WindowWeightingScheme = Boxcar
-
-		WindowTimes Begin
-			0.00000543	0.00001628
-			0.00002713	0.00003798
-			0.00004883	0.00005968
-			0.00007053	0.00010308
-			0.00011394	0.00016819
-			0.00017904	0.00027670
-			0.00028755	0.00045032
-			0.00046117	0.00071074
-			0.00072159	0.00110138
-			0.00111223	0.00170903
-			0.00171988	0.00266392
-			0.00267477	0.00416136
-			0.00417221	0.00650517
-			0.00651603	0.01008600
-			0.01009686	0.01666171
 		WindowTimes End
-
+		LowPassFilter Begin
+			CutOffFrequency = 300000 210000
+			Order           = 1       2
+		LowPassFilter End
 	Receiver End
-
-	ForwardModelling Begin
-
-		OutputType = B
-
-		XOutputScaling = 1e15
-		YOutputScaling = 0.0
-		ZOutputScaling = 1e15
+ForwardModelling Begin
+		//TX loop area is was 340.82 m^2 -> r = sqrt(340.82/pi)
+		ModellingLoopRadius = 10.416
+		OutputType = dB/dt
+		XOutputScaling = 0
+		YOutputScaling = 0
+		ZOutputScaling = 1
 		SecondaryFieldNormalisation  =  none
-
-		FrequenciesPerDecade = 6
+		FrequenciesPerDecade = 5
 		NumberOfAbsiccaInHankelTransformEvaluation = 21
-
 	ForwardModelling End
 
 System End
+
+

@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:00.000** total execution time for 0 files **from examples/Data**:
+**00:12.125** total execution time for 4 files **from examples/Data**:
 
 .. container::
 
@@ -32,6 +32,15 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - N/A
-     - N/A
-     - N/A
+   * - :ref:`sphx_glr_examples_Data_plot_tempest_dataset.py` (``plot_tempest_dataset.py``)
+     - 00:03.684
+     - 0.0
+   * - :ref:`sphx_glr_examples_Data_plot_pointcloud3d.py` (``plot_pointcloud3d.py``)
+     - 00:03.231
+     - 0.0
+   * - :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py` (``plot_frequency_dataset.py``)
+     - 00:02.948
+     - 0.0
+   * - :ref:`sphx_glr_examples_Data_plot_skytem_dataset.py` (``plot_skytem_dataset.py``)
+     - 00:02.262
+     - 0.0

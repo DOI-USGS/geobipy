@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Inference_2D_plot_inference_2d_skytem.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -23,7 +23,7 @@
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-150
+.. GENERATED FROM PYTHON SOURCE LINES 8-152
 
 
 
@@ -33,42 +33,42 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_001.png
-         :alt: skytem_512 glacial, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
+         :alt: skytem glacial, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_001.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_002.png
-         :alt: skytem_512 saline_clay, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
+         :alt: skytem saline_clay, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_002.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_003.png
-         :alt: skytem_512 resistive_dolomites
+         :alt: skytem resistive_dolomites, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_003.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_004.png
-         :alt: skytem_512 resistive_basement, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
+         :alt: skytem resistive_basement, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_004.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_005.png
-         :alt: skytem_512 coastal_salt_water
+         :alt: skytem coastal_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_005.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_006.png
-         :alt: skytem_512 ice_over_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
+         :alt: skytem ice_over_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_006.png
          :class: sphx-glr-multi-img
 
@@ -77,25 +77,507 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 
  .. code-block:: none
 
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x174c38ad0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x174c3a150
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x174763e50
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x17c642950
+    |   |   Shape: (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min: -602.5125
+    |   |   Max: -3.1875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x174db9bd0
+    |   |   Shape: (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min: -604.8
+    |   |   Max: -0.9
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x174760fd0
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x174c3a7d0
+    |   Shape: (79, 132)
+    |   Values: [[0.01052122 0.01052122 0.01016692 ... 0.01850636 0.01850636 0.01850636]
+    |    [0.01021697 0.01021697 0.01015663 ... 0.01602748 0.01602748 0.01602748]
+    |    [0.01011127 0.01011127 0.00988057 ... 0.01737969 0.01737969 0.01737969]
+    |    ...
+    |    [0.06832709 0.06832709 0.09870112 ... 0.09669862 0.09669862 0.09669862]
+    |    [0.08105957 0.08105957 0.09663905 ... 0.0909106  0.0909106  0.0909106 ]
+    |    [0.09148174 0.09148174 0.10054793 ... 0.11236812 0.11236812 0.11236812]]
+    |   Min: 0.006980451543462376
+    |   Max: 0.2038321789145052
+    |   has_posterior: False
+
+
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
       self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
       return (x0, y0, x1 - x0, y1 - y0)
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
       self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
       return (x0, y0, x1 - x0, y1 - y0)
-    resistive_dolomites
-    x and y arguments to pcolormesh cannot have non-finite values or be of type numpy.ma.MaskedArray with masked values
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x174c809d0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x174c82ed0
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x174216550
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x174c803d0
+    |   |   Shape: (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min: -602.5125
+    |   |   Max: -3.1875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x174c82550
+    |   |   Shape: (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min: -604.8
+    |   |   Max: -0.9
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x174c829d0
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x174d53e50
+    |   Shape: (79, 132)
+    |   Values: [[0.01033463 0.01033463 0.01022367 ... 0.01134772 0.01134772 0.01134772]
+    |    [0.01093141 0.01093141 0.01079545 ... 0.01121704 0.01121704 0.01121704]
+    |    [0.0102224  0.0102224  0.00899369 ... 0.01413742 0.01413742 0.01413742]
+    |    ...
+    |    [0.06788858 0.06788858 0.10332184 ... 0.07437715 0.07437715 0.07437715]
+    |    [0.08031206 0.08031206 0.09714714 ... 0.07756677 0.07756677 0.07756677]
+    |    [0.09189958 0.09189958 0.09936831 ... 0.10561892 0.10561892 0.10561892]]
+    |   Min: 0.007064692235206785
+    |   Max: 0.7521657625958085
+    |   has_posterior: False
+
+
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
       self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
       return (x0, y0, x1 - x0, y1 - y0)
-    coastal_salt_water
-    x and y arguments to pcolormesh cannot have non-finite values or be of type numpy.ma.MaskedArray with masked values
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x174a72cd0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x17be64150
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x174685f50
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x17be64450
+    |   |   Shape: (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min: -602.5125
+    |   |   Max: -3.1875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x17be645d0
+    |   |   Shape: (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min: -604.8
+    |   |   Max: -0.9
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x17be64550
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x174a73c50
+    |   Shape: (79, 132)
+    |   Values: [[0.02112514 0.02112514 0.02118673 ... 0.01963369 0.01963369 0.01963369]
+    |    [0.02012794 0.02012794 0.02015706 ... 0.02045956 0.02045956 0.02045956]
+    |    [0.01982581 0.01982581 0.01989992 ... 0.01430375 0.01430375 0.01430375]
+    |    ...
+    |    [0.00482815 0.00482815 0.00482815 ... 0.01235529 0.01235529 0.01235529]
+    |    [0.00347338 0.00347338 0.00347337 ... 0.00904771 0.00904771 0.00904771]
+    |    [0.00280732 0.00280732 0.00278377 ... 0.01122587 0.01122587 0.01122587]]
+    |   Min: 0.000917330743874903
+    |   Max: 6.893577245253312
+    |   has_posterior: False
+
+
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
       self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
+      return (x0, y0, x1 - x0, y1 - y0)
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x1752740d0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x174cbc6d0
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x1752135d0
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x174cbead0
+    |   |   Shape: (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min: -602.5125
+    |   |   Max: -3.1875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x174cbd6d0
+    |   |   Shape: (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min: -604.8
+    |   |   Max: -0.9
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x174cbe5d0
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x175277ad0
+    |   Shape: (79, 132)
+    |   Values: [[0.01171106 0.01171106 0.01150474 ... 0.0209344  0.0209344  0.0209344 ]
+    |    [0.00998759 0.00998759 0.01002506 ... 0.00200545 0.00200545 0.00200545]
+    |    [0.00967387 0.00967387 0.00963086 ... 0.002998   0.002998   0.002998  ]
+    |    ...
+    |    [0.06916639 0.06916639 0.07805965 ... 0.09969281 0.09969281 0.09969281]
+    |    [0.08151576 0.08151576 0.09357014 ... 0.09817375 0.09817375 0.09817375]
+    |    [0.09210769 0.09210769 0.09923809 ... 0.11325164 0.11325164 0.11325164]]
+    |   Min: 0.001399862547383794
+    |   Max: 0.23489486426293366
+    |   has_posterior: False
+
+
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
+      self._mtx[1, 2] += ty
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
+      return (x0, y0, x1 - x0, y1 - y0)
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x17a89efd0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x1750123d0
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x17b8cf5d0
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x175013bd0
+    |   |   Shape: (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min: -602.5125
+    |   |   Max: -3.1875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x1750127d0
+    |   |   Shape: (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min: -604.8
+    |   |   Max: -0.9
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x175010050
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x174cbc350
+    |   Shape: (79, 132)
+    |   Values: [[1.02274906 1.02274906 1.0245564  ... 1.09249798 1.09249798 1.09249798]
+    |    [1.02246109 1.02246109 1.02490237 ... 0.79417678 0.79417678 0.79417678]
+    |    [1.02655439 1.02655439 1.02684903 ... 1.16477248 1.16477248 1.16477248]
+    |    ...
+    |    [0.18075689 0.18075689 0.18075689 ... 0.04261216 0.04261216 0.04261216]
+    |    [0.14798426 0.14798426 0.14798426 ... 0.03894156 0.03894156 0.03894156]
+    |    [0.08446099 0.08446099 0.08446099 ... 0.03091314 0.03091314 0.03091314]]
+    |   Min: 0.004061097299450205
+    |   Max: 37.321525320580754
+    |   has_posterior: False
+
+
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
+      self._mtx[1, 2] += ty
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
+      return (x0, y0, x1 - x0, y1 - y0)
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x179ed4ad0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x179ed4450
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x17abcd5d0
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x179ed4050
+    |   |   Shape: (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min: -602.5125
+    |   |   Max: -3.1875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x179ed4d50
+    |   |   Shape: (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min: -604.8
+    |   |   Max: -0.9
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x179ed4bd0
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x179bd7ed0
+    |   Shape: (79, 132)
+    |   Values: [[0.00050436 0.00050436 0.00050445 ... 0.00059394 0.00059394 0.00059394]
+    |    [0.00020876 0.00020876 0.00020876 ... 0.00077604 0.00077604 0.00077604]
+    |    [0.00075824 0.00075824 0.00075833 ... 0.00102201 0.00102201 0.00102201]
+    |    ...
+    |    [0.00853636 0.00853636 0.00853721 ... 0.00245846 0.00245846 0.00245846]
+    |    [0.00904365 0.00904365 0.0090973  ... 0.00309043 0.00309043 0.00309043]
+    |    [0.00937106 0.00937106 0.00953559 ... 0.0040001  0.0040001  0.0040001 ]]
+    |   Min: 0.0002087568574496072
+    |   Max: 4.3269122357161915
+    |   has_posterior: False
+
+
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
+      self._mtx[1, 2] += ty
+    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
       return (x0, y0, x1 - x0, y1 - y0)
 
 
@@ -156,6 +638,8 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
        results_2d.plot_elevation(linewidth=0.3, ax=ax, xlabel=False, ylabel=False);
 
        plt.ylim([-550, 60])
+
+       print(results_2d.mean_parameters().summary)
 
        ax1 = fig.add_subplot(gs0[0, 1], sharex=ax, sharey=ax)
        results_2d.plot_mean_model(ax=ax1, wrap_clabel=True, **kwargs);
@@ -236,24 +720,24 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
        results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
        results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
-       plt.show()
-       # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
+       # plt.show()
+       plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
 
     if __name__ == '__main__':
        types = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
        for model in types:
-          try:
-             plot_2d_summary('../../../Parallel_Inference/', "skytem_512", model)
-          except Exception as e:
-             print(model)
-             print(e)
-             pass
+          # try:
+             plot_2d_summary('../../../Parallel_Inference/', "skytem", model)
+          # except Exception as e:
+          #    print(model)
+          #    print(e)
+          #    pass
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 10.130 seconds)
+   **Total running time of the script:** (0 minutes 23.702 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_2D_plot_inference_2d_skytem.py:

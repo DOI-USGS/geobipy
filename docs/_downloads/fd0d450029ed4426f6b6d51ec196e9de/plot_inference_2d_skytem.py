@@ -55,6 +55,8 @@ def plot_2d_summary(folder, data_type, model_type):
 
    plt.ylim([-550, 60])
 
+   print(results_2d.mean_parameters().summary)
+
    ax1 = fig.add_subplot(gs0[0, 1], sharex=ax, sharey=ax)
    results_2d.plot_mean_model(ax=ax1, wrap_clabel=True, **kwargs);
    results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
@@ -134,17 +136,17 @@ def plot_2d_summary(folder, data_type, model_type):
    results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
    results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
-   plt.show()
-   # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
+   # plt.show()
+   plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
 
 if __name__ == '__main__':
    types = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
    for model in types:
-      try:
-         plot_2d_summary('../../../Parallel_Inference/', "skytem_512", model)
-      except Exception as e:
-         print(model)
-         print(e)
-         pass
+      # try:
+         plot_2d_summary('../../../Parallel_Inference/', "skytem", model)
+      # except Exception as e:
+      #    print(model)
+      #    print(e)
+      #    pass

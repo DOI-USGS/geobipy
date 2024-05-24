@@ -7,7 +7,7 @@ from os.path import join
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
-from geobipy import CircularLoops
+from geobipy import CircularLoop
 from geobipy import FdemSystem
 from geobipy import FdemData
 from geobipy import FdemDataPoint
@@ -29,7 +29,7 @@ frequencies = np.asarray([380.0, 1776.0, 3345.0, 8171.0, 41020.0, 129550.0])
 
 # Transmitter positions are defined relative to the observation locations in the data
 # This is usually a constant offset for all data points.
-transmitters = CircularLoops(orientation=['z','z','x','z','z','z'],
+transmitters = CircularLoop(orientation=['z','z','x','z','z','z'],
                              moment=np.r_[1, 1, -1, 1, 1, 1],
                              x = np.r_[0,0,0,0,0,0],
                              y = np.r_[0,0,0,0,0,0],
@@ -40,7 +40,7 @@ transmitters = CircularLoops(orientation=['z','z','x','z','z','z'],
                              radius = np.r_[1,1,1,1,1,1])
 
 # Receiver positions are defined relative to the transmitter
-receivers = CircularLoops(orientation=['z','z','x','z','z','z'],
+receivers = CircularLoop(orientation=['z','z','x','z','z','z'],
                              moment=np.r_[1, 1, -1, 1, 1, 1],
                              x = np.r_[7.91, 7.91, 9.03, 7.91, 7.91, 7.89],
                              y = np.r_[0,0,0,0,0,0],
@@ -147,7 +147,7 @@ print(fdp.data_misfit())
 
 # Plot the misfits for a range of half space conductivities
 plt.figure()
-_ = fdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+_ = fdp.plot_halfspace_responses(-6.0, 4.0, 200)
 
 plt.title("Halfspace responses");
 
@@ -180,7 +180,6 @@ fdp.set_proposals(relativeProposal, additiveProposal, z_proposal=z_proposal)
 
 # With priors set we can auto generate the posteriors
 fdp.set_posteriors()
-
 
 nCells = 19
 par = StatArray(np.linspace(0.01, 0.1, nCells), "Conductivity", "$\frac{S}{m}$")

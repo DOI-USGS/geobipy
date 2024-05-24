@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Inference_1D_plot_inference_1d_resolve.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -163,10 +163,28 @@ The directory where HDF files will be stored
     Files are being created for data files ..//..//supplementary////data//Resolve_glacial.csv and system files ..//..//supplementary////data//..//data/FdemSystem2.stm
     Created hdf5 file for line 0.0 with 79 data points
     Created hdf5 files 79 total data points
-    Created hdf5 files in 0:00:06.650509 h:m:s
-    i=5000, k=2, acc=*42.520, 0.007 s/Model, 37.213 s Elapsed, eta=--:--:-- h:m:s
+    Created hdf5 files in 0:00:00.099114 h:m:s
+    i=500, k=2, acc=*46.800, 0.005 s/Model, 2.727 s Elapsed, eta=--:--:-- h:m:s
 
-    Remaining Points -30/1 || Elapsed Time: 0:00:39.027413 h:m:s || ETA 0:00:01.258949 h:m:s
+    i=1000, k=3, acc=*57.400, 0.006 s/Model, 5.934 s Elapsed, eta=--:--:-- h:m:s
+
+    i=1500, k=3, acc=*18.600, 0.008 s/Model, 9.752 s Elapsed, eta=--:--:-- h:m:s
+
+    i=2000, k=2, acc=*9.200, 0.007 s/Model, 13.477 s Elapsed, eta=--:--:-- h:m:s
+
+    i=2500, k=3, acc=*10.200, 0.008 s/Model, 17.422 s Elapsed, eta=--:--:-- h:m:s
+
+    i=3000, k=4, acc=*12.200, 0.007 s/Model, 21.055 s Elapsed, eta=--:--:-- h:m:s
+
+    i=3500, k=3, acc=*12.800, 0.008 s/Model, 24.952 s Elapsed, eta=--:--:-- h:m:s
+
+    i=4000, k=3, acc=*17.600, 0.008 s/Model, 28.722 s Elapsed, eta=--:--:-- h:m:s
+
+    i=4500, k=3, acc=*13.400, 0.007 s/Model, 32.463 s Elapsed, eta=--:--:-- h:m:s
+
+    i=5000, k=3, acc=*15.600, 0.008 s/Model, 36.314 s Elapsed, eta=--:--:-- h:m:s
+
+    Remaining Points -30/1 || Elapsed Time: 0:00:37.097808 h:m:s || ETA 0:00:01.196703 h:m:s
 
 
 
@@ -174,7 +192,7 @@ The directory where HDF files will be stored
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 50.537 seconds)
+   **Total running time of the script:** (0 minutes 37.529 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_1D_plot_inference_1d_resolve.py:

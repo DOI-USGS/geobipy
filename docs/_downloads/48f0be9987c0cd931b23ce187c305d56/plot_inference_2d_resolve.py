@@ -43,7 +43,7 @@ def plot_2d_summary(folder, data_type, model_type):
    gs0 = fig.add_gridspec(6, 2, hspace=1.0)
 
    true_model = Model.create_synthetic_model(model_type)
-   true_model.mesh.y_edges = true_model.mesh.y_edges / 4.1
+   true_model.mesh.y_edges = true_model.mesh.y_edges / 10.0
 
    kwargs['vmin'] = np.log10(np.min(true_model.values))
    kwargs['vmax'] = np.log10(np.max(true_model.values))

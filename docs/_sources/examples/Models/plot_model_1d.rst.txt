@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Models_plot_model_1d.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -45,7 +45,7 @@
 Instantiate the 1D Model with a Half Space
 ++++++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 18-32
+.. GENERATED FROM PYTHON SOURCE LINES 18-31
 
 .. code-block:: Python
 
@@ -58,7 +58,6 @@ Instantiate the 1D Model with a Half Space
     mesh = RectilinearMesh1D(widths = thk)
 
     mod = Model(mesh = mesh, values=par)
-    # mod = Model1D(parameters=par, widths=thk)
 
     plt.figure()
     mod.plotGrid(transpose=True, flip=True)
@@ -75,7 +74,7 @@ Instantiate the 1D Model with a Half Space
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 33-40
+.. GENERATED FROM PYTHON SOURCE LINES 32-39
 
 Randomness and Model Perturbations
 ++++++++++++++++++++++++++++++++++
@@ -85,7 +84,7 @@ the number of cells in the model, a new depth interface, new parameter values
 and the vertical gradient of those parameters.
 The halfSpaceValue is used as a reference value for the parameter prior.
 
-.. GENERATED FROM PYTHON SOURCE LINES 40-54
+.. GENERATED FROM PYTHON SOURCE LINES 39-53
 
 .. code-block:: Python
 
@@ -110,11 +109,11 @@ The halfSpaceValue is used as a reference value for the parameter prior.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 55-56
+.. GENERATED FROM PYTHON SOURCE LINES 54-55
 
 We can evaluate the prior of the model using depths only
 
-.. GENERATED FROM PYTHON SOURCE LINES 56-60
+.. GENERATED FROM PYTHON SOURCE LINES 55-59
 
 .. code-block:: Python
 
@@ -130,18 +129,18 @@ We can evaluate the prior of the model using depths only
 
  .. code-block:: none
 
-    Log probability of the Model given its priors:  -13.338200594791775
-    Log probability of the Model given its priors:  -19.780269280707714
+    Log probability of the Model given its priors:  -3.367295829986474
+    Log probability of the Model given its priors:  -9.809364515902415
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 61-63
+.. GENERATED FROM PYTHON SOURCE LINES 60-62
 
 To propose new models, we specify the probabilities of creating, removing, perturbing, and not changing
 a layer interface
 
-.. GENERATED FROM PYTHON SOURCE LINES 63-66
+.. GENERATED FROM PYTHON SOURCE LINES 62-65
 
 .. code-block:: Python
 
@@ -155,11 +154,11 @@ a layer interface
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 67-68
+.. GENERATED FROM PYTHON SOURCE LINES 66-67
 
 We can then perturb the layers of the model
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-70
+.. GENERATED FROM PYTHON SOURCE LINES 67-69
 
 .. code-block:: Python
 
@@ -172,7 +171,7 @@ We can then perturb the layers of the model
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 71-77
+.. GENERATED FROM PYTHON SOURCE LINES 70-76
 
 .. code-block:: Python
 
@@ -200,11 +199,11 @@ We can then perturb the layers of the model
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 78-79
+.. GENERATED FROM PYTHON SOURCE LINES 77-78
 
 We can evaluate the prior of the model using depths only
 
-.. GENERATED FROM PYTHON SOURCE LINES 79-84
+.. GENERATED FROM PYTHON SOURCE LINES 78-83
 
 .. code-block:: Python
 
@@ -221,13 +220,13 @@ We can evaluate the prior of the model using depths only
 
  .. code-block:: none
 
-    Log probability of the Model given its priors:  -13.338200594791775
-    Log probability of the Model given its priors:  -19.03751254813826
+    Log probability of the Model given its priors:  -3.367295829986474
+    Log probability of the Model given its priors:  -8.360182133368676
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 85-99
+.. GENERATED FROM PYTHON SOURCE LINES 84-98
 
 Perturbing a model multiple times
 +++++++++++++++++++++++++++++++++
@@ -244,7 +243,7 @@ and a 1D histogram for the locations of interfaces.
 Since we have already set the priors on the Model, we can set the posteriors
 based on bins from from the priors.
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-104
+.. GENERATED FROM PYTHON SOURCE LINES 98-103
 
 .. code-block:: Python
 
@@ -260,11 +259,11 @@ based on bins from from the priors.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 105-106
+.. GENERATED FROM PYTHON SOURCE LINES 104-105
 
 Now we randomly perturb the model, and update its posteriors.
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-115
+.. GENERATED FROM PYTHON SOURCE LINES 105-114
 
 .. code-block:: Python
 
@@ -284,7 +283,7 @@ Now we randomly perturb the model, and update its posteriors.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-121
+.. GENERATED FROM PYTHON SOURCE LINES 115-120
 
 We can now plot the posteriors of the model.
 
@@ -292,7 +291,7 @@ Remember in this case, we are simply perturbing the model structure and paramete
 The proposal for the parameter values is fixed and centred around a single value.
 fig = plt.figure(figsize=(8, 6))
 
-.. GENERATED FROM PYTHON SOURCE LINES 121-162
+.. GENERATED FROM PYTHON SOURCE LINES 120-161
 
 .. code-block:: Python
 
@@ -352,7 +351,7 @@ fig = plt.figure(figsize=(8, 6))
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.092 seconds)
+   **Total running time of the script:** (0 minutes 3.052 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_1d.py:

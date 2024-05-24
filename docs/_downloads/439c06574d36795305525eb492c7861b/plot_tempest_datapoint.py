@@ -132,7 +132,7 @@ print(tdp.data_misfit())
 # Plot the misfits for a range of half space conductivities
 plt.figure()
 plt.subplot(1, 2, 1)
-_ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+_ = tdp.plot_halfspace_responses(-6.0, 4.0, 200)
 plt.title("Halfspace responses")
 
 #%%
