@@ -899,12 +899,12 @@ class Model(myObject):
                         'coastal_salt_water' : np.r_[1, 100, 20],    # Coastal salt water upper layer
                         'ice_over_salt_water' : np.r_[10000, 100, 1] # Antarctica glacier ice over salt water
         }
-        conductivities = {'glacial' : np.r_[0.01, 0.1, 0.03333333],   # Glacial sediments, sands and tills
-                        'saline_clay' : np.r_[0.01, 0.1, 1.  ],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
-                        'resistive_dolomites' : np.r_[0.02, 0.002, 0.02 ],   # Glacial sediments, resistive dolomites, marine shale.
-                        'resistive_basement' : np.r_[0.01, 0.1, 0.0001],# Resistive Basement
-                        'coastal_salt_water' : np.r_[1., 0.01, 0.05],    # Coastal salt water upper layer
-                        'ice_over_salt_water' : np.r_[1.e-04, 1.e-02, 1.e+00] # Antarctica glacier ice over salt water
+        conductivities = {'glacial' : np.r_[1e-2, 1e-1, 0.03333333],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[1e-2, 1e-1, 1.  ],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                        'resistive_dolomites' : np.r_[2e-2, 2e-3, 2e-2],   # Glacial sediments, resistive dolomites, marine shale.
+                        'resistive_basement' : np.r_[1e-2, 1e-1, 1e-4],# Resistive Basement
+                        'coastal_salt_water' : np.r_[1., 1e-2, 5e-2],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[1e-4, 1e-2, 1] # Antarctica glacier ice over salt water
         }
 
         conductivity = StatArray.StatArray(conductivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
