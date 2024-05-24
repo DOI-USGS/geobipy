@@ -465,12 +465,12 @@ class DataPoint(Point):
         self.relative_error.plot_posteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plot_posteriors(ax=axes[3], **add_error_kwargs)
 
-    def overlay_on_posteriors(self, overlay, axes):
+    def overlay_on_posteriors(self, overlay, axes, **kwargs):
 
-        super().overlay_on_posteriors(self, overlay, axes[0])
+        super().overlay_on_posteriors(self, overlay, axes[0], **kwargs)
 
-        self.relative_error.overlay_on_posteriors(overlay=overlay.relative_error, ax=axes[2])
-        self.additive_error.overlay_on_posteriors(overlay=overlay.additive_error, ax=axes[3])
+        self.relative_error.overlay_on_posteriors(overlay=overlay.relative_error, ax=axes[2], **kwargs)
+        self.additive_error.overlay_on_posteriors(overlay=overlay.additive_error, ax=axes[3], **kwargs)
 
 
 

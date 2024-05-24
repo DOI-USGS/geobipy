@@ -120,7 +120,7 @@ def filter_color_kwargs(kwargs):
     defaults = {'alpha' : 1.0,
                 'alpha_color' : [1, 1, 1],
                 'cax' : None,
-                'clabel' : True,
+                'clabel' : None,
                 'clim_scaling' : None,
                 'cmap' : 'cividis',
                 'cmapIntervals' : None,
@@ -1258,7 +1258,8 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
             else:
                 clabel(cbar, utilities.getNameUnits(c), wrap=color_kwargs['wrap_clabel'])
         else:
-            clabel(cbar, color_kwargs['clabel'], wrap=color_kwargs['wrap_clabel'])
+            cl = color_kwargs['clabel'] if isinstance(color_kwargs['clabel'], str) else utilities.getNameUnits(c)
+            clabel(cbar, cl, wrap=color_kwargs['wrap_clabel'])
 
     if ('s' in kwargs and not geobipy_kwargs['legend_size'] is None):
         assert (not isinstance(geobipy_kwargs['legend_size'], bool)), TypeError('sizeLegend must have type int, or array_like')

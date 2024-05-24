@@ -5,7 +5,7 @@ from os.path import join
 from copy import deepcopy
 import matplotlib.pyplot as plt
 
-from numpy import allclose, arange, asarray, atleast_1d, float64, full, hstack
+from numpy import allclose, arange, asarray, atleast_1d, float64, full, hstack, int32
 from numpy import nan, ones, r_, repeat
 from numpy import s_, shape, size, vstack, zeros
 from pandas import read_csv
@@ -250,6 +250,10 @@ class TempestData(TdemData):
         self.check()
 
         return self
+
+    def plotLine(self, line, xAxis='index', **kwargs):
+        kwargs['yscale'] = kwargs.get('yscale' ,'linear')
+        super().plotLine(line, xAxis, **kwargs)
 
     def plot_data(self, system=0, channels=None, x='index', **kwargs):
         """ Plots the data

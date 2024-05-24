@@ -952,7 +952,7 @@ class TdemData(Data):
         line = self.line(line)
         kwargs['yscale'] = kwargs.get('yscale', 'log')
 
-        x = self.getXAxis(xAxis)
+        x = self.x_axis(xAxis)
 
         for i in range(self.nSystems):
             plt.subplot(self.nSystems, 1, i + 1)
@@ -979,7 +979,7 @@ class TdemData(Data):
         """
         D = self.data[:, self._component_indices(component, system)]
         times = self.off_time(system)
-        y = self.getXAxis(xAxis=yAxis)
+        y = self.x_axis(xAxis=yAxis)
         ax = D.pcolor(x=times, y=y, **kwargs)
         return ax
 
