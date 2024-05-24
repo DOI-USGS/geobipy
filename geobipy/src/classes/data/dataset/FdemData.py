@@ -554,7 +554,7 @@ class FdemData(Data):
         try:
             df = read_csv(dataFilename, index_col=False, usecols=channels, skipinitialspace = True)
         except:
-            df = read_csv(dataFilename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+            df = read_csv(dataFilename, index_col=False, usecols=channels, sep='\s+', skipinitialspace = True)
         df = df.replace('NaN',nan)
 
         # Assign columns to variables
