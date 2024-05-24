@@ -127,9 +127,9 @@ maximum_height_change = 1.0
 # normal distributions with a mean equal to its value in the current model (of the Markov chain)
 # These variances are used when we randomly choose a new value for that given variable.
 # Proposal variance for the relative error
-relative_error_proposal_variance = [2.5e-4, 2.5e-4]
+relative_error_proposal_variance = [1e-6, 1e-6]
 # Proposal variance for the additive error
-additive_error_proposal_variance = [0.0025, 0.0025]
+additive_error_proposal_variance = [1e-5, 1e-5]
 # Proposal variance of the elevation
 height_proposal_variance = 0.01
 
@@ -156,7 +156,7 @@ factor = None
 # Default is 1.5
 gradient_standard_deviation = None
 # Initial scaling factor for proposal covariance
-covariance_scaling = None
+covariance_scaling = 0.5
 # Scaling factor for data misfit
 multiplier = None
 # Clipping Ratio for interface contrasts
