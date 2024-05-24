@@ -1,7 +1,7 @@
 import subprocess
 
-from numpy import argwhere, column_stack, diff, floor, inf, linspace, meshgrid
-from numpy import nan, nanmax, nanmin, tile, zeros
+from numpy import argwhere, ceil, column_stack, diff, floor, hstack, inf, int32, linspace, meshgrid
+from numpy import minimum, maximum, nan, nanmax, nanmin, tile, zeros
 
 from .fileIO import deleteFile
 from ..classes.core import StatArray
@@ -17,213 +17,140 @@ except:
     Warning('For minimum curvature plotting, the netcdf4 package must be installed')
     pass
 
-# def CT(XY, values, x_grid=None, y_grid=None, dx=None, dy=None,
-#        bounds=None, mask = False, kdtree = None, clip = False, extrapolate=None):
-#     """Use Scipy's CloughTocher C1 continuous interpolation using unstructured meshes to interpolate arbitrary locations to a grid
+from numba_kdtree import KDTree
+from numba import jit
+_numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': False}
 
-#     Parameters
-#     ----------
-#     XY : 2D ndarray of floats
-#         Two columns, each column contains the co-ordinate in a dimension
-#     values : ndarray
-#         The values to interpolate to the grid
-#     x_grid : array_like, optional
-#         Grid node locations in x, regularly spaced.
-#     y_grid : array_like, optional
-#         Grid node locations in y, regularly spaced.
-#     dx : float, optional
-#         The required spacing in x between grid nodes
-#     dy : float, optional
-#         The required spacing in y between grid nodes
-#     bounds : array_like, optional
-#         Length 4 array with the minimum and maximum in two directions. [Xmin, Xmax, Ymin, Ymax]
-#     mask : float, optional
-#         Force interpolated values that are greater than a distance of mask from any known point to be NaN
-#     kdtree : scipy.spatial.ckdtree.cKDTree, optional
-#         If no kdtree is given for the set of points, one is created.  To speed up multiple interpolations, the user can pass their own fixed kdtree and prevent the generation of one every time.
-#     clip : bool, optional
-#         Interpolation can overshoot the known value. clip = True ensures that the min  max of the grid is the same as the known data points.
-#     extrapolate : bool, optional
-#         Extrapolate the grid past the convex hull of the known points using nearest neighbour interpolation.
+def sibson(x, y, values, grid_x, grid_y, z=None, grid_z = None, max_distance=inf):
 
-#     Returns
-#     -------
-#     x : array of floats
-#         The unique grid node along the first dimension
-#     y : array of floats
-#         The unique grid node along the second dimension
-#     vals : array of floats
-#         The interpolated values on a grid, represented by a 2D array
+    if grid_z is None:
+        return __sibson_2d(x, y, values, grid_x, grid_y, max_distance)
+    else:
+        return __sibson_3d(x, y, z, values, grid_x, grid_y, grid_z)
 
-#     """
+def __sibson_2d(x, y, values, grid_x, grid_y, max_distance=inf):
 
-#     if x_grid is None:
-#         x_grid = centred_grid_nodes(bounds[:2], dx)
-#     if y_grid is None:
-#         y_grid = centred_grid_nodes(bounds[2:], dy)
+    import numpy as np
+    points = np.vstack([x, y]).T
 
-#     values[values == inf] = nan
-#     mn = nanmin(values)
-#     mx = nanmax(values)
+    # Integerize the points to the grid.
+    dx = (grid_x[1] - grid_x[0])
+    points[:, 0] -= grid_x[0]
+    points[:, 0] = points[:, 0] / dx
 
-#     values -= mn
-#     if (mx - mn) != 0.0:
-#         values = values / (mx - mn)
+    dy = (grid_y[1] - grid_y[0])
+    points[:, 1] -= grid_y[0]
+    points[:, 1] = points[:, 1] / dy
 
-#     # Create the CT function for interpolation
-#     f = CloughTocher2DInterpolator(XY, values)
+    if not max_distance:
+        max_distance = inf
 
-#     xc, yc, intPoints = getGridLocations2D(bounds, dx, dy, x_grid, y_grid)
+    max_distance = max_distance / (dx*dy)
 
-#     # Interpolate to the grid
-#     vals = f(intPoints).reshape(yc.size, xc.size)
+    # KdTree the points
+    kdtree = KDTree(points, leafsize=16)
 
-#     # Reshape to a 2D array
-#     vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
+    out = __sibson_2d_inner(kdtree, values, grid_x, grid_y, max_distance)
 
-#     if mask or extrapolate:
-#         if (kdtree is None):
-#             kdt = cKDTree(XY)
-#         else:
-#             kdt = kdtree
+    return out
 
-#     # Use distance masking
-#     if mask:
-#         g = meshgrid(xc, yc)
-#         xi = _ndim_coords_from_arrays(tuple(g), ndim=XY.shape[1])
-#         dists, indexes = kdt.query(xi)
-#         vals[dists > mask] = nan
+@jit(**_numba_settings)
+def __sibson_2d_inner(kdtree, values, grid_x, grid_y, max_distance=inf):
+    nx = grid_x.size - 1
+    ny = grid_y.size - 1
 
-#     # Truncate values to the observed values
-#     if (clip):
-#         minV = nanmin(values)
-#         maxV = nanmax(values)
-#         mask = ~isnan(vals)
-#         mask[mask] &= vals[mask] < minV
-#         vals[mask] = minV
-#         mask = ~isnan(vals)
-#         mask[mask] &= vals[mask] > maxV
-#         vals[mask] = maxV
+    c = zeros((ny, nx))
+    n = zeros((ny, nx), dtype=int32)
 
-#     if (not extrapolate is None):
-#         assert isinstance(extrapolate,str), 'extrapolate must be a string. Choose [Nearest]'
-#         extrapolate = extrapolate.lower()
-#         if (extrapolate == 'nearest'):
-#             # Get the indices of the nans
-#             iNan = argwhere(isnan(vals))
-#             # Create Query locations from the nans
-#             xi =  zeros([iNan.shape[0],2])
-#             xi[:,0]=x[iNan[:,1]]
-#             xi[:,1]=y[iNan[:,0]]
-#             # Get the nearest neighbours
-#             dists, indexes = kdt.query(xi)
-#             # Assign the nearest value to the Nan locations
-#             vals[iNan[:,0],iNan[:,1]] = values[indexes]
-#         else:
-#             assert False, 'Extrapolation option not available. Choose [Nearest]'
 
-#     if (mx - mn) != 0.0:
-#         vals = vals * (mx - mn)
-#     vals += mn
 
-#     return xc, yc, vals
+    # For each raster pixel
+    for i in range(ny):
+        for j in range(nx):
+            # Find the nearest point to the pixel
+            distance, index, _ = kdtree.query([j, i], k=1)
+            distance = ceil(distance)
 
-# def minimumCurvature(x, y, values, x_grid=None, y_grid=None, dx=None, dy=None,
-#        bounds=None, mask=False, clip=False, iterations=2000, tension=0.25, accuracy=0.01, verbose=False, **kwargs):
+            distance = int32(distance.item())
+            index = index.item()
 
-#     from pygmt import surface
+            d2 = (distance**2.0) + 0.25
 
-#     values[values == inf] = nan
-#     mn = nanmin(values)
-#     mx = nanmax(values)
+            # if d2 < max_distance:
+            for i_s in range(maximum(0, i-distance), minimum(ny, i+distance)):
+                in_i = (i_s-i)**2.0
+                for j_s in range(maximum(0, j-distance), minimum(nx, j+distance)):
+                    in_j = (j_s-j)**2.0
+                    if (in_i + in_j) <= d2:
+                        c[i_s, j_s] += values[index]
+                        n[i_s, j_s] += 1
 
-#     values -= mn
-#     if (mx - mn) != 0.0:
-#         values = values / (mx - mn)
+            if d2 > max_distance:
+                c[i, j] = nan
 
-#     if x_grid is None:
-#         x_grid = centred_grid_nodes(bounds[:2], dx)
-#     if y_grid is None:
-#         y_grid = centred_grid_nodes(bounds[2:], dy)
+    return c / n
 
-#     xc = StatArray.StatArray(x_grid, name=cf.getName(x), units=cf.getUnits(x))
-#     yc = StatArray.StatArray(y_grid, name=cf.getName(y), units=cf.getUnits(y))
 
-#     bounds = r_[x_grid[0], x_grid[-1], y_grid[0], y_grid[-1]]
-#     dx = abs(x_grid[1] - x_grid[0])
-#     dy = abs(y_grid[1] - y_grid[0])
+def __sibson_3d(x, y, z, values, grid_x, grid_y, grid_z, plot=False, max_distance=inf):
 
-#     if clip:
-#         clip_min = kwargs.pop('clip_min', nanmin(values))
-#         clip_max = kwargs.pop('clip_max', nanmax(values))
-#         xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=bounds, N=iterations, T=tension, C=accuracy, Ll=[clip_min], Lu=[clip_max])
-#     else:
-#         xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=bounds, N=iterations, T=tension, C=accuracy)
+    points = hstack([x, y, z])
 
-#     vals = xr.values
+    # Integerize the points to the grid.
+    dx = (grid_x[1] - grid_x[0])
+    points[:, 0] -= grid_x[0]
+    points[:, 0] = points[:, 0] / dx
 
-#     if (mx - mn) != 0.0:
-#         vals = vals * (mx - mn)
-#     vals += mn
+    dy = (grid_y[1] - grid_y[0])
+    points[:, 1] -= grid_y[0]
+    points[:, 1] = points[:, 1] / dy
 
-#     # Use distance masking
-#     if mask:
-#         kdt = cKDTree(column_stack((x, y)))
-#         xi = _ndim_coords_from_arrays(tuple(meshgrid(xc, yc)), ndim=2)
-#         dists, indexes = kdt.query(xi)
-#         vals[dists > mask] = nan
+    dz = (grid_z[1] - grid_z[0])
+    points[:, 2] -= grid_z[0]
+    points[:, 2] = points[:, 2] / dz
 
-#     vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
-#     return xc, yc, vals
+    max_distance = max_distance / (dx*dy*dz)
 
-# # def centred_grid_nodes(bounds, spacing):
-# #     """Generates grid nodes centred over bounds
+    # KdTree the points
+    kdtree = KDTree(points, leafsize=16)
 
-# #     Parameters
-# #     ----------
-# #     bounds : array_like
-# #         bounds of the dimension
-#     spacing : float
-#         distance between nodes
+    return __sibson_3d_inner(kdtree, values, grid_x, grid_y, grid_z, max_distance)
 
-#     """
-#     # Get the discretization
-#     assert spacing > 0.0, ValueError("spacing must be positive!")
-#     nx = int32(floor((bounds[1] - bounds[0])/spacing) + 1)
-#     mid = 0.5 * (bounds[0] + bounds[1])
-#     sx = 0.5 * nx * spacing
-#     return linspace(mid - sx, mid + sx, nx)
 
-# def getGridLocations2D(bounds, dx=None, dy=None, x_grid=None, y_grid=None):
-#     """Discretize a 2D bounding box by increments of dx and return the grid node locations
+@jit(**_numba_settings)
+def __sibson_3d_inner(kdtree, values, grid_x, grid_y, grid_z, max_distance=inf):
 
-#     Parameters
-#     ----------
-#     bounds : array of floats
-#         Length 4 array with the minimum and maximum in two directions. [Xmin, Xmax, Ymin, Ymax]
-#     dx : float
-#         The spacing between grid nodes
+    nx = grid_x.size
+    ny = grid_y.size
+    nz = grid_z.size
 
-#     Returns
-#     -------
-#     x : array of floats
-#         The unique grid node along the first dimension
-#     y : array of floats
-#         The unique grid node along the second dimension
-#     intPoints : array of floats
-#         2D array containing all grid node locations
+    c = zeros((nz, ny, nx))
+    n = zeros((nz, ny, nx), dtype=int32)
 
-#     """
-#     # Create the cell centres from the bounds
-#     if x_grid is None:
-#         x_grid = centred_grid_nodes(bounds[:2], dx)
-#     if y_grid is None:
-#         y_grid = centred_grid_nodes(bounds[2:], dy)
+    # For each raster pixel
+    for i in range(nz):
+        for j in range(ny):
+            for k in range(nx):
+                # Find the nearest point to the pixel
+                distance, index, _ = kdtree.query([k, j, i], k=1)
+                distance = ceil(distance)
 
-#     x = x_grid[:-1] + 0.5 * diff(x_grid)
-#     y = y_grid[:-1] + 0.5 * diff(y_grid)
-#     # Create the unpacked grid locations
-#     intPoints = zeros([x.size * y.size, 2], order = 'F')
-#     intPoints[:, 0] = tile(x, y.size)
-#     intPoints[:, 1] = y.repeat(x.size)
-#     return x_grid, y_grid, intPoints
+                distance = int32(distance.item())
+                index = index.item()
+
+                d2 = (distance**2.0) + 0.125
+
+                for i_s in range(maximum(0, i-distance), minimum(nz, i+distance)):
+                    in_i = (i_s-i)**2.0
+                    for j_s in range(maximum(0, j-distance), minimum(ny, j+distance)):
+                        in_j = (j_s-j)**2.0
+                        tmp = in_i + in_j
+                        for k_s in range(maximum(0, k-distance), minimum(nx, k+distance)):
+                            in_k = (k_s-k)**2.0
+                            if (tmp + in_k) <= d2:
+                                c[i_s, j_s, k_s] += values[index]
+                                n[i_s, j_s, k_s] += 1
+
+                if d2 > max_distance:
+                    c[i, j, k] = nan
+
+    return c / n
