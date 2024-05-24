@@ -1,6 +1,6 @@
 from copy import deepcopy
 from numpy import arange, argpartition, argsort, argwhere, asarray, column_stack, cumsum, diff, empty
-from numpy import float64, hstack, inf, int32, int64, isnan, maximum, mean, meshgrid, nan, nanmin, nanmax
+from numpy import float64, hstack, inf, int32, int64, isnan, maximum, mean, meshgrid, minimum, nan, nanmin, nanmax
 from numpy import ravel_multi_index, size, sqrt, squeeze, unique, vstack, zeros
 from numpy.linalg import norm
 from ...classes.core.myObject import myObject

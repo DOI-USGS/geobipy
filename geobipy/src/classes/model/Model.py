@@ -73,7 +73,7 @@ class Model(myObject):
     def gradient(self):
         """Compute the gradient
 
-        Parameter gradient :math:`\\nabla_{z}\sigma` at the ith layer is computed via
+        Parameter gradient :math:"\\nabla_{z}\\sigma" at the ith layer is computed via
 
         """
         # if self._gradient is None:
