@@ -45,6 +45,8 @@ class Histogram2D(RectilinearMesh2D):
     def __init__(self, x=None, y=None, **kwargs):
         """ Instantiate a 2D histogram """
 
+        raise DeprecationWarning("HistogramXD no longer in development")
+
         # Instantiate the parent class
         RectilinearMesh2D.__init__(self, x=x, y=y, **kwargs)
 

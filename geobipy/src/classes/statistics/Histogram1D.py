@@ -46,6 +46,8 @@ class Histogram1D(RectilinearMesh1D):
     def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=None, values=None, **kwargs):
         """ Initialize a histogram """
 
+        raise DeprecationWarning("HistogramXD no longer in development")
+
         if 'bins' in kwargs:
             raise Exception('woops')
 
@@ -434,7 +436,7 @@ class Histogram1D(RectilinearMesh1D):
                 [f(l, color=cP.wellSeparated[3], linewidth=1) for l in line]
             else:
                 f(line, color=cP.wellSeparated[3], linewidth=1)
-        
+
         return ax
 
 
@@ -499,4 +501,3 @@ class Histogram1D(RectilinearMesh1D):
               "Relative to: {}").format(type(self), RectilinearMesh1D.summary, self.counts.summary, self.log, self.relativeTo)
 
         return msg
-
