@@ -69,6 +69,13 @@ class Tempest_datapoint(TdemDataPoint):
 
     """
     __slots__ = ('_additive_error_multiplier')
+
+    def __init__(self, *args, additive_error_multiplier=None, **kwargs):
+
+        super().__init__(*args, **kwargs)
+
+        self.additive_error_multiplier = additive_error_multiplier
+
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._additive_error_multiplier = deepcopy(self.additive_error_multiplier)
@@ -83,11 +90,19 @@ class Tempest_datapoint(TdemDataPoint):
                                                                   "additive_error must have size {}").format(self.nChannels))
 
         self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}$', self.units)
-        self._additive_error_multiplier = StatArray.StatArray(ones(self.nSystems * self.n_components), 'Multiplier')
 
     @property
     def additive_error_multiplier(self):
         return self._additive_error_multiplier
+
+    @additive_error_multiplier.setter
+    def additive_error_multiplier(self, values):
+        if values is None:
+            self._additive_error_multiplier = StatArray.StatArray(ones(self.nSystems * self.n_components), 'Multiplier')
+        else:
+            assert size(values) == self.nSystems * self.n_components, ValueError(f'additive_error_multiplier must have size {self.nSystems * self.n_components} but has size {size(values)}')
+            self._additive_error_multiplier = StatArray.StatArray(values, 'Multiplier')
+
 
     @TdemDataPoint.data.getter
     def data(self):

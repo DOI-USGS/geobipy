@@ -53,13 +53,15 @@ class TempestData(TdemData):
 
     single = Tempest_datapoint
 
+    __slots__ = ('_additive_error_multiplier')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._additive_error = StatArray.StatArray((self.nPoints, self.nChannels), "Additive error", "%")
         self._relative_error = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
 
-        self._file = None
+        self._additive_error_multiplier = StatArray.StatArray(ones((self.nPoints, self.n_components * self.nSystems)), "multiplier")
 
     @property
     def additive_error(self):
@@ -78,6 +80,24 @@ class TempestData(TdemData):
                 return
 
             self._additive_error[:, :] = values
+
+    @property
+    def additive_error_multiplier(self):
+        """ """
+        if size(self._additive_error_multiplier, 0) == 0:
+            self._additive_error_multiplier = StatArray.StatArray((self.nPoints, self.nSystems * self.n_components), "multiplier")
+        return self._additive_error_multiplier
+
+    @additive_error_multiplier.setter
+    def additive_error_multiplier(self, values):
+        if values is not None:
+            self.nPoints = size(values, 0)
+            shp = (self.nPoints, self.nSystems * self.n_components)
+            if not allclose(self._additive_error_multiplier.shape, shp):
+                self._additive_error_multiplier = StatArray.StatArray(values, "multiplier")
+                return
+
+            self._additive_error_multiplier[:, :] = values
 
     @property
     def file(self):
@@ -438,7 +458,10 @@ class TempestData(TdemData):
         Notes
         -----
         File Format
-        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+        The data columns are read in according to the column names in the first line.
+        The header line should contain at least the following column names.
+        Extra columns may exist, but will be ignored. In this description, the column name or its
+        alternatives are given followed by what the name represents. Optional columns are also described.
 
         **Required columns**
 
@@ -450,7 +473,7 @@ class TempestData(TdemData):
             Northing co-ordinate of the data point
         y or easting or e
             Easting co-ordinate of the data point
-        z or dtm or dem\_elev or dem\_np or topo
+        z or dtm or dem\\_elev or dem\\_np or topo
             Elevation of the ground at the data point
         alt or laser or bheight
             Altitude of the transmitter coil
