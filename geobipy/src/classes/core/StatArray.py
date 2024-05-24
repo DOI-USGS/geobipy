@@ -936,7 +936,7 @@ class StatArray(ndarray, myObject):
 
     # Statistical Routines
 
-    def hist(self, bins=10, range=None, normed=None, weights=None, density=None, **kwargs):
+    def hist(self, bins=10, **kwargs):
         """Plot a histogram of the StatArray
 
         Plots a histogram, estimates the mean and standard deviation and overlays the PDF of a normal distribution with those values, if density=1.
@@ -958,7 +958,7 @@ class StatArray(ndarray, myObject):
 
         """
         cnts, bins = histogram(
-            self, bins=bins, range=range, normed=normed, weights=weights, density=density)
+            self, bins=bins, **kwargs)
         bins = StatArray(bins, name=self.name, units=self.units)
         cP.bar(cnts, bins, **kwargs)
 
