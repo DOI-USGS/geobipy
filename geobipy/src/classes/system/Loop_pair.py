@@ -147,8 +147,8 @@ class Loop_pair(Point, PointCloud3D):
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out._transmitter = deepcopy(self.transmitter)
-        out._receiver = deepcopy(self.receiver)
+        out._transmitter = deepcopy(self.transmitter, memo=memo)
+        out._receiver = deepcopy(self.receiver, memo=memo)
         return out
 
     def append(self, other):

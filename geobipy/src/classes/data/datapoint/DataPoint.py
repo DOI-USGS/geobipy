@@ -332,7 +332,7 @@ class DataPoint(Point):
         out._fiducial = deepcopy(self.fiducial, memo)
         out._channel_names = deepcopy(self.channel_names, memo)
 
-        out._sensitivity_matrix = deepcopy(self._sensitivity_matrix)
+        out._sensitivity_matrix = deepcopy(self._sensitivity_matrix, memo)
 
         return out
 
