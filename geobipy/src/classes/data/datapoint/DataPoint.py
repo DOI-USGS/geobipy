@@ -201,7 +201,7 @@ class DataPoint(Point):
         """Get the difference between the predicted and observed data,
 
         .. math::
-            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
+            \\delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
 
         Returns
         -------
@@ -211,16 +211,6 @@ class DataPoint(Point):
 
         """
         return StatArray.StatArray(self.predictedData - self.data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
-
-    # @property
-    # def elevation(self):
-    #     return self._elevation
-
-    # @elevation.setter
-    # def elevation(self, value):
-    #     if value is None:
-    #         value = 1
-    #     self._elevation = StatArray.StatArray(value, "Elevation", "m")
 
     @property
     def n_active_channels(self):

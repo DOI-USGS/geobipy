@@ -101,7 +101,7 @@ class Loop_pair(Point):
     @receiver.setter
     def receiver(self, values):
         if (values is not None):
-            assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop(s)')
+            assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop')
             self.nPoints = values.nPoints
             assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
             values = deepcopy(values)
@@ -121,7 +121,7 @@ class Loop_pair(Point):
     @transmitter.setter
     def transmitter(self, values):
         if (values is not None):
-            assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop(s)')
+            assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop')
             if self.nPoints == 0: self.nPoints = values.nPoints
             assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
             values = deepcopy(values)
