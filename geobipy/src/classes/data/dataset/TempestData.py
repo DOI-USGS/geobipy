@@ -640,17 +640,6 @@ class TempestData(TdemData):
         self._data_filename = filename
         self.lineNumber, self.fiducial = self._read_variable(['Line', 'Fiducial'])
 
-    @classmethod
-    def fromHdf(cls, grp, **kwargs):
-        """ Reads the object from a HDF group """
-
-        if kwargs.get('index') is not None:
-            return cls.single.fromHdf(grp, **kwargs)
-
-        out = super(TempestData, cls).fromHdf(grp, **kwargs)
-        out.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
-        return out
-
     def create_synthetic_data(self, model, prng):
 
         ds = TempestData(system=self.system)
@@ -710,3 +699,39 @@ class TempestData(TdemData):
         ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.nChannels))
 
         return ds, ds_noisy
+
+    def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = super().createHdf(parent, myName, withPosterior, fillvalue)
+
+        self.additive_error_multiplier.createHdf(grp, 'additive_error_multiplier', fillvalue=fillvalue)
+
+    def writeHdf(self, parent, name, withPosterior=True):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+        super().writeHdf(parent, name, withPosterior)
+
+        grp = parent[name]
+
+        self.additive_error_multiplier.writeHdf(grp, 'additive_error_multiplier', withPosterior=withPosterior)
+
+    @classmethod
+    def fromHdf(cls, grp, **kwargs):
+        """ Reads the object from a HDF group """
+
+        if kwargs.get('index') is not None:
+            return cls.single.fromHdf(grp, **kwargs)
+
+        self = super(TempestData, cls).fromHdf(grp, **kwargs)
+
+        self.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
+        self.additive_error_multiplier = StatArray.StatArray.fromHdf(grp['additive_error_multiplier'])
+
+        return self

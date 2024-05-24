@@ -1001,8 +1001,7 @@ class TdemData(Data):
         for i in range(self.nSystems):
             self.system[i].toHdf(grp, 'System{}'.format(i))
 
-        self.transmitter.createHdf(grp, 'T', withPosterior=withPosterior, fillvalue=fillvalue)
-        self.receiver.createHdf(grp, 'R', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.loop_pair.createHdf(grp, 'loop_pair', fillvalue=fillvalue)
 
         self.primary_field.createHdf(grp, 'primary_field', withPosterior=withPosterior, fillvalue=fillvalue)
         self.secondary_field.createHdf(grp, 'secondary_field', withPosterior=withPosterior, fillvalue=fillvalue)
@@ -1021,8 +1020,7 @@ class TdemData(Data):
 
         grp = parent[name]
 
-        self.transmitter.writeHdf(grp, 'T', withPosterior=withPosterior)
-        self.receiver.writeHdf(grp, 'R', withPosterior=withPosterior)
+        self.loop_pair.writeHdf(grp, 'loop_pair', withPosterior=withPosterior)
 
         self.primary_field.writeHdf(grp, 'primary_field', withPosterior=withPosterior)
         self.secondary_field.writeHdf(grp, 'secondary_field', withPosterior=withPosterior)

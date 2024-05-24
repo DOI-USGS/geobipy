@@ -829,8 +829,8 @@ class DataPoint(Point):
         #         self.errorPosterior.append(Histogram2D.fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
         #         i += 1
 
-        out.relative_error = StatArray.StatArray.fromHdf(grp['relative_error'], index=index)
-        out.additive_error = StatArray.StatArray.fromHdf(grp['additive_error'], index=index)
+        out._relative_error = StatArray.StatArray.fromHdf(grp['relative_error'], index=index)
+        out._additive_error = StatArray.StatArray.fromHdf(grp['additive_error'], index=index)
 
         return out
 
