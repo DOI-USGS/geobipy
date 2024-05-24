@@ -124,7 +124,7 @@ class DataPoint(Point):
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray.StatArray(values, '$\\epsilon_{Additive}$', self.units)
 
     @property
     def addressof(self):

@@ -6,13 +6,11 @@ import matplotlib.pyplot as plt
 
 from ..core import StatArray
 from ..pointcloud.Point import Point
-from ..pointcloud.PointCloud3D import PointCloud3D
 from .EmLoop import EmLoop
-from .EmLoops import EmLoops
 from .CircularLoop import CircularLoop
 from ...base.HDF.hdfRead import read_item
 
-class Loop_pair(Point, PointCloud3D):
+class Loop_pair(Point):
 
     def __init__(self, transmitter=None, receiver=None, **kwargs):
 
@@ -103,7 +101,7 @@ class Loop_pair(Point, PointCloud3D):
     @receiver.setter
     def receiver(self, values):
         if (values is not None):
-            assert isinstance(values, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop(s)')
+            assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop(s)')
             self.nPoints = values.nPoints
             assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
             values = deepcopy(values)
@@ -123,7 +121,7 @@ class Loop_pair(Point, PointCloud3D):
     @transmitter.setter
     def transmitter(self, values):
         if (values is not None):
-            assert isinstance(values, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop(s)')
+            assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop(s)')
             if self.nPoints == 0: self.nPoints = values.nPoints
             assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
             values = deepcopy(values)

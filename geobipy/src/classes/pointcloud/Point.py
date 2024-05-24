@@ -37,7 +37,7 @@ except:
 class Point(myObject):
     """3D Point Cloud with x,y,z co-ordinates
 
-    PointCloud3D(N, x, y, z)
+    Point(N, x, y, z)
 
     Parameters
     ----------
@@ -477,7 +477,6 @@ class Point(myObject):
 
         return ravel_multi_index([ix, iy], (ax.nCells.item(), ay.nCells.item()))
 
-
     def block_mean(self, dx, dy, values=None):
 
         i_cell = self.block_indices(dx, dy)
@@ -501,7 +500,7 @@ class Point(myObject):
             z_new[i] = mean(self.z[i_cut])
             e_new[i] = mean(self.elevation[i_cut])
 
-        return PointCloud3D(x=x_new, y=y_new, z=z_new, elevation=e_new)
+        return Point(x=x_new, y=y_new, z=z_new, elevation=e_new)
 
 
     def block_median_indices(self, dx=None, dy=None, x_grid=None, y_grid=None, values=None):
