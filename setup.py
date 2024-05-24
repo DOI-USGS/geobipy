@@ -53,7 +53,9 @@ setup(name='geobipy',
         'smm',
         'lmfit',
         'scikit-learn',
-        'randomgen'
+        'randomgen',
+        'numba_kdtree',
+        'pygmt'
     ],
     extra_requires=['sphinx_gallery',
                     "sphinx_rtd_theme"
