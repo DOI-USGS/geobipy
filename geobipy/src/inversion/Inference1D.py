@@ -880,9 +880,11 @@ class Inference1D(myObject):
             #     'normalize': True},
             # add_error_kwargs={
             #     'normalize': True},
-            overlay=overlay)
-
+            overlay=overlay
+        )
         self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax[3], linecolor='k')
+        if self.burned_in:
+            self.datapoint.overlay_on_posteriors(self.best_datapoint, axes=self.posterior_ax[3])
 
         self.posterior_fig.suptitle(title)
 
