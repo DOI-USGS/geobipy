@@ -201,7 +201,7 @@ class DataPoint(Point):
         """Get the difference between the predicted and observed data,
 
         .. math::
-            \\delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
+            \\delta \\mathbf{d} = \\mathbf{d}^{pre} - \\mathbf{d}^{obs}.
 
         Returns
         -------
@@ -258,7 +258,7 @@ class DataPoint(Point):
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
-        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray.StatArray(values, '$\\epsilon_{Relative}x10^{2}$', '%')
 
     @property
     def sensitivity_matrix(self):
@@ -502,9 +502,9 @@ class DataPoint(Point):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
         .. math::
-            \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
+            \\| \\mathbf{W}_{d} (\\mathbf{d}^{obs}-\\mathbf{d}^{pre})\\|_{2}^{2},
 
-        where :math:`\mathbf{W}_{d}` are the reciprocal data errors.
+        where :math:`\\mathbf{W}_{d}` are the reciprocal data errors.
 
         Parameters
         ----------

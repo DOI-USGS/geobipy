@@ -39,7 +39,7 @@ class Inference1D(myObject):
 
     Contains histograms and inversion related variables that can be updated as the Bayesian inversion progresses.
 
-    Inference1D(saveMe, plotMe, savePNG, dataPoint, model, ID, \*\*kwargs)
+    Inference1D(saveMe, plotMe, savePNG, dataPoint, model, ID, **kwargs)
 
     Parameters
     ----------
