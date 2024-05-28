@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Datapoints_plot_resolve_datapoint.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -29,7 +29,7 @@ Frequency domain datapoint
     import numpy as np
     import h5py
     import matplotlib.pyplot as plt
-    from geobipy import CircularLoops
+    from geobipy import CircularLoop
     from geobipy import FdemSystem
     from geobipy import FdemData
     from geobipy import FdemDataPoint
@@ -51,7 +51,7 @@ Frequency domain datapoint
 
     # Transmitter positions are defined relative to the observation locations in the data
     # This is usually a constant offset for all data points.
-    transmitters = CircularLoops(orientation=['z','z','x','z','z','z'],
+    transmitters = CircularLoop(orientation=['z','z','x','z','z','z'],
                                  moment=np.r_[1, 1, -1, 1, 1, 1],
                                  x = np.r_[0,0,0,0,0,0],
                                  y = np.r_[0,0,0,0,0,0],
@@ -62,7 +62,7 @@ Frequency domain datapoint
                                  radius = np.r_[1,1,1,1,1,1])
 
     # Receiver positions are defined relative to the transmitter
-    receivers = CircularLoops(orientation=['z','z','x','z','z','z'],
+    receivers = CircularLoop(orientation=['z','z','x','z','z','z'],
                                  moment=np.r_[1, 1, -1, 1, 1, 1],
                                  x = np.r_[7.91, 7.91, 9.03, 7.91, 7.91, 7.89],
                                  y = np.r_[0,0,0,0,0,0],
@@ -133,7 +133,7 @@ Prepare the dataset so that we can read a point at a time.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 95-227
+.. GENERATED FROM PYTHON SOURCE LINES 95-226
 
 .. code-block:: Python
 
@@ -192,7 +192,7 @@ Prepare the dataset so that we can read a point at a time.
 
     # Plot the misfits for a range of half space conductivities
     plt.figure()
-    _ = fdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+    _ = fdp.plot_halfspace_responses(-6.0, 4.0, 200)
 
     plt.title("Halfspace responses");
 
@@ -225,7 +225,6 @@ Prepare the dataset so that we can read a point at a time.
 
     # With priors set we can auto generate the posteriors
     fdp.set_posteriors()
-
 
     nCells = 19
     par = StatArray(np.linspace(0.01, 0.1, nCells), "Conductivity", "$\frac{S}{m}$")
@@ -312,6 +311,8 @@ Prepare the dataset so that we can read a point at a time.
     1367.81945885548
     Best half space conductivity is [0.097701] $S/m$
     45286.828623928755
+    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_resolve_datapoint.py:169: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      zPrior = Distribution('Uniform', min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0, prng=prng)
 
 
 
@@ -319,7 +320,7 @@ Prepare the dataset so that we can read a point at a time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.395 seconds)
+   **Total running time of the script:** (0 minutes 7.847 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_resolve_datapoint.py:

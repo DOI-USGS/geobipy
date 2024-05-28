@@ -719,7 +719,7 @@ class RectilinearMesh1D(Mesh):
             return ones((1, 1))
 
         x = self.widths.copy()
-        e2e = 0.5 * self.edge_to_edge
+        e2e = 10.0 *  self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
@@ -734,7 +734,8 @@ class RectilinearMesh1D(Mesh):
             else:
                 x[-1] = (x[-2]**2.0 / x[-3]) if brodie else x[-2] + e2e
 
-        return diag(x/(self.nCells * mean(x))) if brodie else diag(x/(self.nCells))
+        out = x/(self.nCells * mean(x)) if brodie else x/(self.nCells)
+        return diag(out)
 
     @property
     def gradient_operator(self):
@@ -744,7 +745,7 @@ class RectilinearMesh1D(Mesh):
 
         x = self.widths.copy()
 
-        e2e = 0.5 * self.edge_to_edge
+        e2e = 10.0 * self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
@@ -1333,8 +1334,8 @@ class RectilinearMesh1D(Mesh):
                         linewidth=1,
                         color=cp.wellSeparated[3])
 
-                doi = values.posterior.opacity_level(percent=67.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
-                axes[2].axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
+            doi = values.posterior.opacity_level(percent=90.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
+            axes[2].axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
         return axes
 
     @property
@@ -1437,7 +1438,7 @@ class RectilinearMesh1D(Mesh):
                 "No priors are set, user self.set_priors().")
 
             # Discretize the parameter values
-            grid = StatArray.StatArray(arange(0.9 * self.min_edge, 1.1 * self.max_edge, 0.5 * self.min_width), self.edges.name, self.edges.units)
+            grid = StatArray.StatArray(arange(0.0, 1.1 * self.max_edge, 0.5 * self.min_width), self.edges.name, self.edges.units)
             mesh = RectilinearMesh1D(edges=grid)
 
             # Initialize the interface Depth Histogram

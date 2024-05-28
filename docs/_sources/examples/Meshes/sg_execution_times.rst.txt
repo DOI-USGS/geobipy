@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:10.044** total execution time for 3 files **from examples/Meshes**:
+**00:08.203** total execution time for 3 files **from examples/Meshes**:
 
 .. container::
 
@@ -33,11 +33,11 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py` (``plot_rectilinear_mesh_1d.py``)
-     - 00:04.711
-     - 0.0
-   * - :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_3d.py` (``plot_rectilinear_mesh_3d.py``)
-     - 00:03.318
+     - 00:04.482
      - 0.0
    * - :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_2d.py` (``plot_rectilinear_mesh_2d.py``)
-     - 00:02.015
+     - 00:01.873
+     - 0.0
+   * - :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_3d.py` (``plot_rectilinear_mesh_3d.py``)
+     - 00:01.848
      - 0.0

@@ -30,7 +30,6 @@ from ..base import fileIO
 from ..base.MPI import loadBalance1D_shrinkingArrays
 
 from ..classes.statistics.mixPearson import mixPearson
-from ..classes.pointcloud.PointCloud3D import PointCloud3D
 from ..classes.data.dataset.Data import Data
 from ..classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 from ..classes.model.Model import Model
@@ -1145,7 +1144,7 @@ class Inference3D(myObject):
 
             self.lines[i].uncache(['x', 'y', 'height', 'elevation'])
 
-        return PointCloud3D(x, y, z, e)
+        return Point(x, y, z, e)
 
     def read_fit_distributions(self, fit_file, mask_by_doi=False, skip=None, components='mve', mean_limits=None, flatten=True):
         if skip is None:

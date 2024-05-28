@@ -24,7 +24,6 @@ thk[-1] = np.inf
 mesh = RectilinearMesh1D(widths = thk)
 
 mod = Model(mesh = mesh, values=par)
-# mod = Model1D(parameters=par, widths=thk)
 
 plt.figure()
 mod.plotGrid(transpose=True, flip=True)

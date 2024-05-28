@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:04.664** total execution time for 1 file **from examples/Distributions**:
+**00:03.207** total execution time for 1 file **from examples/Distributions**:
 
 .. container::
 
@@ -33,5 +33,5 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_Distributions_plot_distributions.py` (``plot_distributions.py``)
-     - 00:04.664
+     - 00:03.207
      - 0.0

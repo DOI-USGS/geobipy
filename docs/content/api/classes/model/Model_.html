@@ -5,7 +5,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Model &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
@@ -115,24 +115,6 @@ Module describing a Model</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.model.Model.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model" title="Link to this definition"></a></dt>
 <dd><p>Generic model class with an attached mesh.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.model.Model.Model.compute_local_inverse_hessian">
-<span class="sig-name descname"><span class="pre">compute_local_inverse_hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model.compute_local_inverse_hessian" title="Link to this definition"></a></dt>
-<dd><p>Generate a localized Hessian matrix using
-a dataPoint and the current realization of the Model1D.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>observation</strong> (<em>geobipy.DataPoint</em><em>, </em><em>geobipy.Dataset</em><em>, </em><em>optional</em>) – The observed data to use when computing the local estimate of the variance.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>out</strong> – Hessian matrix</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array_like</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.model.Model.Model.fromHdf">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_posterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model.fromHdf" title="Link to this definition"></a></dt>
 <dd><p>Reads in the object from a HDF file</p>
@@ -142,7 +124,7 @@ a dataPoint and the current realization of the Model1D.</p>
 <dt class="sig sig-object py" id="geobipy.src.classes.model.Model.Model.gradient">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gradient</span></span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model.gradient" title="Link to this definition"></a></dt>
 <dd><p>Compute the gradient</p>
-<p>Parameter gradient <span class="math notranslate nohighlight">\(\nabla_{z}\sigma\)</span> at the ith layer is computed via</p>
+<p>Parameter gradient :math:”nabla_{z}sigma” at the ith layer is computed via</p>
 </dd></dl>
 
 <dl class="py method">
@@ -158,6 +140,24 @@ a dataPoint and the current realization of the Model1D.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>numpy.float64</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.model.Model.Model.local_inverse_hessian">
+<span class="sig-name descname"><span class="pre">local_inverse_hessian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model.local_inverse_hessian" title="Link to this definition"></a></dt>
+<dd><p>Generate a localized Hessian matrix using
+a dataPoint and the current realization of the Model1D.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>observation</strong> (<em>geobipy.DataPoint</em><em>, </em><em>geobipy.Dataset</em><em>, </em><em>optional</em>) – The observed data to use when computing the local estimate of the variance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Hessian matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>array_like</p>
 </dd>
 </dl>
 </dd></dl>
@@ -285,7 +285,7 @@ self.par to generate new values.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.model.Model.Model.proposal_probabilities">
-<span class="sig-name descname"><span class="pre">proposal_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remapped_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model.proposal_probabilities" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">proposal_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">remapped_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">observation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">structure_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.model.Model.Model.proposal_probabilities" title="Link to this definition"></a></dt>
 <dd><p>Return the forward and reverse proposal probabilities for the model</p>
 <p>Returns the denominator and numerator for the model’s components of the proposal ratio.</p>
 <div class="math notranslate nohighlight" id="equation-proposal-numerator">

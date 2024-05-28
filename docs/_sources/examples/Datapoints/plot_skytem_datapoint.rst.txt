@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Datapoints_plot_skytem_datapoint.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -61,9 +61,9 @@ Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBI
     # For more information about the time domain data set, see :ref:`Time domain dataset`
 
     # The data file name
-    dataFile=dataFolder + 'skytem_512_saline_clay.csv'
+    dataFile=dataFolder + 'skytem_saline_clay.csv'
     # The EM system file name
-    systemFile=[dataFolder + 'SkytemHM_512.stm', dataFolder + 'SkytemLM_512.stm']
+    systemFile=[dataFolder + 'SkytemHM.stm', dataFolder + 'SkytemLM.stm']
 
 
 
@@ -159,7 +159,7 @@ Forward model the data
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:354: RuntimeWarning: divide by zero encountered in log
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:362: RuntimeWarning: divide by zero encountered in log
       additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
 
 
@@ -262,8 +262,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -324824.70759632764
-    652129.2354668385
+    -320327.7331520332
+    643134.8665683006
 
 
 
@@ -277,7 +277,7 @@ Plot the misfits for a range of half space conductivities
 .. code-block:: Python
 
     plt.figure()
-    _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+    _ = tdp.plot_halfspace_responses(-6.0, 4.0, 200)
     plt.title("Halfspace responses")
 
 
@@ -349,7 +349,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    19992.94964076136
+    19656.31514467779
 
 
 
@@ -373,6 +373,13 @@ the relative error multiplier, and the additive error noise floor
 
 
 
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:132: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
 
 
 
@@ -543,7 +550,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.346 seconds)
+   **Total running time of the script:** (0 minutes 1.918 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_skytem_datapoint.py:

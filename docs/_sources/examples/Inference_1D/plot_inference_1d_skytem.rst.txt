@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Inference_1D_plot_inference_1d_skytem.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -44,7 +44,7 @@ Running GeoBIPy to invert Skytem data
         Parser = argparse.ArgumentParser(description="GeoBIPy",
                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         Parser.add_argument('--index', default=0, type=int, help='job array index 0-18')
-        Parser.add_argument('--data', default=None, help="Data type. Choose from ['skytem_512', 'tempest', 'resolve']")
+        Parser.add_argument('--data', default=None, help="Data type. Choose from ['skytem', 'tempest', 'resolve']")
         Parser.add_argument('--model', default=None, help="Model type. Choose from ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']")
 
         return Parser.parse_args()
@@ -67,7 +67,7 @@ Running GeoBIPy to invert Skytem data
 
     models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
-    data_type = "Skytem_512"
+    data_type = "Skytem"
     model_type = models[args.index]
 
 
@@ -135,21 +135,38 @@ The directory where HDF files will be stored
     inference3d.infer(index=2, **kwargs)
 
 
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image-sg:: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_skytem_001.png
+         :alt: plot inference 1d skytem
+         :srcset: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_skytem_001.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_skytem_002.png
+         :alt: Fiducial [2.], Time Domain EM Data
+         :srcset: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_skytem_002.png
+         :class: sphx-glr-multi-img
+
 
 .. rst-class:: sphx-glr-script-out
 
  .. code-block:: none
 
-    Using user input file ..//..//supplementary////options_files//Skytem_512_options
-    Output files will be produced at Skytem_512/glacial
+    Using user input file ..//..//supplementary////options_files//Skytem_options
+    Output files will be produced at Skytem/glacial
     Creating HDF5 files, this may take a few minutes...
-    Files are being created for data files ..//..//supplementary////data//Skytem_512_glacial.csv and system files ['..//..//supplementary////data//..//data//SkytemHM_512.stm', '..//..//supplementary////data//..//data//SkytemLM_512.stm']
+    Files are being created for data files ..//..//supplementary////data//Skytem_glacial.csv and system files ['..//..//supplementary////data//..//data//SkytemHM.stm', '..//..//supplementary////data//..//data//SkytemLM.stm']
     Created hdf5 file for line 0.0 with 79 data points
     Created hdf5 files 79 total data points
-    Created hdf5 files in 0:00:00.171754 h:m:s
-    i=5000, k=6, acc=*17.440, 0.012 s/Model, 60.254 s Elapsed, eta=--:--:-- h:m:s
+    Created hdf5 files in 0:00:00.182385 h:m:s
+    i=5000, k=4, acc=*29.700, 0.010 s/Model, 49.131 s Elapsed, eta=--:--:-- h:m:s
 
-    Remaining Points -2/1 || Elapsed Time: 0:01:00.423246 h:m:s || ETA 0:00:20.141082 h:m:s
+    Remaining Points -2/1 || Elapsed Time: 0:00:50.176460 h:m:s || ETA 0:00:16.725487 h:m:s
 
 
 
@@ -157,7 +174,7 @@ The directory where HDF files will be stored
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 6.343 seconds)
+   **Total running time of the script:** (0 minutes 50.833 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_1D_plot_inference_1d_skytem.py:

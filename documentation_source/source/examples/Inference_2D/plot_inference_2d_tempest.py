@@ -134,8 +134,8 @@ def plot_2d_summary(folder, data_type, model_type):
    results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
    results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
-   plt.show()
-   # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
+   # plt.show()
+   plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
 
 if __name__ == '__main__':

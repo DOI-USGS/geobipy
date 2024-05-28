@@ -39,7 +39,7 @@ class Inference1D(myObject):
 
     Contains histograms and inversion related variables that can be updated as the Bayesian inversion progresses.
 
-    Inference1D(saveMe, plotMe, savePNG, dataPoint, model, ID, \*\*kwargs)
+    Inference1D(saveMe, plotMe, savePNG, dataPoint, model, ID, **kwargs)
 
     Parameters
     ----------
@@ -882,7 +882,9 @@ class Inference1D(myObject):
             #     'normalize': True},
             overlay=overlay
         )
-        self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax[3], linecolor='k')
+
+        if '_observed_datapoint' in self.__dict__:
+            self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax[3], linecolor='k')
         if self.burned_in:
             self.datapoint.overlay_on_posteriors(self.best_datapoint, axes=self.posterior_ax[3])
 

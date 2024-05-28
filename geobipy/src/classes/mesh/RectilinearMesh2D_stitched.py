@@ -178,21 +178,29 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         max_edge = max(y_edges[isfinite(y_edges)])
         if npany(isinf(y_edges)):
             if nanmin(y_edges) == -inf:
-                max_edge = 2.0 * min(y_edges[isfinite(y_edges)])
+                min_edge = 2.0 * min(y_edges[isfinite(y_edges)])
             elif nanmax(y_edges) == inf:
                 max_edge = 2.0 * max(y_edges[isfinite(y_edges)])
 
         alpha = ndim(color_kwargs['alpha'] > 0) if color_kwargs['alpha'] is not None else False
 
+        width = zeros(self.x.nCells)
+
         relativeTo = 0.0 if self.relativeTo is None else self.relativeTo
         for i in range(max(self.nCells)):
+
+            active = where(self.nCells > i)[0]
+
             bottom = y_edges[:, i] + relativeTo
             top = y_edges[:, i+1] + relativeTo
 
-            active = where(self.nCells > i)
-            top[isinf(top)] = max_edge
+            top[top == -inf] = min_edge
+            top[top == inf] = max_edge
 
-            width = zeros(self.x.nCells)
+            bottom[bottom == -inf] = min_edge
+            bottom[bottom == inf] = max_edge
+
+            width[:] = 0.0
             width[active] = top[active] - bottom[active]
 
             colour = color_kwargs['cmap'](v[:, i])
@@ -200,7 +208,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             if alpha:
                 colour[:, -1] = color_kwargs['alpha'][:, i]
 
-            pm = ax.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=colour, **kwargs)
+            pm = ax.bar(self.x.centres, width, self.x.widths, bottom=bottom, color=colour)
 
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)

@@ -1456,11 +1456,11 @@ def pause(interval):
         Pause for *interval* seconds.
 
     """
-    from matplotlib.rcsetup import interactive_bk
     from matplotlib._pylab_helpers import Gcf
+    from matplotlib import backends
 
     backend = plt.rcParams['backend']
-    if backend in interactive_bk:
+    if backend in backends.backend_registry.list_builtin(backends.BackendFilter.INTERACTIVE):
         figManager = Gcf.get_active()
         if figManager is not None:
             canvas = figManager.canvas

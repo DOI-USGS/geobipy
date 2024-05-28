@@ -1231,7 +1231,7 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
 
-        self.data.plot(values=self.doi, axis=1, **kwargs)
+        self.data.plot(values=self.doi, **kwargs)
 
     def plot_elevation(self, **kwargs):
         kwargs['x'] = kwargs.pop('x', 'x')

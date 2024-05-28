@@ -55,7 +55,6 @@ print(Density.summary)
 # The StatArray class has been built so that we may easily
 # attach not only names and units, but statistical distributions too.
 # We won't go into too much detail about the different distribution
-# classes here so check out the :ref:`Distribution Class` for a better description.
 #
 # Two types of distributions can be attached to the StatArray.
 #

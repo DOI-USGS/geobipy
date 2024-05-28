@@ -39,7 +39,6 @@ from .src.classes.system.FdemSystem import FdemSystem
 from .src.classes.system.TdemSystem import TdemSystem
 from .src.classes.system.Waveform import Waveform
 from .src.classes.system.CircularLoop import CircularLoop
-from .src.classes.system.CircularLoops import CircularLoops
 from .src.classes.system.SquareLoop import SquareLoop
 from .src.classes.system.filters.butterworth import butterworth
 # Meshes
@@ -50,7 +49,6 @@ from .src.classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 # Models
 from .src.classes.model.Model import Model
 # Pointclouds
-from .src.classes.pointcloud.PointCloud3D import PointCloud3D
 from .src.classes.pointcloud.Point import Point
 # Statistics
 from .src.classes.statistics.Distribution import Distribution

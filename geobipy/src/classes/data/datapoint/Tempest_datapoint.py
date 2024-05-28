@@ -78,7 +78,7 @@ class Tempest_datapoint(TdemDataPoint):
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out._additive_error_multiplier = deepcopy(self.additive_error_multiplier)
+        out._additive_error_multiplier = deepcopy(self.additive_error_multiplier, memo=memo)
         return out
 
     @TdemDataPoint.additive_error.setter

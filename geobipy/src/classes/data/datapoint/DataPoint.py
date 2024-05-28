@@ -124,7 +124,7 @@ class DataPoint(Point):
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray.StatArray(values, '$\\epsilon_{Additive}$', self.units)
 
     @property
     def addressof(self):
@@ -201,7 +201,7 @@ class DataPoint(Point):
         """Get the difference between the predicted and observed data,
 
         .. math::
-            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
+            \\delta \\mathbf{d} = \\mathbf{d}^{pre} - \\mathbf{d}^{obs}.
 
         Returns
         -------
@@ -211,16 +211,6 @@ class DataPoint(Point):
 
         """
         return StatArray.StatArray(self.predictedData - self.data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
-
-    # @property
-    # def elevation(self):
-    #     return self._elevation
-
-    # @elevation.setter
-    # def elevation(self, value):
-    #     if value is None:
-    #         value = 1
-    #     self._elevation = StatArray.StatArray(value, "Elevation", "m")
 
     @property
     def n_active_channels(self):
@@ -268,7 +258,7 @@ class DataPoint(Point):
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
-        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray.StatArray(values, '$\\epsilon_{Relative}x10^{2}$', '%')
 
     @property
     def sensitivity_matrix(self):
@@ -332,7 +322,7 @@ class DataPoint(Point):
         out._fiducial = deepcopy(self.fiducial, memo)
         out._channel_names = deepcopy(self.channel_names, memo)
 
-        out._sensitivity_matrix = deepcopy(self._sensitivity_matrix)
+        out._sensitivity_matrix = deepcopy(self._sensitivity_matrix, memo)
 
         return out
 
@@ -512,9 +502,9 @@ class DataPoint(Point):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
         .. math::
-            \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
+            \\| \\mathbf{W}_{d} (\\mathbf{d}^{obs}-\\mathbf{d}^{pre})\\|_{2}^{2},
 
-        where :math:`\mathbf{W}_{d}` are the reciprocal data errors.
+        where :math:`\\mathbf{W}_{d}` are the reciprocal data errors.
 
         Parameters
         ----------
