@@ -1855,9 +1855,11 @@ class Inference3D(myObject):
 
         bar = self.progress_bar(lines)
 
+        output = kwargs.pop('output_directory', '.')
+
         for this in bar:
             fig = this.plot_summary(**kwargs)
-            fig.savefig(f"{this.line_number}.png")
+            fig.savefig(f"{output}//{this.line_number}.png")
             plt.close(fig)
             this.close()
             del this
