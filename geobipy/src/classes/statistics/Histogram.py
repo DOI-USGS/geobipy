@@ -355,8 +355,10 @@ class Histogram(Model):
 
     def opacity_level(self, percent=95.0, log=None, axis=0):
         """ Get the index along axis 1 from the bottom up that corresponds to the percent opacity """
+
+        op = self.transparency(percent = percent, log=log, axis=axis)
+
         p = 0.01 * percent
-        op = self.transparency(log=log, axis=axis)
 
         nz = op.nCells - 1
         iC = nz
@@ -504,7 +506,7 @@ class Histogram(Model):
         values, dum = utilities._log(values, log)
         return values
 
-    def transparency(self, percent=95.0, log=None, axis=0):
+    def transparency(self, percent, log=None, axis=0, **kwargs):
         """Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.
 
         Higher ranges in credibility are mapped to more transparency.
@@ -526,7 +528,7 @@ class Histogram(Model):
 
         """
 
-        out = StatArray(self.credible_range(percent=percent, log=log, axis=axis), 'Transparency')
+        out = StatArray(self.credible_range(percent=percent, log=log, axis=axis, **kwargs), 'Transparency')
         mn = nanmin(out)
         mx = nanmax(out)
         t = mx - mn
