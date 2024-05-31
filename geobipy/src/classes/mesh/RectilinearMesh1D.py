@@ -719,7 +719,7 @@ class RectilinearMesh1D(Mesh):
             return ones((1, 1))
 
         x = self.widths.copy()
-        e2e = 10.0 *  self.edge_to_edge
+        e2e = 0.5 * self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
@@ -745,7 +745,7 @@ class RectilinearMesh1D(Mesh):
 
         x = self.widths.copy()
 
-        e2e = 10.0 * self.edge_to_edge
+        e2e = 0.5 * self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
