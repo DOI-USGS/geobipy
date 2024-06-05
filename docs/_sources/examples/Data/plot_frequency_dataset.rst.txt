@@ -457,7 +457,7 @@ A summary will now show the properties of the line.
 
     FdemData
     x:
-    |   Name: Easting (m) 0x174e7e4d0
+    |   Name: Easting (m) 0x171f2ff50
     |   Shape: (6710,)
     |   Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
     |   Min: 586122.82
@@ -465,7 +465,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     y:
-    |   Name: Northing (m) 0x174e7ecd0
+    |   Name: Northing (m) 0x171f2fe50
     |   Shape: (6710,)
     |   Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
     |   Min: 4639119.38
@@ -473,7 +473,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     z:
-    |   Name: Height (m) 0x174e7e150
+    |   Name: Height (m) 0x171f2f950
     |   Shape: (6710,)
     |   Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
     |   Min: 23.830000000000002
@@ -481,7 +481,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     elevation:
-    |   Name: Elevation (m) 0x174e7e050
+    |   Name: Elevation (m) 0x171f2f9d0
     |   Shape: (6710,)
     |   Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
     |   Min: 1213.18
@@ -493,7 +493,7 @@ A summary will now show the properties of the line.
     |   In_Phase 129550.0, Quadrature 380.0, Quadrature 1776.0, Quadrature 3345.0, Quadrature 8171.0, 
     |   Quadrature 41020.0, Quadrature 129550.0
     data:
-    |   Name: Data (ppm) 0x174f4d350
+    |   Name: Data (ppm) 0x171dd6c50
     |   Shape: (80520,)
     |   Values: [145.3 435.8 260.6 ... 749.2 976.5 928.3]
     |   Min: 37.7
@@ -501,7 +501,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     predicted data:
-    |   Name: Predicted Data (ppm) 0x174f4d350
+    |   Name: Predicted Data (ppm) 0x1744559d0
     |   Shape: (80520,)
     |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   Min: 0.0
@@ -509,7 +509,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     std:
-    |   Name: std (ppm) 0x174f4d350
+    |   Name: std (ppm) 0x1744559d0
     |   Shape: (80520,)
     |   Values: [1.453 4.358 2.606 ... 7.492 9.765 9.283]
     |   Min: 0.37700000000000006
@@ -517,7 +517,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     line number:
-    |   Name: Line number 0x174e7d250
+    |   Name: Line number 0x171f2fb50
     |   Shape: (6710,)
     |   Values: [30010. 30010. 30010. ... 30010. 30010. 30010.]
     |   Min: 30010.0
@@ -525,7 +525,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     fiducial:
-    |   Name: Fiducial 0x174e7da50
+    |   Name: Fiducial 0x171f2fbd0
     |   Shape: (6710,)
     |   Values: [30000 30000 30000 ... 30670 30670 30670]
     |   Min: 30000
@@ -533,7 +533,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     relative error:
-    |   Name: Relative error (%) 0x174e7e7d0
+    |   Name: Relative error (%) 0x171f2eb50
     |   Shape: (6710, 1)
     |   Values: [[0.01]
     |    [0.01]
@@ -547,7 +547,7 @@ A summary will now show the properties of the line.
     |   has_posterior: False
 
     additive error:
-    |   Name: Additive error (ppm) 0x174e7e750
+    |   Name: Additive error (ppm) 0x171f2ebd0
     |   Shape: (6710, 1)
     |   Values: [[0.]
     |    [0.]
@@ -714,7 +714,7 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.948 seconds)
+   **Total running time of the script:** (0 minutes 3.419 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:

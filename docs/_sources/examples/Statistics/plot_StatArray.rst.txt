@@ -90,21 +90,21 @@ Instantiating a new StatArray class
 
  .. code-block:: none
 
-    Name: 1 0x169c7d550
+    Name: 1 0x170707ad0
     Shape: (1,)
     Values: [0.]
     Min: 0.0
     Max: 0.0
     has_posterior: False
 
-    Name: 10 0x169c7e450
+    Name: 10 0x1707041d0
     Shape: (10,)
     Values: [0. 0. 0. ... 0. 0. 0.]
     Min: 0.0
     Max: 0.0
     has_posterior: False
 
-    Name: (2, 10) 0x169384e50
+    Name: (2, 10) 0x170705c50
     Shape: (2, 10)
     Values: [[0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]]
@@ -112,25 +112,25 @@ Instantiating a new StatArray class
     Max: 0.0
     has_posterior: False
 
-    Name: 45.454 0x169385f50
+    Name: 45.454 0x170706fd0
     Shape: (1,)
     Values: [45.454]
     Min: 45.454
     Max: 45.454
     has_posterior: False
 
-    Name: 45.454 0x1683fe950
+    Name: 45.454 0x1707058d0
     Shape: (1,)
     Values: [45.454]
     Min: 45.454
     Max: 45.454
     has_posterior: False
 
-    Name: Density ($\frac{g}{cc}$) 0x1695c9e50
+    Name: Density ($\frac{g}{cc}$) 0x170706ed0
     Shape: (1,)
-    Values: [0.9749187]
-    Min: 0.9749187044718027
-    Max: 0.9749187044718027
+    Values: [-0.81925455]
+    Min: -0.8192545455077754
+    Max: -0.8192545455077754
     has_posterior: False
 
 
@@ -202,11 +202,11 @@ We can also attach a proposal distribution
 
  .. code-block:: none
 
-    Name: Density ($\frac{g}{cc}$) 0x1695c9e50
+    Name: Density ($\frac{g}{cc}$) 0x170706ed0
     Shape: (1,)
-    Values: [0.9749187]
-    Min: 0.9749187044718027
-    Max: 0.9749187044718027
+    Values: [-0.81925455]
+    Min: -0.8192545455077754
+    Max: -0.8192545455077754
     Prior:
     |   Uniform Distribution: 
     |   Min: -2.0
@@ -290,7 +290,7 @@ Or we can only generate samples that simultaneously satisfy the prior.
 
  .. code-block:: none
 
-    [1.51308498]
+    [-0.28108827]
 
 
 
@@ -315,7 +315,7 @@ We can perturb the variable by drawing from the attached proposal distribution.
 
  .. code-block:: none
 
-    Name: Density ($\frac{g}{cc}$) 0x1695c9e50
+    Name: Density ($\frac{g}{cc}$) 0x170706ed0
     Shape: (1,)
     Values: [0.38188467]
     Min: 0.38188466718060166
@@ -457,7 +457,7 @@ This produces a single probability.
 
  .. code-block:: none
 
-    0.20188095665063005
+    0.33888096006650337
 
 
 
@@ -1590,7 +1590,7 @@ We can also define a 2D array
  .. code-block:: none
 
 
-    'Name: Density ($\\frac{g}{cc}$) 0x1742c39d0\nShape: (50, 100)\nValues: [[ 2.06611328 -0.96894773  0.47361096 ...  0.16917278 -0.04668624\n  -1.67011115]\n [-2.65469689  0.85834291  0.34430906 ...  1.28800911  1.1144927\n  -0.24695526]\n [-0.75278061 -1.2438372  -1.07790459 ... -0.084758   -0.25569134\n  -0.2208334 ]\n ...\n [ 1.62844768 -1.09228456  0.26267186 ... -0.09846557 -0.38299931\n  -0.80442456]\n [ 0.66077354 -1.37006434 -0.89252653 ...  1.21600984 -1.48399493\n   0.22944182]\n [-0.97250913  0.70182171  0.11826363 ... -1.39823221  0.26741883\n  -0.11541463]]\nMin: -3.46634472149419\nMax: 3.4539286867724015\nhas_posterior: False\n'
+    'Name: Density ($\\frac{g}{cc}$) 0x16fbf1550\nShape: (50, 100)\nValues: [[-4.01780133e-01  3.16635145e-01 -5.27750195e-01 ... -2.44618399e+00\n  -4.96050117e-01  6.25365537e-01]\n [-4.81076204e-01 -9.74014990e-01 -2.11325212e+00 ...  1.81726048e-01\n   2.03762749e-01 -8.72069096e-01]\n [-7.25459267e-01  5.59232504e-01 -1.38786869e+00 ...  6.21068169e-01\n  -2.59833364e+00 -1.14244762e+00]\n ...\n [-1.12094718e+00  1.09285179e+00 -8.49788982e-01 ... -1.72570923e+00\n   4.99544999e-01  5.42242587e-01]\n [ 2.82865259e-01 -1.18059731e-04 -1.52188899e-01 ...  1.13864002e-01\n   7.13026322e-01 -1.02252865e+00]\n [-4.71123302e-01 -4.93942524e-01  6.77625263e-01 ... -1.27237018e+00\n  -2.27635302e+00  1.60185139e+00]]\nMin: -3.2916747712189056\nMax: 3.5748933990954637\nhas_posterior: False\n'
 
 
 
@@ -1866,7 +1866,7 @@ Create a stacked area plot of a 2D StatArray
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.954 seconds)
+   **Total running time of the script:** (0 minutes 3.542 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_StatArray.py:

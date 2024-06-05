@@ -7,7 +7,7 @@
   <title>2D Rectilinear Mesh &mdash; GeoBIPy 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -21,7 +21,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -148,7 +148,7 @@ do not follow a line that is parallel to either the “x” or “y” axis.</p>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Depth (m)&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x174ebb170&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x174e93e60&gt;)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Depth (m)&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x164aa2b10&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x164cef3b0&gt;)
 </pre></div>
 </div>
 <p>We can pcolor the mesh by providing cell values.</p>
@@ -204,16 +204,19 @@ Generate some values</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span><span class="o">.</span><span class="n">intervalStatistic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">intervals</span><span class="o">=</span><span class="p">[</span><span class="mf">6.8</span><span class="p">,</span> <span class="mf">12.4</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[9., 9., 9., ..., 9., 9., 9.]]), [6.8, 12.4])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9.]]), [6.8, 12.4])
 </pre></div>
 </div>
 <p>Compute the mean over multiple intervals for the mesh.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span><span class="o">.</span><span class="n">intervalStatistic</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">intervals</span><span class="o">=</span><span class="p">[</span><span class="mf">6.8</span><span class="p">,</span> <span class="mf">12.4</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">,</span> <span class="mf">40.0</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[ 9.,  9.,  9., ...,  9.,  9.,  9.],
-       [nan, nan, nan, ..., nan, nan, nan],
-       [nan, nan, nan, ..., nan, nan, nan]]), [6.8, 12.4, 20.0, 40.0])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[ 9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,
+         9.,  9.],
+       [nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan,
+        nan, nan],
+       [nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan,
+        nan, nan]]), [6.8, 12.4, 20.0, 40.0])
 </pre></div>
 </div>
 <p>We can specify either axis</p>
@@ -223,7 +226,10 @@ Generate some values</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[ 1.],
        [ 2.],
        [ 3.],
-       ...,
+       [ 4.],
+       [ 5.],
+       [ 6.],
+       [ 7.],
        [ 8.],
        [ 9.],
        [10.]]), [2.8, 4.2])
@@ -235,7 +241,10 @@ Generate some values</p>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(array([[ 1., nan,  1.],
        [ 2., nan,  2.],
        [ 3., nan,  3.],
-       ...,
+       [ 4., nan,  4.],
+       [ 5., nan,  5.],
+       [ 6., nan,  6.],
+       [ 7., nan,  7.],
        [ 8., nan,  8.],
        [ 9., nan,  9.],
        [10., nan, 10.]]), [2.8, 4.2, 5.1, 8.4])
@@ -266,7 +275,7 @@ Generate some values</p>
 <span class="n">rm2</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">values2</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: &gt;, &lt;matplotlib.collections.QuadMesh object at 0x168467740&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x174bbf9e0&gt;)
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: &gt;, &lt;matplotlib.collections.QuadMesh object at 0x165dc6f60&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x164e378f0&gt;)
 </pre></div>
 </div>
 <section id="axes-in-log-space">
@@ -294,7 +303,7 @@ Generate some values</p>
 <span class="n">rm2</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;x&#39;, ylabel=&#39;y&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x169edf6b0&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x1748318e0&gt;)
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;x&#39;, ylabel=&#39;y&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x16613fd40&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x165ff43e0&gt;)
 </pre></div>
 </div>
 </section>
@@ -366,7 +375,7 @@ Generate some values</p>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_013.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_013.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_014.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_014.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.873 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.314 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-2d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/6dec5e41149e94d435270c1dffe803e1/plot_rectilinear_mesh_2d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rectilinear_mesh_2d.ipynb</span></code></a></p>

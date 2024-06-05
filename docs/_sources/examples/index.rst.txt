@@ -585,6 +585,23 @@ In both cases, you will need to write an options file (also shown in these examp
 
 .. only:: html
 
+  .. image:: /examples/Inference_2D/images/thumb/sphx_glr_test_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Inference_2D_test.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D Posterior analysis of Resolve inference</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
   .. image:: /examples/Inference_2D/images/thumb/sphx_glr_plot_inference_2d_skytem_thumb.png
     :alt:
 
@@ -624,6 +641,7 @@ In both cases, you will need to write an options file (also shown in these examp
    :hidden:
 
    /examples/Inference_2D/plot_inference_2d_resolve
+   /examples/Inference_2D/test
    /examples/Inference_2D/plot_inference_2d_skytem
    /examples/Inference_2D/plot_inference_2d_tempest
 

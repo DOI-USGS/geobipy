@@ -7,7 +7,7 @@
   <title>Histogram 2D &mdash; GeoBIPy 1.0.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -21,7 +21,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -162,7 +162,7 @@ saving as HDF5.</p>
 <li><img src="../../_images/sphx_glr_plot_histogram_2d_001.png" srcset="../../_images/sphx_glr_plot_histogram_2d_001.png" alt="2D Histogram" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_histogram_2d_002.png" srcset="../../_images/sphx_glr_plot_histogram_2d_002.png" alt="plot histogram 2d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;Variable 1&#39;, ylabel=&#39;Variable 2&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x169498050&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x1693d91f0&gt;)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;Variable 1&#39;, ylabel=&#39;Variable 2&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x16438c8c0&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x16438dd30&gt;)
 </pre></div>
 </div>
 <p>We can overlay the histogram with its credible intervals</p>
@@ -230,15 +230,34 @@ sphinx_gallery_thumbnail_number = 3</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_2d_006.png" srcset="../../_images/sphx_glr_plot_histogram_2d_006.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x16913f5c0&gt;
+<img src="../../_images/sphx_glr_plot_histogram_2d_006.png" srcset="../../_images/sphx_glr_plot_histogram_2d_006.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x164a133b0&gt;
 </pre></div>
 </div>
 <p>Get the range between credible intervals</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">credible_range</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([2.74747475, 3.23232323, 4.2020202 , ..., 2.66666667,
-           4.36363636, 3.63636364])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([4.92929293, 3.55555556, 2.50505051, 4.44444444, 4.92929293,
+           3.15151515, 3.7979798 , 4.12121212, 4.36363636, 3.31313131,
+           4.36363636, 3.95959596, 3.7979798 , 3.63636364, 4.12121212,
+           4.04040404, 3.87878788, 4.12121212, 3.95959596, 3.7979798 ,
+           3.95959596, 4.28282828, 3.87878788, 3.95959596, 3.7979798 ,
+           3.95959596, 3.95959596, 3.95959596, 3.95959596, 3.95959596,
+           3.95959596, 4.04040404, 3.95959596, 3.95959596, 3.87878788,
+           3.87878788, 4.04040404, 3.95959596, 3.87878788, 3.87878788,
+           3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.95959596, 3.87878788, 3.95959596, 3.87878788, 3.95959596,
+           3.95959596, 3.95959596, 3.87878788, 3.87878788, 3.87878788,
+           3.95959596, 3.95959596, 3.87878788, 3.95959596, 3.87878788,
+           3.95959596, 3.7979798 , 3.95959596, 3.95959596, 3.87878788,
+           3.95959596, 3.87878788, 3.7979798 , 3.87878788, 3.87878788,
+           3.87878788, 4.36363636, 4.28282828, 4.2020202 , 4.28282828,
+           4.52525253, 4.44444444, 4.12121212, 3.63636364, 4.04040404,
+           2.98989899, 3.7979798 , 2.90909091, 3.63636364])
 </pre></div>
 </div>
 <p>We can map the credible range to an opacity or transparency</p>
@@ -297,7 +316,7 @@ sphinx_gallery_thumbnail_number = 3</p>
 <li><img src="../../_images/sphx_glr_plot_histogram_2d_007.png" srcset="../../_images/sphx_glr_plot_histogram_2d_007.png" alt="2D Histogram" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_histogram_2d_008.png" srcset="../../_images/sphx_glr_plot_histogram_2d_008.png" alt="plot histogram 2d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;Variable 1&#39;, ylabel=&#39;Variable 2&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x16957fb60&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x169b702c0&gt;)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;Variable 1&#39;, ylabel=&#39;Variable 2&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x165602120&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x164cf4a10&gt;)
 </pre></div>
 </div>
 <p>We can overlay the histogram with its credible intervals</p>
@@ -364,15 +383,34 @@ sphinx_gallery_thumbnail_number = 3</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_2d_012.png" srcset="../../_images/sphx_glr_plot_histogram_2d_012.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x169bf99a0&gt;
+<img src="../../_images/sphx_glr_plot_histogram_2d_012.png" srcset="../../_images/sphx_glr_plot_histogram_2d_012.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.legend.Legend object at 0x16447adb0&gt;
 </pre></div>
 </div>
 <p>Get the range between credible intervals</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">H</span><span class="o">.</span><span class="n">credible_range</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([2.58585859, 2.02020202, 2.18181818, ..., 4.76767677,
-           3.7979798 , 4.84848485])
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([4.12121212, 3.47474747, 3.15151515, 4.12121212, 4.36363636,
+           3.63636364, 3.87878788, 4.84848485, 3.63636364, 3.71717172,
+           4.2020202 , 4.04040404, 3.7979798 , 3.39393939, 4.12121212,
+           3.7979798 , 4.28282828, 3.7979798 , 3.95959596, 3.87878788,
+           4.04040404, 3.95959596, 3.87878788, 3.95959596, 3.87878788,
+           4.04040404, 3.95959596, 3.95959596, 3.95959596, 3.87878788,
+           3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.87878788, 3.87878788, 3.87878788, 3.95959596, 3.87878788,
+           3.87878788, 3.87878788, 3.87878788, 3.95959596, 3.87878788,
+           3.87878788, 4.04040404, 3.87878788, 3.95959596, 3.95959596,
+           3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+           3.95959596, 3.87878788, 3.87878788, 3.95959596, 3.87878788,
+           3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.95959596,
+           3.95959596, 3.95959596, 3.87878788, 3.7979798 , 3.87878788,
+           3.71717172, 3.87878788, 4.04040404, 4.2020202 , 3.7979798 ,
+           3.95959596, 4.12121212, 3.7979798 , 3.71717172, 4.2020202 ,
+           3.55555556, 3.95959596, 3.71717172, 3.87878788, 4.76767677,
+           3.95959596, 4.52525253, 4.36363636, 3.31313131])
 </pre></div>
 </div>
 <p>We can map the credible range to an opacity or transparency</p>
@@ -439,7 +477,7 @@ sphinx_gallery_thumbnail_number = 3</p>
 <li><img src="../../_images/sphx_glr_plot_histogram_2d_013.png" srcset="../../_images/sphx_glr_plot_histogram_2d_013.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_histogram_2d_014.png" srcset="../../_images/sphx_glr_plot_histogram_2d_014.png" alt="Mean, median, and credible interval overlain" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 9.433 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 32.906 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-2d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/36d592b131669bd825431209f21f3531/plot_histogram_2d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_histogram_2d.ipynb</span></code></a></p>

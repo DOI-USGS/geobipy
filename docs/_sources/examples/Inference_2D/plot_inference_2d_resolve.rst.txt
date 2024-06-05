@@ -23,7 +23,7 @@
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-151
+.. GENERATED FROM PYTHON SOURCE LINES 8-153
 
 
 
@@ -73,41 +73,8 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
          :class: sphx-glr-multi-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
-      self._mtx[1, 2] += ty
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
-      return (x0, y0, x1 - x0, y1 - y0)
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
-      self._mtx[1, 2] += ty
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
-      return (x0, y0, x1 - x0, y1 - y0)
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
-      self._mtx[1, 2] += ty
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
-      return (x0, y0, x1 - x0, y1 - y0)
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
-      self._mtx[1, 2] += ty
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
-      return (x0, y0, x1 - x0, y1 - y0)
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
-      self._mtx[1, 2] += ty
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
-      return (x0, y0, x1 - x0, y1 - y0)
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in scalar add
-      self._mtx[1, 2] += ty
-    /usr/local/Caskroom/mambaforge/base/envs/geobipy/lib/python3.12/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in scalar subtract
-      return (x0, y0, x1 - x0, y1 - y0)
 
 
-
-
-
-
-|
 
 .. code-block:: Python
 
@@ -143,6 +110,9 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
              "log" : 10,
              "cmap" : 'jet'
              }
+
+       import warnings
+       warnings.filterwarnings('error')
 
        fig = plt.figure(figsize=(16, 8))
        plt.suptitle("{} {}".format(data_type, model_type))
@@ -240,25 +210,24 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
        results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
        results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
-
-       plt.show()
-       # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
+       # plt.show()
+       plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
     if __name__ == '__main__':
        models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
        for model in models:
-          try:
+          # try:
              plot_2d_summary("../../../Parallel_Inference/", "resolve", model)
-          except Exception as e:
-             print(model)
-             print(e)
-             pass
+          # except Exception as e:
+          #    print(model)
+          #    print(e)
+          #    pass
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 26.429 seconds)
+   **Total running time of the script:** (0 minutes 49.364 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_2D_plot_inference_2d_resolve.py:
