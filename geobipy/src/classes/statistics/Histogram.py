@@ -506,7 +506,7 @@ class Histogram(Model):
         values, dum = utilities._log(values, log)
         return values
 
-    def transparency(self, percent, log=None, axis=0, **kwargs):
+    def transparency(self, percent=95.0, log=None, axis=0, **kwargs):
         """Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.
 
         Higher ranges in credibility are mapped to more transparency.

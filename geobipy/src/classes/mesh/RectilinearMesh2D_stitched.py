@@ -175,6 +175,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         y_edges = self.y_edges
         y_edges = utilities._power(y_edges, self.y_log)
 
+        min_edge = min(y_edges[isfinite(y_edges)])
         max_edge = max(y_edges[isfinite(y_edges)])
         if npany(isinf(y_edges)):
             if nanmin(y_edges) == -inf:
