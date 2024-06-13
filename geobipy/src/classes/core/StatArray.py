@@ -30,7 +30,7 @@ class StatArray(ndarray, myObject):
     Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an
     in-place numpy function will return a StatArray.  See the example section for more information.
 
-    StatArray(shape, name=None, units=None, \*\*kwargs)
+    StatArray(shape, name=None, units=None, **kwargs)
 
     Parameters
     ----------
@@ -294,6 +294,15 @@ class StatArray(ndarray, myObject):
             else:
                 msg += "Posterior:\n{}".format(("|   "+self.posterior.addressof.replace("\n", "\n|   "))[:-4])
         return msg
+
+    @property
+    def address(self):
+        out = asarray([hex(id(self))])
+        if self.hasPrior:
+            out = out.hstack([out, self.prior.address])
+        if self.hasProposal:
+            out = out.hstack([out, self.proposal.address])
+        return out
 
     def abs(self):
         """Take the absolute value.  In-place operation.
@@ -927,7 +936,7 @@ class StatArray(ndarray, myObject):
 
     # Statistical Routines
 
-    def hist(self, bins=10, range=None, normed=None, weights=None, density=None, **kwargs):
+    def hist(self, bins=10, **kwargs):
         """Plot a histogram of the StatArray
 
         Plots a histogram, estimates the mean and standard deviation and overlays the PDF of a normal distribution with those values, if density=1.
@@ -949,7 +958,7 @@ class StatArray(ndarray, myObject):
 
         """
         cnts, bins = histogram(
-            self, bins=bins, range=range, normed=normed, weights=weights, density=density)
+            self, bins=bins, **kwargs)
         bins = StatArray(bins, name=self.name, units=self.units)
         cP.bar(cnts, bins, **kwargs)
 
@@ -1283,7 +1292,12 @@ class StatArray(ndarray, myObject):
                 i = s_[:self.shape[0], :self.shape[1]]
             j = i[axis]
 
-        return cP.plot(x[j], self[i], **kwargs)
+        smooth = kwargs.pop('smooth', None)
+        this = self[i]
+        if smooth is not None:
+            this = cf.smooth(self[i], smooth)
+
+        return cP.plot(x[j], this, **kwargs)
 
     def _init_posterior_plots(self, gs):
         """Initialize axes for posterior plots
@@ -1345,13 +1359,28 @@ class StatArray(ndarray, myObject):
 
             ax = kwargs.pop('ax')
             for i in range(self.n_posteriors):
-                ax[i].cla()
+                ax[i].set_xscale('linear'); ax[i].cla()
                 self.posterior[i].plot(overlay=overlay[i], ax=ax[i], **kwargs)
         else:
             if isinstance(ax, list):
                 ax = ax[0]
             ax.cla()
             self.posterior.plot(**kwargs)
+
+    def overlay_on_posteriors(self, overlay, ax, **kwargs):
+
+        if size(ax) > 1:
+            assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(size(ax), self.n_posteriors))
+            assert len(overlay) == len(ax), ValueError("line in kwargs must have size {}".format(len(ax)))
+            # overlay = kwargs.pop('overlay', asarray([None for i in range(len(ax))]))
+
+            for i in range(self.n_posteriors):
+                self.posterior[i].plot_overlay(value=overlay[i], ax=ax[i], **kwargs)
+        else:
+            if isinstance(ax, list):
+                ax = ax[0]
+
+            self.posterior.plot_overlay(value=overlay, ax=ax, **kwargs)
 
     def scatter(self, x=None, y=None, i=None, **kwargs):
         """Create a 2D scatter plot.
@@ -1477,7 +1506,7 @@ class StatArray(ndarray, myObject):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
-        A nested heirarchy will be created e.g., myName\data, myName\prior, and myName\proposal.
+        A nested heirarchy will be created e.g., myName/\data, myName/\prior, and myName/\proposal.
         This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
         and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
         In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory

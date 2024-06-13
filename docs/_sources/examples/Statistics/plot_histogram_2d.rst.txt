@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Statistics_plot_histogram_2d.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -164,7 +164,7 @@ Update the histogram counts
  .. code-block:: none
 
 
-    (<Axes: xlabel='Variable 1', ylabel='Variable 2'>, <matplotlib.collections.QuadMesh object at 0x7fbf619a2110>, <matplotlib.colorbar.Colorbar object at 0x7fbf619a2680>)
+    (<Axes: xlabel='Variable 1', ylabel='Variable 2'>, <matplotlib.collections.QuadMesh object at 0x16438c8c0>, <matplotlib.colorbar.Colorbar object at 0x16438dd30>)
 
 
 
@@ -330,7 +330,7 @@ Take the mean or median estimates from the histogram
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7fbf71b42410>
+    <matplotlib.legend.Legend object at 0x164a133b0>
 
 
 
@@ -353,8 +353,27 @@ Get the range between credible intervals
  .. code-block:: none
 
 
-    StatArray([5.25252525, 4.04040404, 3.23232323, ..., 4.76767677,
-               3.7979798 , 3.39393939])
+    StatArray([4.92929293, 3.55555556, 2.50505051, 4.44444444, 4.92929293,
+               3.15151515, 3.7979798 , 4.12121212, 4.36363636, 3.31313131,
+               4.36363636, 3.95959596, 3.7979798 , 3.63636364, 4.12121212,
+               4.04040404, 3.87878788, 4.12121212, 3.95959596, 3.7979798 ,
+               3.95959596, 4.28282828, 3.87878788, 3.95959596, 3.7979798 ,
+               3.95959596, 3.95959596, 3.95959596, 3.95959596, 3.95959596,
+               3.95959596, 4.04040404, 3.95959596, 3.95959596, 3.87878788,
+               3.87878788, 4.04040404, 3.95959596, 3.87878788, 3.87878788,
+               3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.95959596, 3.87878788, 3.95959596, 3.87878788, 3.95959596,
+               3.95959596, 3.95959596, 3.87878788, 3.87878788, 3.87878788,
+               3.95959596, 3.95959596, 3.87878788, 3.95959596, 3.87878788,
+               3.95959596, 3.7979798 , 3.95959596, 3.95959596, 3.87878788,
+               3.95959596, 3.87878788, 3.7979798 , 3.87878788, 3.87878788,
+               3.87878788, 4.36363636, 4.28282828, 4.2020202 , 4.28282828,
+               4.52525253, 4.44444444, 4.12121212, 3.63636364, 4.04040404,
+               2.98989899, 3.7979798 , 2.90909091, 3.63636364])
 
 
 
@@ -490,7 +509,7 @@ Update the histogram counts
  .. code-block:: none
 
 
-    (<Axes: xlabel='Variable 1', ylabel='Variable 2'>, <matplotlib.collections.QuadMesh object at 0x7fbfa24cac80>, <matplotlib.colorbar.Colorbar object at 0x7fbfa24c9b70>)
+    (<Axes: xlabel='Variable 1', ylabel='Variable 2'>, <matplotlib.collections.QuadMesh object at 0x165602120>, <matplotlib.colorbar.Colorbar object at 0x164cf4a10>)
 
 
 
@@ -642,7 +661,7 @@ Take the mean or median estimates from the histogram
  .. code-block:: none
 
 
-    <matplotlib.legend.Legend object at 0x7fbf53b9a650>
+    <matplotlib.legend.Legend object at 0x16447adb0>
 
 
 
@@ -665,8 +684,27 @@ Get the range between credible intervals
  .. code-block:: none
 
 
-    StatArray([3.39393939, 4.04040404, 3.31313131, ..., 3.95959596,
-               3.23232323, 3.31313131])
+    StatArray([4.12121212, 3.47474747, 3.15151515, 4.12121212, 4.36363636,
+               3.63636364, 3.87878788, 4.84848485, 3.63636364, 3.71717172,
+               4.2020202 , 4.04040404, 3.7979798 , 3.39393939, 4.12121212,
+               3.7979798 , 4.28282828, 3.7979798 , 3.95959596, 3.87878788,
+               4.04040404, 3.95959596, 3.87878788, 3.95959596, 3.87878788,
+               4.04040404, 3.95959596, 3.95959596, 3.95959596, 3.87878788,
+               3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.87878788, 3.87878788, 3.87878788, 3.95959596, 3.87878788,
+               3.87878788, 3.87878788, 3.87878788, 3.95959596, 3.87878788,
+               3.87878788, 4.04040404, 3.87878788, 3.95959596, 3.95959596,
+               3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.87878788, 3.87878788, 3.87878788, 3.87878788, 3.87878788,
+               3.95959596, 3.87878788, 3.87878788, 3.95959596, 3.87878788,
+               3.95959596, 3.87878788, 3.87878788, 3.87878788, 3.95959596,
+               3.95959596, 3.95959596, 3.87878788, 3.7979798 , 3.87878788,
+               3.71717172, 3.87878788, 4.04040404, 4.2020202 , 3.7979798 ,
+               3.95959596, 4.12121212, 3.7979798 , 3.71717172, 4.2020202 ,
+               3.55555556, 3.95959596, 3.71717172, 3.87878788, 4.76767677,
+               3.95959596, 4.52525253, 4.36363636, 3.31313131])
 
 
 
@@ -762,7 +800,7 @@ We can map the credible range to an opacity or transparency
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 14.930 seconds)
+   **Total running time of the script:** (0 minutes 32.906 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_2d.py:

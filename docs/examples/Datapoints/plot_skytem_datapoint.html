@@ -5,9 +5,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Skytem Datapoint Class &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -21,7 +21,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -73,7 +73,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#inference-2d">Inference 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
 </ul>
 </li>
@@ -107,7 +107,7 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-datapoints-plot-skytem-datapoint-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="skytem-datapoint-class">
 <span id="sphx-glr-examples-datapoints-plot-skytem-datapoint-py"></span><h1>Skytem Datapoint Class<a class="headerlink" href="#skytem-datapoint-class" title="Link to this heading"></a></h1>
@@ -142,9 +142,9 @@ We would like to thank Ross Brodie at Geoscience Australia for his airborne time
 <span class="c1"># For more information about the time domain data set, see :ref:`Time domain dataset`</span>
 
 <span class="c1"># The data file name</span>
-<span class="n">dataFile</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;skytem_512_saline_clay.csv&#39;</span>
+<span class="n">dataFile</span><span class="o">=</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;skytem_saline_clay.csv&#39;</span>
 <span class="c1"># The EM system file name</span>
-<span class="n">systemFile</span><span class="o">=</span><span class="p">[</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;SkytemHM_512.stm&#39;</span><span class="p">,</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;SkytemLM_512.stm&#39;</span><span class="p">]</span>
+<span class="n">systemFile</span><span class="o">=</span><span class="p">[</span><span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;SkytemHM.stm&#39;</span><span class="p">,</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;SkytemLM.stm&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Initialize and read an EM data set
@@ -176,7 +176,7 @@ Prepare the dataset so that we can read a point at a time.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_skytem_datapoint_001.png" srcset="../../_images/sphx_glr_plot_skytem_datapoint_001.png" alt="Time Domain EM Data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:354: RuntimeWarning: divide by zero encountered in log
+<img src="../../_images/sphx_glr_plot_skytem_datapoint_001.png" srcset="../../_images/sphx_glr_plot_skytem_datapoint_001.png" alt="Time Domain EM Data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:362: RuntimeWarning: divide by zero encountered in log
   additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
 </pre></div>
 </div>
@@ -215,13 +215,13 @@ Prepare the dataset so that we can read a point at a time.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-324824.70759632764
-652129.2354668385
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-320327.7331520334
+643134.8665683013
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plotHalfSpaceResponses</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plot_halfspace_responses</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Halfspace responses&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -244,7 +244,7 @@ Prepare the dataset so that we can read a point at a time.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>19992.94964076136
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>19656.31514467768
 </pre></div>
 </div>
 <p>We can attach priors to the height of the datapoint,
@@ -254,6 +254,10 @@ the relative error multiplier, and the additive error noise floor</p>
 <span class="n">relativePrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 <span class="n">additivePrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">1e-16</span><span class="p">,</span> <span class="mf">1e-16</span><span class="p">],</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">1e-10</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 <span class="n">tdp</span><span class="o">.</span><span class="n">set_priors</span><span class="p">(</span><span class="n">relative_error_prior</span><span class="o">=</span><span class="n">relativePrior</span><span class="p">,</span> <span class="n">additive_error_prior</span><span class="o">=</span><span class="n">additivePrior</span><span class="p">,</span> <span class="n">z_prior</span><span class="o">=</span><span class="n">z_prior</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:132: DeprecationWarning: Conversion of an array with ndim &gt; 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  z_prior = Distribution(&#39;Uniform&#39;, min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
 </pre></div>
 </div>
 <p>In order to perturb our solvable parameters, we need to attach proposal distributions</p>
@@ -339,7 +343,7 @@ are the start and end times, and start and end amplitudes of the waveform. e.g.
 Measurement Time, Data Value, Estimated Standard Deviation</p>
 <p>Example data files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.346 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.960 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-skytem-datapoint-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e25fee0ca5adf0a7a06121d46c4bf8c5/plot_skytem_datapoint.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_skytem_datapoint.ipynb</span></code></a></p>

@@ -1,8 +1,13 @@
 """
 """
-from numpy import allclose, asarray, atleast_1d, float64, full, hstack
-from numpy import nan, ones
-from numpy import s_, shape, size, vstack
+
+from os.path import join
+from copy import deepcopy
+import matplotlib.pyplot as plt
+
+from numpy import allclose, arange, asarray, atleast_1d, float64, full, hstack, int32
+from numpy import nan, ones, r_, repeat
+from numpy import s_, shape, size, vstack, zeros
 from pandas import read_csv
 from matplotlib.figure import Figure
 
@@ -11,11 +16,10 @@ from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ....classes.core import StatArray
 from ...system.CircularLoop import CircularLoop
-from ...system.CircularLoops import CircularLoops
+from ...system.Loop_pair import Loop_pair
 from ....base import plotting as cP
 
-import matplotlib.pyplot as plt
-from os.path import join
+
 import h5py
 
 
@@ -24,7 +28,7 @@ class TempestData(TdemData):
 
     A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.
 
-    TdemData(nPoints=1, nTimes=[1], nSystems=1)
+    TdemData(nPoints=1, nTimes=[1], nSxfystems=1)
 
     Parameters
     ----------
@@ -49,13 +53,15 @@ class TempestData(TdemData):
 
     single = Tempest_datapoint
 
+    __slots__ = ('_additive_error_multiplier')
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._additive_error = StatArray.StatArray((self.nPoints, self.nChannels), "Additive error", "%")
         self._relative_error = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
 
-        self._file = None
+        self._additive_error_multiplier = StatArray.StatArray(ones((self.nPoints, self.n_components * self.nSystems)), "multiplier")
 
     @property
     def additive_error(self):
@@ -74,6 +80,24 @@ class TempestData(TdemData):
                 return
 
             self._additive_error[:, :] = values
+
+    @property
+    def additive_error_multiplier(self):
+        """ """
+        if size(self._additive_error_multiplier, 0) == 0:
+            self._additive_error_multiplier = StatArray.StatArray((self.nPoints, self.nSystems * self.n_components), "multiplier")
+        return self._additive_error_multiplier
+
+    @additive_error_multiplier.setter
+    def additive_error_multiplier(self, values):
+        if values is not None:
+            self.nPoints = size(values, 0)
+            shp = (self.nPoints, self.nSystems * self.n_components)
+            if not allclose(self._additive_error_multiplier.shape, shp):
+                self._additive_error_multiplier = StatArray.StatArray(values, "multiplier")
+                return
+
+            self._additive_error_multiplier[:, :] = values
 
     @property
     def file(self):
@@ -126,7 +150,11 @@ class TempestData(TdemData):
         -----
         File Format
 
-        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+        The data columns are read in according to the column names in the first line.
+        The header line should contain at least the following column names.
+        Extra columns may exist, but will be ignored. In this description,
+        the column name or its alternatives are given followed by what the name represents.
+        Optional columns are also described.
 
         **Required columns**
 
@@ -142,7 +170,7 @@ class TempestData(TdemData):
         y or easting or e
             Easting co-ordinate of the data point
 
-        z or dtm or dem\_elev or dem\_np or topo
+        z or dtm or dem_elev or dem_np or topo
             Elevation of the ground at the data point
 
         alt or laser or bheight
@@ -215,7 +243,7 @@ class TempestData(TdemData):
         self.z = df[iC[4]].values
         self.elevation = df[iC[5]].values
 
-        self.transmitter = CircularLoops(x=self.x,
+        self.loop_pair.transmitter = CircularLoop(x=self.x,
                                          y=self.y,
                                          z=self.z,
                                          pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
@@ -224,7 +252,7 @@ class TempestData(TdemData):
         loopOffset = df[iOffset].values
 
         # Assign the orientations of the acquisistion loops
-        self.receiver = CircularLoops(x = self.transmitter.x + loopOffset[:, 0],
+        self.loop_pair.receiver = CircularLoop(x = self.transmitter.x + loopOffset[:, 0],
                                       y = self.transmitter.y + loopOffset[:, 1],
                                       z = self.transmitter.z + loopOffset[:, 2],
                                       pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
@@ -235,13 +263,17 @@ class TempestData(TdemData):
         self.secondary_field[:, :] = df[iSecondary].values
 
         # If the data error columns are given, assign them
-        self.std;
+        # self.std;
         if len(iStd) > 0:
-            self._std[:, :] = df[iStd].values
+            self.std = df[iStd].values
 
         self.check()
 
         return self
+
+    def plotLine(self, line, xAxis='index', **kwargs):
+        kwargs['yscale'] = kwargs.get('yscale' ,'linear')
+        super().plotLine(line, xAxis, **kwargs)
 
     def plot_data(self, system=0, channels=None, x='index', **kwargs):
         """ Plots the data
@@ -426,7 +458,10 @@ class TempestData(TdemData):
         Notes
         -----
         File Format
-        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+        The data columns are read in according to the column names in the first line.
+        The header line should contain at least the following column names.
+        Extra columns may exist, but will be ignored. In this description, the column name or its
+        alternatives are given followed by what the name represents. Optional columns are also described.
 
         **Required columns**
 
@@ -438,7 +473,7 @@ class TempestData(TdemData):
             Northing co-ordinate of the data point
         y or easting or e
             Easting co-ordinate of the data point
-        z or dtm or dem\_elev or dem\_np or topo
+        z or dtm or dem\\_elev or dem\\_np or topo
             Elevation of the ground at the data point
         alt or laser or bheight
             Altitude of the transmitter coil
@@ -488,7 +523,7 @@ class TempestData(TdemData):
             roll = asarray(gdf['Tx_Roll'][indices])
             yaw = asarray(gdf['Tx_Yaw'][indices])
 
-            self.transmitter = CircularLoops(x=self.x, y=self.y, z=self.z,
+            self.transmitter = CircularLoop(x=self.x, y=self.y, z=self.z,
                                              pitch=pitch, roll=roll, yaw=yaw,
                                              radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
 
@@ -498,7 +533,7 @@ class TempestData(TdemData):
 
             loopOffset = vstack([asarray(gdf['HSep_GPS'][indices]), asarray(gdf['TSep_GPS'][indices]), asarray(gdf['VSep_GPS'][indices])]).T
 
-            self.receiver = CircularLoops(x=self.transmitter.x + loopOffset[:, 0],
+            self.receiver = CircularLoop(x=self.transmitter.x + loopOffset[:, 0],
                                           y=self.transmitter.y + loopOffset[:, 1],
                                           z=self.transmitter.z + loopOffset[:, 2],
                                           pitch=pitch, roll=roll, yaw=yaw,
@@ -605,47 +640,38 @@ class TempestData(TdemData):
         self._data_filename = filename
         self.lineNumber, self.fiducial = self._read_variable(['Line', 'Fiducial'])
 
-    @classmethod
-    def fromHdf(cls, grp, **kwargs):
-        """ Reads the object from a HDF group """
-
-        if kwargs.get('index') is not None:
-            return cls.single.fromHdf(grp, **kwargs)
-
-        out = super(TempestData, cls).fromHdf(grp, **kwargs)
-        out.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
-        return out
-
     def create_synthetic_data(self, model, prng):
 
         ds = TempestData(system=self.system)
 
-        ds.x = model.x
-        ds.y = model.y
-        ds.z = np.full(model.x.nCells, fill_value = 120.0)
-        ds.elevation = np.zeros(model.x.nCells)
-        ds.fiducial = np.arange(model.x.nCells)
+        ds.x = model.x.centres
+        ds.y[:] = 0.0
+        ds.z = full(model.x.nCells, fill_value = 120.0)
+        ds.elevation = zeros(model.x.nCells)
+        ds.fiducial = arange(model.x.nCells)
 
-        ds.loop_pair.transmitter = CircularLoops(
+        transmitter = CircularLoop(
                         x = ds.x, y = ds.y, z = ds.z,
-                        pitch = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                        roll  = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                        yaw   = np.zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
-                        radius = np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+                        pitch = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        roll  = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        yaw   = zeros(model.x.nCells), #np.random.uniform(low=-1.0, high=1.0, size=model.x.nCells),
+                        radius = full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-        ds.loop_pair.receiver = CircularLoops(
-                        x = ds.transmitter.x - 107.0,
-                        y = ds.transmitter.y + 0.0,
-                        z = ds.transmitter.z - 45.0,
-                        pitch = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
-                        roll  = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
-                        yaw   = np.zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
-                        radius = np.full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
+        receiver = CircularLoop(
+                        x = transmitter.x - 107.0,
+                        y = transmitter.y + 0.0,
+                        z = transmitter.z - 45.0,
+                        pitch = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        roll  = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        yaw   = zeros(model.x.nCells), #np.random.uniform(low=-0.5, high=0.5, size=model.x.nCells),
+                        radius = full(model.x.nCells, fill_value=ds.system[0].loopRadius()))
 
-        ds.relative_error = np.repeat(np.r_[0.001, 0.001][None, :], model.x.nCells, 0)
-        add_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
+        ds.loop_pair = Loop_pair(transmitter, receiver)
+
+        ds.relative_error = repeat(r_[0.001, 0.001][None, :], model.x.nCells, 0)
+        add_error = r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
                         0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
-        ds.additive_error = np.repeat(add_error[None, :], model.x.nCells, 0)
+        ds.additive_error = repeat(add_error[None, :], model.x.nCells, 0)
 
         dp = ds.datapoint(0)
 
@@ -673,3 +699,39 @@ class TempestData(TdemData):
         ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.nChannels))
 
         return ds, ds_noisy
+
+    def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
+        """ Create the hdf group metadata in file
+        parent: HDF object to create a group inside
+        myName: Name of the group
+        """
+        # create a new group inside h5obj
+        grp = super().createHdf(parent, myName, withPosterior, fillvalue)
+
+        self.additive_error_multiplier.createHdf(grp, 'additive_error_multiplier', fillvalue=fillvalue)
+
+    def writeHdf(self, parent, name, withPosterior=True):
+        """ Write the StatArray to an HDF object
+        parent: Upper hdf file or group
+        myName: object hdf name. Assumes createHdf has already been called
+        create: optionally create the data set as well before writing
+        """
+        super().writeHdf(parent, name, withPosterior)
+
+        grp = parent[name]
+
+        self.additive_error_multiplier.writeHdf(grp, 'additive_error_multiplier', withPosterior=withPosterior)
+
+    @classmethod
+    def fromHdf(cls, grp, **kwargs):
+        """ Reads the object from a HDF group """
+
+        if kwargs.get('index') is not None:
+            return cls.single.fromHdf(grp, **kwargs)
+
+        self = super(TempestData, cls).fromHdf(grp, **kwargs)
+
+        self.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
+        self.additive_error_multiplier = StatArray.StatArray.fromHdf(grp['additive_error_multiplier'])
+
+        return self

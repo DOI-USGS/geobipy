@@ -1,2 +1,2 @@
-Inference 2D
+2D Inference
 ============

@@ -27,6 +27,7 @@ from scipy import interpolate
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
+brodie = False
 
 class RectilinearMesh1D(Mesh):
     """Class defining a 1D rectilinear mesh with cell centres and edges.
@@ -256,6 +257,16 @@ class RectilinearMesh1D(Mesh):
             self._nCells[0] = self.centres.size
 
     @property
+    def edge_to_edge(self):
+
+        b = self.edges[-2] if self.open_right else self.edges[-1]
+        a = self.edges[1] if self.open_left else self.edges[0]
+
+        return b - a
+
+
+
+    @property
     def plotting_centres(self):
         return self.plotting_edges.internalEdges()
 
@@ -345,8 +356,8 @@ class RectilinearMesh1D(Mesh):
         self._min_width = value
         if value is None:
             self._min_width = (self.max_edge - self.min_edge) / (2.0 * self.max_cells)
-            if self._min_width > self.min_edge:
-                self._min_edge = self._min_width
+            # if self._min_width > self.min_edge:
+            #     self._min_edge = self._min_width
 
     @property
     def nCells(self):
@@ -708,21 +719,23 @@ class RectilinearMesh1D(Mesh):
             return ones((1, 1))
 
         x = self.widths.copy()
+        e2e = 0.5 * self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = (x[1]**2.0 / x[2])
+                x[0] = (x[1]**2.0 / x[2]) if brodie else x[1] - e2e
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = (x[-2]**2.0 / x[-3])
+                x[-1] = (x[-2]**2.0 / x[-3]) if brodie else x[-2] + e2e
 
-        return diag(x/(self.nCells * mean(x)))
+        out = x/(self.nCells * mean(x)) if brodie else x/(self.nCells)
+        return diag(out)
 
     @property
     def gradient_operator(self):
@@ -732,25 +745,31 @@ class RectilinearMesh1D(Mesh):
 
         x = self.widths.copy()
 
+        e2e = 0.5 * self.edge_to_edge
+
         # Sort out infinity here
         if self.open_left:
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = x[1]**2.0 / x[2]
+                x[0] = x[1]**2.0 / x[2] if brodie else x[1] - e2e
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = x[-2]**2.0 / x[-3]
-
-        s = sqrt(x / mean(x))
+                x[-1] = x[-2]**2.0 / x[-3] if brodie else x[-2] + e2e
 
         centre_to_centre = 0.5*(x[:-1] + x[1:])
 
-        tmp = s[1:] / (centre_to_centre * self.nCells - 1)
-        return diags([-tmp, tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item())).toarray()
+        if brodie:
+            s = sqrt(x / mean(x))
+            tmp = s[1:] / (centre_to_centre * (self.nCells - 1))
+        else:
+            tmp = 1.0 / (centre_to_centre * (self.nCells - 1))
+        out = diags([-tmp, tmp], [0, 1], shape=(self.nCells.item()-1, self.nCells.item())).toarray()
+
+        return out
 
     def in_bounds(self, values):
         """Return whether values are inside the cell edges
@@ -1033,7 +1052,10 @@ class RectilinearMesh1D(Mesh):
                 tries = 0
                 while (not suitable_width):  # Continue while the new layer is smaller than the minimum
                     # Get the new edge
-                    new_edge = exp(prng.uniform(low=nplog(self.min_edge), high=nplog(self.max_edge), size=1))
+                    # new_edge = exp(prng.uniform(low=nplog(self.min_edge), high=nplog(self.max_edge), size=1))
+                    # new_edge = prng.uniform(low=self.min_edge, high=self.max_edge, size=1)
+                    new_edge = self.edges.proposal.rng(size=1)
+
                     # Insert the new depth
                     i = self.edges.searchsorted(new_edge)
                     z = self.edges.insert(i, new_edge)
@@ -1215,6 +1237,9 @@ class RectilinearMesh1D(Mesh):
         geobipy_kwargs, kwargs = cp.filter_plotting_kwargs(kwargs)
         color_kwargs, kwargs = cp.filter_color_kwargs(kwargs)
 
+        if value.size == 1:
+            value = value.item()
+
         ax = geobipy_kwargs['ax']
 
         f = ax.axhline if geobipy_kwargs['transpose'] else ax.axvline
@@ -1309,8 +1334,8 @@ class RectilinearMesh1D(Mesh):
                         linewidth=1,
                         color=cp.wellSeparated[3])
 
-                doi = values.posterior.opacity_level(percent=67.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
-                axes[2].axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
+            doi = values.posterior.opacity_level(percent=90.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
+            axes[2].axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
         return axes
 
     @property
@@ -1343,8 +1368,36 @@ class RectilinearMesh1D(Mesh):
         probability = self.nCells.probability(log=True)
 
         # Probability of depth given nCells
-        probability += self.edges.probability(x=self.nCells.item()-1, log=True)
+        # probability += self.edges.probability(x=self.nCells.item()-1, log=True)
+
         return probability
+
+    def proposal_probability(self):
+
+        prng = self.nCells.prior.prng
+        action = self.action[0]
+
+        proposal = 1.0
+        proposal1 = 1.0
+        if action == 'insert':
+            k = self.nCells - 1
+
+            forward = Distribution('Uniform', 0.0, self.remainingSpace(k), prng=prng)
+            reverse = Distribution('Uniform', 0.0, k, prng=prng)
+
+            proposal = reverse.probability(1, log=True)
+            proposal1 = forward.probability(0.0, log=True)
+
+        if action == 'delete':
+            k = self.nCells
+
+            forward = Distribution('Uniform', 0.0, self.remainingSpace(k), prng=prng)
+            reverse = Distribution('Uniform', 0.0, k, prng=prng)
+
+            proposal = forward.probability(0.0, log=True)
+            proposal1 = reverse.probability(1, log=True)
+
+        return proposal, proposal1
 
     def remainingSpace(self, n_cells):
         return (self.max_edge - self.min_edge) - (n_cells * self.min_width)
@@ -1385,7 +1438,7 @@ class RectilinearMesh1D(Mesh):
                 "No priors are set, user self.set_priors().")
 
             # Discretize the parameter values
-            grid = StatArray.StatArray(arange(0.9 * self.min_edge, 1.1 * self.max_edge, 0.5 * self.min_width), self.edges.name, self.edges.units)
+            grid = StatArray.StatArray(arange(0.0, 1.1 * self.max_edge, 0.5 * self.min_width), self.edges.name, self.edges.units)
             mesh = RectilinearMesh1D(edges=grid)
 
             # Initialize the interface Depth Histogram
@@ -1497,6 +1550,12 @@ class RectilinearMesh1D(Mesh):
                                             probabilities,
                                             ['insert', 'delete', 'perturb', 'none'],
                                             prng=kwargs.get('prng', None))
+
+        self.edges.proposal = Distribution('Uniform',
+                                           min=self.min_edge,
+                                           max=self.max_edge,
+                                           log=True,
+                                           prng=kwargs.get('prng', None))
 
     def unperturb(self):
         """After a mesh has had its structure perturbed, remap back its previous state. Used for the reversible jump McMC step.

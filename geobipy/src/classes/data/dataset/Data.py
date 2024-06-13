@@ -3,7 +3,7 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 """
 from copy import copy, deepcopy
 
-from numpy import allclose, any, arange, asarray, atleast_1d, cumsum, float64, full
+from numpy import allclose, any, arange, asarray, atleast_1d, cumsum, diff, float64, full
 from numpy import hstack, int32, isnan, nan, ndim
 from numpy import ones, r_, s_, shape, size, sqrt, sum, unique
 from numpy import vstack, where, zeros
@@ -26,7 +26,6 @@ try:
     from pyvtk import Scalars
 except:
     pass
-
 
 class Data(Point):
     """Class defining a set of Data.
@@ -68,7 +67,8 @@ class Data(Point):
         Data class
 
     """
-    __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file', '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
+    __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file',
+                 '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
                  '_system', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_channels')
 
     def __init__(self, components=None, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channel_names=None, **kwargs):
@@ -83,10 +83,12 @@ class Data(Point):
 
         self._fiducial = StatArray.StatArray(arange(self.nPoints), "Fiducial")
         self._lineNumber = StatArray.StatArray(self.nPoints, "Line number")
+
         shp = (self._nPoints, self.nChannels)
         self._data = StatArray.StatArray(shp, "Data", self.units)
         self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
         self._std = StatArray.StatArray(ones(shp), "std", self.units)
+
         shp = (self.nPoints, self.nSystems)
         self._relative_error = StatArray.StatArray(full(shp, fill_value=0.01), "Relative error", "%")
         self._additive_error = StatArray.StatArray(shp, "Additive error", self.units)
@@ -121,7 +123,8 @@ class Data(Point):
         for i, name in enumerate(self.channel_names):
             out[name.replace(' ', '_')] = self.data[:, i]
 
-        return out, [self.lineNumber.name.replace(' ', '_'), self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channel_names]]
+        return out, [self.lineNumber.name.replace(' ', '_'),
+                     self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channel_names]]
 
     @property
     def active(self):
@@ -436,9 +439,12 @@ class Data(Point):
         out._fiducial = deepcopy(self.fiducial, memo)
         out._lineNumber = deepcopy(self.lineNumber, memo)
         out._channel_names = deepcopy(self.channel_names, memo)
+        out._components = deepcopy(self.components, memo)
         out._data = deepcopy(self.data, memo)
         out._std = deepcopy(self.std, memo)
         out._predictedData = deepcopy(self.predictedData, memo)
+        out._relative_error = deepcopy(self.relative_error, memo)
+        out._additive_error = deepcopy(self._additive_error, memo)
         return out
 
     def addToVTK(self, vtk, prop=['data', 'predicted', 'std'], system=None):
@@ -534,6 +540,9 @@ class Data(Point):
 
         self._read_line_fiducial(filename)
 
+    def close(self):
+        self._file.close()
+
     def _read_line_fiducial(self, filename):
 
         _, channels = Data._csv_channels(filename)
@@ -566,12 +575,27 @@ class Data(Point):
         return s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
     def append(self, other):
+
+        self._relative_error = self.relative_error.append(other.relative_error)
+        self._additive_error = self.additive_error.append(other.additive_error)
+
         super().append(other)
-        self.fiducial = hstack([self.fiducial, other.fiducial])
-        self.lineNumber = hstack([self.lineNumber, other.lineNumber])
-        self.data = vstack([self.data, other.data])
-        self.predictedData = vstack([self.predictedData, other.predictedData])
-        self.std = vstack([self.std, other.std])
+        self._fiducial = self._fiducial.append(other.fiducial)
+        self._lineNumber = self._lineNumber.append(other.lineNumber)
+        self._data = self._data.append(other.data, axis=0)
+        self._predictedData = self._predictedData.append(other.predictedData, axis=0)
+        self._std = self._std.append(other.std, axis=0)
+
+        return self
+
+    def check_line_numbers(self):
+
+        ln = unique(self.lineNumber)
+
+        import numpy as np
+        bad_lines = [l for l in ln if sum(diff(asarray(self.lineNumber == l, dtype=np.int8)) > 0) > 1]
+
+        return bad_lines
 
     def data_misfit(self, squared=False):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
@@ -679,7 +703,12 @@ class Data(Point):
 
     def line(self, line):
         """ Get the data from the given line number """
-        i = where(self.lineNumber == line)[0]
+        if size(line) > 1:
+            i = where(self.lineNumber == line[0])[0]
+            for j in range(1, size(line)):
+                i = hstack([i, where(self.lineNumber == line[j])[0]])
+        else:
+            i = where(self.lineNumber == line)[0]
         assert (i.size > 0), 'Could not get line with number {}'.format(line)
         return self[i]
 
@@ -894,7 +923,10 @@ class Data(Point):
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        ax = super().plot(x=x, values=self.data[:, rTmp], label=self.channel_names[rTmp], **kwargs)
+        if size(rTmp) == 1:
+            rTmp = (rTmp)
+
+        ax = super().plot(x=x, values=self.data[:, rTmp], label=[self.channel_names[r] for r in rTmp], **kwargs)
 
         if legend:
             # Put a legend to the right of the current axis
@@ -1002,7 +1034,12 @@ class Data(Point):
         -----
         File Format
 
-        The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.
+        The data columns are read in according to the column names in the first line.
+        The header line should contain at least the following column names.
+        Extra columns may exist, but will be ignored. In this description,
+        the column name or its alternatives are given followed by what the name represents.
+        Optional columns are also described.
+
 
         **Required columns**
 
@@ -1018,7 +1055,7 @@ class Data(Point):
         y or easting or e
             Easting co-ordinate of the data point
 
-        z or dtm or dem\_elev or dem\_np or topo
+        z or dtm or dem_elev or dem_np or topo
             Elevation of the ground at the data point
 
         alt or laser or bheight
@@ -1150,10 +1187,8 @@ class Data(Point):
 
         self = super(Data, cls).fromHdf(grp, **kwargs)
 
-        if 'fiducial' in grp:
-            self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
-        if 'line_number' in grp:
-            self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
+        self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
+        self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
 
         self.data = StatArray.StatArray.fromHdf(grp['data'])
         self.std = StatArray.StatArray.fromHdf(grp['std'])
@@ -1167,9 +1202,12 @@ class Data(Point):
     def write_csv(self, filename, **kwargs):
         kwargs['na_rep'] = 'nan'
         kwargs['index'] = False
+
         d, order = self._as_dict()
+
         kwargs['columns'] = order
         df = DataFrame(data=d)
+
         df.to_csv(filename, **kwargs)
 
 

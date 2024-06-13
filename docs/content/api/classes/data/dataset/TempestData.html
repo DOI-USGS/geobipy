@@ -5,9 +5,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TempestData &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=61a4c737" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -21,7 +21,7 @@
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
@@ -117,7 +117,7 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.dataset.TempestData.</span></span><span class="sig-name descname"><span class="pre">TempestData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData" title="Link to this definition"></a></dt>
 <dd><p>Time domain electro magnetic data set</p>
 <p>A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.</p>
-<p>TdemData(nPoints=1, nTimes=[1], nSystems=1)</p>
+<p>TdemData(nPoints=1, nTimes=[1], nSxfystems=1)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -144,6 +144,14 @@
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.additive_error">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">additive_error</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.additive_error" title="Link to this definition"></a></dt>
 <dd><p>The data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.createHdf">
+<span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.createHdf" title="Link to this definition"></a></dt>
+<dd><p>Create the hdf group metadata in file
+parent: HDF object to create a group inside
+myName: Name of the group</p>
 </dd></dl>
 
 <dl class="py method">
@@ -194,7 +202,11 @@
 </dl>
 <p class="rubric">Notes</p>
 <p>File Format</p>
-<p>The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.</p>
+<p>The data columns are read in according to the column names in the first line.
+The header line should contain at least the following column names.
+Extra columns may exist, but will be ignored. In this description,
+the column name or its alternatives are given followed by what the name represents.
+Optional columns are also described.</p>
 <p><strong>Required columns</strong></p>
 <dl class="simple">
 <dt>line</dt><dd><p>Line number for the data point</p>
@@ -250,7 +262,10 @@
 </dl>
 <p class="rubric">Notes</p>
 <p>File Format
-The data columns are read in according to the column names in the first line.  The header line should contain at least the following column names. Extra columns may exist, but will be ignored. In this description, the column name or its alternatives are given followed by what the name represents. Optional columns are also described.</p>
+The data columns are read in according to the column names in the first line.
+The header line should contain at least the following column names.
+Extra columns may exist, but will be ignored. In this description, the column name or its
+alternatives are given followed by what the name represents. Optional columns are also described.</p>
 <p><strong>Required columns</strong></p>
 <dl class="simple">
 <dt>line</dt><dd><p>Line number for the data point</p>
@@ -302,6 +317,15 @@ If any loop orientation columns are omitted the loop is assumed to be horizontal
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.single">
 <span class="sig-name descname"><span class="pre">single</span></span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.single" title="Link to this definition"></a></dt>
 <dd><p>alias of <a class="reference internal" href="../datapoint/Tempest_dataPoint.html#geobipy.src.classes.data.datapoint.Tempest_datapoint.Tempest_datapoint" title="geobipy.src.classes.data.datapoint.Tempest_datapoint.Tempest_datapoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tempest_datapoint</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData.writeHdf">
+<span class="sig-name descname"><span class="pre">writeHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData.writeHdf" title="Link to this definition"></a></dt>
+<dd><p>Write the StatArray to an HDF object
+parent: Upper hdf file or group
+myName: object hdf name. Assumes createHdf has already been called
+create: optionally create the data set as well before writing</p>
 </dd></dl>
 
 </dd></dl>

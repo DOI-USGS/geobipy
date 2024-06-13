@@ -5,9 +5,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tempest Datapoint Class &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -21,7 +21,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -72,7 +72,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#inference-2d">Inference 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
 </ul>
 </li>
@@ -106,7 +106,7 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-datapoints-plot-tempest-datapoint-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="tempest-datapoint-class">
 <span id="sphx-glr-examples-datapoints-plot-tempest-datapoint-py"></span><h1>Tempest Datapoint Class<a class="headerlink" href="#tempest-datapoint-class" title="Link to this heading"></a></h1>
@@ -207,8 +207,8 @@ We would like to thank Ross Brodie at Geoscience Australia for his airborne time
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>primary [34.27253219 17.55503397]
-sx [4.50040745 2.57068627 2.01534336 ... 0.33251557 0.29674627 0.15444462]
-sz [6.46667394 4.43233932 3.84850348 ... 1.04330666 0.76773288 0.54604945]
+sx [4.46362582 2.52720951 2.10544857 ... 0.34346631 0.27359586 0.19875285]
+sz [6.47100177 4.53101158 3.87594468 ... 1.05345525 0.79969548 0.56994112]
 J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
    1.13341751e-11  7.27489718e-13]
  [ 2.09383016e-02  3.20412212e-02  4.74815387e-02 ... -1.02489023e-09
@@ -223,8 +223,8 @@ J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
  [ 1.60007270e-05  3.08385747e-05  5.05626410e-05 ... -1.28316523e-09
    1.11041966e-10 -2.41585978e-12]]
 new primary [34.27253219 17.55503397]
-sx [4.50040745 2.57068627 2.01534336 ... 0.33251557 0.29674627 0.15444462]
-sz [6.46667394 4.43233932 3.84850348 ... 1.04330666 0.76773288 0.54604945]
+sx [4.46362582 2.52720951 2.10544857 ... 0.34346631 0.27359586 0.19875285]
+sz [6.47100177 4.53101158 3.87594468 ... 1.05345525 0.79969548 0.56994112]
 new J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
    1.13341751e-11  7.27489718e-13]
  [ 2.09383016e-02  3.20412212e-02  4.74815387e-02 ... -1.02489023e-09
@@ -264,14 +264,14 @@ new J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
 <span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-35698.4834358605
-71558.40557872524
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-36389.6500813217
+72940.71365767403
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plotHalfSpaceResponses</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">plot_halfspace_responses</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Halfspace responses&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -306,6 +306,10 @@ new J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
 <li><img src="../../_images/sphx_glr_plot_tempest_datapoint_004.png" srcset="../../_images/sphx_glr_plot_tempest_datapoint_004.png" alt="plot tempest datapoint" class = "sphx-glr-multi-img"/></li>
 </ul>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Best half space conductivity is [0.01830738] $S/m$
+/Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_tempest_datapoint.py:156: DeprecationWarning: Conversion of an array with ndim &gt; 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  receiver_x_prior = Distribution(&#39;Uniform&#39;, min=np.float64(tdp.receiver.x) - 1.0, max=np.float64(tdp.receiver.x) + 1.0, prng=prng)
+/Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_tempest_datapoint.py:157: DeprecationWarning: Conversion of an array with ndim &gt; 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+  receiver_z_prior = Distribution(&#39;Uniform&#39;, min=np.float64(tdp.receiver.z) - 1.0, max=np.float64(tdp.receiver.z) + 1.0, prng=prng)
 </pre></div>
 </div>
 <p>In order to perturb our solvable parameters, we need to attach proposal distributions</p>
@@ -333,7 +337,7 @@ Note we are not using the priors to accept or reject perturbations.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.060 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.134 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-tempest-datapoint-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/93b8636d5d11f2858e28438141a2ee46/plot_tempest_datapoint.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_tempest_datapoint.ipynb</span></code></a></p>

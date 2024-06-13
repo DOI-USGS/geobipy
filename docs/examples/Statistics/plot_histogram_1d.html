@@ -5,9 +5,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Histogram 1D &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -21,7 +21,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -74,7 +74,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#inference-2d">Inference 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
 </ul>
 </li>
@@ -108,7 +108,7 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-statistics-plot-histogram-1d-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="histogram-1d">
 <span id="sphx-glr-examples-statistics-plot-histogram-1d-py"></span><h1>Histogram 1D<a class="headerlink" href="#histogram-1d" title="Link to this heading"></a></h1>
@@ -160,7 +160,7 @@ saving as HDF5</p>
 <span class="n">H</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_1d_002.png" srcset="../../_images/sphx_glr_plot_histogram_1d_002.png" alt="plot histogram 1d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(-0.030000000000000027, -1.95, 1.9499999999999997)
+<img src="../../_images/sphx_glr_plot_histogram_1d_002.png" srcset="../../_images/sphx_glr_plot_histogram_1d_002.png" alt="plot histogram 1d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(-0.030000000000000027, -2.01, 1.8299999999999996)
 </pre></div>
 </div>
 </section>
@@ -279,7 +279,7 @@ mesh:
 |   Number of Cells:
 |   |   100
 |   Cell Centres:
-|   |   Name: bins (m) 0x7fbfa200e340
+|   |   Name: bins (m) 0x166a0bed0
 |   |   Shape: (100,)
 |   |   Values: [-2.97 -2.91 -2.85 ...  2.85  2.91  2.97]
 |   |   Min: -2.9699999999999998
@@ -287,7 +287,7 @@ mesh:
 |   |   has_posterior: False
 |
 |   Cell Edges:
-|   |   Name: bins (m) 0x7fbfa200d6c0
+|   |   Name: bins (m) 0x166a0a950
 |   |   Shape: (101,)
 |   |   Values: [-3.   -2.94 -2.88 ...  2.88  2.94  3.  ]
 |   |   Min: -3.0
@@ -297,7 +297,7 @@ mesh:
 |   log:
 |   |   None
 |   relativeTo:
-|   |   Name:  0x7fbfa1fb06c0
+|   |   Name:  0x167d420d0
 |   |   Shape: (1,)
 |   |   Values: [0.]
 |   |   Min: 0.0
@@ -305,15 +305,15 @@ mesh:
 |   |   has_posterior: False
 |
 values:
-|   Name: Frequency 0x7fbfa200f2c0
+|   Name: Frequency 0x167d41ad0
 |   Shape: (100,)
-|   Values: [3 2 3 ... 0 2 1]
+|   Values: [0 0 2 ... 2 2 0]
 |   Min: 0
-|   Max: 87
+|   Max: 86
 |   has_posterior: False
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.293 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.342 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-1d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/6651de36bdd3440bb761887dd2b00831/plot_histogram_1d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_histogram_1d.ipynb</span></code></a></p>

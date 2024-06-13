@@ -5,9 +5,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StatArray Class &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -21,7 +21,7 @@
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -77,7 +77,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#inference-2d">Inference 2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
 </ul>
 </li>
@@ -111,7 +111,7 @@
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-statistics-plot-statarray-py"><span class="std std-ref">Go to the end</span></a>
-to download the full example code</p>
+to download the full example code.</p>
 </div>
 <section class="sphx-glr-example-title" id="statarray-class">
 <span id="sphx-glr-examples-statistics-plot-statarray-py"></span><h1>StatArray Class<a class="headerlink" href="#statarray-class" title="Link to this heading"></a></h1>
@@ -157,21 +157,21 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 <span class="c1"># The name and units of the variable can be assigned to the StatArray.</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: 1 0x7fbf40481ac0
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: 1 0x170707ad0
 Shape: (1,)
 Values: [0.]
 Min: 0.0
 Max: 0.0
 has_posterior: False
 
-Name: 10 0x7fbf52997540
+Name: 10 0x1707041d0
 Shape: (10,)
 Values: [0. 0. 0. ... 0. 0. 0.]
 Min: 0.0
 Max: 0.0
 has_posterior: False
 
-Name: (2, 10) 0x7fbf40481ac0
+Name: (2, 10) 0x170705c50
 Shape: (2, 10)
 Values: [[0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]]
@@ -179,25 +179,25 @@ Min: 0.0
 Max: 0.0
 has_posterior: False
 
-Name: 45.454 0x7fbf52997540
+Name: 45.454 0x170706fd0
 Shape: (1,)
 Values: [45.454]
 Min: 45.454
 Max: 45.454
 has_posterior: False
 
-Name: 45.454 0x7fbf40481ac0
+Name: 45.454 0x1707058d0
 Shape: (1,)
 Values: [45.454]
 Min: 45.454
 Max: 45.454
 has_posterior: False
 
-Name: Density ($\frac{g}{cc}$) 0x7fbf52997f40
+Name: Density ($\frac{g}{cc}$) 0x170706ed0
 Shape: (1,)
-Values: [-0.57912126]
-Min: -0.5791212563194518
-Max: -0.5791212563194518
+Values: [-0.81925455]
+Min: -0.8192545455077754
+Max: -0.8192545455077754
 has_posterior: False
 </pre></div>
 </div>
@@ -206,8 +206,7 @@ has_posterior: False
 <h2>Attaching Prior and Proposal Distributions to a StatArray<a class="headerlink" href="#attaching-prior-and-proposal-distributions-to-a-statarray" title="Link to this heading"></a></h2>
 <p>The StatArray class has been built so that we may easily
 attach not only names and units, but statistical distributions too.
-We won’t go into too much detail about the different distribution
-classes here so check out the <span class="xref std std-ref">Distribution Class</span> for a better description.</p>
+We won’t go into too much detail about the different distribution</p>
 <p>Two types of distributions can be attached to the StatArray.</p>
 <ul class="simple">
 <li><dl class="simple">
@@ -243,11 +242,11 @@ sample when we wish to perturb the variable
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Class type of the proposal: &quot;</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">proposal</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$) 0x7fbf52997f40
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$) 0x170706ed0
 Shape: (1,)
-Values: [-0.57912126]
-Min: -0.5791212563194518
-Max: -0.5791212563194518
+Values: [-0.81925455]
+Min: -0.8192545455077754
+Max: -0.8192545455077754
 Prior:
 |   Uniform Distribution:
 |   Min: -2.0
@@ -283,7 +282,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">propose</span><span class="p">(</span><span class="n">relative</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-0.04095499]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-0.28108827]
 </pre></div>
 </div>
 <p>We can perturb the variable by drawing from the attached proposal distribution.</p>
@@ -291,7 +290,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$) 0x7fbf52997f40
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$) 0x170706ed0
 Shape: (1,)
 Values: [0.38188467]
 Min: 0.38188466718060166
@@ -348,7 +347,7 @@ This produces a single probability.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.3912195449832787
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.33888096006650337
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
@@ -701,7 +700,7 @@ x has its own memory allocated (not a reference/pointer)?  True
 <span class="n">Density</span><span class="o">.</span><span class="n">summary</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$) 0x7fbf53e697c0\nShape: (50, 100)\nValues: [[-0.09261046 -0.62871503  0.44062655 ...  0.85936645 -0.70901278\n   0.25472331]\n [ 1.26548023 -0.10173015  0.75511239 ...  0.10859768 -1.02367524\n   0.46045955]\n [-0.19867799 -0.05990528  0.25505206 ... -0.09695121 -1.36113261\n   0.77678945]\n ...\n [ 2.15214478  0.27318879 -0.40283027 ... -0.17158128  0.43057124\n  -0.32814672]\n [ 0.61189822  1.6826707   0.77990983 ...  1.21618644  0.82026928\n  -2.0003221 ]\n [ 0.65143168  1.01615216 -1.77440758 ... -0.92409722 -0.1278735\n   0.37382774]]\nMin: -3.701988729724111\nMax: 3.7179942041156253\nhas_posterior: False\n&#39;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$) 0x16fbf1550\nShape: (50, 100)\nValues: [[-4.01780133e-01  3.16635145e-01 -5.27750195e-01 ... -2.44618399e+00\n  -4.96050117e-01  6.25365537e-01]\n [-4.81076204e-01 -9.74014990e-01 -2.11325212e+00 ...  1.81726048e-01\n   2.03762749e-01 -8.72069096e-01]\n [-7.25459267e-01  5.59232504e-01 -1.38786869e+00 ...  6.21068169e-01\n  -2.59833364e+00 -1.14244762e+00]\n ...\n [-1.12094718e+00  1.09285179e+00 -8.49788982e-01 ... -1.72570923e+00\n   4.99544999e-01  5.42242587e-01]\n [ 2.82865259e-01 -1.18059731e-04 -1.52188899e-01 ...  1.13864002e-01\n   7.13026322e-01 -1.02252865e+00]\n [-4.71123302e-01 -4.93942524e-01  6.77625263e-01 ... -1.27237018e+00\n  -2.27635302e+00  1.60185139e+00]]\nMin: -3.2916747712189056\nMax: 3.5748933990954637\nhas_posterior: False\n&#39;
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -780,7 +779,7 @@ ends of whatever you are plotting</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.186 seconds)</p>
+<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.542 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e43324a965564fecaa251424c676fc0e/plot_StatArray.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_StatArray.ipynb</span></code></a></p>

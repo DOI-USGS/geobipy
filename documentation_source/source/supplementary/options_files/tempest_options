@@ -10,7 +10,7 @@ data_directory = "..//data"
 # Data File Name.
 data_filename = "tempest_glacial.csv"
 # System File Name.
-system_filename = 'Tempest.stm'
+system_filename = 'tempest.stm'
 
 # Define the data type to invert
 data_type = TempestData
@@ -65,7 +65,7 @@ minimum_relative_error = [0.0001, 0.0001]
 maximum_relative_error = [0.01, 0.01]
 ## Proposal variance for the relative error
 # Distribution('Normal', mean=[0.0, 0.0], variance=[2.5e-7, 2.5e-7])
-relative_error_proposal_variance = [1e-4, 1e-4]
+relative_error_proposal_variance = [1e-6, 1e-6]
 # -------------------------------------------------------
 # -------------------------------------------------------
 # Use the prior on the additive data errors
@@ -83,7 +83,7 @@ initial_additive_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742,
 # maximum_additive_error = np.full(30, fill_value=1000.0)
 # Proposal variance for the additive error
 # Distribution('Normal', mean=VALUE, variance=0.0025)
-additive_error_proposal_variance = 1e-2
+additive_error_proposal_variance = 1e-6
 
 # Additive Error Prior Details
 # Distribution('Uniform', min=1.0, max=3.0)
@@ -121,19 +121,19 @@ solve_receiver_x = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_x_change = 5.0 # meters
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-receiver_x_proposal_variance = 0.025
+receiver_x_proposal_variance = 1e-6
 
 solve_receiver_z = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_z_change = 5.0 # meters
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-receiver_z_proposal_variance = 0.025
+receiver_z_proposal_variance = 1e-6
 
 solve_receiver_pitch = False
 # Distribution('Uniform', min=VALUE-change, max=VALUE+change)
 maximum_receiver_pitch_change = 5.0 # degrees
 # Distribution('Normal', mean=VALUE, variance=0.0001)
-receiver_pitch_proposal_variance = 0.01
+receiver_pitch_proposal_variance = 1e-6
 # -------------------------------------------------------
 # -------------------------------------------------------
 
@@ -187,9 +187,9 @@ probability_of_no_change = 0.5
 factor = None
 # Standard Deviation for the difference in layer resistivity
 # Default is 1.5
-gradient_standard_deviation = None
+gradient_standard_deviation = 5
 # Initial scaling factor for proposal covariance
-covariance_scaling = None
+covariance_scaling = 0.5
 # Scaling factor for data misfit
 multiplier = None
 # Clipping Ratio for interface contrasts

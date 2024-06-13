@@ -1,6 +1,6 @@
 from copy import deepcopy
 from numpy import arange, argpartition, argsort, argwhere, asarray, column_stack, cumsum, diff, empty
-from numpy import float64, hstack, inf, int32, int64, isnan, maximum, mean, meshgrid, nan, nanmin, nanmax
+from numpy import float64, hstack, inf, int32, int64, isnan, maximum, mean, meshgrid, minimum, nan, nanmin, nanmax
 from numpy import ravel_multi_index, size, sqrt, squeeze, unique, vstack, zeros
 from numpy.linalg import norm
 from ...classes.core.myObject import myObject
@@ -11,6 +11,7 @@ from ...classes.core import StatArray
 from ...base import fileIO as fIO
 from ...base import utilities as cf
 from ...base import plotting as cP
+from ...base.interpolation import sibson
 # from .Point import Point
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..mesh.RectilinearMesh2D import RectilinearMesh2D
@@ -36,7 +37,7 @@ except:
 class Point(myObject):
     """3D Point Cloud with x,y,z co-ordinates
 
-    PointCloud3D(N, x, y, z)
+    Point(N, x, y, z)
 
     Parameters
     ----------
@@ -90,13 +91,14 @@ class Point(myObject):
         return out
 
     def __deepcopy__(self, memo={}):
-        result = type(self).__new__(type(self))
-        result._nPoints = self.nPoints
-        result._x = deepcopy(self.x)
-        result._y = deepcopy(self.y)
-        result._z = deepcopy(self.z)
-        result._elevation = deepcopy(self.elevation)
-        return result
+        out = type(self).__new__(type(self))
+
+        out._nPoints = self.nPoints
+        out._x = deepcopy(self.x, memo=memo)
+        out._y = deepcopy(self.y, memo=memo)
+        out._z = deepcopy(self.z, memo=memo)
+        out._elevation = deepcopy(self.elevation, memo=memo)
+        return out
 
     def __getitem__(self, i):
         """Define get item
@@ -132,7 +134,10 @@ class Point(myObject):
                 self.y.name.replace(' ', '_'): self.y,
                 self.z.name.replace(' ', '_'): self.z,
                 self.elevation.name.replace(' ', '_'): self.elevation}, \
-                [self.x.name.replace(' ', '_'), self.y.name.replace(' ', '_'), self.z.name.replace(' ', '_'), self.elevation.name.replace(' ', '_')]
+                [self.x.name.replace(' ', '_'),
+                 self.y.name.replace(' ', '_'),
+                 self.z.name.replace(' ', '_'),
+                 self.elevation.name.replace(' ', '_')]
 
     @property
     def addressof(self):
@@ -142,6 +147,13 @@ class Point(myObject):
         msg += "z:\n{}".format(("|   "+self.z.addressof.replace("\n", "\n|   "))[:-4])
         msg += "elevation:\n{}".format(("|   "+self.elevation.addressof.replace("\n", "\n|   "))[:-4])
         return msg
+
+    @property
+    def address(self):
+        out = asarray([hex(id(self))])
+        for x in [self.x, self.y, self.z, self.elevation]:
+            out = hstack([out, squeeze(x.address)])
+        return out
 
     @property
     def hasPosterior(self):
@@ -384,11 +396,13 @@ class Point(myObject):
 
         """
 
-        self.nPoints = self.nPoints + other.nPoints
-        self.x = hstack([self.x, other.x])
-        self.y = hstack([self.y, other.y])
-        self.z = hstack([self.z, other.z])
-        self.elevation = hstack([self.elevation, other.elevation])
+        self._x = self.x.append(other.x)
+        self._y = self.y.append(other.y)
+        self._z = self.z.append(other.z)
+        self._elevation = self.elevation.append(other.elevation)
+        self._nPoints = self.nPoints + other.nPoints
+
+        return self
 
     def axis(self, axis='x'):
         """Obtain the axis against which to plot values.
@@ -463,7 +477,6 @@ class Point(myObject):
 
         return ravel_multi_index([ix, iy], (ax.nCells.item(), ay.nCells.item()))
 
-
     def block_mean(self, dx, dy, values=None):
 
         i_cell = self.block_indices(dx, dy)
@@ -487,7 +500,7 @@ class Point(myObject):
             z_new[i] = mean(self.z[i_cut])
             e_new[i] = mean(self.elevation[i_cut])
 
-        return PointCloud3D(x=x_new, y=y_new, z=z_new, elevation=e_new)
+        return Point(x=x_new, y=y_new, z=z_new, elevation=e_new)
 
 
     def block_median_indices(self, dx=None, dy=None, x_grid=None, y_grid=None, values=None):
@@ -572,9 +585,26 @@ class Point(myObject):
         sp = 0.5 * spacing
         return arange(bounds[0] - sp, bounds[1] + (2*sp), spacing)
 
-    def distance(self, other, **kwargs):
-        """Get the Lp norm distance between two points. """
-        return norm(asarray([self.x, self.y, self.z]) - asarray([other.x, other.y, other.z]), **kwargs)
+    # def distance(self, other, **kwargs):
+    #     """Get the Lp norm distance between two points. """
+    #     return norm(asarray([self.x, self.y, self.z]) - asarray([other.x, other.y, other.z]), **kwargs)
+
+    @property
+    def distance_2d(self):
+        r = diff(self.x)**2.0
+        r += diff(self.y)**2.0
+        distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+        distance[1:] = cumsum(sqrt(r))
+        return distance
+
+    @property
+    def distance_3d(self):
+        r = diff(self.x)**2.0
+        r += diff(self.y)**2.0
+        r += diff(self.z)**2.0
+        distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+        distance[1:] = cumsum(sqrt(r))
+        return distance
 
     def move(self, dx, dy, dz):
         """ Move the point by [dx,dy,dz] """
@@ -616,7 +646,7 @@ class Point(myObject):
     #     assert 0 <= index <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
     #     return Point(self.x[index], self.y[index], self.z[index], self.elevation[index])
 
-    def getXAxis(self, xAxis='x'):
+    def x_axis(self, xAxis='x'):
         """Obtain the xAxis against which to plot values.
 
         Parameters
@@ -645,18 +675,9 @@ class Point(myObject):
         elif xAxis == 'z':
             return self.z
         elif xAxis == 'r2d':
-            r = diff(self.x)**2.0
-            r += diff(self.y)**2.0
-            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
-            distance[1:] = cumsum(sqrt(r))
-            return distance
+            return self.distance_2d
         elif xAxis == 'r3d':
-            r = diff(self.x)**2.0
-            r += diff(self.y)**2.0
-            r += diff(self.z)**2.0
-            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
-            distance[1:] = cumsum(sqrt(r))
-            return distance
+            return self.distance_3d
 
 
     def interpolate(self, dx=None, dy=None, mesh=None, values=None , method='mc', mask = False, clip = True, i=None, block=False, **kwargs):
@@ -700,11 +721,21 @@ class Point(myObject):
             i = self.block_median_indices(x_grid=mesh.x.edges, y_grid=mesh.y.edges, values=values) if block else None
 
         if method.lower() == 'ct':
-            return self.interpCloughTocher(mesh, values, mask=mask, clip=clip, i=i, **kwargs)
-        else:
-            return self.interpMinimumCurvature(mesh, values, mask=mask, clip=clip, i=i, **kwargs)
+            return self._interp_clough_tocher(mesh, values, mask=mask, clip=clip, i=i, **kwargs)
+        elif method.lower() == 'mc':
+            return self._interp_minimum_curvature(mesh, values, mask=mask, clip=clip, i=i, **kwargs)
+        elif method.lower() == 'sibson':
+            return self._interp_sibson(mesh, values, mask=mask, clip=clip, i=i, **kwargs)
 
-    def interpCloughTocher(self, mesh, values, mask = False, clip = None, i=None, **kwargs):
+    def _interp_sibson(self, mesh, values, mask = False, clip = None, i=None, **kwargs):
+
+        vals = sibson(self.x, self.y, values, grid_x=mesh.x.edges, grid_y=mesh.y.edges, max_distance=mask)
+
+        vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
+        out =  Model(mesh=mesh, values=vals.T)
+        return out, kwargs
+
+    def _interp_clough_tocher(self, mesh, values, mask = False, clip = None, i=None, **kwargs):
         """ Interpolate values at the points to a grid """
 
         extrapolate = kwargs.pop('extrapolate', None)
@@ -730,7 +761,7 @@ class Point(myObject):
             XY = column_stack((self.x, self.y))
             vTmp = values
             if (mask or extrapolate):
-                self.setKdTree(nDims = 2)
+                self.set_kdtree(ndim = 2)
                 kdtree = self.kdtree
 
         # Create the CT function for interpolation
@@ -751,11 +782,12 @@ class Point(myObject):
                 kdt = kdtree
 
         # Use distance masking
-        if mask:
-            g = meshgrid(mesh.x.centres, mesh.y.centres)
-            xi = _ndim_coords_from_arrays(tuple(g), ndim=XY.shape[1])
-            dists, indexes = kdt.query(xi)
-            vals[dists > mask] = nan
+        # if mask:
+        #     g = meshgrid(mesh.x.centres, mesh.y.centres)
+        #     xi = _ndim_coords_from_arrays(tuple(g), ndim=XY.shape[1])
+        #     dists, indexes = kdt.query(xi)
+
+        #     vals[dists > mask] = nan
 
         # Truncate values to the observed values
         if (clip):
@@ -793,7 +825,7 @@ class Point(myObject):
 
         return out, kwargs
 
-    def interpMinimumCurvature(self, mesh, values, mask=False, clip=True, i=None, operator=None, condition=None, **kwargs):
+    def _interp_minimum_curvature(self, mesh, values, mask=False, clip=True, i=None, operator=None, condition=None, **kwargs):
 
         try:
             from pygmt import surface
@@ -834,9 +866,9 @@ class Point(myObject):
         if clip:
             clip_min = kwargs.pop('clip_min', nanmin(values))
             clip_max = kwargs.pop('clip_max', nanmax(values))
-            xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=mesh.centres_bounds, N=iterations, T=tension, C=accuracy, Ll=[clip_min], Lu=[clip_max])
+            xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=mesh.centres_bounds, N=iterations, tension=tension, convergence=accuracy, lower=[clip_min], upper=[clip_max])
         else:
-            xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=mesh.centres_bounds, N=iterations, T=tension, C=accuracy)
+            xr = surface(x=x, y=y, z=values, spacing=(dx, dy), region=mesh.centres_bounds, N=iterations, tension=tension, convergence=accuracy)
 
         vals = xr.values
 
@@ -879,6 +911,9 @@ class Point(myObject):
         """
 
         assert (not self.kdtree is None), TypeError('kdtree has not been set, use self.setKdTree()')
+
+        k = minimum(self.nPoints, k)
+
         return self.kdtree.query(x, k, eps, p, distance_upper_bound=radius)
 
 
@@ -907,7 +942,7 @@ class Point(myObject):
         geobipy.plotting.plot : For additional keyword arguments
 
         """
-        x = self.getXAxis(x)
+        x = self.x_axis(x)
         ax = cP.plot(x, values, **kwargs)
         return ax
 
@@ -1037,10 +1072,10 @@ class Point(myObject):
         z_kwargs = kwargs.pop('z_kwargs', {})
 
         overlay = kwargs.pop('overlay', None)
-        if not overlay is None:
-            x_kwargs['overlay'] = overlay.x
-            y_kwargs['overlay'] = overlay.y
-            z_kwargs['overlay'] = overlay.z
+        # if not overlay is None:
+        #     x_kwargs['overlay'] = overlay.x
+        #     y_kwargs['overlay'] = overlay.y
+        #     z_kwargs['overlay'] = overlay.z
 
         if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
             z_kwargs['transpose'] = z_kwargs.get('transpose', True)
@@ -1050,6 +1085,21 @@ class Point(myObject):
             if c.hasPosterior:
                 c.plot_posteriors(ax = axes[i], **kw)
                 i += 1
+
+        if overlay is not None:
+            axes = self.overlay_on_posteriors(overlay, axes)
+
+    def overlay_on_posteriors(self, overlay, axes, x_kwargs={}, y_kwargs={}, z_kwargs={}, **kwargs):
+
+        if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
+            z_kwargs['transpose'] = z_kwargs.get('transpose', True)
+
+        i = 0
+        for s, o, kw in zip([self.x, self.y, self.z], [overlay.x, overlay.y, overlay.z], [x_kwargs, y_kwargs, z_kwargs]):
+            if s.hasPosterior:
+                s.posterior.plot_overlay(value = o, ax = axes[i], **kw, **kwargs)
+                i += 1
+        return axes
 
 
     def pyvista_mesh(self):

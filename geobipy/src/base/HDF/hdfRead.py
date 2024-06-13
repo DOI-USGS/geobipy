@@ -208,7 +208,7 @@ def read_item(h5obj, index=None, **kwargs):
     from ...inversion.Inference1D import Inference1D
     from ...inversion.Inference2D import Inference2D
     from ...classes.system.CircularLoop import CircularLoop
-    from ...classes.system.CircularLoops import CircularLoops
+    # from ...classes.system.CircularLoops import CircularLoops
     s = h5obj.attrs.get('repr')
     if (not s is None):
 
@@ -223,6 +223,9 @@ def read_item(h5obj, index=None, **kwargs):
 
         if '()' in s:
             s = s.replace('()', '')
+
+        if 'CircularLoops' in s:
+            s = s.replace('CircularLoops', 'CircularLoop')
 
         item = eval(cf.safeEval(s))
         tmp = item.fromHdf(h5obj, index=index, **kwargs)

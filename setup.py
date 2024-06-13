@@ -16,7 +16,7 @@ def readme():
     with open('README.rst', encoding='utf-8', mode='r') as f:
         return f.read()
 
-__version__ = '2.0.0'
+__version__ = '2.2.0'
 
 setup(name='geobipy',
     packages=find_packages(),
@@ -53,7 +53,9 @@ setup(name='geobipy',
         'smm',
         'lmfit',
         'scikit-learn',
-        'randomgen'
+        'randomgen',
+        'numba_kdtree',
+        'pygmt'
     ],
     extra_requires=['sphinx_gallery',
                     "sphinx_rtd_theme"

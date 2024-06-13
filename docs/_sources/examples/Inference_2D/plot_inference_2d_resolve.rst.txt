@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Inference_2D_plot_inference_2d_resolve.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -23,7 +23,7 @@
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-151
+.. GENERATED FROM PYTHON SOURCE LINES 8-153
 
 
 
@@ -73,41 +73,8 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
          :class: sphx-glr-multi-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
 
 
-
-
-
-
-|
 
 .. code-block:: Python
 
@@ -144,12 +111,15 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
              "cmap" : 'jet'
              }
 
+       import warnings
+       warnings.filterwarnings('error')
+
        fig = plt.figure(figsize=(16, 8))
        plt.suptitle("{} {}".format(data_type, model_type))
        gs0 = fig.add_gridspec(6, 2, hspace=1.0)
 
        true_model = Model.create_synthetic_model(model_type)
-       true_model.mesh.y_edges = true_model.mesh.y_edges / 4.1
+       true_model.mesh.y_edges = true_model.mesh.y_edges / 10.0
 
        kwargs['vmin'] = np.log10(np.min(true_model.values))
        kwargs['vmax'] = np.log10(np.max(true_model.values))
@@ -240,25 +210,24 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
        results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
        results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
-
-       plt.show()
-       # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
+       # plt.show()
+       plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
     if __name__ == '__main__':
        models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
        for model in models:
-          try:
+          # try:
              plot_2d_summary("../../../Parallel_Inference/", "resolve", model)
-          except Exception as e:
-             print(model)
-             print(e)
-             pass
+          # except Exception as e:
+          #    print(model)
+          #    print(e)
+          #    pass
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 24.877 seconds)
+   **Total running time of the script:** (0 minutes 49.364 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_2D_plot_inference_2d_resolve.py:

@@ -13,6 +13,7 @@ from cached_property import cached_property
 from datetime import timedelta
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
+from ..classes.statistics import get_prng
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.mixPearson import mixPearson
 from ..classes.statistics.Histogram import Histogram
@@ -313,6 +314,10 @@ class Inference2D(myObject):
     @world.setter
     def world(self, communicator):
         self._world = communicator
+
+    def __del__(self):
+        if "_hdf_file" in self.__dict__:
+            self.hdf_file.close()
 
     def __deepcopy__(self, memo={}):
         return None
@@ -1067,13 +1072,14 @@ class Inference2D(myObject):
 
         out = Histogram.fromHdf(self.hdf_file['/model/values/posterior'], index=index)
 
-        out.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        out.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
 
         out.mesh.z.relativeTo = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
-        out.mesh.y.relativeTo = self.halfspace
+
+        # out.mesh.y.relativeTo = self.halfspace
 
         return out
 
@@ -1103,20 +1109,20 @@ class Inference2D(myObject):
         return R
 
 
-    def axis(self, axis):
-        if axis == 'index':
-            ax = StatArray.StatArray(arange(self.nPoints, dtype=float64), 'Index')
-        elif axis == 'fiducial':
-            ax = self.fiducial
-        elif axis == 'x':
-            ax = self.x
-        elif axis == 'y':
-            ax = self.y
-        elif axis == 'z':
-            ax = self.mesh.y
-        elif axis == 'distance':
-            ax = StatArray.StatArray(sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
-        return ax
+    # def axis(self, axis):
+    #     if axis == 'index':
+    #         ax = StatArray.StatArray(arange(self.nPoints, dtype=float64), 'Index')
+    #     elif axis == 'fiducial':
+    #         ax = self.fiducial
+    #     elif axis == 'x':
+    #         ax = self.x
+    #     elif axis == 'y':
+    #         ax = self.y
+    #     elif axis == 'z':
+    #         ax = self.mesh.y
+    #     elif axis == 'distance':
+    #         ax = StatArray.StatArray(sqrt((self.data.x - self.data.x[0])**2.0 + (self.data.y - self.data.y[0])**2.0), 'Distance', 'm')
+    #     return ax
 
     # def x_axis(self, axis, centres=False):
 
@@ -1167,25 +1173,28 @@ class Inference2D(myObject):
 
     #     cP.plot(self.mesh.x, self.bestData.predictedData[:, channel], **kwargs)
 
-    def plot_burned_in(self, **kwargs):
+    def plot_burned_in(self, low=0.0, high=1.0, **kwargs):
 
-        x = self.axis(kwargs.pop('x', 'x'))
+        x = self.data.axis(kwargs.pop('x', 'x'))
         cmap = plt.get_cmap(kwargs.pop('cmap', 'cividis'))
 
         ax = kwargs.pop('ax', plt.gca())
 
-        ylim = (0.0, 1.0)
         if kwargs.pop('underlay', False):
             kwargs['alpha'] = kwargs.get('alpha', 0.5)
-            ylim = ax.get_ylim()
+            ylim = list(ax.get_ylim())
+        else:
+            ylim = [low, high]
 
-        plt.fill_between(x, ylim[1], ylim[0], step='mid', color=cmap(1.0), label="", **kwargs)
-        plt.fill_between(x, (ylim[1]-ylim[0])*(1-self.burned_in)+ylim[0], ylim[0], step='mid', color=cmap(0.0), label="", **kwargs)
+        ax.fill_between(x, ylim[1], ylim[0], step='mid', color=cmap(1.0), label="True", **kwargs)
+        ax.fill_between(x, (ylim[1]-ylim[0])*(1-self.burned_in)+ylim[0], ylim[0], step='mid', color=cmap(0.0), label="False", **kwargs)
+        ax.legend(title="Burned in", prop={'size': 6}, fontsize=6)
 
+        return ax
 
     def plot_channel_saturation(self, **kwargs):
 
-        kwargs['x'] = kwargs.pop('x', 'x')
+        kwargs['x'] = kwargs.get('x', 'x')
         labels = kwargs.pop('labels', True)
         kwargs['color'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
@@ -1222,7 +1231,7 @@ class Inference2D(myObject):
         kwargs['color'] = kwargs.pop('color', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 0.5)
 
-        self.data.plot(values=self.doi, axis=1, **kwargs)
+        self.data.plot(values=self.doi, **kwargs)
 
     def plot_elevation(self, **kwargs):
         kwargs['x'] = kwargs.pop('x', 'x')
@@ -1235,7 +1244,7 @@ class Inference2D(myObject):
     def plot_k_layers(self, **kwargs):
         """ Plot the number of layers in the best model for each data point """
         post = self.model.nCells.posterior
-        post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        post.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
         ax, _, _ = post.plot(overlay=self.model.nCells, axis=1)
         ax.set_title('P(# of Layers)')
 
@@ -1284,7 +1293,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
 
         opacity = self.opacity()
-        opacity.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        opacity.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(opacity, **kwargs); kwargs['alpha'] = mask
 
@@ -1300,7 +1309,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'hot')
 
         entropy = self.entropy
-        entropy.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        entropy.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(entropy, **kwargs); kwargs['alpha'] = mask
 
@@ -1325,7 +1334,7 @@ class Inference2D(myObject):
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
 
         interfaces = self.interface_probability()
-        interfaces.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        interfaces.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(interfaces, **kwargs); kwargs['alpha'] = mask
 
@@ -1341,7 +1350,7 @@ class Inference2D(myObject):
             post = self.relativeErrorPosteriors
 
         kwargs['trim'] = kwargs.get('trim', 0.0)
-        post.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        post.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         post.pcolor(**kwargs)
 
@@ -1486,7 +1495,7 @@ class Inference2D(myObject):
         return out
 
     def plot_best_model(self, **kwargs):
-        self.model.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        self.model.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         kwargs['mask_by_confidence'] = False
         kwargs['mask_by_doi'] = False
@@ -1587,7 +1596,7 @@ class Inference2D(myObject):
 
         model = self.mean_parameters()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
@@ -1597,7 +1606,7 @@ class Inference2D(myObject):
 
         model = self.compute_median_parameter()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
@@ -1607,7 +1616,7 @@ class Inference2D(myObject):
 
         model = self.compute_mode_parameter()
 
-        model.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
 
@@ -1643,7 +1652,7 @@ class Inference2D(myObject):
     def plot_percentile(self, percent, **kwargs):
         posterior = self.parameter_posterior()
 
-        posterior.mesh.x.centres = self.data.axis(kwargs.get('x', 'x'))
+        posterior.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
         percentile = posterior.percentile(percent, axis=1)
 
@@ -2021,4 +2030,101 @@ class Inference2D(myObject):
         self = cls(data, prng=prng, world=world)
         self.mode = mode
         self.hdf_file = grp
+
         return self
+
+
+    def plot_summary(self, **kwargs):
+
+        pp = self.parameter_posterior()
+        mm = self.mean_parameters()
+
+
+        kwargs['x'] = kwargs.get('x', 'x')
+
+        axes = kwargs.get('axes', None)
+        if axes is None:
+            nrows = 3
+            fig = kwargs.pop('fig', plt.figure(figsize=(20, 10)))
+
+            gs = fig.add_gridspec(ncols=2, nrows=6, hspace=2.0)
+
+            ax = fig.add_subplot(gs[0, 0])
+        else:
+            ax = axes.pop(0)
+
+        self.plot_burned_in(x = kwargs['x'], high=self.data.channel_saturation, ax=ax)
+        self.plot_channel_saturation(linewidth=1.0, x = kwargs['x'], ax=ax, flipX=kwargs.get('flipX', False), wrap_ylabel=True)
+
+        ax = fig.add_subplot(gs[1, 0], sharex=ax) if axes is None else axes.pop(0)
+        self.plot_k_layers(x = kwargs['x'], wrap_clabel=True)
+
+        ax0 = fig.add_subplot(gs[0, 1], sharex=ax) if axes is None else axes.pop(0)
+        self.plot_mean_model(ax=ax0, wrap_clabel=True, **kwargs);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax0);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax0);
+        ylim = ax0.get_ylim()
+
+        # By adding the useVariance keyword, we can make regions of lower confidence more transparent
+        ax = fig.add_subplot(gs[1, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        self.plot_mode_model(mask_by_confidence=True, ax=ax, wrap_clabel=True, **kwargs);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ax = fig.add_subplot(gs[2, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        self.plot_best_model(ax=ax, wrap_clabel=True, **kwargs);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        ax.set_ylim(ylim)
+
+        kwargs.pop('vmin', None)
+        kwargs.pop('vmax', None)
+
+        ax = fig.add_subplot(gs[3, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        plt.title('5%')
+        self.plot_percentile(percent=0.05, ax=ax, wrap_clabel=True, **kwargs)
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ax = fig.add_subplot(gs[4, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        plt.title('50%')
+        self.plot_percentile(percent=0.5, ax=ax, wrap_clabel=True, **kwargs)
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ax = fig.add_subplot(gs[5, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        plt.title('95%')
+        self.plot_percentile(percent=0.95, ax=ax, wrap_clabel=True, **kwargs)
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ################################################################################
+        # Now we can start plotting some more interesting posterior properties.
+        # How about the confidence?
+        ax = fig.add_subplot(gs[2, 0], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        self.plot_confidence(x = kwargs['x'], ax=ax);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ################################################################################
+        # We can take the interface depth posterior for each data point,
+        # and display an interface probability cross section
+        # This posterior can be washed out, so the clim_scaling keyword lets me saturate
+        # the top and bottom 0.5% of the colour range
+        ax = fig.add_subplot(gs[3, 0], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        plt.title('P(Interface)')
+        self.plot_interfaces(cmap='Greys', clim_scaling=0.5, x = kwargs['x'], ax=ax);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        ax = fig.add_subplot(gs[4, 0], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
+        self.plot_entropy(cmap='Greys', clim_scaling=0.5, x = kwargs['x'], ax=ax);
+        self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+        self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        if kwargs.get('flipX', False):
+            ax.invert_xaxis()
+        if kwargs.get('flipY', False):
+            ax.invert_yaxis()
+
+        return fig

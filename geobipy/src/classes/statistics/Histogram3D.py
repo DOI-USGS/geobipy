@@ -43,6 +43,8 @@ class Histogram3D(RectilinearMesh3D):
     def __init__(self, x=None, y=None, z=None, **kwargs):
         """ Instantiate a 2D histogram """
 
+        raise DeprecationWarning("HistogramXD no longer in development")
+
         # Instantiate the parent class
         RectilinearMesh3D.__init__(self, x, y, z, **kwargs)
 
@@ -952,19 +954,3 @@ class Histogram3D(RectilinearMesh3D):
         else:
             self._counts = StatArray.StatArray.fromHdf(grp['arr'], index)
         return self
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

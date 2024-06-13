@@ -30,6 +30,9 @@ clean:
 	find ./source/examples -name "*.vtk" -type f -delete
 	find ./source/examples -name "index.rst" -type f -delete
 	find ./source/examples -name "sg_execution_times.rst" -type f -delete
+	find ./source/examples -name "*.png" -type f -delete
+	find ./source/examples -name "*.mp4" -type f -delete
+
 
 cleanGallery:
 	find ./source/examples -name "*.md5" -type f -delete

@@ -21,7 +21,7 @@ def checkCommandArguments():
     Parser = argparse.ArgumentParser(description="GeoBIPy",
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     Parser.add_argument('--index', default=0, type=int, help='job array index 0-18')
-    Parser.add_argument('--data', default=None, help="Data type. Choose from ['skytem_512', 'tempest', 'resolve']")
+    Parser.add_argument('--data', default=None, help="Data type. Choose from ['skytem', 'tempest', 'resolve']")
     Parser.add_argument('--model', default=None, help="Model type. Choose from ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']")
 
     return Parser.parse_args()
@@ -34,7 +34,7 @@ sys.path.append(os.getcwd())
 
 models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
-data_type = "Skytem_512"
+data_type = "Skytem"
 model_type = models[args.index]
 
 #%%

@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**03:16.574** total execution time for 21 files **from all galleries**:
+**01:55.319** total execution time for 26 files **from all galleries**:
 
 .. container::
 
@@ -32,20 +32,26 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_tempest.py` (``examples/Inference_1D/plot_inference_1d_tempest.py``)
-     - 01:22.225
-     - 0.0
-   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_skytem.py` (``examples/Inference_1D/plot_inference_1d_skytem.py``)
-     - 01:06.343
-     - 0.0
    * - :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_resolve.py` (``examples/Inference_2D/plot_inference_2d_resolve.py``)
-     - 00:24.877
+     - 00:49.364
      - 0.0
    * - :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_tempest.py` (``examples/Inference_2D/plot_inference_2d_tempest.py``)
-     - 00:12.999
+     - 00:33.754
      - 0.0
    * - :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_skytem.py` (``examples/Inference_2D/plot_inference_2d_skytem.py``)
-     - 00:10.130
+     - 00:32.201
+     - 0.0
+   * - :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py` (``examples/Data/plot_frequency_dataset.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_Data_plot_pointcloud3d.py` (``examples/Data/plot_pointcloud3d.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_Data_plot_skytem_dataset.py` (``examples/Data/plot_skytem_dataset.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_Data_plot_tempest_dataset.py` (``examples/Data/plot_tempest_dataset.py``)
+     - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py` (``examples/Datapoints/plot_resolve_datapoint.py``)
      - 00:00.000
@@ -63,6 +69,15 @@ Computation times
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_resolve.py` (``examples/Inference_1D/plot_inference_1d_resolve.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_skytem.py` (``examples/Inference_1D/plot_inference_1d_skytem.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_tempest.py` (``examples/Inference_1D/plot_inference_1d_tempest.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_Inference_2D_test.py` (``examples/Inference_2D/test.py``)
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py` (``examples/Meshes/plot_rectilinear_mesh_1d.py``)

@@ -1,18 +1,16 @@
 from copy import deepcopy
 import numpy as np
-from numpy import int32
+from numpy import int32, vstack
 import matplotlib
 import matplotlib.pyplot as plt
 
 from ..core import StatArray
 from ..pointcloud.Point import Point
-from ..pointcloud.PointCloud3D import PointCloud3D
 from .EmLoop import EmLoop
-from .EmLoops import EmLoops
 from .CircularLoop import CircularLoop
 from ...base.HDF.hdfRead import read_item
 
-class Loop_pair(Point, PointCloud3D):
+class Loop_pair(Point):
 
     def __init__(self, transmitter=None, receiver=None, **kwargs):
 
@@ -26,6 +24,33 @@ class Loop_pair(Point, PointCloud3D):
 
         self.transmitter = transmitter
         self.receiver = receiver
+
+    @property
+    def x_offset(self):
+        return self._x
+
+    @x_offset.setter
+    def x_offset(self, value):
+        self._x[:] = value
+        self.receiver.x[:] = self.transmitter.x + value
+
+    @property
+    def y_offset(self):
+        return self._y
+
+    @y_offset.setter
+    def y_offset(self, value):
+        self._y[:] = value
+        self.receiver.y[:] = self.transmitter.y + value
+
+    @property
+    def z_offset(self):
+        return self._z
+
+    @z_offset.setter
+    def z_offset(self, value):
+        self._z[:] = value
+        self.receiver.z[:] = self.transmitter.z + value
 
     @property
     def addressof(self):
@@ -46,7 +71,7 @@ class Loop_pair(Point, PointCloud3D):
                          self.transmitter.roll.item(),
                         -self.transmitter.pitch.item(),
                         -self.transmitter.yaw.item(),
-                         self.x.item(), self.y.item(), self.z.item(),
+                         self.x_offset.item(), self.y_offset.item(), self.z_offset.item(),
                          self.receiver.roll.item(),
                         -self.receiver.pitch.item(),
                         -self.receiver.yaw.item())
@@ -58,6 +83,10 @@ class Loop_pair(Point, PointCloud3D):
 
             self.receiver.nPoints = value
             self.transmitter.nPoints = value
+
+    @property
+    def offset(self):
+        return vstack([self.x, self.y ,self.z]).T
 
     @property
     def hasPosterior(self):
@@ -72,7 +101,7 @@ class Loop_pair(Point, PointCloud3D):
     @receiver.setter
     def receiver(self, values):
         if (values is not None):
-            assert isinstance(values, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop(s)')
+            assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop')
             self.nPoints = values.nPoints
             assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
             values = deepcopy(values)
@@ -92,18 +121,42 @@ class Loop_pair(Point, PointCloud3D):
     @transmitter.setter
     def transmitter(self, values):
         if (values is not None):
-            assert isinstance(values, (EmLoop, EmLoops)), TypeError('transmitter must be a geobipy.EmLoop(s)')
+            assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop')
             if self.nPoints == 0: self.nPoints = values.nPoints
             assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
             values = deepcopy(values)
 
             self._transmitter = values
 
+    def _as_dict(self):
+
+        out = { 'tx_pitch': self.transmitter.pitch,
+                'tx_roll': self.transmitter.roll,
+                'tx_yaw': self.transmitter.yaw,
+                'txrx_dx': self.x,
+                'txrx_dy': self.y,
+                'txrx_dz': self.z,
+                'rx_pitch': self.receiver.pitch,
+                'rx_roll': self.receiver.roll,
+                'rx_yaw': self.receiver.yaw}
+        order = ['tx_pitch', 'tx_roll', 'tx_yaw', 'txrx_dx', 'txrx_dy', 'txrx_dz', 'rx_pitch', 'rx_roll', 'rx_yaw']
+        return out, order
+
+
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out._transmitter = deepcopy(self.transmitter)
-        out._receiver = deepcopy(self.receiver)
+        out._transmitter = deepcopy(self.transmitter, memo=memo)
+        out._receiver = deepcopy(self.receiver, memo=memo)
         return out
+
+    def append(self, other):
+
+        super().append(other)
+
+        self.transmitter = self.transmitter.append(other.transmitter)
+        self.receiver = self.receiver.append(other.receiver)
+
+        return self
 
     def perturb(self):
         super().perturb()
@@ -207,11 +260,7 @@ class Loop_pair(Point, PointCloud3D):
         offset_kwargs = kwargs.pop('offset_kwargs', {})
         receiver_kwargs = kwargs.pop('receiver_kwargs', {})
 
-        overlay = kwargs.get('overlay')
-        if not overlay is None:
-            transmitter_kwargs['overlay'] = overlay.transmitter
-            offset_kwargs['overlay'] = overlay.loop_pair
-            receiver_kwargs['overlay'] = overlay.receiver
+        overlay = kwargs.pop('overlay', None)
 
         i = 0
         if self.transmitter.hasPosterior:
@@ -224,6 +273,22 @@ class Loop_pair(Point, PointCloud3D):
 
         if self.receiver.hasPosterior:
             self.receiver.plot_posteriors(axes = axes[i], **receiver_kwargs)
+
+        if overlay is not None:
+            self.overlay_on_posteriors(overlay, axes, **kwargs)
+
+    def overlay_on_posteriors(self, overlay, axes, **kwargs):
+        i = 0
+        if self.transmitter.hasPosterior:
+            self.transmitter.overlay_on_posteriors(overlay=overlay.transmitter, axes = axes[i], **kwargs)
+            i += 1
+
+        if super().hasPosterior:
+            super().overlay_on_posteriors(overlay=overlay, axes = axes[i], **kwargs)
+            i += 1
+
+        if self.receiver.hasPosterior:
+            self.receiver.overlay_on_posteriors(overlay=overlay.receiver, axes = axes[i], **kwargs)
 
     @property
     def probability(self):

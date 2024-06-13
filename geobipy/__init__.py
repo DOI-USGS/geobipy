@@ -11,8 +11,9 @@ from numpy import int32
 from numpy.random import Generator
 
 from .src.base.utilities import init_debug_print, debug_print as dprint
+from .src.base import utilities
 from .src.base import plotting
-from .src.base.MPI import get_prng
+from .src.classes.statistics import get_prng
 # from .src.base import fileIO
 # from .src.base import interpolation
 
@@ -38,7 +39,6 @@ from .src.classes.system.FdemSystem import FdemSystem
 from .src.classes.system.TdemSystem import TdemSystem
 from .src.classes.system.Waveform import Waveform
 from .src.classes.system.CircularLoop import CircularLoop
-from .src.classes.system.CircularLoops import CircularLoops
 from .src.classes.system.SquareLoop import SquareLoop
 from .src.classes.system.filters.butterworth import butterworth
 # Meshes
@@ -49,7 +49,6 @@ from .src.classes.mesh.RectilinearMesh3D import RectilinearMesh3D
 # Models
 from .src.classes.model.Model import Model
 # Pointclouds
-from .src.classes.pointcloud.PointCloud3D import PointCloud3D
 from .src.classes.pointcloud.Point import Point
 # Statistics
 from .src.classes.statistics.Distribution import Distribution
@@ -91,6 +90,7 @@ def checkCommandArguments():
     Parser.add_argument('--mpi', dest='mpi', action='store_true', help='Run geobipy with MPI libraries.')
     Parser.add_argument('--debug', dest='debug', action='store_true', help='Run geobipy in debug mode.')
     Parser.add_argument('--data_directory', default=None, help='override data_directory in parameter file.')
+    Parser.add_argument('--data_filename', default=None, help='override data_filename in parameter file')
 
     args = Parser.parse_args()
 
@@ -157,6 +157,7 @@ def serial_geobipy(input_file, output_directory, **kwargs):
     options = user_parameters.read(input_file, **kwargs)
 
     data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+    # data.close()
 
     prng = get_prng(seed=options.get('seed', None), jump=options.get('jump', None))
 
@@ -199,6 +200,7 @@ def parallel_mpi(input_file, output_directory, **kwargs):
 
     # Everyone needs the system classes read in early.
     data = kwargs['data_type']._initialize_sequential_reading(kwargs['data_filename'], kwargs['system_filename'])
+    # data.close()
 
     # Get the number of points in the file.
     if masterRank:
@@ -228,7 +230,8 @@ def geobipy():
         parallel_geobipy(args.options_file,
                          args.output_directory,
                          seed=args.seed,
-                         data_directory=args.data_directory)
+                         data_directory=args.data_directory,
+                         data_filename=args.data_filename)
     else:
         serial_geobipy(args.options_file,
                        args.output_directory,

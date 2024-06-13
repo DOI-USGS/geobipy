@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Inference_1D_plot_inference_1d_tempest.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -162,13 +162,13 @@ The directory where HDF files will be stored
     Using user input file ..//..//supplementary////options_files//Tempest_options
     Output files will be produced at Tempest/glacial
     Creating HDF5 files, this may take a few minutes...
-    Files are being created for data files ..//..//supplementary////data//Tempest_glacial.csv and system files ..//..//supplementary////data//..//data/Tempest.stm
+    Files are being created for data files ..//..//supplementary////data//Tempest_glacial.csv and system files ..//..//supplementary////data//..//data/tempest.stm
     Created hdf5 file for line 0.0 with 79 data points
     Created hdf5 files 79 total data points
-    Created hdf5 files in 0:00:00.360661 h:m:s
-    i=5000, k=7, acc=*27.680, 0.015 s/Model, 76.969 s Elapsed, eta=--:--:-- h:m:s
+    Created hdf5 files in 0:00:00.408380 h:m:s
+    i=5000, k=5, acc=*15.680, 0.016 s/Model, 79.402 s Elapsed, eta=--:--:-- h:m:s
 
-    Remaining Points -2/1 || Elapsed Time: 0:01:18.267442 h:m:s || ETA 0:00:26.089147 h:m:s
+    Remaining Points -2/1 || Elapsed Time: 0:01:20.780798 h:m:s || ETA 0:00:26.926933 h:m:s
 
 
 
@@ -176,7 +176,7 @@ The directory where HDF files will be stored
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 22.225 seconds)
+   **Total running time of the script:** (1 minutes 21.625 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_1D_plot_inference_1d_tempest.py:

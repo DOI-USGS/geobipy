@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Inference_2D_plot_inference_2d_skytem.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -23,7 +23,7 @@
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-150
+.. GENERATED FROM PYTHON SOURCE LINES 8-152
 
 
 
@@ -33,42 +33,42 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_001.png
-         :alt: skytem_512 glacial, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
+         :alt: skytem glacial, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_001.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_002.png
-         :alt: skytem_512 saline_clay, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
+         :alt: skytem saline_clay, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_002.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_003.png
-         :alt: skytem_512 resistive_dolomites
+         :alt: skytem resistive_dolomites, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_003.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_004.png
-         :alt: skytem_512 resistive_basement, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
+         :alt: skytem resistive_basement, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_004.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_005.png
-         :alt: skytem_512 coastal_salt_water
+         :alt: skytem coastal_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_005.png
          :class: sphx-glr-multi-img
 
     *
 
       .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_006.png
-         :alt: skytem_512 ice_over_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
+         :alt: skytem ice_over_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
          :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_skytem_006.png
          :class: sphx-glr-multi-img
 
@@ -77,26 +77,480 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 
  .. code-block:: none
 
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
-    resistive_dolomites
-    x and y arguments to pcolormesh cannot have non-finite values or be of type numpy.ma.MaskedArray with masked values
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
-    coastal_salt_water
-    x and y arguments to pcolormesh cannot have non-finite values or be of type numpy.ma.MaskedArray with masked values
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:2039: RuntimeWarning: invalid value encountered in double_scalars
-      self._mtx[1, 2] += ty
-    /Users/nfoks/miniconda3/lib/python3.10/site-packages/matplotlib/transforms.py:372: RuntimeWarning: invalid value encountered in double_scalars
-      return (x0, y0, x1 - x0, y1 - y0)
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x16d1776d0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x16d174650
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x16d336350
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x16d1774d0
+    |   |   Shape: (132,)
+    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
+    |   |   Min: -601.6125
+    |   |   Max: -2.2875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x16d176850
+    |   |   Shape: (133,)
+    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
+    |   |   Min: -603.9
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x16d176bd0
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16d176ad0
+    |   Shape: (79, 132)
+    |   Values: [[0.01033856 0.01033856 0.01032608 ... 0.01558398 0.01558398 0.01558398]
+    |    [0.01000897 0.01000897 0.00993591 ... 0.01545486 0.01545486 0.01545486]
+    |    [0.00955219 0.00955219 0.0095664  ... 0.01290829 0.01290829 0.01290829]
+    |    ...
+    |    [0.06767155 0.06767155 0.08087337 ... 0.09781396 0.09781396 0.09781396]
+    |    [0.08127294 0.08127294 0.09146854 ... 0.09884747 0.09884747 0.09884747]
+    |    [0.09182078 0.09182078 0.09720053 ... 0.09911276 0.09911276 0.09911276]]
+    |   Min: 0.008142645729506102
+    |   Max: 0.18736281207027317
+    |   has_posterior: False
+
+
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x16ba249d0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x16ba24ed0
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x16a2943d0
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x16ba272d0
+    |   |   Shape: (132,)
+    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
+    |   |   Min: -601.6125
+    |   |   Max: -2.2875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x16ba274d0
+    |   |   Shape: (133,)
+    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
+    |   |   Min: -603.9
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x16ba27350
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16ba27650
+    |   Shape: (79, 132)
+    |   Values: [[0.01004342 0.01004342 0.01004776 ... 0.01059402 0.01059402 0.01059402]
+    |    [0.01216306 0.01216306 0.01200007 ... 0.01053094 0.01053094 0.01053094]
+    |    [0.0096322  0.0096322  0.00961509 ... 0.01266093 0.01266093 0.01266093]
+    |    ...
+    |    [0.06790468 0.06790468 0.08216413 ... 0.09468115 0.09468115 0.09468115]
+    |    [0.08066093 0.08066093 0.09027033 ... 0.09565939 0.09565939 0.09565939]
+    |    [0.0918785  0.0918785  0.09698753 ... 0.10118202 0.10118202 0.10118202]]
+    |   Min: 0.005722230815170164
+    |   Max: 0.7350287210217844
+    |   has_posterior: False
+
+
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x16b9002d0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x16b9ab550
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x169562550
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x16b9a9250
+    |   |   Shape: (132,)
+    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
+    |   |   Min: -601.6125
+    |   |   Max: -2.2875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x16b9ab350
+    |   |   Shape: (133,)
+    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
+    |   |   Min: -603.9
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x16b9ab250
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16b900dd0
+    |   Shape: (79, 132)
+    |   Values: [[0.02108286 0.02108286 0.02105478 ... 0.01970014 0.01970014 0.01970014]
+    |    [0.02020133 0.02020133 0.02021404 ... 0.01697529 0.01697529 0.01697529]
+    |    [0.01980096 0.01980096 0.01984157 ... 0.01531969 0.01531969 0.01531969]
+    |    ...
+    |    [0.00553428 0.00553428 0.00546494 ... 0.0027545  0.0027545  0.0027545 ]
+    |    [0.00378312 0.00378312 0.00377909 ... 0.00262642 0.00262642 0.00262642]
+    |    [0.00296382 0.00296382 0.0029272  ... 0.00213216 0.00213216 0.00213216]]
+    |   Min: 0.0008988345212684541
+    |   Max: 0.0391244257801508
+    |   has_posterior: False
+
+
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x16d979bd0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x16d979850
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x16b7868d0
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x16d979a50
+    |   |   Shape: (132,)
+    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
+    |   |   Min: -601.6125
+    |   |   Max: -2.2875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x16d97a0d0
+    |   |   Shape: (133,)
+    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
+    |   |   Min: -603.9
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x16d979f50
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16d953cd0
+    |   Shape: (79, 132)
+    |   Values: [[0.01104549 0.01104549 0.01088691 ... 0.01524806 0.01524806 0.01524806]
+    |    [0.01093171 0.01093171 0.01060605 ... 0.01539332 0.01539332 0.01539332]
+    |    [0.01055781 0.01055781 0.01051885 ... 0.01532385 0.01532385 0.01532385]
+    |    ...
+    |    [0.06858216 0.06858216 0.07381497 ... 0.09939759 0.09939759 0.09939759]
+    |    [0.0811231  0.0811231  0.09235    ... 0.09950496 0.09950496 0.09950496]
+    |    [0.09142048 0.09142048 0.09655967 ... 0.09905984 0.09905984 0.09905984]]
+    |   Min: 0.00249077338478267
+    |   Max: 0.21372916933340144
+    |   has_posterior: False
+
+
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x16d5f7650
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x16d950150
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x1695aa3d0
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x16d951550
+    |   |   Shape: (132,)
+    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
+    |   |   Min: -601.6125
+    |   |   Max: -2.2875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x16d951f50
+    |   |   Shape: (133,)
+    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
+    |   |   Min: -603.9
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x16d9506d0
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16d5f70d0
+    |   Shape: (79, 132)
+    |   Values: [[1.02245403 1.02245403 1.02307401 ... 0.92933622 0.92933622 0.92933622]
+    |    [1.02230576 1.02230576 1.02472151 ... 0.7725808  0.7725808  0.7725808 ]
+    |    [1.02240853 1.02240853 1.02261644 ... 0.92778441 0.92778441 0.92778441]
+    |    ...
+    |    [0.17953964 0.17953964 0.17953964 ... 0.04600592 0.04600592 0.04600592]
+    |    [0.14131043 0.14131043 0.14131043 ... 0.03121664 0.03121664 0.03121664]
+    |    [0.0826337  0.0826337  0.0826337  ... 0.02682797 0.02682797 0.02682797]]
+    |   Min: 0.005438953651048253
+    |   Max: 4.1999468303264145
+    |   has_posterior: False
+
+
+    Model:
+    mesh:
+    |   RectilinearMesh2D: 
+    |   Shape: : (79, 132) 
+    |   x
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   79
+    |   Cell Centres:
+    |   |   Name: Easting (m) 0x16cd233d0
+    |   |   Shape: (79,)
+    |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
+    |   |   Min: 0.0
+    |   |   Max: 78.0
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: Easting (m) 0x16d470350
+    |   |   Shape: (80,)
+    |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
+    |   |   Min: -0.5
+    |   |   Max: 78.5
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name:  0x16b9015d0
+    |   |   Shape: (1,)
+    |   |   Values: [0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   y
+    |   RectilinearMesh1D
+    |   Number of Cells:
+    |   |   132
+    |   Cell Centres:
+    |   |   Name: elevation (m) 0x16d470050
+    |   |   Shape: (132,)
+    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
+    |   |   Min: -601.6125
+    |   |   Max: -2.2875
+    |   |   has_posterior: False
+    |   
+    |   Cell Edges:
+    |   |   Name: elevation (m) 0x16d470c50
+    |   |   Shape: (133,)
+    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
+    |   |   Min: -603.9
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    |   log:
+    |   |   None
+    |   relativeTo:
+    |   |   Name: Elevation (m) 0x16d4708d0
+    |   |   Shape: (79,)
+    |   |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   |   Min: 0.0
+    |   |   Max: 0.0
+    |   |   has_posterior: False
+    |   
+    values:
+    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16cd22e50
+    |   Shape: (79, 132)
+    |   Values: [[0.00045657 0.00045657 0.0004565  ... 0.00054201 0.00054201 0.00054201]
+    |    [0.0004992  0.0004992  0.00049929 ... 0.0006536  0.0006536  0.0006536 ]
+    |    [0.00061429 0.00061429 0.00061429 ... 0.00094599 0.00094599 0.00094599]
+    |    ...
+    |    [0.00828275 0.00828275 0.00829302 ... 0.00850303 0.00850303 0.00850303]
+    |    [0.00901768 0.00901768 0.00902754 ... 0.00835599 0.00835599 0.00835599]
+    |    [0.00925272 0.00925272 0.00930022 ... 0.00957266 0.00957266 0.00957266]]
+    |   Min: 0.00039894971238615474
+    |   Max: 1.1039260435132408
+    |   has_posterior: False
+
+
 
 
 
@@ -156,6 +610,8 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
        results_2d.plot_elevation(linewidth=0.3, ax=ax, xlabel=False, ylabel=False);
 
        plt.ylim([-550, 60])
+
+       print(results_2d.mean_parameters().summary)
 
        ax1 = fig.add_subplot(gs0[0, 1], sharex=ax, sharey=ax)
        results_2d.plot_mean_model(ax=ax1, wrap_clabel=True, **kwargs);
@@ -236,24 +692,24 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
        results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
        results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
-       plt.show()
-       # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
+       # plt.show()
+       plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
 
     if __name__ == '__main__':
        types = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
        for model in types:
-          try:
-             plot_2d_summary('../../../Parallel_Inference/', "skytem_512", model)
-          except Exception as e:
-             print(model)
-             print(e)
-             pass
+          # try:
+             plot_2d_summary('../../../Parallel_Inference/', "skytem", model)
+          # except Exception as e:
+          #    print(model)
+          #    print(e)
+          #    pass
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 10.130 seconds)
+   **Total running time of the script:** (0 minutes 32.201 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_2D_plot_inference_2d_skytem.py:

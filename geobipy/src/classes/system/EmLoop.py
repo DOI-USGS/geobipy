@@ -1,4 +1,4 @@
-from numpy import asarray, ceil, float64, int8, int32, minimum, size, unique, unravel_index
+from numpy import asarray, ceil, float64, hstack, int8, int32, minimum, size, unique, unravel_index
 from copy import deepcopy
 from matplotlib.figure import Figure
 from matplotlib.pyplot import gcf
@@ -19,15 +19,17 @@ class EmLoop(Point, ABC):
 
     """
 
+    __slots__ = ('_orientation', '_moment', '_pitch', '_roll', '_yaw')
+
     def __init__(self, x=None, y=None, z=None, elevation=None, orientation=None, moment=None, pitch=None, roll=None, yaw=None, **kwargs):
 
         super().__init__(x, y, z, elevation, **kwargs)
 
         self._orientation = StatArray.StatArray(self.nPoints, "Orientation", "", dtype=int32)
-        self._moment = StatArray.StatArray(self._nPoints, "Moment", "")
-        self._pitch = StatArray.StatArray(self._nPoints, "Pitch", "$^{o}$")
-        self._roll = StatArray.StatArray(self._nPoints, "Roll", "$^{o}$")
-        self._yaw = StatArray.StatArray(self._nPoints, "Yaw", "$^{o}$")
+        self._moment = StatArray.StatArray(self.nPoints, "Moment", "")
+        self._pitch  = StatArray.StatArray(self.nPoints, "Pitch", "$^{o}$")
+        self._roll   = StatArray.StatArray(self.nPoints, "Roll", "$^{o}$")
+        self._yaw    = StatArray.StatArray(self.nPoints, "Yaw", "$^{o}$")
 
         # Orientation of the loop dipole
         self.orientation = orientation
@@ -54,8 +56,8 @@ class EmLoop(Point, ABC):
         """
         out = super().__getitem__(i)
 
-        if not isinstance(i, slice):
-            i = unique(i)
+        # if not isinstance(i, slice):
+        #     i = unique(i)
 
         _ = self.orientation
         out._orientation = self._orientation[i]
@@ -72,6 +74,14 @@ class EmLoop(Point, ABC):
         msg += "roll:\n{}".format(("|   "+self.roll.addressof.replace("\n", "\n|   "))[:-4])
         msg += "yaw:\n{}".format(("|   "+self.yaw.addressof.replace("\n", "\n|   "))[:-4])
         return msg
+
+    @property
+    def address(self):
+        out = super().address
+        for x in [self.pitch, self.roll, self.yaw]:
+            out = hstack([out, x.address.flatten()])
+
+        return out
 
     @property
     def hasPosterior(self):
@@ -195,6 +205,19 @@ class EmLoop(Point, ABC):
         out._roll = deepcopy(self.roll, memo=memo)
         out._yaw = deepcopy(self.yaw, memo=memo)
         return out
+
+    def append(self, other):
+
+        super().append(other)
+
+        self._orientation = self._orientation.append(other._orientation)
+        self._moment = self._moment.append(other.moment)
+        self._pitch = self._pitch.append(other.pitch)
+        self._roll = self._roll.append(other.roll)
+        self._yaw = self._yaw.append(other.yaw)
+
+        return self
+
 
     def perturb(self):
         """Propose a new point given the attached propsal distributions
@@ -372,15 +395,24 @@ class EmLoop(Point, ABC):
         yaw_kwargs = kwargs.pop('yaw_kwargs', {})
 
         overlay = kwargs.pop('overlay', None)
-        if not overlay is None:
-            pitch_kwargs['overlay'] = overlay.pitch
-            roll_kwargs['overlay'] = overlay.roll
-            yaw_kwargs['overlay'] = overlay.yaw
 
         i = super().n_posteriors
         for c, kw in zip([self.pitch, self.roll, self.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
             if c.hasPosterior:
                 c.plot_posteriors(ax = axes[i], **kw)
+                i += 1
+
+        if overlay is not None:
+            self.overlay_on_posteriors(overlay, axes, pitch_kwargs, roll_kwargs, yaw_kwargs)
+
+    def overlay_on_posteriors(self, overlay, axes, pitch_kwargs={}, roll_kwargs={}, yaw_kwargs={}, **kwargs):
+
+        super().overlay_on_posteriors(overlay, axes[:super().n_posteriors], **kwargs)
+
+        i = super().n_posteriors
+        for s, o, kw in zip([self.pitch, self.roll, self.yaw], [overlay.pitch, overlay.roll, overlay.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
+            if s.hasPosterior:
+                s.posterior.plot_overlay(value = o, ax = axes[i], **kw)
                 i += 1
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):

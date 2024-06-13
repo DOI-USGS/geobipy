@@ -2,7 +2,7 @@
 Module describing a Mesh
 """
 from numpy import abs, argmax, apply_along_axis, cumsum, diff, divide, expand_dims, float64
-from numpy import minimum, ndim
+from numpy import minimum, ndim, nan
 from numpy import r_, s_, searchsorted, size, squeeze, sum, take, take_along_axis, where, zeros_like
 from ...classes.core.myObject import myObject
 from ...base.utilities import _log as log_
@@ -80,33 +80,31 @@ class Mesh(myObject):
     def _mean(self, counts, axis=0):
         ax = self.axis(axis)
         s = tuple([s_[:] if i == axis else None for i in range(self.ndim)])
-
         t = sum(ax.centres[s] * counts, axis = axis)
         N = counts.sum(axis = axis)
 
         if t.size == 1:
             out = t / N
         else:
-            i = where(N > 0.0)
+            i = where(N == 0.0)
+            N[i] = 1
             out = StatArray.StatArray(t.shape)
-            out[i] = (t[i] / N[i])
-
+            out = (t / N)
 
         if ax._relativeTo is not None:
-            nd = ndim(ax.relativeTo)
-            ns = ax.relativeTo.size
+            re = ax.relativeTo
+
+            nd = ndim(re)
+            ns = re.size
             if nd == 2:
-                out[i] += ax.relativeTo[i]
+                out += re
             elif nd == 1:
                 if ns == 1:
-                    out[i] += ax.relativeTo
+                    out += re
                 else:
-                    if ndim(i) == 2:
-                        out[i] += ax.relativeTo[i[0]]
-                    else:
-                        out[i] += ax.relativeTo[i]
+                    out += re[:, None]
             else:
-                out[i] += ax.relativeTo
+                out += re
         out = power_(out, ax.log)
 
         out.name = 'Mean ' + ax.name

@@ -7,7 +7,7 @@ from datetime import timedelta
 
 from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
-from numpy import max, min, log, array, full, longdouble, exp, maximum
+from numpy import max, min, log, array, full, longdouble, exp, maximum, sqrt
 
 from numpy.random import Generator
 from numpy.linalg import norm
@@ -39,7 +39,7 @@ class Inference1D(myObject):
 
     Contains histograms and inversion related variables that can be updated as the Bayesian inversion progresses.
 
-    Inference1D(saveMe, plotMe, savePNG, dataPoint, model, ID, \*\*kwargs)
+    Inference1D(saveMe, plotMe, savePNG, dataPoint, model, ID, **kwargs)
 
     Parameters
     ----------
@@ -96,7 +96,7 @@ class Inference1D(myObject):
                  **kwargs):
         """ Initialize the results of the inversion """
 
-        self.fig = None
+        self.posterior_fig = None
 
         self.world = world
 
@@ -139,6 +139,15 @@ class Inference1D(myObject):
     @covariance_scaling.setter
     def covariance_scaling(self, value):
         self.options['covariance_scaling'] = float64(value)
+
+    @property
+    def observed_datapoint(self):
+        return self._observed_datapoint
+
+    @observed_datapoint.setter
+    def observed_datapoint(self, value):
+        assert isinstance(value, DataPoint), TypeError("observed_datapoint must have type geobipy.Datapoint")
+        self._observed_datapoint = deepcopy(value)
 
     @property
     def datapoint(self):
@@ -444,16 +453,6 @@ class Inference1D(myObject):
 
         self.iRange = StatArray.StatArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
 
-        # Initialize the index for the best model
-        # self.iBestV = StatArray.StatArray(2*self.n_markov_chains, name='Iteration of best model')
-
-        # Initialize the doi
-        # self.doi = model.par.posterior.yBinCentres[0]
-
-        # self.meanInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
-        # self.bestInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
-        # self.opacityInterp = StatArray.StatArray(model.par.posterior.y.nCells.value)
-
         # Initialize time in seconds
         self.inference_time = float64(0.0)
 
@@ -472,6 +471,7 @@ class Inference1D(myObject):
         # ---------------------------------------
         # Set the prior on the data
         self.datapoint.initialize(**kwargs)
+        self.observed_datapoint = deepcopy(datapoint)
         # Set the priors, proposals, and posteriors.
         self.datapoint.set_priors(**kwargs)
         self.datapoint.set_proposals(**kwargs)
@@ -480,6 +480,7 @@ class Inference1D(myObject):
     def initialize_model(self, **kwargs):
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
+
         # dprint('halfspace', halfspace.values)
         self.halfspace = StatArray.StatArray(halfspace.values, 'halfspace')
 
@@ -531,12 +532,13 @@ class Inference1D(myObject):
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
         import numpy as np
-        # dprint('\n\niteration', self.iteration)
+        dprint(f'\n\n{self.iteration=}')
 
-        # dprint('A', self.prng.random())
+        dprint(f'{self.prng.random()=}')
 
-        # print('incoming predicted data', self.datapoint.predictedData)
-        # print('incoming model', self.model.values)
+        dprint(f'incoming {self.datapoint.data=}')
+        dprint(f'incoming {self.datapoint.predictedData=}')
+        dprint(f'incoming {self.model.values=}')
         test_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
@@ -545,36 +547,28 @@ class Inference1D(myObject):
             observation = None
 
         # Propose a new data point, using assigned proposal distributions
-        test_datapoint.perturb()
+        # test_datapoint.perturb()
 
         # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         try:
-            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, self.covariance_scaling)
-        # test predicted data and sensitivity are centered on remapped model
-        # test variance is centered on the remapped model
-        # The data errors have not been perturbed yet.
-
-            # remapped_model, test_model = self.model.perturb(observation, 0.1, self.high_variance, self.covariance_scaling)
-            # remapped_model, test_model = self.model.perturb(observation, 0.1, 2.0, self.covariance_scaling)
+            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, alpha = self.covariance_scaling)
         except:
-            print('singularity line={} fid={} iteration={} rank={}'.format(observation.line_number, observation.fiducial, self.iteration, self.rank))
+            print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
             return True
-        # print('sensitivity after perturbing', np.diag(test_datapoint.sensitivity_matrix))
-        # print('remapped model', remapped_model.values)
-        # print('perturbed model', test_model.values)
 
         if remapped_model is None:
             self.accepted = False
             return
 
         # # Propose a new data point, using assigned proposal distributions
-        # test_datapoint.perturb()
+        test_datapoint.perturb()
 
         # Forward model the data from the candidate model
         test_datapoint.forward(test_model)
-        # J is now centered on the perturbed
 
+        # J is now centered on the perturbed
         test_data_misfit = test_datapoint.data_misfit()
+        dprint(f"{test_data_misfit=}")
 
         # Evaluate the prior for the current data
         test_prior = test_datapoint.probability
@@ -598,7 +592,7 @@ class Inference1D(myObject):
             test_likelihood = test_datapoint.likelihood(log=True)
             observation = test_datapoint
 
-        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation)
+        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation, alpha = self.covariance_scaling)
 
         test_posterior = test_prior + test_likelihood
 
@@ -615,7 +609,6 @@ class Inference1D(myObject):
         self.accepted = acceptance_probability > self.prng.uniform()
 
         if (self.accepted):
-            # dprint("\n accepted?{} \n prior:{}  {}\n likelihood:{}  {}\n proposal:{}  {}".format(self.accepted, test_prior, self.prior, test_likelihood, self.likelihood, proposal, test_proposal))
             # Compute the data misfit
             self.data_misfit = test_data_misfit
             self.prior = test_prior
@@ -624,12 +617,12 @@ class Inference1D(myObject):
             self.model = test_model
             self.datapoint = test_datapoint
             # Reset the sensitivity locally to the newly accepted model
-            self.datapoint.sensitivity(self.model, model_changed=False)
+            # self.datapoint.sensitivity(self.model, model_changed=False)
 
         dprint('accepted', self.accepted)
 
-        # if self.iteration == 44:
-        # input('next')
+        # input('NEXT')
+
         return False
 
     def infer(self, hdf_file_handle):
@@ -640,14 +633,15 @@ class Inference1D(myObject):
         pHDFfile: Optional HDF5 file opened using h5py.File('name.h5','w',driver='mpio', comm=world) before calling Inv_MCMC
         """
 
+        Go = self.datapoint.n_active_channels > 0
+
         if self.interactive_plot:
             self._init_posterior_plots()
             plt.show(block=False)
 
         self.clk.start()
 
-        Go = True
-        failed = False
+        failed = not Go
         while (Go):
             # Accept or reject the new model
             failed = self.accept_reject()
@@ -655,8 +649,8 @@ class Inference1D(myObject):
             self.update()
 
             if self.interactive_plot:
-                self.plot_posteriors(axes=self.ax,
-                                     fig=self.fig,
+                self.plot_posteriors(axes=self.posterior_ax,
+                                     fig=self.posterior_fig,
                                      title="Fiducial {}".format(self.datapoint.fiducial),
                                      increment=self.update_plot_every)
 
@@ -688,7 +682,7 @@ class Inference1D(myObject):
             self.writeHdf(hdf_file_handle)
 
         if self.save_png:
-            self.plot_posteriors(axes = self.ax, fig=self.fig)
+            self.plot_posteriors(axes = self.posterior_ax, fig=self.posterior_fig)
             self.toPNG('.', self.datapoint.fiducial)
 
         return failed
@@ -722,11 +716,16 @@ class Inference1D(myObject):
         if (not self.burned_in):
             target_misfit = sum(self.datapoint.active)
 
-            # if self.data_misfit < target_misfit:
-            if (self.iteration > 10000) and (isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2)):
-                self._n_target_hits += 1
+            # # if self.data_misfit < target_misfit:
+            # if (self.iteration > 10000) and (isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2)):
+            #     self._n_target_hits += 1
 
-            if ((self.iteration > 10000) and (self.relative_chi_squared_fit < 1.0)) or ((self.iteration > 10000) and (self._n_target_hits > 1000)):
+            # converged = (((self.iteration > 10000) and (self.relative_chi_squared_fit < 1.0)) or
+            #              ((self.iteration > 10000) and (self._n_target_hits > 1000)))
+
+            converged = (self.iteration > 5000) and (self.data_misfit < target_misfit)
+
+            if converged:
                 self.burned_in = True  # Let the results know they are burned in
                 self.burned_in_iteration = self.iteration       # Save the burn in iteration to the results
                 self.best_iteration = self.iteration
@@ -763,16 +762,22 @@ class Inference1D(myObject):
                 print(tmp, flush=True)
 
             # Test resetting of the inversion.
-            if not self.burned_in and self.update_plot_every > 1:
-                if self.acceptance_percent == 0.0:
-                    self._n_zero_acceptance += 1
+            if self.update_plot_every > 1:
+                if not self.burned_in:
+                    if self.acceptance_percent == 0.0:
 
-                    # Reset if we have 3 zero acceptances
-                    if self._n_zero_acceptance == self.reset_limit:
-                        self.reset()
+                        self._n_zero_acceptance += 1
+
+                        # Reset if we have 3 zero acceptances
+                        if self._n_zero_acceptance == self.reset_limit:
+                            self.reset()
+                            self._n_zero_acceptance = 0
+                    else:
                         self._n_zero_acceptance = 0
                 else:
-                    self._n_zero_acceptance = 0
+                    if self.acceptance_percent == 0.0:
+                        self.low_variance = -inf
+                        self.high_variance = inf
 
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.kwargs['multiplier']
@@ -814,7 +819,7 @@ class Inference1D(myObject):
             plt.show(block=False)
             plt.interactive(True)
 
-        self.fig, self.ax = fig, ax
+        self.posterior_fig, self.posterior_ax = fig, ax
 
         return fig, ax
 
@@ -825,63 +830,71 @@ class Inference1D(myObject):
             return
 
         if axes is None:
-            fig = kwargs.pop('fig', self.fig)
+            fig = kwargs.pop('fig', self.posterior_fig)
             axes = fig
             if fig is None:
                 fig, axes = self._init_posterior_plots()
 
         if not isinstance(axes, list):
-            axes = self._init_posterior_plots(axes)
+            fig, axes = self._init_posterior_plots(axes)
 
         plot = True
         if increment is not None:
             if (mod(self.iteration, increment) != 0):
                 plot = False
 
-        if plot:
-            self._plotAcceptanceVsIteration()
+        if not plot:
+            return
 
-            # Update the data misfit vs iteration
-            self._plotMisfitVsIteration()
+        self._plotAcceptanceVsIteration()
 
-            overlay = self.best_model if self.burned_in else self.model
+        # Update the data misfit vs iteration
+        self._plotMisfitVsIteration()
 
-            self.model.plot_posteriors(
-                axes=self.ax[2],
-                # ncells_kwargs={
-                #     'normalize': True},
-                edges_kwargs={
-                    'transpose': True,
-                    'trim': False},
-                values_kwargs={
-                    'colorbar': False,
-                    'flipY': True,
-                    'xscale': 'log',
-                    'credible_interval_kwargs': {
-                    }
-                },
-                overlay=overlay)
+        overlay = self.best_model if self.burned_in else self.model
 
-            overlay = self.best_datapoint if self.burned_in else self.datapoint
+        self.model.plot_posteriors(
+            axes=self.posterior_ax[2],
+            # ncells_kwargs={
+            #     'normalize': True},
+            edges_kwargs={
+                'transpose': True,
+                'trim': False},
+            values_kwargs={
+                'colorbar': False,
+                'flipY': True,
+                'xscale': 'log',
+                'credible_interval_kwargs': {
+                }
+            },
+            overlay=overlay)
 
-            self.datapoint.plot_posteriors(
-                axes=self.ax[3],
-                # height_kwargs={
-                #     'normalize': True},
-                data_kwargs={},
-                # rel_error_kwargs={
-                #     'normalize': True},
-                # add_error_kwargs={
-                #     'normalize': True},
-                overlay=overlay)
+        overlay = self.best_datapoint if self.burned_in else self.datapoint
 
-            self.fig.suptitle(title)
+        self.datapoint.plot_posteriors(
+            axes=self.posterior_ax[3],
+            # height_kwargs={
+            #     'normalize': True},
+            data_kwargs={},
+            # rel_error_kwargs={
+            #     'normalize': True},
+            # add_error_kwargs={
+            #     'normalize': True},
+            overlay=overlay
+        )
 
-            if self.fig is not None:
-                self.fig.canvas.draw()
-                self.fig.canvas.flush_events()
+        if '_observed_datapoint' in self.__dict__:
+            self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax[3], linecolor='k')
+        if self.burned_in:
+            self.datapoint.overlay_on_posteriors(self.best_datapoint, axes=self.posterior_ax[3])
 
-            cP.pause(1e-9)
+        self.posterior_fig.suptitle(title)
+
+        if self.posterior_fig is not None:
+            self.posterior_fig.canvas.draw()
+            self.posterior_fig.canvas.flush_events()
+
+        cP.pause(1e-9)
 
     def _plotAcceptanceVsIteration(self, **kwargs):
         """ Plots the acceptance percentage against iteration. """
@@ -892,7 +905,7 @@ class Inference1D(myObject):
         # i_positive = argwhere(acceptance_rate > 0.0)
         # i_zero = argwhere(acceptance_rate == 0.0)
 
-        kwargs['ax'] = kwargs.get('ax', self.ax[0][0])
+        kwargs['ax'] = kwargs.get('ax', self.posterior_ax[0][0])
         kwargs['marker'] = kwargs.get('marker', 'o')
         kwargs['alpha'] = kwargs.get('alpha', 0.7)
         kwargs['linestyle'] = kwargs.get('linestyle', 'none')
@@ -902,29 +915,15 @@ class Inference1D(myObject):
 
         self.acceptance_rate.plot(x=self.acceptance_x, i=i, color='k', **kwargs)
 
-
-        # (self.acceptance_v/self.iteration).plot(x=self.iRange, i=s_[:self.iteration], color='k', **kwargs)
-        # self.acceptance_v[i_zero].plot(x=self.iRange[i_zero], color='r', **kwargs)
-
-        # self.ax[0][0].ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-
-        # kwargs['ax'] = kwargs.get('ax', self.ax[0][1])
-
-        # self.ax[0][1].spines["right"].set_visible(True)
-
-        # self.ax[0][1].tick_params(axis='y')
-
     def _plotMisfitVsIteration(self, **kwargs):
         """ Plot the data misfit against iteration. """
 
         m = kwargs.pop('marker', '.')
-        # ms = kwargs.pop('markersize', 1)
         a = kwargs.pop('alpha', 0.7)
         ls = kwargs.pop('linestyle', 'none')
         c = kwargs.pop('color', 'k')
-        # lw = kwargs.pop('linewidth', 1)
 
-        ax = self.ax[1][0]
+        ax = self.posterior_ax[1][0]
         ax.cla()
         tmp_ax = self.data_misfit_v.plot(self.iRange, i=s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, ax=ax, **kwargs)
         ax.set_ylabel('Data Misfit')
@@ -944,7 +943,7 @@ class Inference1D(myObject):
 
         self.data_misfit_v.posterior.update(self.data_misfit_v[maximum(0, self.iteration-self.update_plot_every):self.iteration], trim=True)
 
-        ax = self.ax[1][1]
+        ax = self.posterior_ax[1][1]
         ax.cla()
 
         misfit_ax, _, _ = self.data_misfit_v.posterior.plot(transpose=True, ax=ax, normalize=True, **kwargs)
@@ -977,9 +976,9 @@ class Inference1D(myObject):
 
     def toPNG(self, directory, fiducial, dpi=300):
        """ save a png of the results """
-       self.fig.set_size_inches(19, 11)
+       self.posterior_fig.set_size_inches(19, 11)
        figName = join(directory, '{}.png'.format(fiducial))
-       self.fig.savefig(figName, dpi=dpi)
+       self.posterior_fig.savefig(figName, dpi=dpi)
 
     def read(self, fileName, system_file_path, fiducial=None, index=None):
         """ Reads a data point's results from HDF5 file """
@@ -996,13 +995,14 @@ class Inference1D(myObject):
                 for ax in this:
                     clear(ax)
             else:
+                this.set_xscale('linear')
                 this.cla()
+
         self._n_resets += 1
         self.initialize(self.datapoint)
         if self.interactive_plot:
-            for ax in self.ax:
+            for ax in self.posterior_ax:
                 clear(ax)
-            # self._init_posterior_plots(fig=self.fig)
 
         self.clk.restart()
 
@@ -1031,7 +1031,6 @@ class Inference1D(myObject):
 
         parent.create_dataset('n_markov_chains', data=self.n_markov_chains)
         parent.create_dataset('nsystems', data=self.datapoint.nSystems)
-        # self.acceptance_v.toHdf(parent,'ratex')
 
         # Initialize the attributes that will be written later
         s = add_axis
@@ -1046,7 +1045,7 @@ class Inference1D(myObject):
         parent.create_dataset('invtime',  shape=(s), dtype=float, fillvalue=nan)
         parent.create_dataset('savetime',  shape=(s), dtype=float, fillvalue=nan)
 
-        self.acceptance_v.createHdf(parent,'acceptance_rate', add_axis=add_axis, fillvalue=nan)
+        self.acceptance_v.createHdf(parent, 'acceptance_rate', add_axis=add_axis, fillvalue=nan)
         self.data_misfit_v.createHdf(parent, 'phids', add_axis=add_axis, fillvalue=nan)
         self.halfspace.createHdf(parent, 'halfspace', add_axis=add_axis, fillvalue=nan)
 
@@ -1076,29 +1075,8 @@ class Inference1D(myObject):
         # Add the burned in logical
         parent['burned_in'][index] = self.burned_in
 
-        # Add the depth of investigation
-        # hdfFile['doi'][i] = self.doi()
-
         # Add the multiplierx
         parent['multiplier'][index] = self.multiplier
-
-        # Add the inversion time
-        # hdfFile['invtime'][i] = self.invTime
-
-        # Add the savetime
-#        hdfFile['savetime'][i] = self.saveTime
-
-        # Interpolate the mean and best model to the discretized hitmap
-        # hm = self.model.par.posterior
-        # self.meanInterp = StatArray.StatArray(hm.mean())
-        # self.bestInterp = StatArray.StatArray(self.best_model.piecewise_constant_interpolate(self.best_model.par, hm, axis=0))
-        # self.opacityInterp[:] = self.Hitmap.credibleRange(percent=95.0, log='e')
-
-        # # Add the interpolated mean model
-        # self.meanInterp.writeHdf(hdfFile, 'meaninterp',  index=i)
-        # # Add the interpolated best
-        # self.bestInterp.writeHdf(hdfFile, 'bestinterp',  index=i)
-        # # Add the interpolated opacity
 
         # Add the acceptance rate
         self.acceptance_v.writeHdf(parent, 'acceptance_rate', index=index)
@@ -1115,6 +1093,7 @@ class Inference1D(myObject):
 
         # Write the model posteriors
         self.model.writeHdf(parent,'model', index=index)
+
         # Write the highest posterior data
         self.best_model.writeHdf(parent,'model', withPosterior=False, index=index)
 

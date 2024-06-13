@@ -39,9 +39,9 @@ dataFolder = "..//..//supplementary//data//"
 # For more information about the time domain data set, see :ref:`Time domain dataset`
 
 # The data file name
-dataFile=dataFolder + 'skytem_512_saline_clay.csv'
+dataFile=dataFolder + 'skytem_saline_clay.csv'
 # The EM system file name
-systemFile=[dataFolder + 'SkytemHM_512.stm', dataFolder + 'SkytemLM_512.stm']
+systemFile=[dataFolder + 'SkytemHM.stm', dataFolder + 'SkytemLM.stm']
 
 #%%
 # Initialize and read an EM data set
@@ -108,7 +108,7 @@ print(tdp.data_misfit())
 #%%
 # Plot the misfits for a range of half space conductivities
 plt.figure()
-_ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+_ = tdp.plot_halfspace_responses(-6.0, 4.0, 200)
 plt.title("Halfspace responses")
 
 #%%

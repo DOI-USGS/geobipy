@@ -23,7 +23,7 @@ class mixNormal(Mixture):
 
     def __deepcopy__(self, memo={}):
         out = type(self)()
-        out._params = deepcopy(self._params)
+        out._params = deepcopy(self._params, memo=memo)
 
     @property
     def amplitudes(self):

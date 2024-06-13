@@ -355,8 +355,10 @@ class Histogram(Model):
 
     def opacity_level(self, percent=95.0, log=None, axis=0):
         """ Get the index along axis 1 from the bottom up that corresponds to the percent opacity """
+
+        op = self.transparency(percent = percent, log=log, axis=axis)
+
         p = 0.01 * percent
-        op = self.transparency(log=log, axis=axis)
 
         nz = op.nCells - 1
         iC = nz
@@ -418,27 +420,36 @@ class Histogram(Model):
         linecolor = kwargs.pop('linecolor', cP.wellSeparated[3])
 
         if self.ndim == 1:
-            bar = self.mesh.bar(values=values, **kwargs)
-
-            if overlay is not None:
-                kwargs['linecolor'] = linecolor
-                self.mesh.plot_line(overlay, **kwargs)
+            A = self.mesh.bar(values=values, **kwargs)
+            pm = None
+            cb = None
+            # if overlay is not None:
+            #     kwargs['linecolor'] = linecolor
+            #     self.mesh.plot_line(overlay, **kwargs)
 
             if interval_kwargs is not None:
                 self.plotCredibleIntervals(ax=kwargs['ax'], **interval_kwargs)
-            return bar, None, None
         else:
             kwargs['cmap'] = kwargs.pop('cmap', mpl.cm.Greys)
-            pc, pm, cb = self.mesh.pcolor(values=values, **kwargs)
+            A, pm, cb = self.mesh.pcolor(values=values, **kwargs)
 
-            if overlay is not None:
-                kwargs['color'] = linecolor
-                self.mesh.plot_line(overlay, **kwargs)
+            # if overlay is not None:
+            #     kwargs['color'] = linecolor
+            #     self.mesh.plot_line(overlay, **kwargs)
 
             if interval_kwargs is not None:
                 self.plotCredibleIntervals(ax=kwargs['ax'], **interval_kwargs)
 
-            return pc, pm, cb
+        if overlay is not None:
+            kwargs['color'] = linecolor
+            self.plot_overlay(overlay, **kwargs)
+
+        return A, pm, cb
+
+
+    def plot_overlay(self, value, **kwargs):
+        self.mesh.plot_line(value, **kwargs)
+
 
     def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
 
@@ -495,7 +506,7 @@ class Histogram(Model):
         values, dum = utilities._log(values, log)
         return values
 
-    def transparency(self, percent=95.0, log=None, axis=0):
+    def transparency(self, percent=95.0, log=None, axis=0, **kwargs):
         """Return a transparency value between 0 and 1 based on the difference between credible invervals of the hitmap.
 
         Higher ranges in credibility are mapped to more transparency.
@@ -517,7 +528,7 @@ class Histogram(Model):
 
         """
 
-        out = StatArray(self.credible_range(percent=percent, log=log, axis=axis), 'Transparency')
+        out = StatArray(self.credible_range(percent=percent, log=log, axis=axis, **kwargs), 'Transparency')
         mn = nanmin(out)
         mx = nanmax(out)
         t = mx - mn
@@ -525,6 +536,8 @@ class Histogram(Model):
             out = (out - mn) / t
         else:
             out -= mn
+
+        out[isnan(out)] = 1.0
 
         return Model(self.mesh.remove_axis(axis), values=out)
 

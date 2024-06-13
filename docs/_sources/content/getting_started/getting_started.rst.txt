@@ -6,4 +6,3 @@ Getting Started
    :maxdepth: 1
 
    installation
-   running_geobipy

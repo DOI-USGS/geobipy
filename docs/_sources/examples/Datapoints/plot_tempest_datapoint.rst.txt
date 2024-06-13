@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -168,8 +168,8 @@ Forward model the data
  .. code-block:: none
 
     primary [34.27253219 17.55503397]
-    sx [4.50040745 2.57068627 2.01534336 ... 0.33251557 0.29674627 0.15444462]
-    sz [6.46667394 4.43233932 3.84850348 ... 1.04330666 0.76773288 0.54604945]
+    sx [4.46362582 2.52720951 2.10544857 ... 0.34346631 0.27359586 0.19875285]
+    sz [6.47100177 4.53101158 3.87594468 ... 1.05345525 0.79969548 0.56994112]
     J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
        1.13341751e-11  7.27489718e-13]
      [ 2.09383016e-02  3.20412212e-02  4.74815387e-02 ... -1.02489023e-09
@@ -184,8 +184,8 @@ Forward model the data
      [ 1.60007270e-05  3.08385747e-05  5.05626410e-05 ... -1.28316523e-09
        1.11041966e-10 -2.41585978e-12]]
     new primary [34.27253219 17.55503397]
-    sx [4.50040745 2.57068627 2.01534336 ... 0.33251557 0.29674627 0.15444462]
-    sz [6.46667394 4.43233932 3.84850348 ... 1.04330666 0.76773288 0.54604945]
+    sx [4.46362582 2.52720951 2.10544857 ... 0.34346631 0.27359586 0.19875285]
+    sz [6.47100177 4.53101158 3.87594468 ... 1.05345525 0.79969548 0.56994112]
     new J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01 ... -1.01809840e-09
        1.13341751e-11  7.27489718e-13]
      [ 2.09383016e-02  3.20412212e-02  4.74815387e-02 ... -1.02489023e-09
@@ -253,8 +253,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -35698.4834358605
-    71558.40557872524
+    -36389.6500813217
+    72940.71365767403
 
 
 
@@ -269,7 +269,7 @@ Plot the misfits for a range of half space conductivities
 
     plt.figure()
     plt.subplot(1, 2, 1)
-    _ = tdp.plotHalfSpaceResponses(-6.0, 4.0, 200)
+    _ = tdp.plot_halfspace_responses(-6.0, 4.0, 200)
     plt.title("Halfspace responses")
 
 
@@ -345,6 +345,10 @@ We can perform a quick search for the best fitting half space
  .. code-block:: none
 
     Best half space conductivity is [0.01830738] $S/m$
+    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_tempest_datapoint.py:156: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      receiver_x_prior = Distribution('Uniform', min=np.float64(tdp.receiver.x) - 1.0, max=np.float64(tdp.receiver.x) + 1.0, prng=prng)
+    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_tempest_datapoint.py:157: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      receiver_z_prior = Distribution('Uniform', min=np.float64(tdp.receiver.z) - 1.0, max=np.float64(tdp.receiver.z) + 1.0, prng=prng)
 
 
 
@@ -414,7 +418,7 @@ Note we are not using the priors to accept or reject perturbations.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.060 seconds)
+   **Total running time of the script:** (0 minutes 1.134 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py:

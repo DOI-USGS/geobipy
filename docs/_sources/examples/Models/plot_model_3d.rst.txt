@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Models_plot_model_3d.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -120,7 +120,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x7fbf544e80a0>, <matplotlib.colorbar.Colorbar object at 0x7fbf544eb100>)
+    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x164fe9430>, <matplotlib.colorbar.Colorbar object at 0x164bc0ec0>)
 
 
 
@@ -203,7 +203,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x7fbf531d48e0>, <matplotlib.colorbar.Colorbar object at 0x7fbf531d5f30>)
+    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x165332ae0>, <matplotlib.colorbar.Colorbar object at 0x16522cf80>)
 
 
 
@@ -266,7 +266,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)'>, <matplotlib.collections.QuadMesh object at 0x7fbf62995a50>, <matplotlib.colorbar.Colorbar object at 0x7fbf62995930>)
+    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x171e6ec90>, <matplotlib.colorbar.Colorbar object at 0x164bff7d0>)
 
 
 
@@ -331,7 +331,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x7fbf62977460>, <matplotlib.colorbar.Colorbar object at 0x7fbf629755d0>)
+    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x17203b1d0>, <matplotlib.colorbar.Colorbar object at 0x17209e450>)
 
 
 
@@ -381,7 +381,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.908 seconds)
+   **Total running time of the script:** (0 minutes 1.140 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_3d.py:

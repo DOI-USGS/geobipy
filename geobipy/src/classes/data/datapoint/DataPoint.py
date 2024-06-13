@@ -124,7 +124,7 @@ class DataPoint(Point):
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._additive_error = StatArray.StatArray(values, '$\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray.StatArray(values, '$\\epsilon_{Additive}$', self.units)
 
     @property
     def addressof(self):
@@ -137,9 +137,17 @@ class DataPoint(Point):
         msg += "fiducial:\n{}".format("|   "+(self.fiducial.addressof.replace("\n", "\n|   "))[:-4])
         msg += "relative error:\n{}".format("|   "+(self.relative_error.addressof.replace("\n", "\n|   "))[:-4])
         msg += "additive error:\n{}".format("|   "+(self.additive_error.addressof.replace("\n", "\n|   "))[:-4])
-        msg += "sensitivitiy matrix:\n{}".format("|   "+(self.sensitivity_matrix.addressof.replace("\n", "\n|   "))[:-4])
+        # msg += "sensitivitiy matrix:\n{}".format("|   "+(self.sensitivity_matrix.addressof.replace("\n", "\n|   "))[:-4])
 
         return msg
+
+    @property
+    def address(self):
+        out = super().address
+        for x in [self.data, self.predictedData, self.std, self.line_number, self.fiducial, self.relative_error, self.additive_error]:
+            out = hstack([out, x.address.flatten()])
+
+        return out
 
     @property
     def channel_names(self):
@@ -193,7 +201,7 @@ class DataPoint(Point):
         """Get the difference between the predicted and observed data,
 
         .. math::
-            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
+            \\delta \\mathbf{d} = \\mathbf{d}^{pre} - \\mathbf{d}^{obs}.
 
         Returns
         -------
@@ -204,19 +212,9 @@ class DataPoint(Point):
         """
         return StatArray.StatArray(self.predictedData - self.data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
 
-    # @property
-    # def elevation(self):
-    #     return self._elevation
-
-    # @elevation.setter
-    # def elevation(self, value):
-    #     if value is None:
-    #         value = 1
-    #     self._elevation = StatArray.StatArray(value, "Elevation", "m")
-
     @property
     def n_active_channels(self):
-        return self.active.size
+        return self.active.sum()
 
     @property
     def nChannels(self):
@@ -260,7 +258,7 @@ class DataPoint(Point):
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
-        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray.StatArray(values, '$\\epsilon_{Relative}x10^{2}$', '%')
 
     @property
     def sensitivity_matrix(self):
@@ -324,7 +322,7 @@ class DataPoint(Point):
         out._fiducial = deepcopy(self.fiducial, memo)
         out._channel_names = deepcopy(self.channel_names, memo)
 
-        out._sensitivity_matrix = deepcopy(self._sensitivity_matrix)
+        out._sensitivity_matrix = deepcopy(self._sensitivity_matrix, memo)
 
         return out
 
@@ -437,9 +435,9 @@ class DataPoint(Point):
         assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         overlay = kwargs.pop('overlay', None)
-        if not overlay is None:
-            rel_error_kwargs['overlay'] = overlay.relative_error
-            add_error_kwargs['overlay'] = overlay.additive_error
+        # if not overlay is None:
+        #     rel_error_kwargs['overlay'] = overlay.relative_error
+        #     add_error_kwargs['overlay'] = overlay.additive_error
 
         super().plot_posteriors(axes=axes[0], **kwargs)
 
@@ -456,6 +454,15 @@ class DataPoint(Point):
 
         self.relative_error.plot_posteriors(ax=axes[2], **rel_error_kwargs)
         self.additive_error.plot_posteriors(ax=axes[3], **add_error_kwargs)
+
+    def overlay_on_posteriors(self, overlay, axes, **kwargs):
+
+        super().overlay_on_posteriors(self, overlay, axes[0], **kwargs)
+
+        self.relative_error.overlay_on_posteriors(overlay=overlay.relative_error, ax=axes[2], **kwargs)
+        self.additive_error.overlay_on_posteriors(overlay=overlay.additive_error, ax=axes[3], **kwargs)
+
+
 
     @property
     def system_indices(self):
@@ -495,9 +502,9 @@ class DataPoint(Point):
         """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
         .. math::
-            \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
+            \\| \\mathbf{W}_{d} (\\mathbf{d}^{obs}-\\mathbf{d}^{pre})\\|_{2}^{2},
 
-        where :math:`\mathbf{W}_{d}` are the reciprocal data errors.
+        where :math:`\\mathbf{W}_{d}` are the reciprocal data errors.
 
         Parameters
         ----------
@@ -812,8 +819,8 @@ class DataPoint(Point):
         #         self.errorPosterior.append(Histogram2D.fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
         #         i += 1
 
-        out.relative_error = StatArray.StatArray.fromHdf(grp['relative_error'], index=index)
-        out.additive_error = StatArray.StatArray.fromHdf(grp['additive_error'], index=index)
+        out._relative_error = StatArray.StatArray.fromHdf(grp['relative_error'], index=index)
+        out._additive_error = StatArray.StatArray.fromHdf(grp['additive_error'], index=index)
 
         return out
 

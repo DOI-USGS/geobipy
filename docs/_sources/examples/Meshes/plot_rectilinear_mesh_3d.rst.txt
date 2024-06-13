@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -317,7 +317,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.318 seconds)
+   **Total running time of the script:** (0 minutes 11.321 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py:

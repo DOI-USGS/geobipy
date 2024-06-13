@@ -36,6 +36,9 @@ def make_colourmap(seq, cname):
         matplotlib.colors.LinearSegmentedColormap.
 
     """
+    if cname in colormaps:
+        return
+
     nl = len(seq)
     dl = 1.0 / (len(seq))
     l = []
@@ -53,7 +56,7 @@ def make_colourmap(seq, cname):
             cdict['green'].append([item, g1, g2])
             cdict['blue'].append([item, b1, b2])
     myMap = mcolors.LinearSegmentedColormap(cname, cdict, 256)
-    plt.register_cmap(name=cname, cmap=myMap)
+    colormaps.register(name=cname, cmap=myMap)
     return myMap
 
 def white_to_colour(rgba, N=256):
@@ -117,7 +120,7 @@ def filter_color_kwargs(kwargs):
     defaults = {'alpha' : 1.0,
                 'alpha_color' : [1, 1, 1],
                 'cax' : None,
-                'clabel' : True,
+                'clabel' : None,
                 'clim_scaling' : None,
                 'cmap' : 'cividis',
                 'cmapIntervals' : None,
@@ -1115,10 +1118,7 @@ def plot(x, y, **kwargs):
 
     pretty(ax)
 
-    # try:
-    ax.plot(x, y, **kwargs)
-    # except:
-    #     plt.plot(x, tmp.T, **kwargs)
+    ax.plot(x, y, alpha=color_kwargs['alpha'], **kwargs)
 
     if geobipy_kwargs['xlim'] is not None:
         ax.set_xlim(geobipy_kwargs['xlim'])
@@ -1258,7 +1258,8 @@ def scatter2D(x, c, y=None, i=None, *args, **kwargs):
             else:
                 clabel(cbar, utilities.getNameUnits(c), wrap=color_kwargs['wrap_clabel'])
         else:
-            clabel(cbar, color_kwargs['clabel'], wrap=color_kwargs['wrap_clabel'])
+            cl = color_kwargs['clabel'] if isinstance(color_kwargs['clabel'], str) else utilities.getNameUnits(c)
+            clabel(cbar, cl, wrap=color_kwargs['wrap_clabel'])
 
     if ('s' in kwargs and not geobipy_kwargs['legend_size'] is None):
         assert (not isinstance(geobipy_kwargs['legend_size'], bool)), TypeError('sizeLegend must have type int, or array_like')
@@ -1455,11 +1456,11 @@ def pause(interval):
         Pause for *interval* seconds.
 
     """
-    from matplotlib.rcsetup import interactive_bk
     from matplotlib._pylab_helpers import Gcf
+    from matplotlib import backends
 
     backend = plt.rcParams['backend']
-    if backend in interactive_bk:
+    if backend in backends.backend_registry.list_builtin(backends.BackendFilter.INTERACTIVE):
         figManager = Gcf.get_active()
         if figManager is not None:
             canvas = figManager.canvas

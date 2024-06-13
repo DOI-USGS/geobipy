@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Distributions_plot_distributions.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -40,6 +40,15 @@ Handles the initialization of different statistical distribution
 
 
 
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh1D.py:693: SyntaxWarning: invalid escape sequence '\s'
+      """Compute the gradient
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh1D.py:1448: SyntaxWarning: invalid escape sequence '\l'
+      """Setup the priors of the mesh.
 
 
 
@@ -82,7 +91,7 @@ Univariate Normal Distribution
  .. code-block:: none
 
 
-    [<matplotlib.lines.Line2D object at 0x7fbf52a35c00>]
+    [<matplotlib.lines.Line2D object at 0x167083620>]
 
 
 
@@ -157,7 +166,7 @@ Uniform Distribution
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.664 seconds)
+   **Total running time of the script:** (0 minutes 35.141 seconds)
 
 
 .. _sphx_glr_download_examples_Distributions_plot_distributions.py:

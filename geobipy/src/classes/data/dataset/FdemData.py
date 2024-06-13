@@ -259,8 +259,10 @@ class FdemData(Data):
 
         super().append(other)
 
-        self.powerline = hstack([self.powerline, other.powerline])
-        self.magnetic = hstack([self.magnetic, other.magnetic])
+        self.powerline = self.powerline.append(other.powerline)
+        self.magnetic = self.magnetic.append(other.magnetic)
+
+        return self
 
 
     # def getChannel(self, channel):
@@ -514,7 +516,7 @@ class FdemData(Data):
         return ax
 
     @classmethod
-    def read_csv(cls, dataFilename, systemFilename):
+    def read_csv(cls, dataFilename, system):
         """Read in both the Fdem data and FDEM system files
 
         The data file is structured using columns with the first line containing header information.
@@ -539,7 +541,7 @@ class FdemData(Data):
         # Read in the EM System file
 
         # Initialize the EMData Class
-        self = cls(system=systemFilename)
+        self = cls(system=system)
 
         # assert nDatafiles == self.nSystems, Exception("Number of data files must match number of system files.")
         nPoints, iC, iData, iStd, powerline, magnetic = FdemData._csv_channels(dataFilename)
@@ -552,7 +554,7 @@ class FdemData(Data):
         try:
             df = read_csv(dataFilename, index_col=False, usecols=channels, skipinitialspace = True)
         except:
-            df = read_csv(dataFilename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+            df = read_csv(dataFilename, index_col=False, usecols=channels, sep='\\s+', skipinitialspace = True)
         df = df.replace('NaN',nan)
 
         # Assign columns to variables
@@ -1113,8 +1115,6 @@ class FdemData(Data):
 
         dp = ds.datapoint(0)
 
-        model.mesh.y_edges = model.mesh.y_edges / 4.1
-
         for k in range(model.x.nCells):
             mod = model[k]
             dp.forward(mod)
@@ -1122,6 +1122,6 @@ class FdemData(Data):
 
         ds_noisy = deepcopy(ds)
 
-        ds_noisy.data += prng.normal(scale=ds.std, size=ds.data.shape)
+        ds_noisy._data += prng.normal(scale=ds.std, size=ds.data.shape)
 
         return ds, ds_noisy

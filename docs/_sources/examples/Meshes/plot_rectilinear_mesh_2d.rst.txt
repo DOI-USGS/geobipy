@@ -11,7 +11,7 @@
         :class: sphx-glr-download-link-note
 
         :ref:`Go to the end <sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py>`
-        to download the full example code
+        to download the full example code.
 
 .. rst-class:: sphx-glr-example-title
 
@@ -114,7 +114,7 @@ We can plot the grid lines of the mesh.
  .. code-block:: none
 
 
-    (<Axes: xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x7fbfa25ab9d0>, <matplotlib.colorbar.Colorbar object at 0x7fbfa25a9480>)
+    (<Axes: xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x164aa2b10>, <matplotlib.colorbar.Colorbar object at 0x164cef3b0>)
 
 
 
@@ -271,7 +271,7 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[9., 9., 9., ..., 9., 9., 9.]]), [6.8, 12.4])
+    (array([[9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9.]]), [6.8, 12.4])
 
 
 
@@ -294,9 +294,12 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[ 9.,  9.,  9., ...,  9.,  9.,  9.],
-           [nan, nan, nan, ..., nan, nan, nan],
-           [nan, nan, nan, ..., nan, nan, nan]]), [6.8, 12.4, 20.0, 40.0])
+    (array([[ 9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,
+             9.,  9.],
+           [nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan,
+            nan, nan],
+           [nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan,
+            nan, nan]]), [6.8, 12.4, 20.0, 40.0])
 
 
 
@@ -322,7 +325,10 @@ We can specify either axis
     (array([[ 1.],
            [ 2.],
            [ 3.],
-           ...,
+           [ 4.],
+           [ 5.],
+           [ 6.],
+           [ 7.],
            [ 8.],
            [ 9.],
            [10.]]), [2.8, 4.2])
@@ -347,7 +353,10 @@ We can specify either axis
     (array([[ 1., nan,  1.],
            [ 2., nan,  2.],
            [ 3., nan,  3.],
-           ...,
+           [ 4., nan,  4.],
+           [ 5., nan,  5.],
+           [ 6., nan,  6.],
+           [ 7., nan,  7.],
            [ 8., nan,  8.],
            [ 9., nan,  9.],
            [10., nan, 10.]]), [2.8, 4.2, 5.1, 8.4])
@@ -417,7 +426,7 @@ Resample a grid
  .. code-block:: none
 
 
-    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x7fbf62976530>, <matplotlib.colorbar.Colorbar object at 0x7fbf629765c0>)
+    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x165dc6f60>, <matplotlib.colorbar.Colorbar object at 0x164e378f0>)
 
 
 
@@ -481,7 +490,7 @@ Axes in log space
  .. code-block:: none
 
 
-    (<Axes: xlabel='x', ylabel='y'>, <matplotlib.collections.QuadMesh object at 0x7fbf629922f0>, <matplotlib.colorbar.Colorbar object at 0x7fbf629916c0>)
+    (<Axes: xlabel='x', ylabel='y'>, <matplotlib.collections.QuadMesh object at 0x16613fd40>, <matplotlib.colorbar.Colorbar object at 0x165ff43e0>)
 
 
 
@@ -593,7 +602,7 @@ RelativeTo
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.015 seconds)
+   **Total running time of the script:** (0 minutes 3.314 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:

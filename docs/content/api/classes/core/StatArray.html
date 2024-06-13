@@ -5,9 +5,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StatArray &mdash; GeoBIPy 1.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b76e3c8a" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
@@ -21,7 +21,7 @@
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
-        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -116,7 +116,7 @@
 One can also attach prior and proposal distributions so that it may be used in an MCMC algorithm easily.
 Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an
 in-place numpy function will return a StatArray.  See the example section for more information.</p>
-<p>StatArray(shape, name=None, units=None, **kwargs)</p>
+<p>StatArray(shape, name=None, units=None, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -274,6 +274,11 @@ unless a copy is required, in which case it will be C-contiguous. Only used when
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.address">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.address" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.addressof">
@@ -437,7 +442,7 @@ and will not pass sub-classes through by default.</p>
 <span class="sig-name descname"><span class="pre">createHdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h5obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">withPosterior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fillvalue</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upcast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.createHdf" title="Link to this definition"></a></dt>
 <dd><p>Create the Metadata for a StatArray in a HDF file</p>
 <p>Creates a new group in a HDF file under h5obj.
-A nested heirarchy will be created e.g., myNamedata, myNameprior, and myNameproposal.
+A nested heirarchy will be created e.g., myName/data, myName/prior, and myName/proposal.
 This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
 and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
 In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
@@ -580,12 +585,12 @@ If min and max are given, the edges are fixed and not calculated.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nSamples</strong> – </p></li>
-<li><p><strong>log</strong> – </p></li>
-<li><p><strong>mean_bounds</strong> – </p></li>
-<li><p><strong>variance_bounds</strong> – </p></li>
+<li><p><strong>nSamples</strong></p></li>
+<li><p><strong>log</strong></p></li>
+<li><p><strong>mean_bounds</strong></p></li>
+<li><p><strong>variance_bounds</strong></p></li>
 <li><p><strong>k</strong> (<em>ints</em>) – Two ints with starting and ending # of clusters</p></li>
-<li><p><strong>tolerance</strong> – </p></li>
+<li><p><strong>tolerance</strong></p></li>
 </ul>
 </dd>
 </dl>
@@ -694,7 +699,7 @@ and then reading the hdf contents via the object’s methods.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.hist">
-<span class="sig-name descname"><span class="pre">hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hist" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.hist" title="Link to this definition"></a></dt>
 <dd><p>Plot a histogram of the StatArray</p>
 <p>Plots a histogram, estimates the mean and standard deviation and overlays the PDF of a normal distribution with those values, if density=1.</p>
 <div class="admonition seealso">
@@ -861,6 +866,11 @@ and then reading the hdf contents via the object’s methods.</p>
 <span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.normalize" title="Link to this definition"></a></dt>
 <dd><p>Normalize to range 0 - 1.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.overlay_on_posteriors">
+<span class="sig-name descname"><span class="pre">overlay_on_posteriors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">overlay</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.core.StatArray.StatArray.overlay_on_posteriors" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.core.StatArray.StatArray.pad">

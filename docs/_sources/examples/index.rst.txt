@@ -9,6 +9,9 @@ Examples
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -22,6 +25,7 @@ Distributions
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -39,6 +43,8 @@ Distributions
       <div class="sphx-glr-thumbnail-title">Distribution Class</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
@@ -58,6 +64,7 @@ Statistics
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -127,6 +134,8 @@ Statistics
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -148,6 +157,7 @@ Meshes
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -200,6 +210,8 @@ Meshes
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -220,6 +232,7 @@ Models
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -272,6 +285,8 @@ Models
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -292,10 +307,90 @@ Data
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="3D Point Cloud class">
+
+.. only:: html
+
+  .. image:: /examples/Data/images/thumb/sphx_glr_plot_pointcloud3d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Data_plot_pointcloud3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">3D Point Cloud class</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Frequency domain dataset">
+
+.. only:: html
+
+  .. image:: /examples/Data/images/thumb/sphx_glr_plot_frequency_dataset_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Frequency domain dataset</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Skytem dataset">
+
+.. only:: html
+
+  .. image:: /examples/Data/images/thumb/sphx_glr_plot_skytem_dataset_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Data_plot_skytem_dataset.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Skytem dataset</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Tempest dataset">
+
+.. only:: html
+
+  .. image:: /examples/Data/images/thumb/sphx_glr_plot_tempest_dataset_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Data_plot_tempest_dataset.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Tempest dataset</div>
+    </div>
+
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
     </div>
+
+
+.. toctree::
+   :hidden:
+
+   /examples/Data/plot_pointcloud3d
+   /examples/Data/plot_frequency_dataset
+   /examples/Data/plot_skytem_dataset
+   /examples/Data/plot_tempest_dataset
 
 Datapoints
 ==========
@@ -305,6 +400,7 @@ Datapoints
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -357,6 +453,8 @@ Datapoints
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -387,6 +485,7 @@ In both cases, you will need to write an options file (also shown in these examp
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -439,6 +538,8 @@ In both cases, you will need to write an options file (also shown in these examp
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -451,7 +552,7 @@ In both cases, you will need to write an options file (also shown in these examp
    /examples/Inference_1D/plot_inference_1d_skytem
    /examples/Inference_1D/plot_inference_1d_tempest
 
-Inference 2D
+2D Inference
 ============
 
 
@@ -459,6 +560,7 @@ Inference 2D
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -470,6 +572,23 @@ Inference 2D
     :alt:
 
   :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_resolve.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">2D Posterior analysis of Resolve inference</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
+
+.. only:: html
+
+  .. image:: /examples/Inference_2D/images/thumb/sphx_glr_test_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Inference_2D_test.py`
 
 .. raw:: html
 
@@ -511,6 +630,8 @@ Inference 2D
     </div>
 
 
+.. thumbnail-parent-div-close
+
 .. raw:: html
 
     </div>
@@ -520,6 +641,7 @@ Inference 2D
    :hidden:
 
    /examples/Inference_2D/plot_inference_2d_resolve
+   /examples/Inference_2D/test
    /examples/Inference_2D/plot_inference_2d_skytem
    /examples/Inference_2D/plot_inference_2d_tempest
 
@@ -531,6 +653,7 @@ HDF 5
 
     <div class="sphx-glr-thumbnails">
 
+.. thumbnail-parent-div-open
 
 .. raw:: html
 
@@ -548,6 +671,8 @@ HDF 5
       <div class="sphx-glr-thumbnail-title">Using HDF5 within GeoBIPy</div>
     </div>
 
+
+.. thumbnail-parent-div-close
 
 .. raw:: html
 
