@@ -355,7 +355,7 @@ class RectilinearMesh1D(Mesh):
     def min_width(self, value):
         self._min_width = value
         if value is None:
-            self._min_width = (self.max_edge - self.min_edge) / (2.0 * self.max_cells)
+            self._min_width = 1.0 #(self.max_edge - self.min_edge) / (2.0 * self.max_cells)
             # if self._min_width > self.min_edge:
             #     self._min_edge = self._min_width
 
@@ -710,7 +710,7 @@ class RectilinearMesh1D(Mesh):
 
         """
         if self.nCells.item() > 1:
-            return (diff(nplog(values))) / (nplog(self.widths[:-1]) - nplog(self.min_width))
+            return diff(nplog(values)) / (nplog(self.widths[:-1]))# - nplog(self.min_width))
 
     @property
     def cell_weights(self):
@@ -719,22 +719,28 @@ class RectilinearMesh1D(Mesh):
             return ones((1, 1))
 
         x = self.widths.copy()
-        e2e = 10.0 *  self.edge_to_edge
+        e2e = self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = (x[1]**2.0 / x[2]) if brodie else x[1] - e2e
+                if brodie:
+                    x[0] = (x[1]**2.0 / x[2])
+                else:
+                    x[0] = x[1] - e2e
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = (x[-2]**2.0 / x[-3]) if brodie else x[-2] + e2e
+                if brodie:
+                    x[-1] = (x[-2]**2.0 / x[-3])
+                else:
+                    x[-1] = x[-2] + e2e
 
-        out = x/(self.nCells * mean(x)) if brodie else x/(self.nCells)
+        out = x/(self.nCells * mean(x)) if brodie else x/(x.sum())
         return diag(out)
 
     @property
@@ -745,20 +751,26 @@ class RectilinearMesh1D(Mesh):
 
         x = self.widths.copy()
 
-        e2e = 10.0 * self.edge_to_edge
+        e2e = self.edge_to_edge
 
         # Sort out infinity here
         if self.open_left:
             if self.nCells == 2:
                 x[0] = x[-1]
             else:
-                x[0] = x[1]**2.0 / x[2] if brodie else x[1] - e2e
+                if brodie:
+                    x[0] = x[1]**2.0 / x[2]
+                else:
+                    x[0] = x[1] - e2e
 
         if self.open_right:
             if self.nCells == 2:
                 x[-1] = x[0]
             else:
-                x[-1] = x[-2]**2.0 / x[-3] if brodie else x[-2] + e2e
+                if brodie:
+                    x[-1] = x[-2]**2.0 / x[-3]
+                else:
+                    x[-1] = x[-2] + e2e
 
         centre_to_centre = 0.5*(x[:-1] + x[1:])
 

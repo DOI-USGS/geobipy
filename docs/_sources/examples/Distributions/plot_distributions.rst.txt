@@ -41,6 +41,15 @@ Handles the initialization of different statistical distribution
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh1D.py:693: SyntaxWarning: invalid escape sequence '\s'
+      """Compute the gradient
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh1D.py:1448: SyntaxWarning: invalid escape sequence '\l'
+      """Setup the priors of the mesh.
+
 
 
 
@@ -82,7 +91,7 @@ Univariate Normal Distribution
  .. code-block:: none
 
 
-    [<matplotlib.lines.Line2D object at 0x16849b680>]
+    [<matplotlib.lines.Line2D object at 0x167083620>]
 
 
 
@@ -157,7 +166,7 @@ Uniform Distribution
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.207 seconds)
+   **Total running time of the script:** (0 minutes 35.141 seconds)
 
 
 .. _sphx_glr_download_examples_Distributions_plot_distributions.py:

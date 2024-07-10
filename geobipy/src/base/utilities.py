@@ -2,10 +2,10 @@ from copy import deepcopy
 
 from textwrap import wrap
 
-from numpy import abs, arange, argsort, argwhere, asarray, atleast_1d, complex128, cos, diag, diff, divide, dot, empty
-from numpy import exp, flip, full, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
+from numpy import abs, arange, arctan2, argsort, argwhere, asarray, atleast_1d, ceil, complex128, cos, diag, diff, divide, dot, empty
+from numpy import exp, flip, floor, full, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
 from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
-from numpy import real, s_, shape, sin, size, squeeze, where, zeros
+from numpy import real, s_, shape, sign, sin, size, squeeze, where, zeros
 from numpy import all as npall
 from numpy import log as nplog
 
@@ -20,8 +20,8 @@ from sklearn.mixture import GaussianMixture
 from smm import SMM
 
 from numba import (njit, jit, float64)
-_jit_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': True}
 _njit_settings = {'nogil': False, 'fastmath': True, 'cache': True}
+_nan_njit_settings = {'nogil': False, 'fastmath': False, 'cache': True}
 
 from numba.pycc import CC
 
@@ -107,6 +107,157 @@ def bresenham(x, y):
                     error += dx
 
     return points[:j, :]
+
+@njit(**_njit_settings)
+@cc.export('fast_march', 'f8[:, :](f8[:], f8[:])')
+def fast_march(x, y):
+    n_segments = int32(x.size - 1)
+
+    nTmp = int32(0)
+    for i in range(n_segments):
+        nx = int32(abs(x[i+1] - x[i]))
+        ny = int32(abs(y[i+1] - y[i]))
+        if nx == 0:
+            nx = 1
+        if ny == 0:
+            ny = 1
+        nTmp += (nx * ny)
+
+    points = zeros((2*nTmp, 2), dtype=int32)
+
+    j = 0
+    for i in range(n_segments):
+        x1 = x[i]; y1 = y[i]
+        x2 = x[i+1]; y2 = y[i+1]
+
+        # Grid cells are 1.0 X 1.0.
+        fx1 = floor(x1); fy1 = floor(y1)
+        fx2 = floor(x2); fy2 = floor(y2)
+        cx1 = ceil(x1); cy1 = ceil(y1)
+
+        dx = x2 - x1; dy = y2 - y1
+        stepX = sign(dx); stepY = sign(dy)
+
+        #Ray Slope related nps.
+        #Straight distance to the first vertical grid boundary.
+        xOffset = (cx1 - x1) if x2 > x1 else (x1 - fx1)
+        # Straight distance to the first horizontal grid boundary.
+        yOffset = (cy1 - y1) if y2 > y1 else (y1 - fy1)
+        # Angle of ray/slope.
+        angle = arctan2(-dy, dx)
+
+        # How far to move along the ray to cross the first vertical grid cell boundary.
+        ca = cos(angle); sa = sin(angle)
+        tMaxX = inf; tMaxY = inf;
+        tDeltaX = inf; tDeltaY = inf
+
+        if ca != 0.0:
+            tMaxX = xOffset / ca
+            tDeltaX = 1.0 / ca
+
+        if sa != 0.0:
+            tDeltaY = 1.0 / sa
+            tMaxY = yOffset / sa
+
+        # Travel one grid cell at a time.
+        manhattanDistance = abs(fx2 - fx1) + abs(fy2 - fy1)
+        t = 0
+        while t <= manhattanDistance:
+            points[j, :] = [fx1, fy1]
+            # Only move in either X or Y coordinates, not both.
+            if (abs(tMaxX) < abs(tMaxY)):
+                tMaxX += tDeltaX
+                fx1 += stepX
+            else:
+                tMaxY += tDeltaY
+                fy1 += stepY
+            t += 1
+            j += 1
+
+    return points[:j, :]
+
+# Function that returns true if
+# the given pixel is valid
+@njit(**_njit_settings)
+@cc.export('is_valid', 'boolean(f8[:, :], i4, i4, f8)')
+def is_valid(values, x, y, value):
+    m = values.shape[1]
+    out = (0 <= x < m)
+
+    if out:
+        n = values.shape[0]
+        out = (0 <= y < n)
+
+    if out:
+        out = values[y, x] == value
+
+    return out
+
+@njit(**_nan_njit_settings)
+@cc.export('is_valid_nan', 'boolean(f8[:, :], i4, i4, f8)')
+def is_valid_nan(values, x, y, value):
+    m = values.shape[1]
+    out = (0 <= x < m)
+
+    if out:
+        n = values.shape[0]
+        out = (0 <= y < n)
+
+    if out:
+        out = isnan(values[y, x])
+
+    return out
+
+@njit(**_nan_njit_settings)
+@cc.export('flood_fill', 'f8[:, :](f8[:, :], i8, i8, f8)')
+def flood_fill(values, x, y, new_value):
+
+    queue = empty((values.size, 2), dtype=int32)
+    q_length = 0
+
+    queue[q_length, :] = [x, y]; q_length += 1
+
+    old_value = values[y, x]
+
+    use_nan = isnan(old_value)
+
+    # Color the pixel with the new color
+    values[y, x] = new_value
+
+    k = 0
+    done = k > q_length
+    while not done:
+        # Dequeue the front node
+        ix, iy = queue[k, :]; k += 1
+
+        # Check if the adjacent
+        # pixels are valid
+        ix1 = ix + 1
+        valid = is_valid_nan(values, ix1, iy, old_value) if use_nan else is_valid(values, ix1, iy, old_value)
+        if valid:
+            values[iy, ix1] = new_value
+            queue[q_length, :] = [ix1, iy]; q_length += 1
+
+        ix1 = ix - 1
+        valid = is_valid_nan(values, ix1, iy, old_value) if use_nan else is_valid(values, ix1, iy, old_value)
+        if valid:
+            values[iy, ix1] = new_value
+            queue[q_length, :] = [ix1, iy]; q_length += 1
+
+        iy1 = iy + 1
+        valid = is_valid_nan(values, ix, iy1, old_value) if use_nan else is_valid(values, ix, iy1, old_value)
+        if valid:
+            values[iy1, ix] = new_value
+            queue[q_length, :] = [ix, iy1]; q_length += 1
+
+        iy1 = iy - 1
+        valid = is_valid_nan(values, ix, iy1, old_value) if use_nan else is_valid(values, ix, iy1, old_value)
+        if valid:
+            values[iy1, ix] = new_value
+            queue[q_length, :] = [ix, iy1]; q_length += 1
+
+        done = k >= q_length
+    return values
 
 world_rank = 0
 print_rank = 0
