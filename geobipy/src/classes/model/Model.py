@@ -432,7 +432,7 @@ class Model(myObject):
     def prior_derivative(self, order):
         # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ws)(m - mref)
         operator = self.values.priorDerivative(order=2)
-        operator *= self.mesh.cell_weights
+        # operator *= self.mesh.cell_weights
 
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
@@ -500,13 +500,13 @@ class Model(myObject):
                                                    linewidth=1,
                                                    color='#5046C8',
                                                    ax=axes[-1])
-        self.values.posterior.mode(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
-                                                   flipY=False,
-                                                   reciprocateX=values_kwargs.get('reciprocateX', None),
-                                                   labels=False,
-                                                   linewidth=1,
-                                                   color='#6046C8',
-                                                   ax=axes[-1])
+        # self.values.posterior.mode(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
+        #                                            flipY=False,
+        #                                            reciprocateX=values_kwargs.get('reciprocateX', None),
+        #                                            labels=False,
+        #                                            linewidth=1,
+        #                                            color='#6046C8',
+        #                                            ax=axes[-1])
 
     def pcolor(self, **kwargs):
         """Plot like an image
