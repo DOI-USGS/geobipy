@@ -17,7 +17,7 @@ from numpy.ma import masked_array
 from ..classes.core import StatArray
 import h5py
 from sklearn.mixture import GaussianMixture
-from smm import SMM
+# from smm import SMM
 
 from numba import (njit, jit, float64)
 _njit_settings = {'nogil': False, 'fastmath': True, 'cache': True}
@@ -1225,36 +1225,36 @@ def load_gmm(filename, sort_by_means=True):
 
     return set_gmm(weights, means, covariances)
 
-def save_smm(gmm, filename):
-    with h5py.File(filename, 'w') as f:
-        f.create_dataset('weights', data=gmm.weights_)
-        f.create_dataset('means', data=gmm.means_)
-        f.create_dataset('covariances', data=gmm.covars_)
-        f.create_dataset('degrees', data=gmm.degrees_)
+# def save_smm(gmm, filename):
+#     with h5py.File(filename, 'w') as f:
+#         f.create_dataset('weights', data=gmm.weights_)
+#         f.create_dataset('means', data=gmm.means_)
+#         f.create_dataset('covariances', data=gmm.covars_)
+#         f.create_dataset('degrees', data=gmm.degrees_)
 
-def set_smm(weights, means, covariances, degrees):
-    out = SMM(n_components = len(means))
-    out.means_ = means
-    out.weights_ = weights
-    out.covars_ = covariances
-    out.degrees_ = degrees
-    return out
+# def set_smm(weights, means, covariances, degrees):
+#     out = SMM(n_components = len(means))
+#     out.means_ = means
+#     out.weights_ = weights
+#     out.covars_ = covariances
+#     out.degrees_ = degrees
+#     return out
 
-def load_smm(filename, sort_by_means=True):
-    with h5py.File(filename, 'r') as f:
-        weights = asarray(f['weights'])
-        means = asarray(f['means'])
-        covariances = asarray(f['covariances'])
-        degrees = asarray(f['degrees'])
+# def load_smm(filename, sort_by_means=True):
+#     with h5py.File(filename, 'r') as f:
+#         weights = asarray(f['weights'])
+#         means = asarray(f['means'])
+#         covariances = asarray(f['covariances'])
+#         degrees = asarray(f['degrees'])
 
-    if sort_by_means:
-        order = argsort(means[:, 0])
-        weights = weights[order]
-        means = means[order, :]
-        covariances = covariances[order, :, :]
-        degrees = degrees[order]
+#     if sort_by_means:
+#         order = argsort(means[:, 0])
+#         weights = weights[order]
+#         means = means[order, :]
+#         covariances = covariances[order, :, :]
+#         degrees = degrees[order]
 
-    return set_smm(weights, means, covariances, degrees)
+#     return set_smm(weights, means, covariances, degrees)
 
 def reslice(slic, start=None, stop=None, step=None):
     if npall(x is None for x in [start, stop, step]):

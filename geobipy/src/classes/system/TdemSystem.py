@@ -6,7 +6,7 @@ from ...classes.core import StatArray
 from .EmLoop import EmLoop
 from .CircularLoop import CircularLoop
 from .TdemSystem_GAAEM import TdemSystem_GAAEM
-import empymod
+# import empymod
 
 
 class TdemSystem(TdemSystem_GAAEM):
@@ -34,32 +34,24 @@ class TdemSystem(TdemSystem_GAAEM):
             return super().__init__(system_filename)
 
         # self.offTimes = StatArray.StatArray(offTimes, 'Time', 's')
-        self._off_time = StatArray.StatArray(offTimes, 'Time', 's')
-        self.transmitterLoop = transmitterLoop
-        self.receiverLoop = receiverLoop
-        self.loopOffset = loopOffset
-        self.waveform = waveform
-        self.offTimeFilters = offTimeFilters
-        self.delayTime = 1.8e-7
-        self._components = None
+        # self._off_time = StatArray.StatArray(offTimes, 'Time', 's')
+        # self.transmitterLoop = transmitterLoop
+        # self.receiverLoop = receiverLoop
+        # self.loopOffset = loopOffset
+        # self.waveform = waveform
+        # self.offTimeFilters = offTimeFilters
+        # self.delayTime = 1.8e-7
+        # self._components = None
 
-        self.modellingTimes, self.modellingFrequencies, self.ft, self.ftarg = empymod.utils.check_time(
-            time=self.get_modellingTimes,          # Required times
-            signal=-1,           # Switch-off response
-            ft='dlf',           # Use DLF
-            ftarg={'fftfilt': 'key_81_CosSin_2009'},
-            verb=0)
+        # self.modellingTimes, self.modellingFrequencies, self.ft, self.ftarg = empymod.utils.check_time(
+        #     time=self.get_modellingTimes,          # Required times
+        #     signal=-1,           # Switch-off response
+        #     ft='dlf',           # Use DLF
+        #     ftarg={'fftfilt': 'key_81_CosSin_2009'},
+        #     verb=0)
 
     def __deepcopy__(self, memo={}):
         return None
-
-    @property
-    def components(self):
-        return self._components
-
-    @property
-    def n_components(self):
-        return size(self.components)
 
     @property
     def n_channels(self):

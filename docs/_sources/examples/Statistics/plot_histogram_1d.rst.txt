@@ -445,7 +445,7 @@ We can update the histogram with some new values
     |   |   Min: -2.9699999999999998
     |   |   Max: 2.9699999999999998
     |   |   has_posterior: False
-    |   
+    |
     |   Cell Edges:
     |   |   Name: bins (m) 0x166a0a950
     |   |   Shape: (101,)
@@ -453,17 +453,17 @@ We can update the histogram with some new values
     |   |   Min: -3.0
     |   |   Max: 3.0
     |   |   has_posterior: False
-    |   
+    |
     |   log:
     |   |   None
-    |   relativeTo:
+    |   relative_to:
     |   |   Name:  0x167d420d0
     |   |   Shape: (1,)
     |   |   Values: [0.]
     |   |   Min: 0.0
     |   |   Max: 0.0
     |   |   has_posterior: False
-    |   
+    |
     values:
     |   Name: Frequency 0x167d41ad0
     |   Shape: (100,)

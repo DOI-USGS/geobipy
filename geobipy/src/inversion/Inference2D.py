@@ -180,7 +180,7 @@ class Inference2D(myObject):
 
         if out.mesh.y.name == "Depth":
             out.mesh.y.edges = StatArray.StatArray(-out.mesh.y.edges, name='elevation', units=out.mesh.y.units)
-        out.mesh.y.relativeTo = self.data.elevation
+        out.mesh.y.relative_to = self.data.elevation
 
         return out
 
@@ -206,7 +206,7 @@ class Inference2D(myObject):
 
         # Change positive depth to negative height
         mesh.y.edges = StatArray.StatArray(-mesh.y.edges, name='Height', units=self.y.units)
-        mesh.y.relativeTo = self.elevation
+        mesh.y.relative_to = self.elevation
         mesh.x.centres = self.longest_coordinate
 
         return mesh
@@ -221,7 +221,7 @@ class Inference2D(myObject):
         out = Model.fromHdf(self.hdf_file['/model'], skip_posterior=False)
 
         out.mesh.y_edges = StatArray.StatArray(-out.mesh.y_edges, name='elevation', units=self.mean_parameters().mesh.y.units)
-        out.mesh.relativeTo = self.elevation
+        out.mesh.relative_to = self.elevation
         out.mesh.x.centres = self.longest_coordinate
         return out
 
@@ -403,7 +403,7 @@ class Inference2D(myObject):
     #     opacity = StatArray.StatArray(zeros(self.nPoints))
 
     #     for i in range(self.nPoints):
-    #         h = Histogram1D(edges = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relativeTo[i])
+    #         h = Histogram1D(edges = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relative_to[i])
     #         h._counts[:] = self.additiveErrorPosteriors.counts[i, :]
     #         opacity[i] = h.credibleRange(percent, log)
 
@@ -1077,9 +1077,9 @@ class Inference2D(myObject):
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray.StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
 
-        out.mesh.z.relativeTo = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
+        out.mesh.z.relative_to = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
 
-        # out.mesh.y.relativeTo = self.halfspace
+        # out.mesh.y.relative_to = self.halfspace
 
         return out
 
@@ -1521,7 +1521,7 @@ class Inference2D(myObject):
     #         if kwargs.get('alpha') is None:
     #             opacity = ones(mesh.shape)
 
-    #         indices = mesh.y.cellIndex(self.doi + mesh.y.relativeTo)
+    #         indices = mesh.y.cellIndex(self.doi + mesh.y.relative_to)
 
     #         for i in range(self.nPoints):
     #             opacity[i, indices[i]:] = 0.0
@@ -1625,7 +1625,7 @@ class Inference2D(myObject):
     def doi_mask(self, model):
 
         mask = ones(model.shape)
-        indices = model.mesh.y.cellIndex(self.doi + model.mesh.y.relativeTo)
+        indices = model.mesh.y.cellIndex(self.doi + model.mesh.y.relative_to)
 
         for i in range(self.nPoints):
             mask[i, indices[i]:] = 0.0

@@ -496,7 +496,7 @@ Axes in log space
 
 .. GENERATED FROM PYTHON SOURCE LINES 160-162
 
-RelativeTo
+relative_to
 ++++++++++
 
 .. GENERATED FROM PYTHON SOURCE LINES 162-220
@@ -515,7 +515,7 @@ RelativeTo
     plt.subplot(122)
     _  = rm.plotGrid(linewidth=0.5, flipY=True)
 
-    # RelativeTo single
+    # relative_to single
     with h5py.File('rm2d.h5', 'w') as f:
         rm.toHdf(f, 'test')
 
@@ -529,12 +529,12 @@ RelativeTo
     plt.subplot(212)
     rm2.pcolor(arr, flipY=True)
 
-    # RelativeTo expanded
+    # relative_to expanded
     with h5py.File('rm2d.h5', 'w') as f:
-        rm.createHdf(f, 'test', add_axis=RectilinearMesh1D(centres=StatArray(np.arange(3.0), name='Easting', units="m"), relativeTo = 0.2*np.random.randn(x.size, y.size)))
+        rm.createHdf(f, 'test', add_axis=RectilinearMesh1D(centres=StatArray(np.arange(3.0), name='Easting', units="m"), relative_to = 0.2*np.random.randn(x.size, y.size)))
         for i in range(3):
-            rm.x.relativeTo += 0.5
-            rm.y.relativeTo += 0.5
+            rm.x.relative_to += 0.5
+            rm.y.relative_to += 0.5
             rm.writeHdf(f, 'test', index=i)
 
     with h5py.File('rm2d.h5', 'r') as f:

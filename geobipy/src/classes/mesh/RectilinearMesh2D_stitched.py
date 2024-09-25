@@ -27,7 +27,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
     """Class defining stitched 1D rectilinear meshes.
     """
 
-    def __init__(self, max_cells, x=None, relativeTo=None, nCells=None, **kwargs):
+    def __init__(self, max_cells, x=None, relative_to=None, nCells=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
         self._max_cells = int32(max_cells)
@@ -35,7 +35,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         self.nCells = nCells
         self.y_edges = None
         self.y_log = kwargs.get('y_log')
-        self.relativeTo = relativeTo
+        self.relative_to = relative_to
 
     @property
     def max_cells(self):
@@ -104,8 +104,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         # assert shape(slic) == (1,), ValueError("slic must be over 1 dimensions.")
 
         if isinstance(slic, (int, integer)):
-            relativeTo = self.x._relativeTo[slic] if not self.x._relativeTo is None else None
-            return RectilinearMesh1D(edges=self.y_edges[slic, :self.nCells[slic]+2], relativeTo=relativeTo)
+            relative_to = self.x._relative_to[slic] if not self.x._relative_to is None else None
+            return RectilinearMesh1D(edges=self.y_edges[slic, :self.nCells[slic]+2], relative_to=relative_to)
 
         else:
             slic0 = slic
@@ -113,11 +113,11 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
                 # If a slice, add one to the end for bins.
                 slic0 = slice(slic.start, slic.stop+1, slic.step)
 
-            relativeTo = self.relativeTo[slic] if not self.relativeTo is None else None
+            relative_to = self.relative_to[slic] if not self.relative_to is None else None
             if self.xyz:
-                out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._y.edges[slic0], z_edges=self._z_edges[slic0, :], relativeTo=relativeTo)
+                out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._y.edges[slic0], z_edges=self._z_edges[slic0, :], relative_to=relative_to)
             else:
-                out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._z_edges[slic0, :], relativeTo=relativeTo)
+                out = type(self)(x_edges=self._x.edges[slic0], y_edges=self._z_edges[slic0, :], relative_to=relative_to)
             out.nCells = self.nCells[slic]
             return out
 
@@ -187,13 +187,13 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
 
         width = zeros(self.x.nCells)
 
-        relativeTo = 0.0 if self.relativeTo is None else self.relativeTo
+        relative_to = 0.0 if self.relative_to is None else self.relative_to
         for i in range(max(self.nCells)):
 
             active = where(self.nCells > i)[0]
 
-            bottom = y_edges[:, i] + relativeTo
-            top = y_edges[:, i+1] + relativeTo
+            bottom = y_edges[:, i] + relative_to
+            top = y_edges[:, i+1] + relative_to
 
             top[top == -inf] = min_edge
             top[top == inf] = max_edge
@@ -339,8 +339,8 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
 
         self.y_edges.createHdf(grp, 'y/edges', withPosterior=withPosterior, fillvalue=fillvalue, upcast=upcast)
 
-        if not self.relativeTo is None:
-            self.relativeTo.createHdf(grp, 'y/relativeTo', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=upcast)
+        if not self.relative_to is None:
+            self.relative_to.createHdf(grp, 'y/relative_to', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=upcast)
 
         if self._nCells is not None:
             self.nCells.createHdf(grp, 'nCells', withPosterior=withPosterior, fillvalue=fillvalue, upcast=upcast)
@@ -357,13 +357,13 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             nCells = StatArray.StatArray.fromHdf(grp['nCells'], skip_posterior=skip_posterior)
             edges = StatArray.StatArray.fromHdf(grp['y/edges'], skip_posterior=skip_posterior)
 
-            relativeTo = None
-            if 'y/relativeTo' in grp:
-                relativeTo = StatArray.StatArray.fromHdf(grp['y/relativeTo'], skip_posterior=skip_posterior)
-                if npall(isnan(relativeTo)):
-                    relativeTo = None
+            relative_to = None
+            if 'y/relative_to' in grp:
+                relative_to = StatArray.StatArray.fromHdf(grp['y/relative_to'], skip_posterior=skip_posterior)
+                if npall(isnan(relative_to)):
+                    relative_to = None
 
-            out = cls(max_cells=edges.shape[1]-1,  x=x, relativeTo=relativeTo, nCells=nCells)
+            out = cls(max_cells=edges.shape[1]-1,  x=x, relative_to=relative_to, nCells=nCells)
             out.y_edges = edges
 
         else:

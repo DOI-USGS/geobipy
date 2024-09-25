@@ -12,8 +12,8 @@ from numpy import max, min, log, array, full, longdouble, exp, maximum, sqrt
 from numpy.random import Generator
 from numpy.linalg import norm
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import Figure
 
 from ..base import plotting as cP
 from ..base.utilities import expReal
@@ -96,8 +96,6 @@ class Inference1D(myObject):
                  **kwargs):
         """ Initialize the results of the inversion """
 
-        self.posterior_fig = None
-
         self.world = world
 
         self.options = kwargs
@@ -123,6 +121,9 @@ class Inference1D(myObject):
 
         self._n_zero_acceptance = 0
         self._n_resets = 0
+
+        self.posterior_fig = None
+        self.posterior_ax = None
 
     @property
     def acceptance_percent(self):
@@ -462,6 +463,10 @@ class Inference1D(myObject):
         self.best_posterior = self.posterior
         self.best_iteration = int64(0)
 
+        # if self.interactive_plot:
+        #     self._init_posterior_plots()
+        #     plt.show(block=False)
+
     def initialize_datapoint(self, datapoint, **kwargs):
 
         self.datapoint = datapoint
@@ -635,10 +640,6 @@ class Inference1D(myObject):
 
         Go = self.datapoint.n_active_channels > 0
 
-        if self.interactive_plot:
-            self._init_posterior_plots()
-            plt.show(block=False)
-
         self.clk.start()
 
         failed = not Go
@@ -650,7 +651,6 @@ class Inference1D(myObject):
 
             if self.interactive_plot:
                 self.plot_posteriors(axes=self.posterior_ax,
-                                     fig=self.posterior_fig,
                                      title="Fiducial {}".format(self.datapoint.fiducial),
                                      increment=self.update_plot_every)
 
@@ -789,27 +789,27 @@ class Inference1D(myObject):
         # Update the height posterior
         self.datapoint.update_posteriors()
 
-    def _init_posterior_plots(self, gs=None, **kwargs):
+    def _init_posterior_plots(self, **kwargs):
         """ Initialize the plotting region """
         # Setup the figure region. The figure window is split into a 4x3
         # region. Columns are able to span multiple rows
-        fig  = kwargs.get('fig', plt.gcf())
-        if gs is None:
-            fig = kwargs.pop('fig', plt.figure(facecolor='white', figsize=(16, 9)))
-            gs = fig
 
-        if isinstance(gs, Figure):
-            gs.clf()
-            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
+        fig = plt.figure(facecolor='white', figsize=(16, 9))
 
-        gs = gs.subgridspec(2, 2, height_ratios=(1, 6))
+        if self.interactive_plot:
+            plt.interactive(True)
+
+        # fig.clf()
+
+        gs = fig.add_gridspec(nrows=2, ncols=2, height_ratios=(1, 6))
 
         ax = []
-
         ax.append([cP.pretty(plt.subplot(gs[0, 0]))])  # Acceptance Rate 0
 
         splt = gs[0, 1].subgridspec(1, 2, width_ratios=[4, 1])
-        tmp = []; tmp.append(cP.pretty(plt.subplot(splt[0, 0]))); tmp.append(cP.pretty(plt.subplot(splt[0, 1])))
+        tmp = [];
+        tmp.append(cP.pretty(plt.subplot(splt[0, 0])));
+        tmp.append(cP.pretty(plt.subplot(splt[0, 1])))
         ax.append(tmp)  # Data misfit vs iteration 1 and posterior
 
         ax.append(self.model._init_posterior_plots(gs[1, 0]))
@@ -817,26 +817,16 @@ class Inference1D(myObject):
 
         if self.interactive_plot:
             plt.show(block=False)
-            plt.interactive(True)
 
         self.posterior_fig, self.posterior_ax = fig, ax
 
         return fig, ax
 
-    def plot_posteriors(self, axes=None, title="", increment=None, **kwargs):
+    def plot_posteriors(self, title="", increment=None, **kwargs):
         """ Updates the figures for MCMC Inversion """
         # Plots that change with every iteration
         if self.iteration == 0:
             return
-
-        if axes is None:
-            fig = kwargs.pop('fig', self.posterior_fig)
-            axes = fig
-            if fig is None:
-                fig, axes = self._init_posterior_plots()
-
-        if not isinstance(axes, list):
-            fig, axes = self._init_posterior_plots(axes)
 
         plot = True
         if increment is not None:
@@ -845,6 +835,9 @@ class Inference1D(myObject):
 
         if not plot:
             return
+
+        if self.posterior_ax is None:
+            self._init_posterior_plots()
 
         self._plotAcceptanceVsIteration()
 
@@ -890,11 +883,10 @@ class Inference1D(myObject):
 
         self.posterior_fig.suptitle(title)
 
-        if self.posterior_fig is not None:
-            self.posterior_fig.canvas.draw()
-            self.posterior_fig.canvas.flush_events()
+        self.posterior_fig.canvas.draw()
+        self.posterior_fig.canvas.flush_events()
 
-        cP.pause(1e-9)
+        # cP.pause(1e-9)
 
     def _plotAcceptanceVsIteration(self, **kwargs):
         """ Plots the acceptance percentage against iteration. """

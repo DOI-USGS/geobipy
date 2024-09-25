@@ -517,7 +517,7 @@ class Tempest_datapoint(TdemDataPoint):
             posterior = []
             for i in range(self.n_components):
                 b = bins[i, :]
-                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()), log=10)
+                mesh = RectilinearMesh1D(edges = b, relative_to=0.5*(b.max()-b.min()), log=10)
                 posterior.append(Histogram(mesh=mesh))
             self.relative_error.posterior = posterior
 
@@ -542,7 +542,7 @@ class Tempest_datapoint(TdemDataPoint):
             posterior = []
             for i in range(self.n_components):
                 b = bins[i, :]
-                mesh = RectilinearMesh1D(edges = b, log=log, relativeTo=0.5*(b.max()-b.min()))
+                mesh = RectilinearMesh1D(edges = b, log=log, relative_to=0.5*(b.max()-b.min()))
                 posterior.append(Histogram(mesh=mesh))
             self.additive_error_multiplier.posterior = posterior
 

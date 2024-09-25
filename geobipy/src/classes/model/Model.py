@@ -688,6 +688,7 @@ class Model(myObject):
             x_log = None
             if 'log' in type(self.values.prior).__name__.lower():
                 x_log = 10
+
             mesh = RectilinearMesh2D(x_edges=bins, y_edges=self.mesh.edges.posterior.mesh.edges, x_relative_to=relative_to, x_log=x_log)
 
             # Set the posterior hitmap for conductivity vs depth
@@ -871,6 +872,17 @@ class Model(myObject):
     def writeHdf(self, parent, name, withPosterior=True, index=None):
         self.mesh.writeHdf(parent, name+'/mesh', withPosterior=withPosterior, index=index)
         self.values.writeHdf(parent, name+'/values',  withPosterior=withPosterior, index=index)
+
+    @classmethod
+    def from_tif(cls, rio_dataset, **kwargs):
+
+        if 'comm' in kwargs:
+            print("DO STUFF IN PARALLEL")
+        else:
+            mesh = Mesh(x_centres = rio_dataset.x.values,
+                        y_centres = rio_dataset.y.values)
+            return cls(mesh, values=np.squeeze(rio_dataset.values))
+
 
     @classmethod
     def fromHdf(cls, grp, index=None, skip_posterior=False):

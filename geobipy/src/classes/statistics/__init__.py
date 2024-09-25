@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import pickle
 from numpy.random import Generator, PCG64DXSM
-from randomgen import Xoshiro256
 
 
-def get_prng(generator=Xoshiro256, seed=None, jump=None, world=None):
+def get_prng(generator=PCG64DXSM, seed=None, jump=None, world=None):
     """Generate an independent prng.
 
     Returns

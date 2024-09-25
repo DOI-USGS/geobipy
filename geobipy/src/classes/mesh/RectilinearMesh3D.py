@@ -46,19 +46,19 @@ class RectilinearMesh3D(RectilinearMesh2D):
         The locations of the centre of each cell in the "z" direction. Only z_centres or z_edges can be given.
     z_edges : geobipy.StatArray, optional
         The locations of the edges of each cell, including the outermost edges, in the "z" direction. Only z_centres or z_edges can be given.
-    relativeToCentres : geobipy.StatArray, optional
-        The relativeTo of each point at the x, y locations. Only relativeToCentres or relativeToEdges can be given, not both.
+    relative_toCentres : geobipy.StatArray, optional
+        The relative_to of each point at the x, y locations. Only relative_toCentres or relative_toEdges can be given, not both.
         Has shape (y.nCells, x.nCells).
-    relativeToEdges : geobipy.StatArray, optional
-        The relativeTo of each point at the x, y locations of the edges of each cell, including the outermost edges. Only relativeToCentres or relativeToEdges can be given, not both.
+    relative_toEdges : geobipy.StatArray, optional
+        The relative_to of each point at the x, y locations of the edges of each cell, including the outermost edges. Only relative_toCentres or relative_toEdges can be given, not both.
         Has shape (y.nEdges, x.nEdges).
 
     Other Parameters
     ----------------
     [x, y, z]log : 'e' or float, optional
         See geobipy.RectilinearMesh1D for log description.
-    [x, y, z]relativeTo : float, optional
-        See geobipy.RectilinearMesh1D for relativeTo description.
+    [x, y, z]relative_to : float, optional
+        See geobipy.RectilinearMesh1D for relative_to description.
 
     Returns
     -------
@@ -74,14 +74,14 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.y = kwargs if y is None else y
         self.z = kwargs if z is None else z
 
-        # if self.x._relativeTo is not None:
-        #     assert all(self.x.relativeTo.shape == self.shape[1:]), "x axis relative to must have shape {} but has shape {}".format(self.shape[1:], self.x.relativeTo.shape)
+        # if self.x._relative_to is not None:
+        #     assert all(self.x.relative_to.shape == self.shape[1:]), "x axis relative to must have shape {} but has shape {}".format(self.shape[1:], self.x.relative_to.shape)
 
-        # if self.y._relativeTo is not None:
-        #     assert all(self.y.relativeTo.shape == self.shape[::2]), "y axis relative to must have shape {} but has shape {}".format(self.shape[::2], self.y.relativeTo.shape)
+        # if self.y._relative_to is not None:
+        #     assert all(self.y.relative_to.shape == self.shape[::2]), "y axis relative to must have shape {} but has shape {}".format(self.shape[::2], self.y.relative_to.shape)
 
-        # if self.z._relativeTo is not None:
-        #     assert all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {} but has shape {}".format(self.shape[:2], self.z.relativeTo.shape)
+        # if self.z._relative_to is not None:
+        #     assert all(self.z.relative_to.shape == self.shape[:2]), "z axis relative to must have shape {} but has shape {}".format(self.shape[:2], self.z.relative_to.shape)
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
@@ -96,47 +96,47 @@ class RectilinearMesh3D(RectilinearMesh2D):
             x = self.x[slic[0]]
             y = self.y[slic[1]]
             z = self.z[slic[2]]
-            if x._relativeTo is not None:
-                nd = ndim(x.relativeTo)
+            if x._relative_to is not None:
+                nd = ndim(x.relative_to)
                 slc = s_[:]
                 if nd == 2:
                     slc = slic[1:]
                 elif nd == 1:
-                    s = x.relativeTo.size
+                    s = x.relative_to.size
                     if s == self.shape[1]:
                         slc = slic[1]
                     elif s == self.shape[2]:
                         slc = slic[2]
 
-                x.relativeTo = x.relativeTo[slc]
+                x.relative_to = x.relative_to[slc]
 
-            if y._relativeTo is not None:
-                nd = ndim(y.relativeTo)
+            if y._relative_to is not None:
+                nd = ndim(y.relative_to)
                 slc = s_[:]
                 if nd == 2:
                     slc = slic[::2]
                 elif nd == 1:
-                    s = y.relativeTo.size
+                    s = y.relative_to.size
                     if s == self.shape[0]:
                         slc = slic[0]
                     elif s == self.shape[2]:
                         slc = slic[2]
 
-                y.relativeTo = y.relativeTo[slc]
+                y.relative_to = y.relative_to[slc]
 
-            if z._relativeTo is not None:
-                nd = ndim(z.relativeTo)
+            if z._relative_to is not None:
+                nd = ndim(z.relative_to)
                 slc = s_[:]
                 if nd == 2:
                     slc = slic[:2]
                 elif nd == 1:
-                    s = z.relativeTo.size
+                    s = z.relative_to.size
                     if s == self.shape[0]:
                         slc = slic[0]
                     elif s == self.shape[1]:
                         slc = slic[1]
 
-                z.relativeTo = z.relativeTo[slc]
+                z.relative_to = z.relative_to[slc]
 
             out = type(self)(x=x, y=y, z=z)
             return out
@@ -146,8 +146,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
             b = [x for x in (0, 1, 2) if x in axis]
 
             x = deepcopy(self.axis(a[0]))
-            if x._relativeTo is not None:
-                if x._relativeTo.size > 1:
+            if x._relative_to is not None:
+                if x._relative_to.size > 1:
                     if a[0] == 0:
                         if b[0] == 1:
                             axis = 0
@@ -158,11 +158,11 @@ class RectilinearMesh3D(RectilinearMesh2D):
                             axis = 0
                         if b[0] == 2:
                             axis = 'OOPS'
-                    x.relativeTo = take(x.relativeTo, slic[b[0]], axis)
+                    x.relative_to = take(x.relative_to, slic[b[0]], axis)
 
             y = deepcopy(self.axis(a[1]))
-            if y._relativeTo is not None:
-                if y._relativeTo.size > 1:
+            if y._relative_to is not None:
+                if y._relative_to.size > 1:
                     if a[1] == 1:
                         if b[0] == 0:
                             axis = 0
@@ -174,7 +174,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
                         elif b[0] == 1:
                             axis = 1
 
-                    y.relativeTo = take(y.relativeTo, slic[b[0]], axis)
+                    y.relative_to = take(y.relative_to, slic[b[0]], axis)
 
             x = x[slic[a[0]]]
             x.dimension = 0
@@ -188,8 +188,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
             b = [x for x in (0, 1, 2) if x in axis]
 
             out = self.axis(a[0])[slic[a[0]]]
-            if out._relativeTo is not None:
-                out.relativeTo = out.relativeTo[slic[b[0]], slic[b[1]]]
+            if out._relative_to is not None:
+                out.relative_to = out.relative_to[slic[b[0]], slic[b[1]]]
 
         return out
 
@@ -255,18 +255,18 @@ class RectilinearMesh3D(RectilinearMesh2D):
     @property
     def x_edges(self):
         re_tmp = None
-        if self.x._relativeTo is not None:
-            re_tmp = deepcopy(self.x.relativeTo)
-            nd = ndim(self.x.relativeTo)
+        if self.x._relative_to is not None:
+            re_tmp = deepcopy(self.x.relative_to)
+            nd = ndim(self.x.relative_to)
             if nd == 2:
                 mesh = self.remove_axis(0)
-                re_nodes = mesh.interpolate_centres_to_nodes(self.x.relativeTo)
-                self.x.relativeTo = re_nodes
+                re_nodes = mesh.interpolate_centres_to_nodes(self.x.relative_to)
+                self.x.relative_to = re_nodes
 
         out = super().x_edges
 
         if re_tmp is not None:
-            self.x.relativeTo = re_tmp
+            self.x.relative_to = re_tmp
 
         nd = ndim(out)
         if nd == 3:
@@ -280,18 +280,18 @@ class RectilinearMesh3D(RectilinearMesh2D):
     @property
     def y_edges(self):
         re_tmp = None
-        if self.y._relativeTo is not None:
-            re_tmp = deepcopy(self.y.relativeTo)
-            nd = ndim(self.y.relativeTo)
+        if self.y._relative_to is not None:
+            re_tmp = deepcopy(self.y.relative_to)
+            nd = ndim(self.y.relative_to)
             if nd == 2:
                 mesh = self.remove_axis(1)
-                re_nodes = mesh.interpolate_centres_to_nodes(self.y.relativeTo)
-                self.y.relativeTo = re_nodes
+                re_nodes = mesh.interpolate_centres_to_nodes(self.y.relative_to)
+                self.y.relative_to = re_nodes
 
         out = super().y_edges
 
         if re_tmp is not None:
-            self.y.relativeTo = re_tmp
+            self.y.relative_to = re_tmp
 
         nd = ndim(out)
         if nd == 3:
@@ -305,18 +305,18 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def z_edges(self):
 
         re_tmp = None
-        if self.z._relativeTo is not None:
-            nd = ndim(self.z.relativeTo)
+        if self.z._relative_to is not None:
+            nd = ndim(self.z.relative_to)
             if nd == 2:
-                re_tmp = deepcopy(self.z.relativeTo)
+                re_tmp = deepcopy(self.z.relative_to)
                 mesh = self.remove_axis(2)
-                re_nodes = mesh.interpolate_centres_to_nodes(self.z.relativeTo)
-                self.z.relativeTo = re_nodes
+                re_nodes = mesh.interpolate_centres_to_nodes(self.z.relative_to)
+                self.z.relative_to = re_nodes
 
         out = self.z.edges_absolute
 
         if re_tmp is not None:
-            self.z.relativeTo = re_tmp
+            self.z.relative_to = re_tmp
 
         if ndim(out) == 1:
             return repeat(repeat(out[None, :], self.y.nEdges, 0)[None, :, :], self.x.nEdges, 0)
@@ -345,15 +345,15 @@ class RectilinearMesh3D(RectilinearMesh2D):
                         centres=values.get('z_centres'),
                         edges=values.get('z_edges'),
                         log=values.get('z_log'),
-                        relativeTo=values.get('z_relative_to'),
+                        relative_to=values.get('z_relative_to'),
                         dimension=2)
 
         assert isinstance(values, RectilinearMesh1D), TypeError('z must be a RectilinearMesh1D')
         assert values.dimension == 2
         self._z = values
 
-        # if self.z._relativeTo is not None:
-        #     assert all(self.z.relativeTo.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
+        # if self.z._relative_to is not None:
+        #     assert all(self.z.relative_to.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
 
     def other_axis(self, axis):
 
@@ -662,7 +662,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
     # def _mean(self, values, axis=0):
 
     #     a = self.axis(axis)
-    #     if a._relativeTo is None:
+    #     if a._relative_to is None:
     #         return super()._mean(values, axis)
 
     #     s = tuple([s_[:] if i == axis else None for i in range(self.ndim)])
@@ -851,8 +851,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """ Display a summary of the 3D Point Cloud """
         msg = ("3D Rectilinear Mesh: \n"
               "Shape: : {} \nx\n{}y\n{}z\n{}").format(self.shape, self.x.summary, self.y.summary, self.z.summary)
-        # if not self.relativeTo is None:
-        #     msg += self.relativeTo.summary
+        # if not self.relative_to is None:
+        #     msg += self.relative_to.summary
         return msg
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=None):
@@ -866,8 +866,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.x.createHdf(grp, 'x', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
         self.y.createHdf(grp, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
         self.z.createHdf(grp, 'z', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
-        # if not self.relativeTo is None:
-        #     self.relativeTo.createHdf(grp, 'relativeTo', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        # if not self.relative_to is None:
+        #     self.relative_to.createHdf(grp, 'relative_to', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
         return grp
 
@@ -881,8 +881,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.x.writeHdf(grp, 'x',  withPosterior=withPosterior, index=index)
         self.y.writeHdf(grp, 'y',  withPosterior=withPosterior, index=index)
         self.z.writeHdf(grp, 'z',  withPosterior=withPosterior, index=index)
-        # if not self.relativeTo is None:
-        #     self.relativeTo.writeHdf(grp, 'relativeTo', withPosterior=withPosterior, index=index)
+        # if not self.relative_to is None:
+        #     self.relative_to.writeHdf(grp, 'relative_to', withPosterior=withPosterior, index=index)
 
     @classmethod
     def fromHdf(cls, grp, index=None, skip_posterior=False):
@@ -896,14 +896,14 @@ class RectilinearMesh3D(RectilinearMesh2D):
             z = RectilinearMesh1D.fromHdf(grp['z'], skip_posterior=skip_posterior)
             z.dimension = 2
 
-            if y._relativeTo is not None:
-                nd = ndim(y.relativeTo)
+            if y._relative_to is not None:
+                nd = ndim(y.relative_to)
                 if nd == 1:
-                    y.relativeTo = repeat(y.relativeTo[:, None], z.nCells, 1)
-            if z._relativeTo is not None:
-                nd = ndim(z.relativeTo)
+                    y.relative_to = repeat(y.relative_to[:, None], z.nCells, 1)
+            if z._relative_to is not None:
+                nd = ndim(z.relative_to)
                 if nd == 1:
-                    z.relativeTo = repeat(z.relativeTo[:, None], y.nCells, 1)
+                    z.relative_to = repeat(z.relative_to[:, None], y.nCells, 1)
 
             out = cls(x=x, y=y, z=z)
         else:

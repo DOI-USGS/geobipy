@@ -3,7 +3,7 @@ Module with custom file handling operations
 """
 import os
 from subprocess import Popen, PIPE, STDOUT
-from numpy import asfarray, atleast_1d, float64, zeros
+from numpy import asarray, atleast_1d, float64, zeros
 import re
 from pandas import read_csv
 
@@ -294,9 +294,9 @@ def get_real_numbers_from_line(line, indices=None, delimiters=','):
 
     if not indices is None:
         indices = atleast_1d(indices)
-        values = asfarray([i for i in indices], float64)
+        values = asarray([i for i in indices], float64)
     else:
-        values = asfarray(line, float64)
+        values = asarray(line, float64)
 
     return values
 

@@ -268,7 +268,7 @@ Here we use edges
 
 .. GENERATED FROM PYTHON SOURCE LINES 124-128
 
-RelativeTo
+relative_to
 ++++++++++
 Instantiate a new 1D rectilinear mesh by specifying cell centres or edges.
 Here we use edges
@@ -290,7 +290,7 @@ Here we use edges
 
 .. code-block:: Python
 
-    rm = RectilinearMesh1D(edges=x, relativeTo=5.0)
+    rm = RectilinearMesh1D(edges=x, relative_to=5.0)
 
 
 
@@ -333,7 +333,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
     with h5py.File('rm1d.h5', 'w') as f:
         rm.createHdf(f, 'rm1d', add_axis=3)
         for i in range(3):
-            rm.relativeTo += 0.5
+            rm.relative_to += 0.5
             rm.writeHdf(f, 'rm1d', index=i)
 
     with h5py.File('rm1d.h5', 'r') as f:
@@ -354,7 +354,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
     # +++++++++++++++++++++++++
     n_cells = 2
     widths = StatArray(np.full(n_cells, fill_value=10.0), 'test')
-    rm = RectilinearMesh1D(widths=widths, relativeTo=0.0)
+    rm = RectilinearMesh1D(widths=widths, relative_to=0.0)
 
 
 
@@ -558,19 +558,19 @@ Expanded
         tmp = rm.pad(rm.max_cells)
         tmp.createHdf(f, 'rm1d', withPosterior=True, add_axis=StatArray(np.arange(3.0), name='Easting', units="m"))
 
-        rm.relativeTo = 5.0
+        rm.relative_to = 5.0
         rm.writeHdf(f, 'rm1d', withPosterior = True, index=0)
 
         rm = deepcopy(rm0)
         for i in range(1000):
             rm = rm.perturb(); rm.update_posteriors()
-        rm.relativeTo = 10.0
+        rm.relative_to = 10.0
         rm.writeHdf(f, 'rm1d', withPosterior = True, index=1)
 
         rm = deepcopy(rm0)
         for i in range(1000):
             rm = rm.perturb(); rm.update_posteriors()
-        rm.relativeTo = 25.0
+        rm.relative_to = 25.0
         rm.writeHdf(f, 'rm1d', withPosterior = True, index=2)
 
     with h5py.File('rm1d.h5', 'r') as f:

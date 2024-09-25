@@ -157,7 +157,7 @@ plt.subplot(212)
 rm2.pcolor(arr)
 
 #%%
-# RelativeTo
+# relative_to
 # ++++++++++
 x = StatArray(np.arange(10.0), 'Northing', 'm')
 y = StatArray(np.arange(20.0), 'Depth', 'm')
@@ -171,7 +171,7 @@ rm = RectilinearMesh2D(x_centres=x, x_relative_to=0.2*np.random.randn(y.size), y
 plt.subplot(122)
 _  = rm.plotGrid(linewidth=0.5, flipY=True)
 
-# RelativeTo single
+# relative_to single
 with h5py.File('rm2d.h5', 'w') as f:
     rm.toHdf(f, 'test')
 
@@ -185,12 +185,12 @@ rm.pcolor(arr, flipY=True)
 plt.subplot(212)
 rm2.pcolor(arr, flipY=True)
 
-# RelativeTo expanded
+# relative_to expanded
 with h5py.File('rm2d.h5', 'w') as f:
-    rm.createHdf(f, 'test', add_axis=RectilinearMesh1D(centres=StatArray(np.arange(3.0), name='Easting', units="m"), relativeTo = 0.2*np.random.randn(x.size, y.size)))
+    rm.createHdf(f, 'test', add_axis=RectilinearMesh1D(centres=StatArray(np.arange(3.0), name='Easting', units="m"), relative_to = 0.2*np.random.randn(x.size, y.size)))
     for i in range(3):
-        rm.x.relativeTo += 0.5
-        rm.y.relativeTo += 0.5
+        rm.x.relative_to += 0.5
+        rm.y.relative_to += 0.5
         rm.writeHdf(f, 'test', index=i)
 
 with h5py.File('rm2d.h5', 'r') as f:

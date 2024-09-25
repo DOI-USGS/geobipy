@@ -7,7 +7,7 @@ from copy import deepcopy
 from numpy import hstack, size, zeros, vstack
 from .....base import utilities as cf
 from ....system.TdemSystem_GAAEM import TdemSystem_GAAEM
-from .empymod_walktem import empymod_walktem
+# from .empymod_walktem import empymod_walktem
 
 
 def tdem1dfwd(datapoint, model1d):
@@ -28,7 +28,7 @@ def tdem1dfwd(datapoint, model1d):
         Frequency domain data.
 
     """
-    assert datapoint.z[0] >= model1d.mesh.relativeTo, "Sensor altitude must be above the top of the model"
+    assert datapoint.z[0] >= model1d.mesh.relative_to, "Sensor altitude must be above the top of the model"
 
     heightTolerance = 0.0
     if (datapoint.transmitter.z > heightTolerance):
@@ -36,8 +36,8 @@ def tdem1dfwd(datapoint, model1d):
             "For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dfwd(datapoint, model1d)
 
-    else:
-        return empymod_tdem1dfwd(datapoint, model1d)
+    # else:
+    #     return empymod_tdem1dfwd(datapoint, model1d)
 
 
 def tdem1dsen(datapoint, model1d, ix=None, model_changed=True):
@@ -47,43 +47,43 @@ def tdem1dsen(datapoint, model1d, ix=None, model_changed=True):
         assert isinstance(datapoint.system[0], TdemSystem_GAAEM), TypeError(
             "For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dsen(datapoint, model1d, ix, model_changed)
-    else:
-        return empymod_tdem1dsen(datapoint, model1d, ix)
+    # else:
+    #     return empymod_tdem1dsen(datapoint, model1d, ix)
 
 
-def empymod_tdem1dfwd(datapoint, model1d):
+# def empymod_tdem1dfwd(datapoint, model1d):
 
-    for i in range(datapoint.nSystems):
-        iSys = datapoint._systemIndices(i)
-        fm = empymod_walktem(datapoint.system[i], model1d)
-        datapoint._predictedData[iSys] = fm
+#     for i in range(datapoint.nSystems):
+#         iSys = datapoint._systemIndices(i)
+#         fm = empymod_walktem(datapoint.system[i], model1d)
+#         datapoint._predictedData[iSys] = fm
 
 
-def empymod_tdem1dsen(datapoint, model1d, ix=None):
+# def empymod_tdem1dsen(datapoint, model1d, ix=None):
 
-    if (ix is None):  # Generate a full matrix if the layers are not specified
-        ix = range(model1d.mesh.nCells[0])
-        J = zeros((datapoint.nWindows, model1d.mesh.nCells[0]))
-    else:  # Partial matrix for specified layers
-        J = zeros((datapoint.nWindows, size(ix)))
+#     if (ix is None):  # Generate a full matrix if the layers are not specified
+#         ix = range(model1d.mesh.nCells[0])
+#         J = zeros((datapoint.nWindows, model1d.mesh.nCells[0]))
+#     else:  # Partial matrix for specified layers
+#         J = zeros((datapoint.nWindows, size(ix)))
 
-    for j in range(datapoint.nSystems):  # For each system
-        iSys = datapoint._systemIndices(j)
+#     for j in range(datapoint.nSystems):  # For each system
+#         iSys = datapoint._systemIndices(j)
 
-        d0 = empymod_walktem(datapoint.system[j], model1d)
-        m1 = deepcopy(model1d)
+#         d0 = empymod_walktem(datapoint.system[j], model1d)
+#         m1 = deepcopy(model1d)
 
-        for i in range(size(ix)):  # For the specified layers
-            iLayer = ix[i]
-            dSigma = 0.02 * model1d.values[iLayer]
-            m1.values[:] = model1d.values[:]
-            m1.values[iLayer] += dSigma
-            d1 = empymod_walktem(datapoint.system[j], m1)
-            # Store the necessary component
-            J[iSys, i] = (d1 - d0) / dSigma
+#         for i in range(size(ix)):  # For the specified layers
+#             iLayer = ix[i]
+#             dSigma = 0.02 * model1d.values[iLayer]
+#             m1.values[:] = model1d.values[:]
+#             m1.values[iLayer] += dSigma
+#             d1 = empymod_walktem(datapoint.system[j], m1)
+#             # Store the necessary component
+#             J[iSys, i] = (d1 - d0) / dSigma
 
-    datapoint.J = J[datapoint.active, :]
-    return datapoint.J
+#     datapoint.J = J[datapoint.active, :]
+#     return datapoint.J
 
 
 def gaTdem1dfwd(datapoint, model1d):

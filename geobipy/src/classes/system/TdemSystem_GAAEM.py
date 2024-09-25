@@ -36,9 +36,18 @@ try:
             self.filename = system_filename
             with open(system_filename, 'r') as f:
                 self.string = f.readlines()
+            self._components = None
 
         def __deepcopy__(self, memo={}):
             return None
+
+        @property
+        def components(self):
+            return self._components
+
+        @property
+        def n_components(self):
+            return size(self.components)
 
         @property
         def isGA(self):
@@ -127,6 +136,3 @@ except Exception as e:
                  "Please see the package's README for instructions on how to install it \n"
                  "Check that you have loaded the compiler that was used to compile the forward modeller\n")
             print(Warning(h))
-
-    print(e)
-    raise Exception(e)

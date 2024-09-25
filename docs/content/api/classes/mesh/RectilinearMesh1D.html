@@ -13,11 +13,11 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
-  
+
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
@@ -28,17 +28,17 @@
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="RectilinearMesh2D" href="RectilinearMesh2D.html" />
-    <link rel="prev" title="Mesh classes" href="mesh.html" /> 
+    <link rel="prev" title="Mesh classes" href="mesh.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../../../../index.html" class="icon icon-home">
             GeoBIPy
           </a>
@@ -104,7 +104,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="rectilinearmesh1d">
 <h1>RectilinearMesh1D<a class="headerlink" href="#rectilinearmesh1d" title="Link to this heading"></a></h1>
 <div class="graphviz"><img src="../../../../_images/inheritance-fbcbab5f4f1af2527248286e74b8ace6d4173b15.png" alt="Inheritance diagram of geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" usemap="#inheritancef15b3b6232" class="inheritance graphviz" /></div>
@@ -115,7 +115,7 @@
 Module describing a 1D Rectilinear Mesh class</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh1D.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeTo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh1D.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="Link to this definition"></a></dt>
 <dd><p>Class defining a 1D rectilinear mesh with cell centres and edges.</p>
 <p>Contains a simple 1D mesh with cell edges, widths, and centre locations.</p>
 <p>RectilinearMesh1D(centres, edges, edgesMin, edgesMax)</p>
@@ -127,7 +127,7 @@ Module describing a 1D Rectilinear Mesh class</p>
 <li><p><strong>widths</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The widths of the cells.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Entries are given in linear space, but internally cells are logged.
 Plotting is in log space.</p></li>
-<li><p><strong>relativeTo</strong> (<em>float</em><em>, </em><em>optional</em>) – If a float is given, updates will be relative to this value.</p></li>
+<li><p><strong>relative_to</strong> (<em>float</em><em>, </em><em>optional</em>) – If a float is given, updates will be relative to this value.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -556,7 +556,7 @@ e.g. probabilities = [0.5, 0.25, 0.15, 0.1]</p></li>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -567,7 +567,7 @@ e.g. probabilities = [0.5, 0.25, 0.15, 0.1]</p></li>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

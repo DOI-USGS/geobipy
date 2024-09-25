@@ -26,7 +26,7 @@ def fdem1dfwd(system, model1d, altitude):
 
     """
 
-    assert altitude >= model1d.mesh.relativeTo, "Sensor altitude must be above the top of the model"
+    assert altitude >= model1d.mesh.relative_to, "Sensor altitude must be above the top of the model"
 
     transmitter_height = altitude + system.transmitter.z
     receiver_height = -transmitter_height + system.receiver.z
@@ -103,7 +103,7 @@ def fdem1dsen(system, model1d, altitude):
 
     """
 
-    assert altitude >= model1d.mesh.relativeTo, "Sensor altitude must be above the top of the model"
+    assert altitude >= model1d.mesh.relative_to, "Sensor altitude must be above the top of the model"
 
     transmitter_height = altitude + system.transmitter.z
     receiver_height = -transmitter_height + system.receiver.z

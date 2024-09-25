@@ -22,7 +22,7 @@ class Histogram1D(RectilinearMesh1D):
 
     Fast updating relies on knowing the bins ahead of time.
 
-    Histogram1D(values, bins, binCentres, log, relativeTo)
+    Histogram1D(values, bins, binCentres, log, relative_to)
 
     Parameters
     ----------
@@ -33,7 +33,7 @@ class Histogram1D(RectilinearMesh1D):
     log : 'e' or float, optional
         Entries are given in linear space, but internally bins and values are logged.
         Plotting is in log space.
-    relativeTo : float, optional
+    relative_to : float, optional
         If a float is given, updates will be relative to this value.
 
     Returns
@@ -43,7 +43,7 @@ class Histogram1D(RectilinearMesh1D):
 
     """
 
-    def __init__(self, centres=None, edges=None, widths=None, log=None, relativeTo=None, values=None, **kwargs):
+    def __init__(self, centres=None, edges=None, widths=None, log=None, relative_to=None, values=None, **kwargs):
         """ Initialize a histogram """
 
         raise DeprecationWarning("HistogramXD no longer in development")
@@ -52,7 +52,7 @@ class Histogram1D(RectilinearMesh1D):
             raise Exception('woops')
 
         # Initialize the parent class
-        RectilinearMesh1D.__init__(self, centres=centres, edges=edges, widths=widths, log=log, relativeTo=relativeTo)
+        RectilinearMesh1D.__init__(self, centres=centres, edges=edges, widths=widths, log=log, relative_to=relative_to)
 
         self._counts = StatArray.StatArray(self.nCells.value, 'Frequency', dtype=np.int64)
 
@@ -72,7 +72,7 @@ class Histogram1D(RectilinearMesh1D):
 
         out._edges = bins
         out.log = self.log
-        out._relativeTo = self._relativeTo
+        out._relative_to = self._relative_to
 
         out._counts = self.counts[slic]
         return out
@@ -121,7 +121,7 @@ class Histogram1D(RectilinearMesh1D):
         # out.dx = self.dx
         out._counts = deepcopy(self._counts)
         # out.log = self.log
-        # out._relativeTo = self._relativeTo
+        # out._relative_to = self._relative_to
 
         return out
 
@@ -457,11 +457,6 @@ class Histogram1D(RectilinearMesh1D):
         if normalize:
             cP.ylabel('Density')
 
-    @property
-    def hdf_name(self):
-        """ Reprodicibility procedure """
-        return('Histogram1D')
-
 
     def createHdf(self, parent, name, withPosterior=True, nRepeats=None, fillvalue=None):
         """ Create the hdf group metadata in file
@@ -498,6 +493,6 @@ class Histogram1D(RectilinearMesh1D):
               "Bins: \n{}"
               "Counts:\n{}"
               "Values are logged to base {}\n"
-              "Relative to: {}").format(type(self), RectilinearMesh1D.summary, self.counts.summary, self.log, self.relativeTo)
+              "Relative to: {}").format(type(self), RectilinearMesh1D.summary, self.counts.summary, self.log, self.relative_to)
 
         return msg

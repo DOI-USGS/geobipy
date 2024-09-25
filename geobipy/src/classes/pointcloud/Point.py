@@ -1001,7 +1001,7 @@ class Point(myObject):
 
         """
         if self.x.hasPrior:
-            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.x.prior.bins(), name=self.x.name, units=self.x.units), relativeTo=self.x)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.x.prior.bins(), name=self.x.name, units=self.x.units), relative_to=self.x)
             self.x.posterior = Histogram(mesh=mesh)
 
     def set_y_posterior(self):
@@ -1009,7 +1009,7 @@ class Point(myObject):
 
         """
         if self.y.hasPrior:
-            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.y.prior.bins(), name=self.y.name, units=self.y.units), relativeTo=self.y)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.y.prior.bins(), name=self.y.name, units=self.y.units), relative_to=self.y)
             self.y.posterior = Histogram(mesh=mesh)
 
     def set_z_posterior(self):
@@ -1017,7 +1017,7 @@ class Point(myObject):
 
         """
         if self.z.hasPrior:
-            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relative_to=self.z)
             self.z.posterior = Histogram(mesh=mesh)
 
     def update_posteriors(self):

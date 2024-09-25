@@ -323,7 +323,7 @@ class EmLoop(Point, ABC):
 
         """
         if self.pitch.hasPrior:
-            mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.pitch.prior.bins(199), name=self.pitch.name, units=self.pitch.units), relativeTo=self.pitch)
+            mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.pitch.prior.bins(199), name=self.pitch.name, units=self.pitch.units), relative_to=self.pitch)
             self.pitch.posterior = Histogram(mesh=mesh)
 
     def set_roll_posterior(self):
@@ -331,7 +331,7 @@ class EmLoop(Point, ABC):
 
         """
         if self.roll.hasPrior:
-            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.roll.prior.bins(), name=self.roll.name, units=self.roll.units), relativeTo=self.roll)
+            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.roll.prior.bins(), name=self.roll.name, units=self.roll.units), relative_to=self.roll)
             self.roll.posterior = Histogram(mesh=mesh)
 
     def set_yaw_posterior(self):
@@ -339,7 +339,7 @@ class EmLoop(Point, ABC):
 
         """
         if self.yaw.hasPrior:
-            mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.yaw.prior.bins(), name=self.yaw.name, units=self.yaw.units), relativeTo=self.yaw)
+            mesh = RectilinearMesh1D(edges=StatArray.StatArray(self.yaw.prior.bins(), name=self.yaw.name, units=self.yaw.units), relative_to=self.yaw)
             self.yaw.posterior = Histogram(mesh=mesh)
 
     def update_posteriors(self):

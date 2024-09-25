@@ -91,8 +91,8 @@ class Mesh(myObject):
             out = StatArray.StatArray(t.shape)
             out = (t / N)
 
-        if ax._relativeTo is not None:
-            re = ax.relativeTo
+        if ax._relative_to is not None:
+            re = ax.relative_to
 
             nd = ndim(re)
             ns = re.size

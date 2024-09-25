@@ -1,6 +1,5 @@
 from ..core.myObject import myObject
 from numpy.random import Generator
-from randomgen import Xoshiro256
 
 class baseDistribution(myObject):
     """ Define an abstract base distribution class """

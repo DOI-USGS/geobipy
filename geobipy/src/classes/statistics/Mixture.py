@@ -3,10 +3,10 @@ import h5py
 from ...classes.core.myObject import myObject
 from ...classes.core import StatArray
 from ...base import utilities as cF
-from scipy.optimize import curve_fit
-from lmfit import models
-from lmfit import Parameters
-from lmfit.model import Model, ModelResult
+# from scipy.optimize import curve_fit
+# from lmfit import models
+# from lmfit import Parameters
+# from lmfit.model import Model, ModelResult
 
 
 class Mixture(myObject):
@@ -202,13 +202,13 @@ class Mixture(myObject):
                 print('misfit decreases', misfit_test[1] - misfit[1])
                 print('gradient substantial', mu, np.abs(misfit_test - misfit))
 
-                
+
             # except:
             #     print('failed for blah')
             #     accept_model = False
             #     lmfit_barfed = True
 
-            
+
             go = accept_model
             if n_components is not None:
                 accept_model = True
@@ -382,7 +382,7 @@ class Mixture(myObject):
             pars['g{}_expon'.format(i)].set(value=tmp, vary=False)
 
         kwargs['weights'] = weights
-        
+
         if verbose:
             print('fitting with', pars)
 

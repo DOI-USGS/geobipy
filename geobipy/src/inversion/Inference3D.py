@@ -22,7 +22,7 @@ import h5py
 from datetime import timedelta
 
 from sklearn.mixture import GaussianMixture
-from smm import SMM
+# from smm import SMM
 from cached_property import cached_property
 from ..classes.core.myObject import myObject
 from ..classes.core import StatArray
@@ -321,6 +321,7 @@ class Inference3D(myObject):
         datapoint = self.data._read_record(record=0)
 
         # While preparing the file, we need access to the line numbers and fiducials in the data file
+        kwargs['interactive_plot'] = False
         inference1d = Inference1D(prng=self.prng, **kwargs)
 
         inference1d.initialize(datapoint=datapoint)
@@ -413,7 +414,7 @@ class Inference3D(myObject):
             if reciprocateParameter:
                 vals = divide(1.0, self.meanParameters)
                 vals.name = 'Resistivity'
-                vals.units = '$\Omega m$'
+                vals.units = '$\\Omega m$'
                 return vals
             else:
                 return self.meanParameters
@@ -422,7 +423,7 @@ class Inference3D(myObject):
             if reciprocateParameter:
                 vals = 1.0 / self.meanParameters
                 vals.name = 'Resistivity'
-                vals.units = '$\Omega m$'
+                vals.units = '$\\Omega m$'
                 return vals
             else:
                 return self.bestParameters
@@ -896,43 +897,43 @@ class Inference3D(myObject):
         return gmm
 
 
-    def cluster_fits_smm(self, n_clusters, plot=False, **kwargs):
+    # def cluster_fits_smm(self, n_clusters, plot=False, **kwargs):
 
-        std = std(self.fits[2], axis=0)
-        whitened = (self.fits[2] / std).reshape(-1, 1)
+    #     std = std(self.fits[2], axis=0)
+    #     whitened = (self.fits[2] / std).reshape(-1, 1)
 
-        model = SMM(n_components=n_clusters, **kwargs).fit(whitened)
-        model.means_ *= std
+    #     model = SMM(n_components=n_clusters, **kwargs).fit(whitened)
+    #     model.means_ *= std
 
-        order = argsort(model.means_[:, 0])
-        model.weights_ = model.weights_[order]
-        model.means_ = model.means_[order, :]
-        if model.covariance_type == 'diag':
-            model.covars_ = model.covars_[order, :]
-        else:
-            model.covars_ = model.covariances[order, :, :]
+    #     order = argsort(model.means_[:, 0])
+    #     model.weights_ = model.weights_[order]
+    #     model.means_ = model.means_[order, :]
+    #     if model.covariance_type == 'diag':
+    #         model.covars_ = model.covars_[order, :]
+    #     else:
+    #         model.covars_ = model.covariances[order, :, :]
 
-        model.degrees_ = model.degrees[order]
+    #     model.degrees_ = model.degrees[order]
 
-        if plot:
-            bins = StatArray.StatArray(linspace(self.fits[2].min(), self.fits[2].max(), 200))
-            binCentres = bins.internalEdges()
-            x_predict = binCentres
-            x_predict = x_predict.reshape(-1, 1)
+    #     if plot:
+    #         bins = StatArray.StatArray(linspace(self.fits[2].min(), self.fits[2].max(), 200))
+    #         binCentres = bins.internalEdges()
+    #         x_predict = binCentres
+    #         x_predict = x_predict.reshape(-1, 1)
 
-            pdf, responsibilities = model.score_samples(x_predict)
-            pdf_individual = responsibilities * pdf[:, newaxis]
+    #         pdf, responsibilities = model.score_samples(x_predict)
+    #         pdf_individual = responsibilities * pdf[:, newaxis]
 
-            h = Histogram1D(edges = bins)
-            h.update(self.fits[2])
+    #         h = Histogram1D(edges = bins)
+    #         h.update(self.fits[2])
 
-            h._counts = h._counts / max(h._counts)
-            h.plot(alpha=0.4, linewidth=0)
+    #         h._counts = h._counts / max(h._counts)
+    #         h.plot(alpha=0.4, linewidth=0)
 
-            for i in range(model.n_components):
-                plt.plot(binCentres, pdf_individual[:, i], '--k', linewidth=1)
+    #         for i in range(model.n_components):
+    #             plt.plot(binCentres, pdf_individual[:, i], '--k', linewidth=1)
 
-        return model
+    #     return model
 
     @cached_property
     def data_misfit(self):

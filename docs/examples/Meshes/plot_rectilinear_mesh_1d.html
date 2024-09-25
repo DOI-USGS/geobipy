@@ -13,11 +13,11 @@
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
-  
+
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
@@ -27,17 +27,17 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="2D Rectilinear Mesh" href="plot_rectilinear_mesh_2d.html" />
-    <link rel="prev" title="StatArray Class" href="../Statistics/plot_StatArray.html" /> 
+    <link rel="prev" title="StatArray Class" href="../Statistics/plot_StatArray.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../../index.html" class="icon icon-home">
             GeoBIPy
           </a>
@@ -62,7 +62,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">1D Rectilinear Mesh</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#the-basics">The basics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#log-space-rectilinear-mesh">Log-space rectilinear mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#relativeto">RelativeTo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#relative_to">relative_to</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#randomness-and-model-perturbations">Randomness and Model Perturbations</a></li>
 </ul>
 </li>
@@ -104,7 +104,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-meshes-plot-rectilinear-mesh-1d-py"><span class="std std-ref">Go to the end</span></a>
@@ -242,14 +242,14 @@ Here we use edges</p>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_007.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_007.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-multi-img"/></li>
 </ul>
 </section>
-<section id="relativeto">
-<h2>RelativeTo<a class="headerlink" href="#relativeto" title="Link to this heading"></a></h2>
+<section id="relative_to">
+<h2>relative_to<a class="headerlink" href="#relative_to" title="Link to this heading"></a></h2>
 <p>Instantiate a new 1D rectilinear mesh by specifying cell centres or edges.
 Here we use edges</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">11.0</span><span class="p">),</span> <span class="s1">&#39;Deviation&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">rm</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">relative_to</span><span class="o">=</span><span class="mf">5.0</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We can plot the grid of the mesh
@@ -279,7 +279,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;rm1d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">rm</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
-        <span class="n">rm</span><span class="o">.</span><span class="n">relativeTo</span> <span class="o">+=</span> <span class="mf">0.5</span>
+        <span class="n">rm</span><span class="o">.</span><span class="n">relative_to</span> <span class="o">+=</span> <span class="mf">0.5</span>
         <span class="n">rm</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;rm1d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -300,7 +300,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
 <span class="c1"># +++++++++++++++++++++++++</span>
 <span class="n">n_cells</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">widths</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_cells</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
-<span class="n">rm</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">rm</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">,</span> <span class="n">relative_to</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
@@ -386,19 +386,19 @@ Here we force the creation of a layer.</p>
     <span class="n">tmp</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">max_cells</span><span class="p">)</span>
     <span class="n">tmp</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Easting&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">))</span>
 
-    <span class="n">rm</span><span class="o">.</span><span class="n">relativeTo</span> <span class="o">=</span> <span class="mf">5.0</span>
+    <span class="n">rm</span><span class="o">.</span><span class="n">relative_to</span> <span class="o">=</span> <span class="mf">5.0</span>
     <span class="n">rm</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">rm</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">rm0</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
         <span class="n">rm</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">perturb</span><span class="p">();</span> <span class="n">rm</span><span class="o">.</span><span class="n">update_posteriors</span><span class="p">()</span>
-    <span class="n">rm</span><span class="o">.</span><span class="n">relativeTo</span> <span class="o">=</span> <span class="mf">10.0</span>
+    <span class="n">rm</span><span class="o">.</span><span class="n">relative_to</span> <span class="o">=</span> <span class="mf">10.0</span>
     <span class="n">rm</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">rm</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">rm0</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
         <span class="n">rm</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">perturb</span><span class="p">();</span> <span class="n">rm</span><span class="o">.</span><span class="n">update_posteriors</span><span class="p">()</span>
-    <span class="n">rm</span><span class="o">.</span><span class="n">relativeTo</span> <span class="o">=</span> <span class="mf">25.0</span>
+    <span class="n">rm</span><span class="o">.</span><span class="n">relative_to</span> <span class="o">=</span> <span class="mf">25.0</span>
     <span class="n">rm</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;rm1d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -458,7 +458,7 @@ Here we force the creation of a layer.</p>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -469,7 +469,7 @@ Here we force the creation of a layer.</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>

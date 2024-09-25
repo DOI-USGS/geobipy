@@ -13,11 +13,11 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
-  
+
   <!--[if lt IE 9]>
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
+
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../../../_static/documentation_options.js?v=8d563738"></script>
@@ -27,17 +27,17 @@
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="RectilinearMesh3D" href="RectilinearMesh3D.html" />
-    <link rel="prev" title="RectilinearMesh2D" href="RectilinearMesh2D.html" /> 
+    <link rel="prev" title="RectilinearMesh2D" href="RectilinearMesh2D.html" />
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-          
-          
+
+
           <a href="../../../../index.html" class="icon icon-home">
             GeoBIPy
           </a>
@@ -103,7 +103,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
+
   <section id="rectilinearmesh2d-stitched">
 <h1>RectilinearMesh2D_stitched<a class="headerlink" href="#rectilinearmesh2d-stitched" title="Link to this heading"></a></h1>
 <div class="graphviz"><img src="../../../../_images/inheritance-5af40ba389a59cbb40e4b8635224cd781f1330cd.png" alt="Inheritance diagram of geobipy.src.classes.mesh.RectilinearMesh2D_stitched" usemap="#inheritance9774ecb1cc" class="inheritance graphviz" /></div>
@@ -115,7 +115,7 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh2D_stitched.RectilinearMesh2D_stitched">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh2D_stitched.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh2D_stitched</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeTo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nCells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh2D_stitched.RectilinearMesh2D_stitched" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh2D_stitched.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh2D_stitched</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_cells</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nCells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh2D_stitched.RectilinearMesh2D_stitched" title="Link to this definition"></a></dt>
 <dd><p>Class defining stitched 1D rectilinear meshes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh2D_stitched.RectilinearMesh2D_stitched.createHdf">
@@ -156,7 +156,7 @@ myName: Name of the group</p>
 <li><p><strong>xAxis</strong> (<em>str</em>) – If xAxis is ‘x’, the horizontal xAxis uses self.x
 If xAxis is ‘y’, the horizontal xAxis uses self.y
 If xAxis is ‘r’, the horizontal xAxis uses cumulative distance along the line</p></li>
-<li><p><strong>zAxis</strong> (<em>str</em>) – If zAxis is ‘absolute’ the vertical axis is the relativeTo plus z.
+<li><p><strong>zAxis</strong> (<em>str</em>) – If zAxis is ‘absolute’ the vertical axis is the relative_to plus z.
 If zAxis is ‘relative’ the vertical axis is z.</p></li>
 <li><p><strong>alpha</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
 If array_like, each pixel is given an individual alpha value.</p></li>
@@ -236,7 +236,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+
 
 </footer>
         </div>
@@ -247,7 +247,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
 
 </body>
 </html>
