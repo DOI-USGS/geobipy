@@ -135,22 +135,10 @@ The directory where HDF files will be stored
     inference3d.infer(index=30, **kwargs)
 
 
-.. rst-class:: sphx-glr-horizontal
-
-
-    *
-
-      .. image-sg:: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_resolve_001.png
-         :alt: plot inference 1d resolve
-         :srcset: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_resolve_001.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_resolve_002.png
-         :alt: Fiducial [30], Frequency Domain EM Data
-         :srcset: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_resolve_002.png
-         :class: sphx-glr-multi-img
+.. image-sg:: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_resolve_001.png
+   :alt: Fiducial [30], Frequency Domain EM Data
+   :srcset: /examples/Inference_1D/images/sphx_glr_plot_inference_1d_resolve_001.png
+   :class: sphx-glr-single-img
 
 
 .. rst-class:: sphx-glr-script-out
@@ -161,30 +149,60 @@ The directory where HDF files will be stored
     Output files will be produced at Resolve/glacial
     Creating HDF5 files, this may take a few minutes...
     Files are being created for data files ..//..//supplementary////data//Resolve_glacial.csv and system files ..//..//supplementary////data//..//data/FdemSystem2.stm
+    RectilinearMesh1D
+    Number of Cells:
+    |   StatArray
+    |   Name:   Number of cells
+    |   Address:['0x13f2ddfd0' '0x14dd80fe0' '0x14c433990' '0x14c4324f0']
+    |   Shape:  (1,)
+    |   Values: [30]
+    |   Min:    30
+    |   Max:    30
+    |   Prior:
+    |   |   Uniform Distribution: 
+    |   |   Min: 1
+    |   |   Max: 30
+    |   has_posterior: True
+
+    Cell Centres:
+    |   StatArray
+    |   Name:   Depth (m)
+    |   Address:['0x14c277ad0']
+    |   Shape:  (30,)
+    |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   Min:    0.0
+    |   Max:    0.0
+    |   has_posterior: False
+
+    Cell Edges:
+    |   StatArray
+    |   Name:   Depth (m)
+    |   Address:['0x14c274350']
+    |   Shape:  (31,)
+    |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   Min:    0.0
+    |   Max:    0.0
+    |   has_posterior: True
+
+    log:
+    |   None
+    relative_to:
+    |   StatArray
+    |   Name:   
+    |   Address:['0x13f2dced0']
+    |   Shape:  (1,)
+    |   Values: [0.]
+    |   Min:    0.0
+    |   Max:    0.0
+    |   has_posterior: False
+
+
     Created hdf5 file for line 0.0 with 79 data points
     Created hdf5 files 79 total data points
-    Created hdf5 files in 0:00:00.099843 h:m:s
-    i=500, k=1, acc=*57.000, 0.005 s/Model, 2.320 s Elapsed, eta=--:--:-- h:m:s
+    Created hdf5 files in 0:00:06.184965 h:m:s
+    i=5000, k=1, acc=*49.200, 0.006 s/Model, 30.223 s Elapsed, eta=--:--:-- h:m:s
 
-    i=1000, k=3, acc=*46.400, 0.006 s/Model, 5.429 s Elapsed, eta=--:--:-- h:m:s
-
-    i=1500, k=2, acc=*57.200, 0.006 s/Model, 8.442 s Elapsed, eta=--:--:-- h:m:s
-
-    i=2000, k=3, acc=*21.400, 0.007 s/Model, 11.734 s Elapsed, eta=--:--:-- h:m:s
-
-    i=2500, k=2, acc=*13.200, 0.008 s/Model, 15.529 s Elapsed, eta=--:--:-- h:m:s
-
-    i=3000, k=3, acc=*13.600, 0.008 s/Model, 19.454 s Elapsed, eta=--:--:-- h:m:s
-
-    i=3500, k=2, acc=*12.800, 0.008 s/Model, 23.455 s Elapsed, eta=--:--:-- h:m:s
-
-    i=4000, k=4, acc=*13.600, 0.007 s/Model, 26.993 s Elapsed, eta=--:--:-- h:m:s
-
-    i=4500, k=3, acc=*11.800, 0.008 s/Model, 30.783 s Elapsed, eta=--:--:-- h:m:s
-
-    i=5000, k=3, acc=*10.600, 0.008 s/Model, 34.653 s Elapsed, eta=--:--:-- h:m:s
-
-    Remaining Points -30/1 || Elapsed Time: 0:00:35.770894 h:m:s || ETA 0:00:01.153900 h:m:s
+    Remaining Points -30/1 || Elapsed Time: 0:00:31.353168 h:m:s || ETA 0:00:01.011393 h:m:s
 
 
 
@@ -192,7 +210,7 @@ The directory where HDF files will be stored
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 36.274 seconds)
+   **Total running time of the script:** (0 minutes 37.843 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_1D_plot_inference_1d_resolve.py:
@@ -208,6 +226,10 @@ The directory where HDF files will be stored
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_inference_1d_resolve.py <plot_inference_1d_resolve.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_inference_1d_resolve.zip <plot_inference_1d_resolve.zip>`
 
 
 .. only:: html

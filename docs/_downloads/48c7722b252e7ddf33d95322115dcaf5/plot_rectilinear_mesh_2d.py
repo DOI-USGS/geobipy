@@ -33,7 +33,7 @@ rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 # We can plot the grid lines of the mesh.
 p=0;
 plt.figure(p)
-_  = rm.plotGrid(flipY=True, linewidth=0.5)
+_  = rm.plot_grid(flipY=True, linewidth=0.5)
 
 # Intersecting multisegment lines with a mesh
 arr = np.zeros(rm.shape)
@@ -47,22 +47,13 @@ rm.pcolor(values = arr)
 xx, yy = np.meshgrid(rm.y.centres, rm.x.centres)
 arr = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "Values")
 
+rm2, values2 = rm.resample(0.5, 0.5, arr, method='linear')
+
+
 p += 1; plt.figure(p)
 _ = rm.pcolor(arr, grid=True, flipY=True, linewidth=0.5)
 
-# xG = rm.xGradientMatrix()
-# zG = rm.yGradientMatrix()
 
-# dax = StatArray((xG * arr.flatten()).reshape((arr.shape[0], arr.shape[1]-1)))
-# rm2 = rm[:, :9]
-
-# plt.figure()
-# rm2.pcolor(dax, xAxis='r', grid=True, flipY=True, linewidth=0.5)
-
-# dax = StatArray((zG * arr.flatten()).reshape((arr.shape[0]-1, arr.shape[1])))
-
-# plt.figure()
-# dax.pcolor(grid=True, flipY=True, linewidth=0.5)
 
 #%%
 # Mask the x axis cells by a distance
@@ -114,11 +105,11 @@ rm4 = rm[5, :5]
 
 p += 1; plt.figure(p)
 plt.subplot(131)
-rm2.plotGrid()
+rm2.plot_grid()
 plt.subplot(132)
-rm3.plotGrid()
+rm3.plot_grid()
 plt.subplot(133)
-rm4.plotGrid(transpose=True)
+rm4.plot_grid(transpose=True)
 
 #%%
 # Resample a grid
@@ -140,7 +131,7 @@ rm = RectilinearMesh2D(x_edges=x, x_log=10, y_edges=y, y_log=10)
 
 # We can plot the grid lines of the mesh.
 p += 1; plt.figure(p)
-_  = rm.plotGrid(linewidth=0.5)
+_  = rm.plot_grid(linewidth=0.5)
 
 #%%
 with h5py.File('rm2d.h5', 'w') as f:
@@ -166,10 +157,10 @@ rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 
 p += 1; plt.figure(p)
 plt.subplot(121)
-_  = rm.plotGrid(linewidth=0.5, flipY=True)
+_  = rm.plot_grid(linewidth=0.5, flipY=True)
 rm = RectilinearMesh2D(x_centres=x, x_relative_to=0.2*np.random.randn(y.size), y_centres=y, y_relative_to=0.2*np.random.randn(x.size))
 plt.subplot(122)
-_  = rm.plotGrid(linewidth=0.5, flipY=True)
+_  = rm.plot_grid(linewidth=0.5, flipY=True)
 
 # relative_to single
 with h5py.File('rm2d.h5', 'w') as f:

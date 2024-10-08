@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -241,7 +241,7 @@ surface [WARNING]: You should have pre-processed the data with block-mean, -medi
 surface [WARNING]: Check that previous processing steps write results with enough decimals.
 surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-(584494.28, 590194.28, 4639054.24, 4661854.24)
+(np.float64(584494.28), np.float64(590194.28), np.float64(4639054.24), np.float64(4661854.24))
 </pre></div>
 </div>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
@@ -254,7 +254,7 @@ surface [WARNING]: You should have pre-processed the data with block-mean, -medi
 surface [WARNING]: Check that previous processing steps write results with enough decimals.
 surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-(662822.398, 668372.398, 4560028.655, 4600678.655)
+(np.float64(662822.398), np.float64(668372.398), np.float64(4560028.655), np.float64(4600678.655))
 </pre></div>
 </div>
 <p>Or, we can plot both data sets in one figure to see their positions relative
@@ -278,7 +278,7 @@ surface [WARNING]: You should have pre-processed the data with block-mean, -medi
 surface [WARNING]: Check that previous processing steps write results with enough decimals.
 surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-(584419.28, 590219.28, 4638979.24, 4661979.24)
+(np.float64(584419.28), np.float64(590219.28), np.float64(4638979.24), np.float64(4661979.24))
 </pre></div>
 </div>
 <p>Export the data to VTK</p>
@@ -305,35 +305,43 @@ surface [WARNING]: Possibly some data were half-way between nodes and subject to
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>FdemData
 x:
-|   Name: Easting (m) 0x171f2ff50
-|   Shape: (6710,)
+|   StatArray
+|   Name:   Easting (m)
+|   Address:[&#39;0x142163950&#39;]
+|   Shape:  (6710,)
 |   Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
-|   Min: 586122.82
-|   Max: 586852.29
+|   Min:    586122.82
+|   Max:    586852.29
 |   has_posterior: False
 
 y:
-|   Name: Northing (m) 0x171f2fe50
-|   Shape: (6710,)
+|   StatArray
+|   Name:   Northing (m)
+|   Address:[&#39;0x142161cd0&#39;]
+|   Shape:  (6710,)
 |   Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
-|   Min: 4639119.38
-|   Max: 4661772.42
+|   Min:    4639119.38
+|   Max:    4661772.42
 |   has_posterior: False
 
 z:
-|   Name: Height (m) 0x171f2f950
-|   Shape: (6710,)
+|   StatArray
+|   Name:   Height (m)
+|   Address:[&#39;0x1421623d0&#39;]
+|   Shape:  (6710,)
 |   Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
-|   Min: 23.830000000000002
-|   Max: 50.567
+|   Min:    23.830000000000002
+|   Max:    50.567
 |   has_posterior: False
 
 elevation:
-|   Name: Elevation (m) 0x171f2f9d0
-|   Shape: (6710,)
+|   StatArray
+|   Name:   Elevation (m)
+|   Address:[&#39;0x142161550&#39;]
+|   Shape:  (6710,)
 |   Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
-|   Min: 1213.18
-|   Max: 1338.02
+|   Min:    1213.18
+|   Max:    1338.02
 |   has_posterior: False
 
 channel names:
@@ -341,48 +349,55 @@ channel names:
 |   In_Phase 129550.0, Quadrature 380.0, Quadrature 1776.0, Quadrature 3345.0, Quadrature 8171.0,
 |   Quadrature 41020.0, Quadrature 129550.0
 data:
-|   Name: Data (ppm) 0x171dd6c50
-|   Shape: (80520,)
+|   DataArray
+|   Name:   Data (ppm)
+|   Address:[&#39;0x1421042d0&#39;]
+|   Shape:  (80520,)
 |   Values: [145.3 435.8 260.6 ... 749.2 976.5 928.3]
-|   Min: 37.7
-|   Max: 3726.9
-|   has_posterior: False
+|   Min:    37.7
+|   Max:    3726.9
 
 predicted data:
-|   Name: Predicted Data (ppm) 0x1744559d0
-|   Shape: (80520,)
+|   DataArray
+|   Name:   Predicted Data (ppm)
+|   Address:[&#39;0x1421042d0&#39;]
+|   Shape:  (80520,)
 |   Values: [0. 0. 0. ... 0. 0. 0.]
-|   Min: 0.0
-|   Max: 0.0
-|   has_posterior: False
+|   Min:    0.0
+|   Max:    0.0
 
 std:
-|   Name: std (ppm) 0x1744559d0
-|   Shape: (80520,)
+|   DataArray
+|   Name:   std (ppm)
+|   Address:[&#39;0x142104150&#39;]
+|   Shape:  (80520,)
 |   Values: [1.453 4.358 2.606 ... 7.492 9.765 9.283]
-|   Min: 0.37700000000000006
-|   Max: 37.269
-|   has_posterior: False
+|   Min:    0.37700000000000006
+|   Max:    37.269
 
 line number:
-|   Name: Line number 0x171f2fb50
-|   Shape: (6710,)
+|   DataArray
+|   Name:   Line number
+|   Address:[&#39;0x140e9c850&#39;]
+|   Shape:  (6710,)
 |   Values: [30010. 30010. 30010. ... 30010. 30010. 30010.]
-|   Min: 30010.0
-|   Max: 30010.0
-|   has_posterior: False
+|   Min:    30010.0
+|   Max:    30010.0
 
 fiducial:
-|   Name: Fiducial 0x171f2fbd0
-|   Shape: (6710,)
+|   DataArray
+|   Name:   Fiducial
+|   Address:[&#39;0x1799cdfd0&#39;]
+|   Shape:  (6710,)
 |   Values: [30000 30000 30000 ... 30670 30670 30670]
-|   Min: 30000
-|   Max: 30670
-|   has_posterior: False
+|   Min:    30000
+|   Max:    30670
 
 relative error:
-|   Name: Relative error (%) 0x171f2eb50
-|   Shape: (6710, 1)
+|   DataArray
+|   Name:   Relative error (%)
+|   Address:[&#39;0x142160a50&#39;]
+|   Shape:  (6710, 1)
 |   Values: [[0.01]
 |    [0.01]
 |    [0.01]
@@ -390,13 +405,14 @@ relative error:
 |    [0.01]
 |    [0.01]
 |    [0.01]]
-|   Min: 0.01
-|   Max: 0.01
-|   has_posterior: False
+|   Min:    0.01
+|   Max:    0.01
 
 additive error:
-|   Name: Additive error (ppm) 0x171f2ebd0
-|   Shape: (6710, 1)
+|   DataArray
+|   Name:   Additive error (ppm)
+|   Address:[&#39;0x142160ad0&#39;]
+|   Shape:  (6710, 1)
 |   Values: [[0.]
 |    [0.]
 |    [0.]
@@ -404,9 +420,8 @@ additive error:
 |    [0.]
 |    [0.]
 |    [0.]]
-|   Min: 0.0
-|   Max: 0.0
-|   has_posterior: False
+|   Min:    0.0
+|   Max:    0.0
 </pre></div>
 </div>
 <p>And we can scatter2D the points in the line.</p>
@@ -510,13 +525,16 @@ These must appear after the data colums.</p>
 <p>Example system files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
 <p>See the Resolve.stm files.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.419 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.206 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-frequency-dataset-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/ffa7a17936c32d098025040a94f8af46/plot_frequency_dataset.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_frequency_dataset.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/8a8596f0390404145eca225a8f310218/plot_frequency_dataset.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_frequency_dataset.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/dd5f000fe10de32b5e5e1f6a210e1afb/plot_frequency_dataset.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_frequency_dataset.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

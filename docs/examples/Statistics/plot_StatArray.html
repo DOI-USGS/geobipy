@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -58,6 +58,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_DataArray.html">DataArray Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_3d.html">Histogram 3D</a></li>
@@ -118,13 +119,11 @@ to download the full example code.</p>
 <p>Extends the numpy ndarray class to add extra attributes such as names, and
 units, and allows us to attach statistical descriptors of the array.
 The direct extension to numpy maintains speed and functionality of numpy arrays.</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
-<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Histogram</span>
-<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Distribution</span>
-<span class="kn">from</span> <span class="nn">geobipy.src.classes.mesh.RectilinearMesh1D</span> <span class="kn">import</span> <span class="n">RectilinearMesh1D</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">,</span> <span class="n">Histogram</span><span class="p">,</span> <span class="n">Distribution</span><span class="p">,</span> <span class="n">RectilinearMesh1D</span>
+
 
 <span class="c1"># plt.style.use(&#39;seaborn-pastel&#39;)</span>
 </pre></div>
@@ -133,71 +132,130 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 <h2>Instantiating a new StatArray class<a class="headerlink" href="#instantiating-a-new-statarray-class" title="Link to this heading"></a></h2>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Integer</span>
 <span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">1</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 0&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 <span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;10&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">10</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">test</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">),</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 1&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 <span class="c1"># tuple/Shape</span>
 <span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;(2, 10)&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span>  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">test</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">),</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 2&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;(2, 10)&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">test</span> <span class="o">==</span>  <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 2&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 
 <span class="c1"># float</span>
 <span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mf">45.454</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;45.454&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">1</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="mf">45.454</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 3&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 <span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">45.454</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;45.454&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">1</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="mf">45.454</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 4&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 
-<span class="c1"># complex</span>
-<span class="c1"># test = StatArray(np.complex(0.0, 1.0), name=&#39;complex(0, 1)&#39;)</span>
-
 <span class="c1"># array</span>
-<span class="n">Density</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Density&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">1</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 5&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">10</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 6&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">10</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 6&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+
+
 
 <span class="c1"># The StatArray can take any numpy function that returns an array as an input.</span>
 <span class="c1"># The name and units of the variable can be assigned to the StatArray.</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: 1 0x170707ad0
-Shape: (1,)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
+Name:   1
+Address:[&#39;0x164367c50&#39;]
+Shape:  (1,)
 Values: [0.]
-Min: 0.0
-Max: 0.0
+Min:    0.0
+Max:    0.0
 has_posterior: False
 
-Name: 10 0x1707041d0
-Shape: (10,)
+StatArray
+Name:   10
+Address:[&#39;0x164367250&#39;]
+Shape:  (10,)
 Values: [0. 0. 0. ... 0. 0. 0.]
-Min: 0.0
-Max: 0.0
+Min:    0.0
+Max:    0.0
 has_posterior: False
 
-Name: (2, 10) 0x170705c50
-Shape: (2, 10)
+StatArray
+Name:   (2, 10)
+Address:[&#39;0x1643666d0&#39;]
+Shape:  (2, 10)
 Values: [[0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]]
-Min: 0.0
-Max: 0.0
+Min:    0.0
+Max:    0.0
 has_posterior: False
 
-Name: 45.454 0x170706fd0
-Shape: (1,)
+StatArray
+Name:   (2, 10)
+Address:[&#39;0x164366450&#39;]
+Shape:  (2,)
+Values: [ 2 10]
+Min:    2
+Max:    10
+has_posterior: False
+
+StatArray
+Name:   45.454
+Address:[&#39;0x164364850&#39;]
+Shape:  (1,)
 Values: [45.454]
-Min: 45.454
-Max: 45.454
+Min:    45.454
+Max:    45.454
 has_posterior: False
 
-Name: 45.454 0x1707058d0
-Shape: (1,)
+StatArray
+Name:   45.454
+Address:[&#39;0x164365e50&#39;]
+Shape:  (1,)
 Values: [45.454]
-Min: 45.454
-Max: 45.454
+Min:    45.454
+Max:    45.454
 has_posterior: False
 
-Name: Density ($\frac{g}{cc}$) 0x170706ed0
-Shape: (1,)
-Values: [-0.81925455]
-Min: -0.8192545455077754
-Max: -0.8192545455077754
+StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x1643657d0&#39;]
+Shape:  (1,)
+Values: [0.28613692]
+Min:    0.28613691597121504
+Max:    0.28613691597121504
+has_posterior: False
+
+StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x164364cd0&#39;]
+Shape:  (10,)
+Values: [0. 1. 2. ... 7. 8. 9.]
+Min:    0.0
+Max:    9.0
+has_posterior: False
+
+StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x1643657d0&#39;]
+Shape:  (10,)
+Values: [0. 1. 2. ... 7. 8. 9.]
+Min:    0.0
+Max:    9.0
 has_posterior: False
 </pre></div>
 </div>
@@ -232,6 +290,8 @@ sample when we wish to perturb the variable
 <span class="n">generator</span> <span class="o">=</span> <span class="n">PCG64DXSM</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">prng</span> <span class="o">=</span> <span class="n">Generator</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
 
+<span class="n">Density</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
 <span class="n">Density</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -242,11 +302,14 @@ sample when we wish to perturb the variable
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Class type of the proposal: &quot;</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">proposal</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$) 0x170706ed0
-Shape: (1,)
-Values: [-0.81925455]
-Min: -0.8192545455077754
-Max: -0.8192545455077754
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x164367550&#39; &#39;0x164520ec0&#39; &#39;0x1643d18f0&#39; ... &#39;0x164523fe0&#39; &#39;0x1643d1bf0&#39;
+ &#39;0x1643d1c50&#39;]
+Shape:  (1,)
+Values: [10.]
+Min:    10.0
+Max:    10.0
 Prior:
 |   Uniform Distribution:
 |   Min: -2.0
@@ -267,7 +330,7 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.25
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.0
 </pre></div>
 </div>
 <p>The univariate proposal distribution can generate random samples from itself.</p>
@@ -282,7 +345,7 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">propose</span><span class="p">(</span><span class="n">relative</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-0.28108827]
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[10.53816627]
 </pre></div>
 </div>
 <p>We can perturb the variable by drawing from the attached proposal distribution.</p>
@@ -290,11 +353,14 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Name: Density ($\frac{g}{cc}$) 0x170706ed0
-Shape: (1,)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x164367550&#39; &#39;0x164520ec0&#39; &#39;0x1643d18f0&#39; ... &#39;0x164523fe0&#39; &#39;0x1643d1bf0&#39;
+ &#39;0x1643d1c50&#39;]
+Shape:  (1,)
 Values: [0.38188467]
-Min: 0.38188466718060166
-Max: 0.38188466718060166
+Min:    0.38188466718060166
+Max:    0.38188466718060166
 Prior:
 |   Uniform Distribution:
 |   Min: -2.0
@@ -347,7 +413,7 @@ This produces a single probability.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.33888096006650337
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.3865034288373199
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
@@ -700,7 +766,7 @@ x has its own memory allocated (not a reference/pointer)?  True
 <span class="n">Density</span><span class="o">.</span><span class="n">summary</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&#39;Name: Density ($\\frac{g}{cc}$) 0x16fbf1550\nShape: (50, 100)\nValues: [[-4.01780133e-01  3.16635145e-01 -5.27750195e-01 ... -2.44618399e+00\n  -4.96050117e-01  6.25365537e-01]\n [-4.81076204e-01 -9.74014990e-01 -2.11325212e+00 ...  1.81726048e-01\n   2.03762749e-01 -8.72069096e-01]\n [-7.25459267e-01  5.59232504e-01 -1.38786869e+00 ...  6.21068169e-01\n  -2.59833364e+00 -1.14244762e+00]\n ...\n [-1.12094718e+00  1.09285179e+00 -8.49788982e-01 ... -1.72570923e+00\n   4.99544999e-01  5.42242587e-01]\n [ 2.82865259e-01 -1.18059731e-04 -1.52188899e-01 ...  1.13864002e-01\n   7.13026322e-01 -1.02252865e+00]\n [-4.71123302e-01 -4.93942524e-01  6.77625263e-01 ... -1.27237018e+00\n  -2.27635302e+00  1.60185139e+00]]\nMin: -3.2916747712189056\nMax: 3.5748933990954637\nhas_posterior: False\n&#39;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;StatArray\nName:   Density ($\\frac{g}{cc}$)\nAddress:[&#39;0x15abbb5d0&#39;]\nShape:  (50, 100)\nValues: [[ 0.36285142 -1.45926241 -1.99018616 ...  0.5120016  -0.09939725\n   0.34190296]\n [ 1.63234194  0.83149504 -0.79399095 ... -1.41783437 -0.5618095\n   0.09735701]\n [-1.35818096  0.04230022  0.7493373  ... -2.36089817  0.41162449\n  -0.95753703]\n ...\n [ 0.75872936  0.11271041  1.92135862 ... -1.71396947  0.36126637\n   1.28428028]\n [ 0.28017354 -0.01762853 -0.08438573 ...  0.31977915 -1.81485406\n  -0.24001704]\n [-0.19700963  1.40366952 -2.17161654 ... -1.09729843 -0.33771638\n  -2.03100392]]\nMin:    -3.991157603243882\nMax:    3.6682397222771446\nhas_posterior: False\n&quot;
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -779,13 +845,16 @@ ends of whatever you are plotting</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.542 seconds)</p>
+<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.117 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e43324a965564fecaa251424c676fc0e/plot_StatArray.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_StatArray.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/53dc65a717762d4693b891c0caabbde0/plot_StatArray.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_StatArray.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/6ea40b011244de987af10f1723709b1e/plot_StatArray.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_StatArray.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

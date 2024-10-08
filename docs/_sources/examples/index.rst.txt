@@ -68,6 +68,23 @@ Statistics
 
 .. raw:: html
 
+    <div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us to attach statistical descriptors of the array. The direct extension to numpy maintains speed and functionality of numpy arrays.">
+
+.. only:: html
+
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_DataArray_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Statistics_plot_DataArray.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">DataArray Class</div>
+    </div>
+
+
+.. raw:: html
+
     <div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5">
 
 .. only:: html
@@ -119,7 +136,7 @@ Statistics
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us to attach statistical descriptors of the array. The direct extension to numpy maintains speed and functionality of numpy arrays.">
 
 .. only:: html
 
@@ -144,6 +161,7 @@ Statistics
 .. toctree::
    :hidden:
 
+   /examples/Statistics/plot_DataArray
    /examples/Statistics/plot_histogram_1d
    /examples/Statistics/plot_histogram_2d
    /examples/Statistics/plot_histogram_3d
@@ -657,7 +675,7 @@ HDF 5
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory syste...">
+    <div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory systems. A common bottleneck with large parallel algorithms is the input output of information to disk. We use HDF5 to read and write data in order to leverage the parallel capabililties of the HDF5 API.">
 
 .. only:: html
 

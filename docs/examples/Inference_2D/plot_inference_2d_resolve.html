@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -108,14 +108,23 @@ to download the full example code.</p>
 <section class="sphx-glr-example-title" id="d-posterior-analysis-of-resolve-inference">
 <span id="sphx-glr-examples-inference-2d-plot-inference-2d-resolve-py"></span><h1>2D Posterior analysis of Resolve inference<a class="headerlink" href="#d-posterior-analysis-of-resolve-inference" title="Link to this heading"></a></h1>
 <p>All plotting in GeoBIPy can be carried out using the 3D inference class</p>
-<ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_plot_inference_2d_resolve_001.png" srcset="../../_images/sphx_glr_plot_inference_2d_resolve_001.png" alt="resolve glacial, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_inference_2d_resolve_002.png" srcset="../../_images/sphx_glr_plot_inference_2d_resolve_002.png" alt="resolve saline_clay, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_inference_2d_resolve_003.png" srcset="../../_images/sphx_glr_plot_inference_2d_resolve_003.png" alt="resolve resistive_dolomites, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_inference_2d_resolve_004.png" srcset="../../_images/sphx_glr_plot_inference_2d_resolve_004.png" alt="resolve resistive_basement, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_inference_2d_resolve_005.png" srcset="../../_images/sphx_glr_plot_inference_2d_resolve_005.png" alt="resolve coastal_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_inference_2d_resolve_006.png" srcset="../../_images/sphx_glr_plot_inference_2d_resolve_006.png" alt="resolve ice_over_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)" class = "sphx-glr-multi-img"/></li>
-</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>glacial
+[Errno 2] Unable to synchronously open file (unable to open file: name = &#39;../../../Parallel_Inference//resolve/glacial/0.0.h5&#39;, errno = 2, error message = &#39;No such file or directory&#39;, flags = 0, o_flags = 0)
+saline_clay
+[Errno 2] Unable to synchronously open file (unable to open file: name = &#39;../../../Parallel_Inference//resolve/saline_clay/0.0.h5&#39;, errno = 2, error message = &#39;No such file or directory&#39;, flags = 0, o_flags = 0)
+resistive_dolomites
+[Errno 2] Unable to synchronously open file (unable to open file: name = &#39;../../../Parallel_Inference//resolve/resistive_dolomites/0.0.h5&#39;, errno = 2, error message = &#39;No such file or directory&#39;, flags = 0, o_flags = 0)
+resistive_basement
+[Errno 2] Unable to synchronously open file (unable to open file: name = &#39;../../../Parallel_Inference//resolve/resistive_basement/0.0.h5&#39;, errno = 2, error message = &#39;No such file or directory&#39;, flags = 0, o_flags = 0)
+coastal_salt_water
+[Errno 2] Unable to synchronously open file (unable to open file: name = &#39;../../../Parallel_Inference//resolve/coastal_salt_water/0.0.h5&#39;, errno = 2, error message = &#39;No such file or directory&#39;, flags = 0, o_flags = 0)
+ice_over_salt_water
+[Errno 2] Unable to synchronously open file (unable to open file: name = &#39;../../../Parallel_Inference//resolve/ice_over_salt_water/0.0.h5&#39;, errno = 2, error message = &#39;No such file or directory&#39;, flags = 0, o_flags = 0)
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model</span>
@@ -147,9 +156,6 @@ to download the full example code.</p>
          <span class="s2">&quot;log&quot;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
          <span class="s2">&quot;cmap&quot;</span> <span class="p">:</span> <span class="s1">&#39;jet&#39;</span>
          <span class="p">}</span>
-
-   <span class="kn">import</span> <span class="nn">warnings</span>
-   <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;error&#39;</span><span class="p">)</span>
 
    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">model_type</span><span class="p">))</span>
@@ -247,28 +253,32 @@ to download the full example code.</p>
    <span class="n">results_2d</span><span class="o">.</span><span class="n">plot_data_elevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">);</span>
    <span class="n">results_2d</span><span class="o">.</span><span class="n">plot_elevation</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">);</span>
 
-   <span class="c1"># plt.show()</span>
-   <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">_</span><span class="si">{}</span><span class="s1">.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">model_type</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+
+   <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+   <span class="c1"># plt.savefig(&#39;{}_{}.png&#39;.format(data_type, model_type), dpi=300)</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
    <span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;glacial&#39;</span><span class="p">,</span> <span class="s1">&#39;saline_clay&#39;</span><span class="p">,</span> <span class="s1">&#39;resistive_dolomites&#39;</span><span class="p">,</span> <span class="s1">&#39;resistive_basement&#39;</span><span class="p">,</span> <span class="s1">&#39;coastal_salt_water&#39;</span><span class="p">,</span> <span class="s1">&#39;ice_over_salt_water&#39;</span><span class="p">]</span>
 
    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-      <span class="c1"># try:</span>
+      <span class="k">try</span><span class="p">:</span>
          <span class="n">plot_2d_summary</span><span class="p">(</span><span class="s2">&quot;../../../Parallel_Inference/&quot;</span><span class="p">,</span> <span class="s2">&quot;resolve&quot;</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
-      <span class="c1"># except Exception as e:</span>
-      <span class="c1">#    print(model)</span>
-      <span class="c1">#    print(e)</span>
-      <span class="c1">#    pass</span>
+      <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+         <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+         <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+         <span class="k">pass</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 49.364 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.560 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-inference-2d-plot-inference-2d-resolve-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/1663fc70a797174c7ea5a88d52e4b2b2/plot_inference_2d_resolve.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_inference_2d_resolve.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/48f0be9987c0cd931b23ce187c305d56/plot_inference_2d_resolve.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_inference_2d_resolve.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/517d2f5356b7a3ac11e723033c4b0fb3/plot_inference_2d_resolve.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_inference_2d_resolve.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

@@ -154,4 +154,4 @@ H.animate(0, 'test.mp4')
 
 plt.show()
 
-H.to_vtk('h3d.vtk')
+# H.to_vtk('h3d.vtk')

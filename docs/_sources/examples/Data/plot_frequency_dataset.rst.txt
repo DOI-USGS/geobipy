@@ -277,7 +277,7 @@ We can create maps of the elevations in two separate figures
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-    (584494.28, 590194.28, 4639054.24, 4661854.24)
+    (np.float64(584494.28), np.float64(590194.28), np.float64(4639054.24), np.float64(4661854.24))
 
 
 
@@ -308,7 +308,7 @@ We can create maps of the elevations in two separate figures
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-    (662822.398, 668372.398, 4560028.655, 4600678.655)
+    (np.float64(662822.398), np.float64(668372.398), np.float64(4560028.655), np.float64(4600678.655))
 
 
 
@@ -373,7 +373,7 @@ interpolate the specified channel number.
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-    (584419.28, 590219.28, 4638979.24, 4661979.24)
+    (np.float64(584419.28), np.float64(590219.28), np.float64(4638979.24), np.float64(4661979.24))
 
 
 
@@ -457,35 +457,43 @@ A summary will now show the properties of the line.
 
     FdemData
     x:
-    |   Name: Easting (m) 0x171f2ff50
-    |   Shape: (6710,)
+    |   StatArray
+    |   Name:   Easting (m)
+    |   Address:['0x142163950']
+    |   Shape:  (6710,)
     |   Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
-    |   Min: 586122.82
-    |   Max: 586852.29
+    |   Min:    586122.82
+    |   Max:    586852.29
     |   has_posterior: False
 
     y:
-    |   Name: Northing (m) 0x171f2fe50
-    |   Shape: (6710,)
+    |   StatArray
+    |   Name:   Northing (m)
+    |   Address:['0x142161cd0']
+    |   Shape:  (6710,)
     |   Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
-    |   Min: 4639119.38
-    |   Max: 4661772.42
+    |   Min:    4639119.38
+    |   Max:    4661772.42
     |   has_posterior: False
 
     z:
-    |   Name: Height (m) 0x171f2f950
-    |   Shape: (6710,)
+    |   StatArray
+    |   Name:   Height (m)
+    |   Address:['0x1421623d0']
+    |   Shape:  (6710,)
     |   Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
-    |   Min: 23.830000000000002
-    |   Max: 50.567
+    |   Min:    23.830000000000002
+    |   Max:    50.567
     |   has_posterior: False
 
     elevation:
-    |   Name: Elevation (m) 0x171f2f9d0
-    |   Shape: (6710,)
+    |   StatArray
+    |   Name:   Elevation (m)
+    |   Address:['0x142161550']
+    |   Shape:  (6710,)
     |   Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
-    |   Min: 1213.18
-    |   Max: 1338.02
+    |   Min:    1213.18
+    |   Max:    1338.02
     |   has_posterior: False
 
     channel names:
@@ -493,48 +501,55 @@ A summary will now show the properties of the line.
     |   In_Phase 129550.0, Quadrature 380.0, Quadrature 1776.0, Quadrature 3345.0, Quadrature 8171.0, 
     |   Quadrature 41020.0, Quadrature 129550.0
     data:
-    |   Name: Data (ppm) 0x171dd6c50
-    |   Shape: (80520,)
+    |   DataArray
+    |   Name:   Data (ppm)
+    |   Address:['0x1421042d0']
+    |   Shape:  (80520,)
     |   Values: [145.3 435.8 260.6 ... 749.2 976.5 928.3]
-    |   Min: 37.7
-    |   Max: 3726.9
-    |   has_posterior: False
+    |   Min:    37.7
+    |   Max:    3726.9
 
     predicted data:
-    |   Name: Predicted Data (ppm) 0x1744559d0
-    |   Shape: (80520,)
+    |   DataArray
+    |   Name:   Predicted Data (ppm)
+    |   Address:['0x1421042d0']
+    |   Shape:  (80520,)
     |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   Min: 0.0
-    |   Max: 0.0
-    |   has_posterior: False
+    |   Min:    0.0
+    |   Max:    0.0
 
     std:
-    |   Name: std (ppm) 0x1744559d0
-    |   Shape: (80520,)
+    |   DataArray
+    |   Name:   std (ppm)
+    |   Address:['0x142104150']
+    |   Shape:  (80520,)
     |   Values: [1.453 4.358 2.606 ... 7.492 9.765 9.283]
-    |   Min: 0.37700000000000006
-    |   Max: 37.269
-    |   has_posterior: False
+    |   Min:    0.37700000000000006
+    |   Max:    37.269
 
     line number:
-    |   Name: Line number 0x171f2fb50
-    |   Shape: (6710,)
+    |   DataArray
+    |   Name:   Line number
+    |   Address:['0x140e9c850']
+    |   Shape:  (6710,)
     |   Values: [30010. 30010. 30010. ... 30010. 30010. 30010.]
-    |   Min: 30010.0
-    |   Max: 30010.0
-    |   has_posterior: False
+    |   Min:    30010.0
+    |   Max:    30010.0
 
     fiducial:
-    |   Name: Fiducial 0x171f2fbd0
-    |   Shape: (6710,)
+    |   DataArray
+    |   Name:   Fiducial
+    |   Address:['0x1799cdfd0']
+    |   Shape:  (6710,)
     |   Values: [30000 30000 30000 ... 30670 30670 30670]
-    |   Min: 30000
-    |   Max: 30670
-    |   has_posterior: False
+    |   Min:    30000
+    |   Max:    30670
 
     relative error:
-    |   Name: Relative error (%) 0x171f2eb50
-    |   Shape: (6710, 1)
+    |   DataArray
+    |   Name:   Relative error (%)
+    |   Address:['0x142160a50']
+    |   Shape:  (6710, 1)
     |   Values: [[0.01]
     |    [0.01]
     |    [0.01]
@@ -542,13 +557,14 @@ A summary will now show the properties of the line.
     |    [0.01]
     |    [0.01]
     |    [0.01]]
-    |   Min: 0.01
-    |   Max: 0.01
-    |   has_posterior: False
+    |   Min:    0.01
+    |   Max:    0.01
 
     additive error:
-    |   Name: Additive error (ppm) 0x171f2ebd0
-    |   Shape: (6710, 1)
+    |   DataArray
+    |   Name:   Additive error (ppm)
+    |   Address:['0x142160ad0']
+    |   Shape:  (6710, 1)
     |   Values: [[0.]
     |    [0.]
     |    [0.]
@@ -556,9 +572,8 @@ A summary will now show the properties of the line.
     |    [0.]
     |    [0.]
     |    [0.]]
-    |   Min: 0.0
-    |   Max: 0.0
-    |   has_posterior: False
+    |   Min:    0.0
+    |   Max:    0.0
 
 
 
@@ -714,7 +729,7 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.419 seconds)
+   **Total running time of the script:** (0 minutes 3.206 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:
@@ -730,6 +745,10 @@ See the Resolve.stm files.
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_frequency_dataset.py <plot_frequency_dataset.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_frequency_dataset.zip <plot_frequency_dataset.zip>`
 
 
 .. only:: html

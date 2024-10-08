@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -269,7 +269,7 @@ Prepare the dataset so that we can read a point at a time.</p>
 
 
 <span class="c1"># Define the distributions used as priors.</span>
-<span class="n">zPrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">fdp</span><span class="o">.</span><span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">fdp</span><span class="o">.</span><span class="n">z</span><span class="p">)</span> <span class="o">+</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">zPrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">fdp</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">fdp</span><span class="o">.</span><span class="n">z</span> <span class="o">+</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 <span class="n">relativePrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 <span class="n">additivePrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 <span class="n">fdp</span><span class="o">.</span><span class="n">set_priors</span><span class="p">(</span><span class="n">z_prior</span><span class="o">=</span><span class="n">zPrior</span><span class="p">,</span> <span class="n">relative_error_prior</span><span class="o">=</span><span class="n">relativePrior</span><span class="p">,</span> <span class="n">additive_error_prior</span><span class="o">=</span><span class="n">additivePrior</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
@@ -298,7 +298,7 @@ Prepare the dataset so that we can read a point at a time.</p>
 
 
 <span class="c1"># Plot the posterior distributions</span>
-<span class="c1"># fig = plt.figure()</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">fdp</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">overlay</span><span class="o">=</span><span class="n">fdp</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">h5py</span>
@@ -309,6 +309,7 @@ Prepare the dataset so that we can read a point at a time.</p>
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;fdp.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">fdp1</span> <span class="o">=</span> <span class="n">FdemDataPoint</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;fdp&#39;</span><span class="p">])</span>
 
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">fdp1</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">overlay</span><span class="o">=</span><span class="n">fdp1</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">h5py</span>
@@ -333,23 +334,26 @@ Prepare the dataset so that we can read a point at a time.</p>
 <li><img src="../../_images/sphx_glr_plot_resolve_datapoint_001.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_001.png" alt="Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_resolve_datapoint_002.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_002.png" alt="plot resolve datapoint" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_resolve_datapoint_003.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_003.png" alt="Halfspace responses" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_004.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_004.png" alt="Frequency Domain EM Data, Frequency Domain EM Data, Frequency Domain EM Data, Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_004.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_004.png" alt="Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_005.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_005.png" alt="Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_006.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_006.png" alt="Frequency Domain EM Data, Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
 </ul>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-733.5454886696688
 1367.81945885548
 Best half space conductivity is [0.097701] $S/m$
 45286.828623928755
-/Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_resolve_datapoint.py:169: DeprecationWarning: Conversion of an array with ndim &gt; 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
-  zPrior = Distribution(&#39;Uniform&#39;, min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0, prng=prng)
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 7.442 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 9.803 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-resolve-datapoint-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/521357f099bff44b6fc76f69b371108f/plot_resolve_datapoint.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_resolve_datapoint.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/950360871c2acdf8ad1b1627e54009da/plot_resolve_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_resolve_datapoint.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d879a27c2deb3b0230b4bdd74daa15f2/plot_resolve_datapoint.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_resolve_datapoint.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

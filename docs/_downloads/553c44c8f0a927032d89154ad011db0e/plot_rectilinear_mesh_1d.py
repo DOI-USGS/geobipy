@@ -4,7 +4,7 @@
 """
 #%%
 from copy import deepcopy
-from geobipy import StatArray
+from geobipy import DataArray, StatArray
 from geobipy import RectilinearMesh1D, RectilinearMesh2D, RectilinearMesh2D_stitched
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ rm = RectilinearMesh1D(edges=x, centres=None, widths=None)
 arr = StatArray(np.random.randn(*rm.shape), "Name", "Units")
 p=0; plt.figure(p)
 plt.subplot(121)
-_ = rm.plotGrid(transpose=True, flip=True)
+_ = rm.plot_grid(transpose=True, flip=True)
 plt.subplot(122)
 _ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
 
@@ -83,7 +83,7 @@ rm = RectilinearMesh1D(edges=x, log=10)
 # Or Pcolor the mesh showing. An array of cell values is used as the colour.
 p+=1; plt.figure(p)
 plt.subplot(121)
-_ = rm.plotGrid(transpose=True, flip=True)
+_ = rm.plot_grid(transpose=True, flip=True)
 plt.subplot(122)
 arr = StatArray(np.random.randn(rm.nCells), "Name", "Units")
 _ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
@@ -135,7 +135,7 @@ rm = RectilinearMesh1D(edges=x, relative_to=5.0)
 # Or Pcolor the mesh showing. An array of cell values is used as the colour.
 p+=1; plt.figure(p)
 plt.subplot(121)
-_ = rm.plotGrid(transpose=True, flip=True)
+_ = rm.plot_grid(transpose=True, flip=True)
 plt.subplot(122)
 arr = StatArray(np.random.randn(rm.nCells), "Name", "Units")
 _ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
@@ -178,7 +178,7 @@ _ = rm2.pcolor(np.repeat(arr[None, :], 3, 0), grid=True, flipY=True)
 # Making a mesh perturbable
 # +++++++++++++++++++++++++
 n_cells = 2
-widths = StatArray(np.full(n_cells, fill_value=10.0), 'test')
+widths = DataArray(np.full(n_cells, fill_value=10.0), 'test')
 rm = RectilinearMesh1D(widths=widths, relative_to=0.0)
 
 #%%
@@ -246,9 +246,12 @@ rm1.plot_posteriors(axes=ax)
 # Expanded
 with h5py.File('rm1d.h5', 'w') as f:
     tmp = rm.pad(rm.max_cells)
-    tmp.createHdf(f, 'rm1d', withPosterior=True, add_axis=StatArray(np.arange(3.0), name='Easting', units="m"))
+    tmp.createHdf(f, 'rm1d', withPosterior=True, add_axis=DataArray(np.arange(3.0), name='Easting', units="m"))
+
+    print(list(f['rm1d'].keys()))
 
     rm.relative_to = 5.0
+    print(rm.summary)
     rm.writeHdf(f, 'rm1d', withPosterior = True, index=0)
 
     rm = deepcopy(rm0)
@@ -279,7 +282,7 @@ with h5py.File('rm1d.h5', 'r') as f:
 
 plt.figure()
 plt.subplot(121)
-rm2.plotGrid(transpose=True, flip=True)
+rm2.plot_grid(transpose=True, flip=True)
 plt.subplot(122)
 rm2.edges.posterior.pcolor(transpose=True, flip=True)
 

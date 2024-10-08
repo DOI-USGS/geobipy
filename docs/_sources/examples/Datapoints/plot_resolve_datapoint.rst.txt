@@ -133,7 +133,7 @@ Prepare the dataset so that we can read a point at a time.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 95-226
+.. GENERATED FROM PYTHON SOURCE LINES 95-227
 
 .. code-block:: Python
 
@@ -211,7 +211,7 @@ Prepare the dataset so that we can read a point at a time.
 
 
     # Define the distributions used as priors.
-    zPrior = Distribution('Uniform', min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0, prng=prng)
+    zPrior = Distribution('Uniform', min=fdp.z - 2.0, max=fdp.z + 2.0, prng=prng)
     relativePrior = Distribution('Uniform', min=0.01, max=0.5, prng=prng)
     additivePrior = Distribution('Uniform', min=5, max=15, prng=prng)
     fdp.set_priors(z_prior=zPrior, relative_error_prior=relativePrior, additive_error_prior=additivePrior, prng=prng)
@@ -240,7 +240,7 @@ Prepare the dataset so that we can read a point at a time.
 
 
     # Plot the posterior distributions
-    # fig = plt.figure()
+    fig = plt.figure()
     fdp.plot_posteriors(overlay=fdp)
 
     import h5py
@@ -251,6 +251,7 @@ Prepare the dataset so that we can read a point at a time.
     with h5py.File('fdp.h5', 'r') as f:
         fdp1 = FdemDataPoint.fromHdf(f['fdp'])
 
+    plt.figure()
     fdp1.plot_posteriors(overlay=fdp1)
 
     import h5py
@@ -298,8 +299,22 @@ Prepare the dataset so that we can read a point at a time.
     *
 
       .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_resolve_datapoint_004.png
-         :alt: Frequency Domain EM Data, Frequency Domain EM Data, Frequency Domain EM Data, Frequency Domain EM Data
+         :alt: Frequency Domain EM Data
          :srcset: /examples/Datapoints/images/sphx_glr_plot_resolve_datapoint_004.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_resolve_datapoint_005.png
+         :alt: Frequency Domain EM Data
+         :srcset: /examples/Datapoints/images/sphx_glr_plot_resolve_datapoint_005.png
+         :class: sphx-glr-multi-img
+
+    *
+
+      .. image-sg:: /examples/Datapoints/images/sphx_glr_plot_resolve_datapoint_006.png
+         :alt: Frequency Domain EM Data, Frequency Domain EM Data
+         :srcset: /examples/Datapoints/images/sphx_glr_plot_resolve_datapoint_006.png
          :class: sphx-glr-multi-img
 
 
@@ -311,8 +326,6 @@ Prepare the dataset so that we can read a point at a time.
     1367.81945885548
     Best half space conductivity is [0.097701] $S/m$
     45286.828623928755
-    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_resolve_datapoint.py:169: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
-      zPrior = Distribution('Uniform', min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0, prng=prng)
 
 
 
@@ -320,7 +333,7 @@ Prepare the dataset so that we can read a point at a time.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 7.442 seconds)
+   **Total running time of the script:** (0 minutes 9.803 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_resolve_datapoint.py:
@@ -336,6 +349,10 @@ Prepare the dataset so that we can read a point at a time.
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_resolve_datapoint.py <plot_resolve_datapoint.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_resolve_datapoint.zip <plot_resolve_datapoint.zip>`
 
 
 .. only:: html

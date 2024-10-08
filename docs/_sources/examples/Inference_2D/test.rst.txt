@@ -111,6 +111,10 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 
       :download:`Download Python source code: test.py <test.py>`
 
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: test.zip <test.zip>`
+
 
 .. only:: html
 

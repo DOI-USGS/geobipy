@@ -8,13 +8,11 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
 """
 #%%
-from geobipy import StatArray
-from geobipy import Histogram
-from geobipy import Distribution
-from geobipy.src.classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+from geobipy import DataArray, StatArray, Histogram, Distribution, RectilinearMesh1D
+
 
 # plt.style.use('seaborn-pastel')
 
@@ -25,25 +23,45 @@ import h5py
 
 # Integer
 test = StatArray(1, name='1')
+assert isinstance(test, StatArray) and test.size ==  1 and test.item() == 0.0, TypeError("da 0")
 print(test.summary)
 test = StatArray(10, name='10')
+assert isinstance(test, StatArray) and test.size ==  10 and np.all(test == 0.0), TypeError("da 1")
 print(test.summary)
 # tuple/Shape
 test = StatArray((2, 10), name='(2, 10)')
+assert isinstance(test, StatArray) and np.all(test.shape ==  (2, 10)) and np.all(test == 0.0), TypeError("da 2")
+print(test.summary)
+
+test = StatArray([2, 10], name='(2, 10)')
+assert isinstance(test, StatArray) and np.all(test ==  [2, 10]), TypeError("da 2")
 print(test.summary)
 
 # float
 test = StatArray(45.454, name='45.454')
+assert isinstance(test, StatArray) and test.size ==  1 and test.item() == 45.454, TypeError("da 3")
 print(test.summary)
 test = StatArray(np.float64(45.454), name='45.454')
+assert isinstance(test, StatArray) and test.size ==  1 and test.item() == 45.454, TypeError("da 4")
 print(test.summary)
 
-# complex
-# test = StatArray(np.complex(0.0, 1.0), name='complex(0, 1)')
-
 # array
-Density = StatArray(np.random.randn(1), name="Density", units="$\frac{g}{cc}$")
-print(Density.summary)
+test = StatArray(np.random.randn(1), name="test", units="$\frac{g}{cc}$")
+assert isinstance(test, StatArray) and test.size ==  1, TypeError("da 5")
+print(test.summary)
+
+test = StatArray(np.arange(10.0), name="test", units="$\frac{g}{cc}$")
+assert isinstance(test, StatArray) and test.size ==  10, TypeError("da 6")
+print(test.summary)
+
+
+test = DataArray(np.arange(10.0), name="test", units="$\frac{g}{cc}$")
+test = StatArray(test)
+assert isinstance(test, StatArray) and test.size ==  10, TypeError("da 6")
+print(test.summary)
+
+
+
 
 # The StatArray can take any numpy function that returns an array as an input.
 # The name and units of the variable can be assigned to the StatArray.
@@ -75,6 +93,8 @@ from numpy.random import Generator
 from numpy.random import PCG64DXSM
 generator = PCG64DXSM(seed=0)
 prng = Generator(generator)
+
+Density = StatArray(10.0, name="test", units="$\frac{g}{cc}$")
 
 Density.prior = Distribution('Uniform', -2.0, 2.0, prng=prng)
 

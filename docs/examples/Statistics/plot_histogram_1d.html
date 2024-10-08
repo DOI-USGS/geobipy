@@ -8,16 +8,16 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
-
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-
+  
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
@@ -27,17 +27,17 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Histogram 2D" href="plot_histogram_2d.html" />
-    <link rel="prev" title="Distribution Class" href="../Distributions/plot_distributions.html" />
+    <link rel="prev" title="DataArray Class" href="plot_DataArray.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-
-
+          
+          
           <a href="../../index.html" class="icon icon-home">
             GeoBIPy
           </a>
@@ -58,6 +58,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_DataArray.html">DataArray Class</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Histogram 1D</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#histogram-with-regular-bins">Histogram with regular bins</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#histogram-with-irregular-bins">Histogram with irregular bins</a></li>
@@ -104,7 +105,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-statistics-plot-histogram-1d-py"><span class="std std-ref">Go to the end</span></a>
@@ -160,7 +161,7 @@ saving as HDF5</p>
 <span class="n">H</span><span class="o">.</span><span class="n">plotMedian</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_1d_002.png" srcset="../../_images/sphx_glr_plot_histogram_1d_002.png" alt="plot histogram 1d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(-0.030000000000000027, -2.01, 1.8299999999999996)
+<img src="../../_images/sphx_glr_plot_histogram_1d_002.png" srcset="../../_images/sphx_glr_plot_histogram_1d_002.png" alt="plot histogram 1d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(np.float64(-0.030000000000000027), np.float64(-2.01), np.float64(1.9499999999999997))
 </pre></div>
 </div>
 </section>
@@ -279,47 +280,57 @@ mesh:
 |   Number of Cells:
 |   |   100
 |   Cell Centres:
-|   |   Name: bins (m) 0x166a0bed0
-|   |   Shape: (100,)
+|   |   StatArray
+|   |   Name:   bins (m)
+|   |   Address:[&#39;0x15560cc50&#39;]
+|   |   Shape:  (100,)
 |   |   Values: [-2.97 -2.91 -2.85 ...  2.85  2.91  2.97]
-|   |   Min: -2.9699999999999998
-|   |   Max: 2.9699999999999998
+|   |   Min:    -2.9699999999999998
+|   |   Max:    2.9699999999999998
 |   |   has_posterior: False
 |
 |   Cell Edges:
-|   |   Name: bins (m) 0x166a0a950
-|   |   Shape: (101,)
+|   |   StatArray
+|   |   Name:   bins (m)
+|   |   Address:[&#39;0x15560cad0&#39;]
+|   |   Shape:  (101,)
 |   |   Values: [-3.   -2.94 -2.88 ...  2.88  2.94  3.  ]
-|   |   Min: -3.0
-|   |   Max: 3.0
+|   |   Min:    -3.0
+|   |   Max:    3.0
 |   |   has_posterior: False
 |
 |   log:
 |   |   None
 |   relative_to:
-|   |   Name:  0x167d420d0
-|   |   Shape: (1,)
+|   |   StatArray
+|   |   Name:
+|   |   Address:[&#39;0x159d83550&#39;]
+|   |   Shape:  (1,)
 |   |   Values: [0.]
-|   |   Min: 0.0
-|   |   Max: 0.0
+|   |   Min:    0.0
+|   |   Max:    0.0
 |   |   has_posterior: False
 |
 values:
-|   Name: Frequency 0x167d41ad0
-|   Shape: (100,)
-|   Values: [0 0 2 ... 2 2 0]
-|   Min: 0
-|   Max: 86
-|   has_posterior: False
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x159d825d0&#39;]
+|   Shape:  (100,)
+|   Values: [1 1 0 ... 0 2 1]
+|   Min:    0
+|   Max:    82
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.342 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.198 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-1d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/6651de36bdd3440bb761887dd2b00831/plot_histogram_1d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_histogram_1d.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/9570534d71f4f6a00b8f20360000c3ff/plot_histogram_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_histogram_1d.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/2144e9773886d1394652515ba8d8dc41/plot_histogram_1d.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_histogram_1d.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
@@ -330,7 +341,7 @@ values:
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../Distributions/plot_distributions.html" class="btn btn-neutral float-left" title="Distribution Class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_DataArray.html" class="btn btn-neutral float-left" title="DataArray Class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="plot_histogram_2d.html" class="btn btn-neutral float-right" title="Histogram 2D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
@@ -343,7 +354,7 @@ values:
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-
+   
 
 </footer>
         </div>
@@ -354,7 +365,7 @@ values:
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>

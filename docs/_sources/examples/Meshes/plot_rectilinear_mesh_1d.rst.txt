@@ -26,7 +26,7 @@
 .. code-block:: Python
 
     from copy import deepcopy
-    from geobipy import StatArray
+    from geobipy import DataArray, StatArray
     from geobipy import RectilinearMesh1D, RectilinearMesh2D, RectilinearMesh2D_stitched
     import matplotlib.gridspec as gridspec
     import matplotlib.pyplot as plt
@@ -88,7 +88,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
     arr = StatArray(np.random.randn(*rm.shape), "Name", "Units")
     p=0; plt.figure(p)
     plt.subplot(121)
-    _ = rm.plotGrid(transpose=True, flip=True)
+    _ = rm.plot_grid(transpose=True, flip=True)
     plt.subplot(122)
     _ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
 
@@ -198,7 +198,7 @@ Here we use edges
     # Or Pcolor the mesh showing. An array of cell values is used as the colour.
     p+=1; plt.figure(p)
     plt.subplot(121)
-    _ = rm.plotGrid(transpose=True, flip=True)
+    _ = rm.plot_grid(transpose=True, flip=True)
     plt.subplot(122)
     arr = StatArray(np.random.randn(rm.nCells), "Name", "Units")
     _ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
@@ -310,7 +310,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
 
     p+=1; plt.figure(p)
     plt.subplot(121)
-    _ = rm.plotGrid(transpose=True, flip=True)
+    _ = rm.plot_grid(transpose=True, flip=True)
     plt.subplot(122)
     arr = StatArray(np.random.randn(rm.nCells), "Name", "Units")
     _ = rm.pcolor(arr, grid=True, transpose=True, flip=True)
@@ -353,7 +353,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.
     # Making a mesh perturbable
     # +++++++++++++++++++++++++
     n_cells = 2
-    widths = StatArray(np.full(n_cells, fill_value=10.0), 'test')
+    widths = DataArray(np.full(n_cells, fill_value=10.0), 'test')
     rm = RectilinearMesh1D(widths=widths, relative_to=0.0)
 
 
@@ -550,15 +550,18 @@ We can then perturb the layers of the model
 
 Expanded
 
-.. GENERATED FROM PYTHON SOURCE LINES 247-286
+.. GENERATED FROM PYTHON SOURCE LINES 247-289
 
 .. code-block:: Python
 
     with h5py.File('rm1d.h5', 'w') as f:
         tmp = rm.pad(rm.max_cells)
-        tmp.createHdf(f, 'rm1d', withPosterior=True, add_axis=StatArray(np.arange(3.0), name='Easting', units="m"))
+        tmp.createHdf(f, 'rm1d', withPosterior=True, add_axis=DataArray(np.arange(3.0), name='Easting', units="m"))
+
+        print(list(f['rm1d'].keys()))
 
         rm.relative_to = 5.0
+        print(rm.summary)
         rm.writeHdf(f, 'rm1d', withPosterior = True, index=0)
 
         rm = deepcopy(rm0)
@@ -589,7 +592,7 @@ Expanded
 
     plt.figure()
     plt.subplot(121)
-    rm2.plotGrid(transpose=True, flip=True)
+    rm2.plot_grid(transpose=True, flip=True)
     plt.subplot(122)
     rm2.edges.posterior.pcolor(transpose=True, flip=True)
 
@@ -614,13 +617,125 @@ Expanded
          :class: sphx-glr-multi-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    RectilinearMesh1D
+    Number of Cells:
+    |   StatArray
+    |   Name:   Number of cells
+    |   Address:['0x1651307d0' '0x164d369c0' '0x1648182d0' '0x16481a250']
+    |   Shape:  (1,)
+    |   Values: [30]
+    |   Min:    30
+    |   Max:    30
+    |   Prior:
+    |   |   Uniform Distribution: 
+    |   |   Min: 1
+    |   |   Max: 30
+    |   has_posterior: True
+
+    Cell Centres:
+    |   StatArray
+    |   Name:   test
+    |   Address:['0x1648f8cd0']
+    |   Shape:  (30,)
+    |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   Min:    0.0
+    |   Max:    0.0
+    |   has_posterior: False
+
+    Cell Edges:
+    |   StatArray
+    |   Name:   test
+    |   Address:['0x1648f9450']
+    |   Shape:  (31,)
+    |   Values: [0. 0. 0. ... 0. 0. 0.]
+    |   Min:    0.0
+    |   Max:    0.0
+    |   has_posterior: True
+
+    log:
+    |   None
+    relative_to:
+    |   StatArray
+    |   Name:   
+    |   Address:['0x1648fa050']
+    |   Shape:  (1,)
+    |   Values: [0.]
+    |   Min:    0.0
+    |   Max:    0.0
+    |   has_posterior: False
+
+
+    ['nCells', 'x', 'y']
+    RectilinearMesh1D
+    Number of Cells:
+    |   StatArray
+    |   Name:   Number of cells
+    |   Address:['0x164736bd0' '0x15a50a3c0' '0x164d4b150' '0x164d49bf0']
+    |   Shape:  (1,)
+    |   Values: [15]
+    |   Min:    15
+    |   Max:    15
+    |   Prior:
+    |   |   Uniform Distribution: 
+    |   |   Min: 1
+    |   |   Max: 30
+    |   has_posterior: True
+
+    Cell Centres:
+    |   StatArray
+    |   Name:   test
+    |   Address:['0x1646147d0']
+    |   Shape:  (15,)
+    |   Values: [  1.22331766   3.28906551   6.36608642 ...  66.85590133 108.99206549
+    |    148.449825  ]
+    |   Min:    1.2233176602046558
+    |   Max:    148.4498250024555
+    |   has_posterior: False
+
+    Cell Edges:
+    |   StatArray
+    |   Name:   test
+    |   Address:['0x164614dd0' '0x15c97a960' '0x164d4af70' '0x164795bb0' '0x16466b4f0'
+    |    '0x16466a930']
+    |   Shape:  (16,)
+    |   Values: [  0.           2.44663532   4.13149571 ...  70.19008745 147.79404353
+    |    149.10560647]
+    |   Min:    0.0
+    |   Max:    149.1056064716983
+    |   Prior:
+    |   |   Order Statistics: 
+    |   |   None 
+    |   Proposal:
+    |   |   Uniform Distribution: 
+    |   |   Min: 1.0
+    |   |   Max: 149.99999999999997
+    |   has_posterior: True
+
+    log:
+    |   None
+    relative_to:
+    |   StatArray
+    |   Name:   
+    |   Address:['0x164774f50']
+    |   Shape:  (1,)
+    |   Values: [5.]
+    |   Min:    5.0
+    |   Max:    5.0
+    |   has_posterior: False
+
+
+
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.030 seconds)
+   **Total running time of the script:** (0 minutes 5.945 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py:
@@ -636,6 +751,10 @@ Expanded
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_rectilinear_mesh_1d.py <plot_rectilinear_mesh_1d.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_rectilinear_mesh_1d.zip <plot_rectilinear_mesh_1d.zip>`
 
 
 .. only:: html

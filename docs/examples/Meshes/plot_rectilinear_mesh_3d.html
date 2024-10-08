@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -128,11 +128,11 @@ to download the full example code.</p>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">231</span><span class="p">)</span>
-<span class="n">rm2</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm2</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">232</span><span class="p">)</span>
-<span class="n">rm3</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm3</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">233</span><span class="p">)</span>
-<span class="n">rm4</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm4</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_rectilinear_mesh_3d_001.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_3d_001.png" alt="plot rectilinear mesh 3d" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">rm2</span> <span class="o">=</span> <span class="n">rm</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
@@ -140,11 +140,11 @@ to download the full example code.</p>
 <span class="n">rm4</span> <span class="o">=</span> <span class="n">rm</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="p">:]</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">234</span><span class="p">)</span>
-<span class="n">rm2</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm2</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">235</span><span class="p">)</span>
-<span class="n">rm3</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm3</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">236</span><span class="p">)</span>
-<span class="n">rm4</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm4</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_rectilinear_mesh_3d_002.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_3d_002.png" alt="plot rectilinear mesh 3d" class = "sphx-glr-single-img"/><div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;rm3d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -168,11 +168,11 @@ to download the full example code.</p>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">231</span><span class="p">)</span>
-<span class="n">rm2</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm2</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">232</span><span class="p">)</span>
-<span class="n">rm3</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm3</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">233</span><span class="p">)</span>
-<span class="n">rm4</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm4</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_rectilinear_mesh_3d_003.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_3d_003.png" alt="plot rectilinear mesh 3d" class = "sphx-glr-single-img"/><p>We can plot the mesh in 3D!</p>
@@ -181,7 +181,6 @@ to download the full example code.</p>
 </div>
 <p>We can plot the mesh in 3D!</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mesh</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pyvista_mesh</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;rm3d_re1.vtk&#39;</span><span class="p">)</span>
-
 
 <span class="n">x_re</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">centres</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">rm</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">nCells</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="s2">&quot;x_re&quot;</span><span class="p">)</span>
 
@@ -196,11 +195,11 @@ to download the full example code.</p>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">231</span><span class="p">)</span>
-<span class="n">rm2</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm2</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">232</span><span class="p">)</span>
-<span class="n">rm3</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm3</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">233</span><span class="p">)</span>
-<span class="n">rm4</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm4</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_rectilinear_mesh_3d_004.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_3d_004.png" alt="plot rectilinear mesh 3d" class = "sphx-glr-single-img"/><p>We can plot the mesh in 3D!</p>
@@ -228,11 +227,11 @@ to download the full example code.</p>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">231</span><span class="p">)</span>
-<span class="n">rm2</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm2</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">232</span><span class="p">)</span>
-<span class="n">rm3</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm3</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">233</span><span class="p">)</span>
-<span class="n">rm4</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">()</span>
+<span class="n">rm4</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">()</span>
 </pre></div>
 </div>
 <img src="../../_images/sphx_glr_plot_rectilinear_mesh_3d_005.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_3d_005.png" alt="plot rectilinear mesh 3d" class = "sphx-glr-single-img"/><p>We can plot the mesh in 3D!</p>
@@ -253,13 +252,16 @@ to download the full example code.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 11.321 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.145 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-3d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/b7483b08f4f927c644b97f4bf2cf523c/plot_rectilinear_mesh_3d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rectilinear_mesh_3d.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/7f3bb43ebb9eba21697953fbfc04f6d2/plot_rectilinear_mesh_3d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rectilinear_mesh_3d.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/dc3e882d376317616b04bc390b62a137/plot_rectilinear_mesh_3d.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_rectilinear_mesh_3d.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

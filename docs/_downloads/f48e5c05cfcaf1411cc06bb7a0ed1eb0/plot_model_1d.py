@@ -26,7 +26,7 @@ mesh = RectilinearMesh1D(widths = thk)
 mod = Model(mesh = mesh, values=par)
 
 plt.figure()
-mod.plotGrid(transpose=True, flip=True)
+mod.plot_grid(transpose=True, flip=True)
 
 #%%
 # Randomness and Model Perturbations

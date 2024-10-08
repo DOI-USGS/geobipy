@@ -23,58 +23,34 @@
 
 All plotting in GeoBIPy can be carried out using the 3D inference class
 
-.. GENERATED FROM PYTHON SOURCE LINES 8-153
-
-
-
-.. rst-class:: sphx-glr-horizontal
-
-
-    *
-
-      .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_001.png
-         :alt: resolve glacial, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
-         :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_001.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_002.png
-         :alt: resolve saline_clay, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
-         :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_002.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_003.png
-         :alt: resolve resistive_dolomites, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
-         :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_003.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_004.png
-         :alt: resolve resistive_basement, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
-         :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_004.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_005.png
-         :alt: resolve coastal_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
-         :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_005.png
-         :class: sphx-glr-multi-img
-
-    *
-
-      .. image-sg:: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_006.png
-         :alt: resolve ice_over_salt_water, Best model, 5%, 50%, 95%, P(# of Layers), P(Interface)
-         :srcset: /examples/Inference_2D/images/sphx_glr_plot_inference_2d_resolve_006.png
-         :class: sphx-glr-multi-img
+.. GENERATED FROM PYTHON SOURCE LINES 8-151
 
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    glacial
+    [Errno 2] Unable to synchronously open file (unable to open file: name = '../../../Parallel_Inference//resolve/glacial/0.0.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+    saline_clay
+    [Errno 2] Unable to synchronously open file (unable to open file: name = '../../../Parallel_Inference//resolve/saline_clay/0.0.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+    resistive_dolomites
+    [Errno 2] Unable to synchronously open file (unable to open file: name = '../../../Parallel_Inference//resolve/resistive_dolomites/0.0.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+    resistive_basement
+    [Errno 2] Unable to synchronously open file (unable to open file: name = '../../../Parallel_Inference//resolve/resistive_basement/0.0.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+    coastal_salt_water
+    [Errno 2] Unable to synchronously open file (unable to open file: name = '../../../Parallel_Inference//resolve/coastal_salt_water/0.0.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+    ice_over_salt_water
+    [Errno 2] Unable to synchronously open file (unable to open file: name = '../../../Parallel_Inference//resolve/ice_over_salt_water/0.0.h5', errno = 2, error message = 'No such file or directory', flags = 0, o_flags = 0)
+
+
+
+
+
+
+|
 
 .. code-block:: Python
 
@@ -110,9 +86,6 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
              "log" : 10,
              "cmap" : 'jet'
              }
-
-       import warnings
-       warnings.filterwarnings('error')
 
        fig = plt.figure(figsize=(16, 8))
        plt.suptitle("{} {}".format(data_type, model_type))
@@ -210,24 +183,25 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
        results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
        results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
-       # plt.show()
-       plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
+
+       plt.show()
+       # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
     if __name__ == '__main__':
        models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
        for model in models:
-          # try:
+          try:
              plot_2d_summary("../../../Parallel_Inference/", "resolve", model)
-          # except Exception as e:
-          #    print(model)
-          #    print(e)
-          #    pass
+          except Exception as e:
+             print(model)
+             print(e)
+             pass
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 49.364 seconds)
+   **Total running time of the script:** (0 minutes 2.560 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_2D_plot_inference_2d_resolve.py:
@@ -243,6 +217,10 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_inference_2d_resolve.py <plot_inference_2d_resolve.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_inference_2d_resolve.zip <plot_inference_2d_resolve.zip>`
 
 
 .. only:: html

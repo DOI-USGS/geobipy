@@ -96,8 +96,11 @@ prng = Generator(generator)
 # Set values of relative and additive error for both systems.
 tdp.relative_error = np.r_[0.05, 0.05]
 tdp.additive_error = np.r_[1e-14, 1e-13]
-# Define a multivariate log normal distribution as the prior on the predicted data.
-tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
+# Define a multivariate normal distribution as the prior on the predicted data.
+data_prior = Distribution('MvNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
+
+tdp.set_priors(data_prior=data_prior)
+
 
 #%%
 # This allows us to evaluate the likelihood of the predicted data
@@ -155,6 +158,7 @@ for i in range(10):
 
 #%%
 # Plot the posterior distributions
+plt.figure()
 tdp.plot_posteriors(overlay=tdp)
 
 plt.show()

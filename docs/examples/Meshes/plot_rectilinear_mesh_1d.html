@@ -8,16 +8,16 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
-
+  
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-
+  
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
         <script src="../../_static/documentation_options.js?v=8d563738"></script>
@@ -27,17 +27,17 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="2D Rectilinear Mesh" href="plot_rectilinear_mesh_2d.html" />
-    <link rel="prev" title="StatArray Class" href="../Statistics/plot_StatArray.html" />
+    <link rel="prev" title="StatArray Class" href="../Statistics/plot_StatArray.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
 
-
-
+          
+          
           <a href="../../index.html" class="icon icon-home">
             GeoBIPy
           </a>
@@ -62,7 +62,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">1D Rectilinear Mesh</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#the-basics">The basics</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#log-space-rectilinear-mesh">Log-space rectilinear mesh</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#relative_to">relative_to</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#relative-to">relative_to</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#randomness-and-model-perturbations">Randomness and Model Perturbations</a></li>
 </ul>
 </li>
@@ -104,7 +104,7 @@
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-
+             
   <div class="sphx-glr-download-link-note admonition note">
 <p class="admonition-title">Note</p>
 <p><a class="reference internal" href="#sphx-glr-download-examples-meshes-plot-rectilinear-mesh-1d-py"><span class="std std-ref">Go to the end</span></a>
@@ -113,7 +113,7 @@ to download the full example code.</p>
 <section class="sphx-glr-example-title" id="d-rectilinear-mesh">
 <span id="sphx-glr-examples-meshes-plot-rectilinear-mesh-1d-py"></span><h1>1D Rectilinear Mesh<a class="headerlink" href="#d-rectilinear-mesh" title="Link to this heading"></a></h1>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">StatArray</span>
 <span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">RectilinearMesh1D</span><span class="p">,</span> <span class="n">RectilinearMesh2D</span><span class="p">,</span> <span class="n">RectilinearMesh2D_stitched</span>
 <span class="kn">import</span> <span class="nn">matplotlib.gridspec</span> <span class="k">as</span> <span class="nn">gridspec</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -136,7 +136,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">arr</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="o">*</span><span class="n">rm</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Units&quot;</span><span class="p">)</span>
 <span class="n">p</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -198,7 +198,7 @@ Here we use edges</p>
 <span class="c1"># Or Pcolor the mesh showing. An array of cell values is used as the colour.</span>
 <span class="n">p</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
 <span class="n">arr</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">nCells</span><span class="p">),</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Units&quot;</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -242,8 +242,8 @@ Here we use edges</p>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_007.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_007.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-multi-img"/></li>
 </ul>
 </section>
-<section id="relative_to">
-<h2>relative_to<a class="headerlink" href="#relative_to" title="Link to this heading"></a></h2>
+<section id="relative-to">
+<h2>relative_to<a class="headerlink" href="#relative-to" title="Link to this heading"></a></h2>
 <p>Instantiate a new 1D rectilinear mesh by specifying cell centres or edges.
 Here we use edges</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">11.0</span><span class="p">),</span> <span class="s1">&#39;Deviation&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
@@ -256,7 +256,7 @@ Here we use edges</p>
 Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">p</span><span class="o">+=</span><span class="mi">1</span><span class="p">;</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
 <span class="n">arr</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">nCells</span><span class="p">),</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Units&quot;</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -299,7 +299,7 @@ Or Pcolor the mesh showing. An array of cell values is used as the colour.</p>
 <span class="c1"># Making a mesh perturbable</span>
 <span class="c1"># +++++++++++++++++++++++++</span>
 <span class="n">n_cells</span> <span class="o">=</span> <span class="mi">2</span>
-<span class="n">widths</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_cells</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<span class="n">widths</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">n_cells</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">10.0</span><span class="p">),</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
 <span class="n">rm</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">,</span> <span class="n">relative_to</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -384,9 +384,12 @@ Here we force the creation of a layer.</p>
 <p>Expanded</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;rm1d.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">tmp</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">max_cells</span><span class="p">)</span>
-    <span class="n">tmp</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Easting&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">))</span>
+    <span class="n">tmp</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="n">DataArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Easting&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;rm1d&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
     <span class="n">rm</span><span class="o">.</span><span class="n">relative_to</span> <span class="o">=</span> <span class="mf">5.0</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
     <span class="n">rm</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">rm</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">rm0</span><span class="p">)</span>
@@ -417,7 +420,7 @@ Here we force the creation of a layer.</p>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
-<span class="n">rm2</span><span class="o">.</span><span class="n">plotGrid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">rm2</span><span class="o">.</span><span class="n">plot_grid</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
 <span class="n">rm2</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">posterior</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -428,13 +431,123 @@ Here we force the creation of a layer.</p>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_014.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_014.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_015.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_015.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 8.030 seconds)</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>RectilinearMesh1D
+Number of Cells:
+|   StatArray
+|   Name:   Number of cells
+|   Address:[&#39;0x1651307d0&#39; &#39;0x164d369c0&#39; &#39;0x1648182d0&#39; &#39;0x16481a250&#39;]
+|   Shape:  (1,)
+|   Values: [30]
+|   Min:    30
+|   Max:    30
+|   Prior:
+|   |   Uniform Distribution:
+|   |   Min: 1
+|   |   Max: 30
+|   has_posterior: True
+
+Cell Centres:
+|   StatArray
+|   Name:   test
+|   Address:[&#39;0x1648f8cd0&#39;]
+|   Shape:  (30,)
+|   Values: [0. 0. 0. ... 0. 0. 0.]
+|   Min:    0.0
+|   Max:    0.0
+|   has_posterior: False
+
+Cell Edges:
+|   StatArray
+|   Name:   test
+|   Address:[&#39;0x1648f9450&#39;]
+|   Shape:  (31,)
+|   Values: [0. 0. 0. ... 0. 0. 0.]
+|   Min:    0.0
+|   Max:    0.0
+|   has_posterior: True
+
+log:
+|   None
+relative_to:
+|   StatArray
+|   Name:
+|   Address:[&#39;0x1648fa050&#39;]
+|   Shape:  (1,)
+|   Values: [0.]
+|   Min:    0.0
+|   Max:    0.0
+|   has_posterior: False
+
+
+[&#39;nCells&#39;, &#39;x&#39;, &#39;y&#39;]
+RectilinearMesh1D
+Number of Cells:
+|   StatArray
+|   Name:   Number of cells
+|   Address:[&#39;0x164736bd0&#39; &#39;0x15a50a3c0&#39; &#39;0x164d4b150&#39; &#39;0x164d49bf0&#39;]
+|   Shape:  (1,)
+|   Values: [15]
+|   Min:    15
+|   Max:    15
+|   Prior:
+|   |   Uniform Distribution:
+|   |   Min: 1
+|   |   Max: 30
+|   has_posterior: True
+
+Cell Centres:
+|   StatArray
+|   Name:   test
+|   Address:[&#39;0x1646147d0&#39;]
+|   Shape:  (15,)
+|   Values: [  1.22331766   3.28906551   6.36608642 ...  66.85590133 108.99206549
+|    148.449825  ]
+|   Min:    1.2233176602046558
+|   Max:    148.4498250024555
+|   has_posterior: False
+
+Cell Edges:
+|   StatArray
+|   Name:   test
+|   Address:[&#39;0x164614dd0&#39; &#39;0x15c97a960&#39; &#39;0x164d4af70&#39; &#39;0x164795bb0&#39; &#39;0x16466b4f0&#39;
+|    &#39;0x16466a930&#39;]
+|   Shape:  (16,)
+|   Values: [  0.           2.44663532   4.13149571 ...  70.19008745 147.79404353
+|    149.10560647]
+|   Min:    0.0
+|   Max:    149.1056064716983
+|   Prior:
+|   |   Order Statistics:
+|   |   None
+|   Proposal:
+|   |   Uniform Distribution:
+|   |   Min: 1.0
+|   |   Max: 149.99999999999997
+|   has_posterior: True
+
+log:
+|   None
+relative_to:
+|   StatArray
+|   Name:
+|   Address:[&#39;0x164774f50&#39;]
+|   Shape:  (1,)
+|   Values: [5.]
+|   Min:    5.0
+|   Max:    5.0
+|   has_posterior: False
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.945 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-1d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/16ec1efc89ed8eeea10bd844b92557de/plot_rectilinear_mesh_1d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rectilinear_mesh_1d.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/553c44c8f0a927032d89154ad011db0e/plot_rectilinear_mesh_1d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_rectilinear_mesh_1d.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/a3ece577667aef55ca48b74fee4c6ed6/plot_rectilinear_mesh_1d.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_rectilinear_mesh_1d.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
@@ -458,7 +571,7 @@ Here we force the creation of a layer.</p>
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     provided by <a href="https://readthedocs.org">Read the Docs</a>.
-
+   
 
 </footer>
         </div>
@@ -469,7 +582,7 @@ Here we force the creation of a layer.</p>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
+  </script> 
 
 </body>
 </html>
