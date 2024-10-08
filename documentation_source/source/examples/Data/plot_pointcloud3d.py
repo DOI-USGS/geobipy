@@ -77,12 +77,12 @@ PC3D.map(dx=0.01, dy=0.01, method='sibson')
 plt.subplot(334)
 PC3D.map(dx=0.01, dy=0.01, method='ct', mask=0.03)
 plt.subplot(335)
-PC3D.map(dx=0.01, dy=0.01, method='mc', mask=0.03)
+PC3D.map(dx=0.01, dy=0.01, method='mc', mask=0.3)
 plt.subplot(336)
 PC3D.map(dx=0.01, dy=0.01, method='sibson', mask=0.03)
 #%%
 # For lots of points, these surfaces can look noisy. Using a block filter will help
-PCsub = PC3D.block_median(0.005, 0.005)
+PCsub = PC3D.block_median(0.05, 0.05)
 plt.subplot(337)
 PCsub.map(dx=0.01, dy=0.01, method='ct', mask=0.03)
 plt.subplot(338)
@@ -121,8 +121,6 @@ PC3D.read_csv(filename=dataFolder + 'Resolve1.txt')
 
 
 #%%
-
-
 plt.figure()
 f = PC3D.scatter2D(s=10)
 

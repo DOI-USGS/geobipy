@@ -300,6 +300,6 @@ plt.legend()
 with h5py.File('h2d.h5', 'r') as f:
     H1 = Histogram.fromHdf(f['h2d'])
 
-H1.pyvista_mesh().save('h3d_read.vtk')
+# H1.pyvista_mesh().save('h3d_read.vtk')
 
 plt.show()

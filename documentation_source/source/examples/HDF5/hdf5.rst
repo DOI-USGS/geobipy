@@ -170,6 +170,10 @@ Similarly, we can duplicate a 2D array with an extra 2D duplication
 
       :download:`Download Python source code: hdf5.py <hdf5.py>`
 
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: hdf5.zip <hdf5.zip>`
+
 
 .. only:: html
 
