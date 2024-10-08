@@ -1,7 +1,7 @@
 
 import numpy as np
 from copy import deepcopy
-from ...classes.core import StatArray
+from ..core.DataArray import DataArray
 from scipy.stats import (multivariate_normal, norm)
 from scipy.special import beta
 import matplotlib.pyplot as plt
@@ -61,7 +61,7 @@ class mixPearson(Mixture):
 
     @property
     def variances(self):
-        return StatArray.StatArray(self.sigmas**2.0, 'Variance')
+        return DataArray(self.sigmas**2.0, 'Variance')
 
 
     @sigmas.setter
@@ -135,7 +135,7 @@ class mixPearson(Mixture):
     def probability(self, x, log, component=None):
 
         if component is None:
-            out = StatArray.StatArray(np.empty([self.n_components, np.size(x)]), "Probability Density")
+            out = DataArray(np.empty([self.n_components, np.size(x)]), "Probability Density")
             for i in range(self.n_components):
                 out[i, :] =  self._probability(x, log, self.means[i], self.variances[i], self.exponents[i])
             return out
@@ -149,6 +149,6 @@ class mixPearson(Mixture):
         p = (1.0 / (sigma * beta(exponent - 0.5, 0.5))) * (1 + ((x - mean)**2.0)/(sigma**2.0))**-exponent
 
         if log:
-            return StatArray.StatArray(np.log(p), "Probability Density")
+            return DataArray(np.log(p), "Probability Density")
         else:
-            return StatArray.StatArray(p, "Probability Density")
+            return DataArray(p, "Probability Density")

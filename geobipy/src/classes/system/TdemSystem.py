@@ -2,7 +2,7 @@ from numpy import log10, logspace, max, maximum, min, size
 
 from ...classes.core.myObject import myObject
 from ...base import fileIO as fIO
-from ...classes.core import StatArray
+from ..statistics import StatArray
 from .EmLoop import EmLoop
 from .CircularLoop import CircularLoop
 from .TdemSystem_GAAEM import TdemSystem_GAAEM
@@ -30,7 +30,6 @@ class TdemSystem(TdemSystem_GAAEM):
         """Instantiate"""
 
         if not system_filename is None:
-
             return super().__init__(system_filename)
 
         # self.offTimes = StatArray.StatArray(offTimes, 'Time', 's')

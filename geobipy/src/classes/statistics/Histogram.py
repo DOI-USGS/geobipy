@@ -10,7 +10,7 @@ from .mixPearson import mixPearson
 from ...base import utilities
 from ...base import plotting as cP
 from ..model.Model import Model
-from ..core.StatArray import StatArray
+from ..core.DataArray import DataArray
 import progressbar
 
 class Histogram(Model):
@@ -34,28 +34,28 @@ class Histogram(Model):
     def pdf(self):
         out = Model(self.mesh)
         if self.values.max() > 0:
-            out.values = StatArray(self.values / sum(self.mesh.area * self.values), name='Density')
+            out.values = DataArray(self.values / sum(self.mesh.area * self.values), name='Density')
         else:
-            out.values = StatArray(out.mesh.shape, name='Density')
+            out.values = DataArray(out.mesh.shape, name='Density')
         return out
 
     @property
     def pmf(self):
         out = Model(self.mesh)
         if self.values.max() > 0:
-            out.values = StatArray(self.values / sum(self.values), name='mass')
+            out.values = DataArray(self.values / sum(self.values), name='mass')
         else:
-            out.values = StatArray(out.mesh.shape, name='mass')
+            out.values = DataArray(out.mesh.shape, name='mass')
         return out
 
     @Model.values.setter
     def values(self, values):
         if values is None:
-            self._values = StatArray(self.shape, name='Frequency', dtype=int32)
+            self._values = DataArray(self.shape, name='Frequency', dtype=int32)
             return
 
         # assert all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
-        self._values = StatArray(values, name='Frequency')
+        self._values = DataArray(values, name='Frequency')
 
     def __getitem__(self, slic):
         mesh = self.mesh[slic]
@@ -81,7 +81,7 @@ class Histogram(Model):
             cdf = cumsum(self.values, axis=axis)
         cdf = cdf / cdf.max()
 
-        return Model(self.mesh, StatArray(cdf, name='Cumulative Density Function'))
+        return Model(self.mesh, DataArray(cdf, name='Cumulative Density Function'))
 
     def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
         return self.mesh._compute_probability(distribution, self.pdf.values, log, log_probability, axis, **kwargs)
@@ -273,7 +273,7 @@ class Histogram(Model):
 
         Returns
         -------
-        out : geobipy.StatArray
+        out : geobipy.DataArray
             The means along the axis.
 
         """
@@ -395,7 +395,7 @@ class Histogram(Model):
             out = Model(self.mesh.remove_axis(axis), values=percentile)
         else:
             mesh = deepcopy(self.mesh)
-            mesh.axis(axis).centres = StatArray(percent, 'percent', '%')
+            mesh.axis(axis).centres = DataArray(percent, 'percent', '%')
             out = Model(mesh, values=percentile)
 
         return out
@@ -496,7 +496,7 @@ class Histogram(Model):
 
         Returns
         -------
-        out : geobipy.StatArray
+        out : geobipy.DataArray
             The samples.
 
         """
@@ -528,7 +528,7 @@ class Histogram(Model):
 
         """
 
-        out = StatArray(self.credible_range(percent=percent, log=log, axis=axis, **kwargs), 'Transparency')
+        out = DataArray(self.credible_range(percent=percent, log=log, axis=axis, **kwargs), 'Transparency')
         mn = nanmin(out)
         mx = nanmax(out)
         t = mx - mn

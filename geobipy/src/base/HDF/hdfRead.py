@@ -107,7 +107,7 @@ def readKeyFromFiles(fNames, groupName, key, index=None, **kwargs):
 
     Other Parameters
     ----------------
-    Any other parameters in \*\*kwargs are optional but may be necessary if an object's .fromHDF() procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are necessary.
+    Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF() procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are necessary.
 
     Returns
     -------
@@ -144,7 +144,7 @@ def readKeyFromFile(h5obj, fName, groupName, key, index=None, **kwargs):
 
     Other Parameters
     ----------------
-    Any other parameters in \*\*kwargs are optional but may be necessary if an object's .fromHDF() procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are necessary.
+    Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF() procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are necessary.
 
     Returns
     -------
@@ -184,7 +184,7 @@ def read_item(h5obj, index=None, **kwargs):
 
     Other Parameters
     ----------------
-    Any other parameters in \*\*kwargs are optional but may be necessary if an object's .fromHDF() procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are necessary.
+    Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF() procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are necessary.
 
     Returns
     -------
@@ -192,7 +192,8 @@ def read_item(h5obj, index=None, **kwargs):
         An object that has a .fromHdf() procedure or a numpy array of the returned variable.
 
     """
-    from ...classes.core import StatArray
+    from ...classes.core.DataArray import DataArray
+    from ...classes.statistics.StatArray import StatArray
     from ...classes.statistics.Histogram import Histogram
     from ...classes.data.datapoint.FdemDataPoint import FdemDataPoint
     from ...classes.data.datapoint.TdemDataPoint import TdemDataPoint

@@ -4,10 +4,10 @@ Module describing a Mesh
 from numpy import abs, argmax, apply_along_axis, cumsum, diff, divide, expand_dims, float64
 from numpy import minimum, ndim, nan
 from numpy import r_, s_, searchsorted, size, squeeze, sum, take, take_along_axis, where, zeros_like
-from ...classes.core.myObject import myObject
+from ..core.myObject import myObject
 from ...base.utilities import _log as log_
 from ...base.utilities import _power as power_
-from ..core import StatArray
+from ..core.DataArray import DataArray
 
 
 class Mesh(myObject):
@@ -88,7 +88,7 @@ class Mesh(myObject):
         else:
             i = where(N == 0.0)
             N[i] = 1
-            out = StatArray.StatArray(t.shape)
+            out = DataArray(t.shape)
             out = (t / N)
 
         if ax._relative_to is not None:
@@ -131,7 +131,7 @@ class Mesh(myObject):
 
         """
         out = self._percentile(values, 50.0, axis)
-        if isinstance(out, StatArray.StatArray):
+        if isinstance(out, DataArray):
             out.name =  "Median " + self.axis(axis).name
         return out
 
@@ -159,6 +159,7 @@ class Mesh(myObject):
         if self.ndim == 1:
             out = self.centres_absolute[i]
         else:
+
             centres = self.axis(axis).centres_absolute
             if centres.ndim != i.ndim:
             # if centres.ndim > 1:

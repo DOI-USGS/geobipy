@@ -6,7 +6,7 @@ import numpy as np
 from .baseDistribution import baseDistribution
 from scipy.stats import t
 from ...base import plotting as cP
-from ..core import StatArray
+from ..core.DataArray import DataArray
 
 class StudentT(baseDistribution):
     """Univariate normal distribution
@@ -86,6 +86,6 @@ class StudentT(baseDistribution):
     def probability(self, x, log):
         """ For a realization x, compute the probability """
         if log:
-            return StatArray.StatArray(t.logpdf(x, self.degrees, loc = self._mean, scale = self.variance), "Probability Density")
+            return DataArray(t.logpdf(x, self.degrees, loc = self._mean, scale = self.variance), "Probability Density")
         else:
-            return StatArray.StatArray(t.pdf(x, self.degrees, loc = self._mean, scale = self.variance), "Probability Density")
+            return DataArray(t.pdf(x, self.degrees, loc = self._mean, scale = self.variance), "Probability Density")

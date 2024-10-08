@@ -8,7 +8,6 @@ from numpy import cumsum, empty, searchsorted, size, sum
 from .baseDistribution import baseDistribution
 from scipy.stats import norm
 from ...base import plotting as cP
-from ..core import StatArray
 
 class Categorical(baseDistribution):
     """Categorical distribution

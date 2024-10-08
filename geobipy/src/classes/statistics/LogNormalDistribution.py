@@ -6,7 +6,7 @@ from numpy import array, exp, linspace, log, size, squeeze, sqrt
 from .NormalDistribution import Normal
 from scipy.stats import norm
 from ...base import plotting as cP
-from ..core import StatArray
+from ..core.DataArray import DataArray
 
 class LogNormal(Normal):
     """Univariate normal distribution
@@ -54,7 +54,7 @@ class LogNormal(Normal):
         """ For a realization x, compute the probability """
         if self.linearSpace:
             x = log(x)
-        return StatArray.StatArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
+        return DataArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
 
 
     def __deepcopy__(self, memo={}):
@@ -106,7 +106,7 @@ class LogNormal(Normal):
 
 
         bins = self.bins()
-        t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
+        t = r"$\\tilde{N}(\\mu="+str(self.mean)+", \\sigma^{2}="+str(self.variance)+")$"
 
         cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)
 
@@ -118,9 +118,9 @@ class LogNormal(Normal):
             x= log(x)
 
         if log:
-            return StatArray.StatArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
+            return DataArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
         else:
-            return StatArray.StatArray(norm.pdf(x, loc = self._mean, scale = self.variance), "Probability Density")
+            return DataArray(norm.pdf(x, loc = self._mean, scale = self.variance), "Probability Density")
 
 #    def hdfName(self):
 #        """ Create the group name for an HDF file """
@@ -164,4 +164,4 @@ class LogNormal(Normal):
         tmp = nStd * sqrt(self.variance)
         values = linspace(self._mean - tmp, self._mean + tmp, nBins+1)
 
-        return StatArray.StatArray(exp(values)) if self.linearSpace else StatArray.StatArray(values)
+        return DataArray(exp(values)) if self.linearSpace else DataArray(values)

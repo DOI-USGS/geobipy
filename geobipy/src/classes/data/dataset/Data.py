@@ -12,7 +12,8 @@ from numpy import all as npall
 from numpy.ma import MaskedArray
 
 from pandas import DataFrame, read_csv
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from ....base import fileIO as fIO
 from ....base import utilities as cf
 from ....base import plotting as cP
@@ -81,17 +82,17 @@ class Data(Point):
 
         super().__init__(x, y, z, elevation)
 
-        self._fiducial = StatArray.StatArray(arange(self.nPoints), "Fiducial")
-        self._lineNumber = StatArray.StatArray(self.nPoints, "Line number")
+        self._fiducial = DataArray(arange(self.nPoints), "Fiducial")
+        self._lineNumber = DataArray(self.nPoints, "Line number")
 
         shp = (self._nPoints, self.nChannels)
-        self._data = StatArray.StatArray(shp, "Data", self.units)
-        self._predictedData = StatArray.StatArray(shp, "Predicted Data", self.units)
-        self._std = StatArray.StatArray(ones(shp), "std", self.units)
+        self._data = DataArray(shp, "Data", self.units)
+        self._predictedData = DataArray(shp, "Predicted Data", self.units)
+        self._std = DataArray(ones(shp), "std", self.units)
 
         shp = (self.nPoints, self.nSystems)
-        self._relative_error = StatArray.StatArray(full(shp, fill_value=0.01), "Relative error", "%")
-        self._additive_error = StatArray.StatArray(shp, "Additive error", self.units)
+        self._relative_error = DataArray(full(shp, fill_value=0.01), "Relative error", "%")
+        self._additive_error = DataArray(shp, "Additive error", self.units)
 
         self.fiducial = fiducial
         self.lineNumber = lineNumber
@@ -158,7 +159,7 @@ class Data(Point):
     def additive_error(self):
         """The data. """
         if size(self._additive_error, 0) == 0:
-            self._additive_error = StatArray.StatArray((self.nPoints, self.nSystems), "Additive error", self.units)
+            self._additive_error = DataArray((self.nPoints, self.nSystems), "Additive error", self.units)
         return self._additive_error
 
     @additive_error.setter
@@ -167,7 +168,7 @@ class Data(Point):
             self.nPoints = size(values, 0)
             shp = (self.nPoints, self.nSystems)
             if not allclose(self._additive_error.shape, shp):
-                self._additive_error = StatArray.StatArray(values, "Additive error", self.units)
+                self._additive_error = DataArray(values, "Additive error", self.units)
                 return
 
             self._additive_error[:, :] = values
@@ -241,7 +242,7 @@ class Data(Point):
     def data(self):
         """The data. """
         if size(self._data, 0) == 0:
-            self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
+            self._data = DataArray((self.nPoints, self.nChannels), "Data", self.units)
         return self._data
 
     @data.setter
@@ -251,7 +252,7 @@ class Data(Point):
 
             shp = (self.nPoints, self.nChannels)
             if not allclose(self._data.shape, shp):
-                self._data = StatArray.StatArray(values, "Data", self.units)
+                self._data = DataArray(values, "Data", self.units)
                 return
 
             self._data[:, :] = values
@@ -259,7 +260,7 @@ class Data(Point):
 
     @property
     def deltaD(self):
-        """Get the difference between the predicted and observed data,
+        r"""Get the difference between the predicted and observed data,
 
         .. math::
             \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
@@ -275,7 +276,7 @@ class Data(Point):
     @property
     def fiducial(self):
         if size(self._fiducial) == 0:
-            self._fiducial = StatArray.StatArray(arange(self.nPoints), "Fiducial")
+            self._fiducial = DataArray(arange(self.nPoints), "Fiducial")
         return self._fiducial
 
     @fiducial.setter
@@ -283,7 +284,7 @@ class Data(Point):
         if values is not None:
             self.nPoints = size(values)
             if self._fiducial.size != self.nPoints:
-                self._fiducial = StatArray.StatArray(values.astype(float64), "Fiducial")
+                self._fiducial = DataArray(values.astype(float64), "Fiducial")
                 return
 
             self._fiducial[:] = values
@@ -291,7 +292,7 @@ class Data(Point):
     @property
     def lineNumber(self):
         if size(self._lineNumber) == 0:
-            self._lineNumber = StatArray.StatArray(self.nPoints, "Line number")
+            self._lineNumber = DataArray(self.nPoints, "Line number")
         return self._lineNumber
 
     @lineNumber.setter
@@ -299,7 +300,7 @@ class Data(Point):
         if values is not None:
             self.nPoints = size(values)
             if self._lineNumber.size != self.nPoints:
-                self._lineNumber = StatArray.StatArray(values, "Line number")
+                self._lineNumber = DataArray(values, "Line number")
                 return
 
             self._lineNumber[:] = values
@@ -337,7 +338,7 @@ class Data(Point):
     def predictedData(self):
         """The predicted data. """
         if size(self._predictedData, 0) == 0:
-            self._predictedData = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted Data", self.units)
+            self._predictedData = DataArray((self.nPoints, self.nChannels), "Predicted Data", self.units)
         return self._predictedData
 
     @predictedData.setter
@@ -348,7 +349,7 @@ class Data(Point):
 
             shp = (self.nPoints, self.nChannels)
             if not allclose(self._predictedData.shape, shp):
-                self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
+                self._predictedData = DataArray(values, "Predicted Data", self.units)
                 return
 
             self._predictedData[:, :] = values
@@ -357,7 +358,7 @@ class Data(Point):
     def relative_error(self):
         """The data. """
         if size(self._relative_error, 0) == 0:
-            self._relative_error = StatArray.StatArray(full((self.nPoints, self.nSystems), fill_value=0.01), "Relative error", "%")
+            self._relative_error = DataArray(full((self.nPoints, self.nSystems), fill_value=0.01), "Relative error", "%")
         return self._relative_error
 
     @relative_error.setter
@@ -366,7 +367,7 @@ class Data(Point):
             self.nPoints = size(values, 0)
             shp = (self.nPoints, self.nSystems)
             if not allclose(self._relative_error.shape, shp):
-                self._relative_error = StatArray.StatArray(values, "Relative error", "%")
+                self._relative_error = DataArray(values, "Relative error", "%")
                 return
 
             self._relative_error[:, :] = values
@@ -375,7 +376,7 @@ class Data(Point):
     def std(self):
         """The data. """
         if size(self._std, 0) == 0:
-            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+            self._std = DataArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
         relative_error = self.relative_error[:, None] * self.data
         self._std[:, :] = sqrt((relative_error**2.0) + (self.additive_error[:, None]**2.0))
@@ -389,7 +390,7 @@ class Data(Point):
 
             shp = (self.nPoints, self.nChannels)
             if not allclose(self._std.shape, shp):
-                self._std = StatArray.StatArray(values, "Std", self.units)
+                self._std = DataArray(values, "Std", self.units)
                 return
 
             self._std[:, :] = values
@@ -532,7 +533,7 @@ class Data(Point):
         try:
             df = read_csv(filename, index_col=False, usecols=channels, chunksize=1, skipinitialspace = True)
         except:
-            df = read_csv(filename, index_col=False, usecols=channels, chunksize=1, delim_whitespace=True, skipinitialspace = True)
+            df = read_csv(filename, index_col=False, usecols=channels, chunksize=1, sep=r"\s+", skipinitialspace = True)
 
 
         self._file = df
@@ -550,7 +551,7 @@ class Data(Point):
         try:
             df = read_csv(filename, index_col=False, usecols=channels[:2], skipinitialspace = True)
         except:
-            df = read_csv(filename, index_col=False, usecols=channels[:2], delim_whitespace=True, skipinitialspace = True)
+            df = read_csv(filename, index_col=False, usecols=channels[:2], sep=r"\s+", skipinitialspace = True)
 
         df = df.replace('NaN',nan)
         self.lineNumber = df[channels[0]].values
@@ -598,7 +599,7 @@ class Data(Point):
         return bad_lines
 
     def data_misfit(self, squared=False):
-        """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
+        r"""Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
         .. math::
             \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
@@ -617,7 +618,7 @@ class Data(Point):
 
         """
         x = MaskedArray((self.deltaD / self.std)**2.0, mask=~self.active)
-        data_misfit = StatArray.StatArray(sum(x, axis=1), "Data misfit")
+        data_misfit = DataArray(sum(x, axis=1), "Data misfit")
         return data_misfit if squared else sqrt(data_misfit)
 
     def __getitem__(self, i):
@@ -748,10 +749,10 @@ class Data(Point):
     #     """
 
     #     if system is None:
-    #         return StatArray.StatArray(self.predictedData[:, channel], "Predicted data {}".format(self.channel_names[channel]), self.predictedData.units)
+    #         return DataArray(self.predictedData[:, channel], "Predicted data {}".format(self.channel_names[channel]), self.predictedData.units)
     #     else:
     #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-    #         return StatArray.StatArray(self.predictedData[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channel_names[self.systemOffset[system] + channel]), self.predictedData.units)
+    #         return DataArray(self.predictedData[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channel_names[self.systemOffset[system] + channel]), self.predictedData.units)
 
 
     # def stdChannel(self, channel, system=None):
@@ -773,10 +774,10 @@ class Data(Point):
     #     """
 
     #     if system is None:
-    #         return StatArray.StatArray(self.std[:, channel], "Std {}".format(self.channel_names[channel]), self.std.units)
+    #         return DataArray(self.std[:, channel], "Std {}".format(self.channel_names[channel]), self.std.units)
     #     else:
     #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-    #         return StatArray.StatArray(self.std[:, self.systemOffset[system] + channel], "Std {}".format(self.channel_names[self.systemOffset[system] + channel]), self.std.units)
+    #         return DataArray(self.std[:, self.systemOffset[system] + channel], "Std {}".format(self.channel_names[self.systemOffset[system] + channel]), self.std.units)
 
 
     # def maketest(self, nPoints, nChannels):
@@ -1187,15 +1188,15 @@ class Data(Point):
 
         self = super(Data, cls).fromHdf(grp, **kwargs)
 
-        self.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'])
-        self.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'])
+        self.fiducial = DataArray.fromHdf(grp['fiducial'])
+        self.lineNumber = DataArray.fromHdf(grp['line_number'])
 
-        self.data = StatArray.StatArray.fromHdf(grp['data'])
-        self.std = StatArray.StatArray.fromHdf(grp['std'])
-        self.predictedData = StatArray.StatArray.fromHdf(grp['predicted_data'])
+        self.data = DataArray.fromHdf(grp['data'])
+        self.std = DataArray.fromHdf(grp['std'])
+        self.predictedData = DataArray.fromHdf(grp['predicted_data'])
 
-        self.relative_error = StatArray.StatArray.fromHdf(grp['relative_error'])
-        self.additive_error = StatArray.StatArray.fromHdf(grp['additive_error'])
+        self.relative_error = DataArray.fromHdf(grp['relative_error'])
+        self.additive_error = DataArray.fromHdf(grp['additive_error'])
 
         return self
 

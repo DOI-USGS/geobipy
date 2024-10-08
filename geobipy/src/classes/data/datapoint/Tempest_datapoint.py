@@ -8,8 +8,8 @@ from numpy import all as npall
 from matplotlib.figure import Figure
 from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
 
-
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from .TdemDataPoint import TdemDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
 from ...statistics.Distribution import Distribution
@@ -89,7 +89,7 @@ class Tempest_datapoint(TdemDataPoint):
             assert size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
                                                                   "additive_error must have size {}").format(self.nChannels))
 
-        self._additive_error = StatArray.StatArray(values, '$\epsilon_{additive}$', self.units)
+        self._additive_error = StatArray(values, '$\\epsilon_{additive}$', self.units)
 
     @property
     def additive_error_multiplier(self):
@@ -98,10 +98,10 @@ class Tempest_datapoint(TdemDataPoint):
     @additive_error_multiplier.setter
     def additive_error_multiplier(self, values):
         if values is None:
-            self._additive_error_multiplier = StatArray.StatArray(ones(self.nSystems * self.n_components), 'Multiplier')
+            self._additive_error_multiplier = StatArray(ones(self.nSystems * self.n_components), 'Multiplier')
         else:
             assert size(values) == self.nSystems * self.n_components, ValueError(f'additive_error_multiplier must have size {self.nSystems * self.n_components} but has size {size(values)}')
-            self._additive_error_multiplier = StatArray.StatArray(values, 'Multiplier')
+            self._additive_error_multiplier = StatArray(values, 'Multiplier')
 
 
     @TdemDataPoint.data.getter
@@ -135,7 +135,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
-        self._relative_error = StatArray.StatArray(values, '$\epsilon_{Relative}$', '%')
+        self._relative_error = StatArray(values, '$\epsilon_{Relative}$', '%')
 
     @TdemDataPoint.std.getter
     def std(self):
@@ -513,7 +513,7 @@ class Tempest_datapoint(TdemDataPoint):
     def set_relative_error_posterior(self):
 
         if self.relative_error.hasPrior:
-            bins = StatArray.StatArray(atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
+            bins = DataArray(atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
             posterior = []
             for i in range(self.n_components):
                 b = bins[i, :]
@@ -523,7 +523,7 @@ class Tempest_datapoint(TdemDataPoint):
 
     # def set_additive_error_posterior(self, log=None):
     #     if self.additive_error.hasPrior:
-    #         bins = RectilinearMesh1D(edges=StatArray.StatArray(self.additive_error.prior.bins()[0, :], name=self.additive_error.name, units=self.data.units), log=10)
+    #         bins = RectilinearMesh1D(edges=DataArray(self.additive_error.prior.bins()[0, :], name=self.additive_error.name, units=self.data.units), log=10)
     #         posterior = []
     #         # for j in range(self.nSystems):
     #         system_times = RectilinearMesh1D(centres=self.off_time(0), log=10)
@@ -537,7 +537,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         """
         if self.additive_error_multiplier.hasPrior:
-            bins = StatArray.StatArray(atleast_2d(self.additive_error_multiplier.prior.bins()), name=self.additive_error_multiplier.name)
+            bins = DataArray(atleast_2d(self.additive_error_multiplier.prior.bins()), name=self.additive_error_multiplier.name)
 
             posterior = []
             for i in range(self.n_components):
@@ -588,5 +588,5 @@ class Tempest_datapoint(TdemDataPoint):
     def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
         self = super(Tempest_datapoint, cls).fromHdf(grp, **kwargs)
-        self._additive_error_multiplier = StatArray.StatArray.fromHdf(grp['additive_error_multiplier'], **kwargs)
+        self._additive_error_multiplier = StatArray.fromHdf(grp['additive_error_multiplier'], **kwargs)
         return self

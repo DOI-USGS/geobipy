@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 from ...classes.core.myObject import myObject
-from ...classes.core import StatArray
+from ..core.DataArray import DataArray
 from ...base import utilities as cF
 # from scipy.optimize import curve_fit
 # from lmfit import models
@@ -51,7 +51,7 @@ class Mixture(myObject):
 
     @params.setter
     def params(self, values):
-        self._params = StatArray.StatArray(values)
+        self._params = DataArray(values)
 
     def fit_to_curve(self, x, y, n_components=None, plot=False, debug=False, verbose=False, final=False, **kwargs):
         """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
@@ -82,7 +82,7 @@ class Mixture(myObject):
         masking = kwargs.pop('masking', 1.67)
         dynamic_weighting = kwargs.pop('dynamic_weighting', False)
 
-        x = StatArray.StatArray(x)
+        x = DataArray(x)
 
         edges = x.edges()
         centres, dum = cF._log(x, log)
@@ -445,5 +445,5 @@ class Mixture(myObject):
         """
         # assert np.size(index) == np.size(item['data'].shape) - 1, ValueError('Need to specify a {}D index'.format(np.size(item['data'].shape)-1))
 
-        self.params = StatArray.StatArray.fromHdf(grp['params'], index=index)
+        self.params = DataArray.fromHdf(grp['params'], index=index)
         return self.squeeze()

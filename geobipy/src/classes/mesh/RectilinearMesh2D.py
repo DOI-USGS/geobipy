@@ -4,14 +4,14 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 
 from numpy import abs, arange, asarray
-from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float64, full, int_, int32, integer, interp
+from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float32, float64, full, int_, int32, integer, interp
 from numpy import max, maximum, meshgrid, min, minimum, nan, ndim, outer, r_, ravel_multi_index
 from numpy import repeat, s_, searchsorted, shape, size, sqrt, squeeze, tile, unravel_index
 from numpy import where, zeros
 from numpy import all as npall
 
 from .Mesh import Mesh
-from ...classes.core import StatArray
+from ..core.DataArray import DataArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
@@ -157,7 +157,7 @@ class RectilinearMesh2D(Mesh):
                 dx = diff(self.x.edges)
                 dy = diff(self.y.edges)
 
-                distance = StatArray.StatArray(zeros(self.x.nEdges), 'Distance', self.x.centres.units)
+                distance = DataArray(zeros(self.x.nEdges), 'Distance', self.x.centres.units)
                 distance[1:] = cumsum(sqrt(dx**2.0 + dy**2.0))
 
                 self._distance = RectilinearMesh1D(edges = distance)
@@ -176,7 +176,7 @@ class RectilinearMesh2D(Mesh):
 
     #     self._relative_to = None
     #     if not values is None:
-    #         self._relative_to = StatArray.StatArray(values, "relative_to", "m")
+    #         self._relative_to = DataArray(values, "relative_to", "m")
 
     @property
     def nCells(self):
@@ -341,7 +341,7 @@ class RectilinearMesh2D(Mesh):
             probability[j] = dot(p, pdf[j])
         probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
-        return StatArray.StatArray(probability, name='marginal_probability')
+        return DataArray(probability, name='marginal_probability')
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -408,12 +408,12 @@ class RectilinearMesh2D(Mesh):
     #     y = utilities._power(y, self.y.log)
     #     return x, y
 
-    def xGradientMatrix(self):
-        tmp = self.x.gradientMatrix()
+    def x_gradient_operator(self):
+        tmp = self.x.gradient_operator
         return kron(diags(sqrt(self.y.widths)), tmp)
 
 
-    def yGradientMatrix(self):
+    def y_gradient_operator(self):
         nx = self.x.nCells.item()
         nz = self.y.nCells.item()
         tmp = 1.0 / sqrt(self.x.centreTocentre)
@@ -454,34 +454,55 @@ class RectilinearMesh2D(Mesh):
     #     """
     #     return out
 
-    def resample(self, dx, dy, values, kind='cubic'):
+    def resample(self, dx, dy, values, method='cubic'):
 
-        x = deepcopy(self.x)
-        x.edges = arange(self.x.edges[0], self.x.edges[-1]+dx, dx)
-        y = deepcopy(self.y)
-        y.edges = arange(self.y.edges[0], self.y.edges[-1]+dy, dy)
+        x = deepcopy(self.x); y = deepcopy(self.y)
 
-        z = None
-        if self.xyz:
-            z = y
-            y = deepcopy(self.y)
-            y.edges = arange(self.y.edges[0], self.y.edges[-1]+dx, dx)
+        if isinstance(dx, (float, float32, float64)):
+            x.edges = arange(self.x.edges[0], self.x.edges[-1]+dx, dx)
+        else:
+            x.centres = dx
+
+        if isinstance(dy, (float, float32, float64)):
+            y.edges = arange(self.y.edges[0], self.y.edges[-1]+dy, dy)
+        else:
+            y.centres = dy
+
+        # z = None
+        # if self.xyz:
+        #     z = y
+        #     y = deepcopy(self.y)
+        #     y.edges = arange(self.y.edges[0], self.y.edges[-1]+dx, dx)
 
         mesh = RectilinearMesh2D(x=x, y=y)
 
         if self.x._relative_to is not None:
-            mesh.x.relative_to = self.y.resample(dy, self.x.relative_to)
+            mesh.x.relative_to = self.y.resample(dx, self.x.relative_to)
         if self.y._relative_to is not None:
             mesh.y.relative_to = self.x.resample(dy, self.y.relative_to)
 
-        f = interpolate.interp2d(self.y.centres, self.x.centres, values, kind=kind)
-        return mesh, f(mesh.y.centres, mesh.x.centres)
+        print(self.x.centres, self.y.centres)
+        print(mesh.x.centres, mesh.y.centres)
 
-    def interpolate_centres_to_nodes(self, values, kind='cubic'):
+        print(values.shape)
+
+        f = interpolate.RegularGridInterpolator((self.x.centres, self.y.centres), values, method=method, bounds_error=False)
+
+        xx, yy = meshgrid(mesh.x.centres, mesh.y.centres, indexing='ij', sparse=True)
+
+        print(xx)
+        print(xx.shape)
+        print(yy)
+        print(yy.shape)
+
+        return mesh, f((xx, yy))
+
+    def interpolate_centres_to_nodes(self, values, method='cubic'):
         if self.x.nCells <= 3 or self.y.nCells <= 3:
-            kind = 'linear'
-        f = interpolate.interp2d(self.y.centres, self.x.centres, values, kind=kind)
-        return f(self.y.edges, self.x.edges)
+            method = 'linear'
+        f = interpolate.RegularGridInterpolator((self.x.centres, self.y.centres), values, method=method, bounds_error=False)
+        xx, yy = meshgrid(self.x.edges, self.y.edges, indexing='ij', sparse=True)
+        return f((xx, yy))
 
     def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
         """Compute a statistic of the array between the intervals given along dimension dim.
@@ -690,7 +711,10 @@ class RectilinearMesh2D(Mesh):
 
     def line_indices(self, x, y):
         i = self.cellIndices(x, y)
-        return utilities.bresenham(i[0, :], i[1, :])
+        out = utilities.bresenham(i[0, :], i[1, :])
+        out[0, :] = minimum(out[0, :], self.x.nCells)
+        out[1, :] = minimum(out[1, :], self.y.nCells)
+        return out
 
     def ravelIndices(self, ixy, order='C'):
         """Return a global index into a 1D array given the two cell indices in x and z.
@@ -851,7 +875,7 @@ class RectilinearMesh2D(Mesh):
         kwargs['yscale'] = kwargs.pop('yscale', 'linear' if self.y.log is None else 'log')
 
         if (self.x._relative_to is None) and (self.y._relative_to is None):
-            tmp = StatArray.StatArray(full(self.shape, fill_value=nan)).T
+            tmp = DataArray(full(self.shape, fill_value=nan)).T
             tmp.pcolor(x=self.x.edges_absolute, y=self.y.edges_absolute, grid=True, colorbar=False, **kwargs)
 
         else:
@@ -1070,7 +1094,7 @@ class RectilinearMesh2D(Mesh):
                 return cls(x=x, y=y)
 
     def fromHdf_cell_values(self, grp, key, index=None, skip_posterior=False):
-        return StatArray.StatArray.fromHdf(grp, key, index=index, skip_posterior=skip_posterior)
+        return DataArray.fromHdf(grp, key, index=index, skip_posterior=skip_posterior)
 
 
     def range(self, axis):

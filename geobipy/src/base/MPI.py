@@ -8,7 +8,7 @@ from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
 from numpy import int32, int64, prod, reshape, unravel_index, s_, size, zeros
 from numpy import ndim as npndim
 import numpy as np
-from ..classes.core import StatArray
+from ..classes.statistics import StatArray
 
 class world3D(object):
 

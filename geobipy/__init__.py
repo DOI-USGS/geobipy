@@ -22,7 +22,7 @@ from .src.classes.statistics import get_prng
 # Classes within geobipy
 # Core
 from .src.classes.core.DataArray import DataArray
-from .src.classes.core.StatArray import StatArray
+from .src.classes.statistics.StatArray import StatArray
 # from .src.classes.core.Stopwatch import Stopwatch
 # Data points
 from .src.classes.data.datapoint.DataPoint import DataPoint

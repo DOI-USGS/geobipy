@@ -10,7 +10,7 @@ from pandas import read_csv
 
 from .CircularLoop import CircularLoop
 from ...classes.core.myObject import myObject
-from ...classes.core import StatArray
+from ..statistics import StatArray
 
 class FdemSystem(myObject):
     """ Defines a Frequency Domain ElectroMagnetic acquisition system """

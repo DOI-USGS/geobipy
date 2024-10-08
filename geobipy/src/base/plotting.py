@@ -1,5 +1,4 @@
 import matplotlib as mpl
-mpl.use('TkAgg')
 
 from numpy import abs, arange, arctan, arctan2, asarray, atleast_2d, concatenate, cos, diff
 from numpy import float32, float64, gradient, hstack, isnan, linspace, log10, meshgrid, nanmax

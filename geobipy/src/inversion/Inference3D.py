@@ -25,7 +25,7 @@ from sklearn.mixture import GaussianMixture
 # from smm import SMM
 from cached_property import cached_property
 from ..classes.core.myObject import myObject
-from ..classes.core import StatArray
+from ..classes.statistics.StatArray import StatArray
 from ..base import fileIO
 from ..base.MPI import loadBalance1D_shrinkingArrays
 
@@ -443,7 +443,7 @@ class Inference3D(myObject):
 
     def additiveError(self, slic=None):
         op = vstack if self.nSystems > 1 else hstack
-        out = StatArray.StatArray(op([line.additiveError for line in self.lines]), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units)
+        out = StatArray(op([line.additiveError for line in self.lines]), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units)
         for line in self.lines:
             line.uncache('additiveError')
         return out
@@ -637,7 +637,7 @@ class Inference3D(myObject):
     # @cached_property
     # def additiveError(self):
 
-    #     additiveError = StatArray.StatArray((self.nSystems, self.nPoints), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
+    #     additiveError = StatArray((self.nSystems, self.nPoints), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
 
     #     print("Reading Additive Errors Posteriors", flush=True)
     #     bar = self.loop_over(self.nLines)
@@ -665,16 +665,16 @@ class Inference3D(myObject):
         return bestData
 
     def bestParameters(self, slic=None):
-        return StatArray.StatArray(vstack([line.bestParameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
+        return StatArray(vstack([line.bestParameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
 
     def load_marginal_probability(self, filename):
 
         with h5py.File(filename, 'r') as f:
-            values = StatArray.StatArray.fromHdf(f['probabilities'])
+            values = StatArray.fromHdf(f['probabilities'])
 
         return values
             # for i in range(self.nLines):
-            #     self.lines[i].marginal_probability = StatArray.StatArray.fromHdf(f['probabilities'], index=s_[self.lineIndices[i], :, :])
+            #     self.lines[i].marginal_probability = StatArray.fromHdf(f['probabilities'], index=s_[self.lineIndices[i], :, :])
             #     self.lines[i].uncache('highest_marginal')
 
         # self.uncache('marginalProbability')
@@ -685,7 +685,7 @@ class Inference3D(myObject):
     def marginalProbability(self):
 
         mp = self.lines[0].marginal_probability()
-        marginalProbability = StatArray.StatArray((self.nPoints, self.zGrid.nCells.item(), mp.shape[-1]), name=mp.name, units=mp.units)
+        marginalProbability = StatArray((self.nPoints, self.zGrid.nCells.item(), mp.shape[-1]), name=mp.name, units=mp.units)
         marginalProbability[self.lineIndices[0], :, :] = mp
 
         print('Reading marginal probability', flush=True)
@@ -726,12 +726,12 @@ class Inference3D(myObject):
         for line in self.lines:
             key = 'credible_lower'
             if not key in line.hdf_file.keys():
-                credibleLower = StatArray.StatArray(zeros(line.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), line.parameterUnits)
+                credibleLower = StatArray(zeros(line.mesh.shape), '{}% Credible Interval'.format(100.0 - percent), line.parameterUnits)
                 credibleLower.createHdf(line.hdf_file, key)
 
             key = 'credible_upper'
             if not key in line.hdf_file.keys():
-                credibleUpper = StatArray.StatArray(zeros(line.mesh.shape), '{}% Credible Interval'.format(percent), line.parameterUnits)
+                credibleUpper = StatArray(zeros(line.mesh.shape), '{}% Credible Interval'.format(percent), line.parameterUnits)
                 credibleUpper.createHdf(line.hdf_file, key)
 
         if self.parallel_access:
@@ -747,7 +747,7 @@ class Inference3D(myObject):
         """
         for line in self.lines:
             if not 'doi' in line.hdf_file:
-                doi = StatArray.StatArray(line.nPoints, 'Depth of investigation', line.height.units)
+                doi = StatArray(line.nPoints, 'Depth of investigation', line.height.units)
                 doi.createHdf(line.hdf_file, 'doi')
 
         if self.parallel_access:
@@ -809,7 +809,7 @@ class Inference3D(myObject):
 
 
         # Create the space in HDF5
-        probabilities = StatArray.StatArray((z.nCells.value, global_mixture.n_components), name='probabilities')
+        probabilities = StatArray((z.nCells.value, global_mixture.n_components), name='probabilities')
         probabilities.createHdf(probabilities_h5, 'probabilities', nRepeats=self.nPoints)
 
         for i in r:
@@ -838,7 +838,7 @@ class Inference3D(myObject):
 
             hdf_file = h5py.File(filename, 'w', driver='mpio', comm=self.world)
 
-            StatArray.StatArray().createHdf(hdf_file, 'probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=nan)
+            StatArray().createHdf(hdf_file, 'probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=nan)
 
             r = range(self.line_starts[self.rank], self.line_ends[self.rank])
             self.world.barrier()
@@ -856,7 +856,7 @@ class Inference3D(myObject):
             hdf_file.close()
 
         else:
-            return StatArray.StatArray(vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
+            return StatArray(vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
 
     def cluster_fits_gmm(self, n_clusters, plot=False):
 
@@ -875,7 +875,7 @@ class Inference3D(myObject):
         cF.save_gmm(gmm, "gmm_{}_clusters.h5".format(gmm.n_components))
 
         if plot:
-            bins = StatArray.StatArray(linspace(self.fits[2].min(), self.fits[2].max(), 200))
+            bins = StatArray(linspace(self.fits[2].min(), self.fits[2].max(), 200))
             binCentres = bins.internalEdges()
             x_predict = binCentres
             x_predict = x_predict.reshape(-1, 1)
@@ -916,7 +916,7 @@ class Inference3D(myObject):
     #     model.degrees_ = model.degrees[order]
 
     #     if plot:
-    #         bins = StatArray.StatArray(linspace(self.fits[2].min(), self.fits[2].max(), 200))
+    #         bins = StatArray(linspace(self.fits[2].min(), self.fits[2].max(), 200))
     #         binCentres = bins.internalEdges()
     #         x_predict = binCentres
     #         x_predict = x_predict.reshape(-1, 1)
@@ -1029,7 +1029,7 @@ class Inference3D(myObject):
 
     @cached_property
     def interface_probability(self):
-        interfaces = StatArray.StatArray((self.nPoints, self.zGrid.nCells.item()), name='P(interface)')
+        interfaces = StatArray((self.nPoints, self.zGrid.nCells.item()), name='P(interface)')
 
         print("Reading Depth Posteriors", flush=True)
         Bar=progressbar.ProgressBar()
@@ -1052,7 +1052,7 @@ class Inference3D(myObject):
         return lineIndices
 
     def meanParameters(self, slic=None):
-        return StatArray.StatArray(vstack([line.mean_parameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
+        return StatArray(vstack([line.mean_parameters(slic) for line in self.lines]), name=self.lines[0].parameterName, units=self.lines[0].parameterUnits)
 
     def mesh2d(self, dx, dy, **kwargs):
         return self.pointcloud.centred_mesh(dx, dy, **kwargs)
@@ -1102,7 +1102,7 @@ class Inference3D(myObject):
     @cached_property
     def opacity(self):
 
-        opacity = StatArray.StatArray((self.zGrid.nCells.item(), self.nPoints), order = 'F')
+        opacity = StatArray((self.zGrid.nCells.item(), self.nPoints), order = 'F')
 
         print("Reading opacity", flush=True)
         Bar = progressbar.ProgressBar()
@@ -1128,10 +1128,10 @@ class Inference3D(myObject):
     @cached_property
     def pointcloud(self):
 
-        x = StatArray.StatArray(self.nPoints, name=self.lines[0].x.name, units=self.lines[0].x.units)
-        y = StatArray.StatArray(self.nPoints, name=self.lines[0].y.name, units=self.lines[0].y.units)
-        z = StatArray.StatArray(self.nPoints, name=self.lines[0].height.name, units=self.lines[0].height.units)
-        e = StatArray.StatArray(self.nPoints, name=self.lines[0].elevation.name, units=self.lines[0].elevation.units)
+        x = StatArray(self.nPoints, name=self.lines[0].x.name, units=self.lines[0].x.units)
+        y = StatArray(self.nPoints, name=self.lines[0].y.name, units=self.lines[0].y.units)
+        z = StatArray(self.nPoints, name=self.lines[0].height.name, units=self.lines[0].height.units)
+        e = StatArray(self.nPoints, name=self.lines[0].elevation.name, units=self.lines[0].elevation.units)
         # Loop over the lines in the data set and get the attributes
         print('Reading co-ordinates', flush=True)
         bar = self.loop_over(self.nLines)
@@ -1184,17 +1184,17 @@ class Inference3D(myObject):
             # Mask out nulls
             i0, i1, i2 = amp_3D.nonzero()
 
-            depth = StatArray.StatArray(z3D[i0, i1, i2].flatten(), 'Depth')
-            amplitudes = StatArray.StatArray(amp_3D[i0, i1, i2].flatten(), 'Amplitude')
+            depth = StatArray(z3D[i0, i1, i2].flatten(), 'Depth')
+            amplitudes = StatArray(amp_3D[i0, i1, i2].flatten(), 'Amplitude')
             means = None
             variances = None
             exponents = None
             if 'm' in components:
-                means = StatArray.StatArray(mean_3D[i0, i1, i2].flatten(), 'Mean')
+                means = StatArray(mean_3D[i0, i1, i2].flatten(), 'Mean')
             if 'v' in components:
-                variances = StatArray.StatArray(var_3D[i0, i1, i2].flatten(), 'Variance')
+                variances = StatArray(var_3D[i0, i1, i2].flatten(), 'Variance')
             if 'e' in components:
-                exponents = StatArray.StatArray(exp_3D[i0, i1, i2].flatten(), 'Exponent')
+                exponents = StatArray(exp_3D[i0, i1, i2].flatten(), 'Exponent')
         else:
             depth = z3D
             amplitudes = amp_3D
@@ -1213,7 +1213,7 @@ class Inference3D(myObject):
 
     def relativeError(self):
         op = vstack if self.nSystems > 1 else hstack
-        out = StatArray.StatArray(op([line.relativeError for line in self.lines]), name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units)
+        out = StatArray(op([line.relativeError for line in self.lines]), name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units)
         for line in self.lines:
             line.uncache('relativeError')
         return out
@@ -1298,7 +1298,7 @@ class Inference3D(myObject):
 
     @property
     def fiducials(self):
-        return StatArray.StatArray(hstack([line.fiducials for line in self.lines]), name='fiducials')
+        return StatArray(hstack([line.fiducials for line in self.lines]), name='fiducials')
 
     def fiducial(self, index):
         """ Get the fiducial of the given data point """
@@ -1518,8 +1518,8 @@ class Inference3D(myObject):
 
     #     for i in range(self.nLines):
 
-    #         means = StatArray.StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit means")
-    #         variances = StatArray.StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit variances")
+    #         means = StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit means")
+    #         variances = StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit variances")
 
     #         if 'mixture_fits' in self.lines[i].hdf_file:
     #             saved_command = self.lines[i].hdf_file['/mixture_fits'].attrs['command']
@@ -1578,7 +1578,7 @@ class Inference3D(myObject):
 
     @cached_property
     def highest_marginal(self):
-        return StatArray.StatArray(argmax(self.marginalProbability, axis=-1), name='Highest marginal').T
+        return StatArray(argmax(self.marginalProbability, axis=-1), name='Highest marginal').T
 
     def histogram(self, nBins, **kwargs):
         """ Compute a histogram of the model, optionally show the histogram for given depth ranges instead """
@@ -1591,7 +1591,7 @@ class Inference3D(myObject):
             values, logLabel = cF._log(values, log)
             values.name = logLabel + values.name
 
-        values = StatArray.StatArray(values, values.name, values.units)
+        values = StatArray(values, values.name, values.units)
 
         h = Histogram1D(linspace(nanmin(values), nanmax(values), nBins))
         h.update(values)
@@ -1650,7 +1650,7 @@ class Inference3D(myObject):
     #     x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
 
     #     # Initialize 3D volume
-    #     mean3D = StatArray.StatArray(zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+    #     mean3D = StatArray(zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
     #     mean3D[0, :, :] = vals
 
     #     # Interpolate for each depth
@@ -1676,7 +1676,7 @@ class Inference3D(myObject):
     #     x1, y1, vals = interpolation.minimumCurvature(x, y, values, self.pointcloud.bounds, dx=dx, dy=dy, mask=mask, clip=clip, iterations=2000, tension=0.25, accuracy=0.01)
 
     #     # Initialize 3D volume
-    #     mean3D = StatArray.StatArray(zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
+    #     mean3D = StatArray(zeros([self.zGrid.nCells.value, y1.size+1, x1.size+1], order = 'F'),name = 'Conductivity', units = '$Sm^{-1}$')
     #     mean3D[0, :, :] = vals
 
     #     # Interpolate for each depth
@@ -1721,7 +1721,7 @@ class Inference3D(myObject):
 
     def percentageParameter(self, value, depth, depth2=None):
 
-        percentage = StatArray.StatArray(empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+        percentage = StatArray(empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
 
         print('Calculating percentages', flush = True)
         bar = self.loop_over(self.nLines)
@@ -1738,7 +1738,7 @@ class Inference3D(myObject):
             values = line.depth_slice(depth, variable, reciprocateParameter=reciprocateParameter, **kwargs)
             out[self.lineIndices[i]] = values
 
-        return StatArray.StatArray(out, values.name, values.units)
+        return StatArray(out, values.name, values.units)
 
     def interpolate_3d(self, dx, dy, variable, block=True, **kwargs):
 
@@ -1964,7 +1964,7 @@ class Inference3D(myObject):
         vals1D = self.depth_slice(depth=depth, variable='marginal_probability', index=0, **kwargs)
         values, dum = self.interpolate(dx, dy, vals1D, **kwargs)
 
-        interpolated_marginal = StatArray.StatArray((*values.shape, nClusters), 'Marginal probability')
+        interpolated_marginal = StatArray((*values.shape, nClusters), 'Marginal probability')
         interpolated_marginal[:, :, 0] = values.values
 
         for i in range(1, nClusters):
@@ -1978,7 +1978,7 @@ class Inference3D(myObject):
 
         interpolated_marginal, values, dum = self.interpolate_marginal(dx, dy, depth, **kwargs)
 
-        highest = StatArray.StatArray((argmax(interpolated_marginal, axis=-1)).astype(float32))
+        highest = StatArray((argmax(interpolated_marginal, axis=-1)).astype(float32))
         msk = npall(isnan(interpolated_marginal), axis=-1)
         highest[msk] = nan
         values.values = highest
@@ -2136,7 +2136,7 @@ class Inference3D(myObject):
         if log10:
             model = log10(model)
 
-        res = StatArray.StatArray(column_stack((model,z)))
+        res = StatArray(column_stack((model,z)))
 
         if (clipNan):
             res = res[logical_not(isnan(res[:,0]))]
@@ -2150,7 +2150,7 @@ class Inference3D(myObject):
         else:
             ParVsZ = precomputedParVsZ
 
-        assert isinstance(ParVsZ, StatArray.StatArray), "precomputedParVsZ must be an StatArray"
+        assert isinstance(ParVsZ, StatArray), "precomputedParVsZ must be an StatArray"
 
         if (log10Depth):
             ParVsZ[:,1] = log10(ParVsZ[:,1])
@@ -2159,7 +2159,7 @@ class Inference3D(myObject):
 
     def GMM(self, ParVsZ, clusterID, trainPercent=90.0, plot=True):
         """ Classify the subsurface parameters """
-        assert isinstance(ParVsZ, StatArray.StatArray), "ParVsZ must be an StatArray"
+        assert isinstance(ParVsZ, StatArray), "ParVsZ must be an StatArray"
         ParVsZ.GMM(clusterID, trainPercent=trainPercent, covType=['spherical','tied','diag','full'], plot=plot)
 
     def uncache(self, variable):

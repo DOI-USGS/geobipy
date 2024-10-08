@@ -20,7 +20,7 @@ from ..base.utilities import expReal
 from ..base.utilities import debug_print as dprint
 
 import h5py
-from ..classes.core import StatArray
+from ..classes.core.DataArray import DataArray
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram import Histogram
 from ..classes.core.myObject import myObject
@@ -405,7 +405,7 @@ class Inference1D(myObject):
         # Initialize the vectors to save results
         # StatArray of the data misfit
 
-        self.data_misfit_v = StatArray.StatArray(2 * self.n_markov_chains, name='Data Misfit')
+        self.data_misfit_v = DataArray(2 * self.n_markov_chains, name='Data Misfit')
         self.data_misfit_v[0] = self.data_misfit
 
         target = sum(self.datapoint.active)
@@ -415,7 +415,7 @@ class Inference1D(myObject):
 
         self.relative_chi_squared_fit = 100.0
 
-        edges = StatArray.StatArray(linspace(1, 2*target))
+        edges = DataArray(linspace(1, 2*target))
         self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
 
         # Initialize a stopwatch to keep track of time
@@ -446,13 +446,13 @@ class Inference1D(myObject):
         # Model acceptance rate
         self.accepted = 0
 
-        self.acceptance_v = StatArray.StatArray(full(2 * self.n_markov_chains, fill_value=0, dtype=uint8), name='% Acceptance')
+        self.acceptance_v = DataArray(full(2 * self.n_markov_chains, fill_value=0, dtype=uint8), name='% Acceptance')
 
         n = 2 * int32(self.n_markov_chains / self.update_plot_every)
-        self.acceptance_x = StatArray.StatArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
-        self.acceptance_rate = StatArray.StatArray(full(n, fill_value=nan), name='% Acceptance')
+        self.acceptance_x = DataArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
+        self.acceptance_rate = DataArray(full(n, fill_value=nan), name='% Acceptance')
 
-        self.iRange = StatArray.StatArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
+        self.iRange = DataArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
 
         # Initialize time in seconds
         self.inference_time = float64(0.0)
@@ -487,7 +487,7 @@ class Inference1D(myObject):
         halfspace = self.datapoint.find_best_halfspace()
 
         # dprint('halfspace', halfspace.values)
-        self.halfspace = StatArray.StatArray(halfspace.values, 'halfspace')
+        self.halfspace = DataArray(halfspace.values, 'halfspace')
 
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
@@ -780,7 +780,7 @@ class Inference1D(myObject):
                         self.high_variance = inf
 
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
-                self.multiplier *= self.kwargs['multiplier']
+                self.multiplier *= self.options['multiplier']
 
         # Added the layer depths to a list, we histogram this list every
         # iPlot iterations
@@ -1052,7 +1052,7 @@ class Inference1D(myObject):
 
         # Get the point index
         if index is None:
-            fiducials = StatArray.StatArray.fromHdf(parent['data/fiducial'])
+            fiducials = DataArray.fromHdf(parent['data/fiducial'])
             index = fiducials.searchsorted(self.datapoint.fiducial)
 
         # Add the iteration number
@@ -1106,7 +1106,7 @@ class Inference1D(myObject):
         assert not (iNone and fNone) ^ (not iNone and not fNone), Exception("Must specify either an index OR a fiducial.")
 
         if not fNone:
-            fiducials = StatArray.StatArray.fromHdf(hdfFile['data/fiducial'])
+            fiducials = DataArray.fromHdf(hdfFile['data/fiducial'])
             index = fiducials.searchsorted(fiducial)
 
         self = cls(
@@ -1140,7 +1140,7 @@ class Inference1D(myObject):
 
         # Compute the x axis for acceptance since its every X iterations.
         n = 2 * int32(self.n_markov_chains / self.update_plot_every)
-        self.acceptance_x = StatArray.StatArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
+        self.acceptance_x = DataArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
 
         self.best_datapoint = self.datapoint
 
@@ -1158,7 +1158,7 @@ class Inference1D(myObject):
         self.saveTime = array(hdfFile.get('savetime')[index])
 
         # Initialize a list of iteration number
-        self.iRange = StatArray.StatArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
+        self.iRange = DataArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
 
         self.verbose = False
 

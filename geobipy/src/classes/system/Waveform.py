@@ -1,5 +1,5 @@
 import numpy as np
-from ..core import StatArray
+from ..statistics import StatArray
 
 class Waveform(object):
     """Defines a waveform using piece-wise linear segments

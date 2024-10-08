@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from numpy import abs, allclose, arange, argmax, array, asarray, atleast_1d, concatenate, delete
+from numpy import abs, allclose, arange, argmax, array, asarray, atleast_1d, concatenate, delete, hstack
 from numpy import diff, divide, expand_dims, flip, float32, float64, histogram, inf, insert, int32, int64, isnan
 from numpy import mean, nan, nanmax, nanmin, ndarray, ndim, ones, r_, resize, s_, size, squeeze, sum, unique, where, zeros
 from numpy import shape as npshape
@@ -13,16 +13,16 @@ import h5py
 
 from ...base import utilities as cf
 from ...base import plotting as cP
-from ..statistics.Distribution import Distribution
-from ..statistics.baseDistribution import baseDistribution
-from .myObject import myObject
+from .Distribution import Distribution
+from .baseDistribution import baseDistribution
+from ..core.myObject import myObject
 from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.figure import Figure
 
-from .DataArray import DataArray
+from ..core.DataArray import DataArray
 
 class StatArray(DataArray):
     """Class extension to numpy.ndarray
@@ -109,10 +109,10 @@ class StatArray(DataArray):
 
     # "hidden" methods
 
-    def __new__(subtype, shape=None, name=None, units=None, verbose=False, **kwargs):
+    def __new__(cls, shape=None, name=None, units=None, verbose=False, **kwargs):
         """Instantiate a new StatArray """
 
-        self = super().__new__(subtype, shape, name, units, **kwargs)
+        self = super().__new__(cls, shape, name, units, **kwargs)
 
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, StatArray):
@@ -124,8 +124,6 @@ class StatArray(DataArray):
                 self._posterior = shape._posterior
 
         return self
-
-
 
     @property
     def n_posteriors(self):
@@ -212,9 +210,9 @@ class StatArray(DataArray):
     def address(self):
         out = super().address
         if self.hasPrior:
-            out = out.hstack([out, self.prior.address])
+            out = hstack([out, self.prior.address])
         if self.hasProposal:
-            out = out.hstack([out, self.proposal.address])
+            out = hstack([out, self.proposal.address])
         return out
 
 
@@ -741,7 +739,7 @@ class StatArray(DataArray):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
-        A nested heirarchy will be created e.g., myName/\data, myName/\prior, and myName/\proposal.
+        A nested heirarchy will be created e.g., myName/data, myName/prior, and myName/proposal.
         This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
         and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
         In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
@@ -798,7 +796,13 @@ class StatArray(DataArray):
 
         """
 
-        grp = super().createHdf(h5obj, name, shape, add_axis, fillvalue)
+        hdf_name = None
+        if not self.hasPosterior:
+            hdf_name = 'DataArray'
+
+        grp = super().createHdf(h5obj, name, shape, add_axis, fillvalue, hdf_name=hdf_name)
+
+        grp = h5obj[name]
 
         if withPosterior:
             self.create_posterior_hdf(grp, add_axis, fillvalue, upcast)
@@ -900,6 +904,12 @@ class StatArray(DataArray):
             is_file = True
             grp = file
 
+        if not "n_posteriors" in grp:
+            out = DataArray.fromHdf(grp, name, index)
+            if is_file:
+                file.close()
+            return out
+
         out = super().fromHdf(grp, name, index)
 
         if not name is None:
@@ -916,12 +926,10 @@ class StatArray(DataArray):
         return out
 
     def posteriors_from_hdf(self, grp, index):
-        from ..statistics.Histogram import Histogram
+        from .Histogram import Histogram
         n_posteriors = 0
         if 'n_posteriors' in grp:
             n_posteriors = asarray(grp['n_posteriors'])
-        if 'nPosteriors' in grp:
-            n_posteriors = asarray(grp['nPosteriors'])
 
         if n_posteriors == 0:
             self.posterior = None

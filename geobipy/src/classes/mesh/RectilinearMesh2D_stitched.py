@@ -12,7 +12,8 @@ from numpy import all as npall
 from numpy import any as npany
 
 from matplotlib.figure import Figure
-from ...classes.core import StatArray
+from ..core.DataArray import DataArray
+from ..statistics.StatArray import StatArray
 from .RectilinearMesh2D import RectilinearMesh2D
 
 import matplotlib.cm as mplcm
@@ -52,7 +53,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         else:
             assert size(values) == self.x.nCells, ValueError("Size of nCells must be {}".format(self.x.nCells))
 
-        self._nCells = StatArray.StatArray(values, 'Number of cells', dtype=int32)
+        self._nCells = StatArray(values, 'Number of cells', dtype=int32)
 
     @property
     def shape(self):
@@ -88,7 +89,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             for i in range(self.x.nCells):
                 values[i, self.nCells[i]+1:] = nan
 
-        self._y_edges = StatArray.StatArray(values)
+        self._y_edges = StatArray(values)
 
     @property
     def plotting_edges(self):
@@ -354,12 +355,12 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         if index is None:
 
             x = RectilinearMesh1D.fromHdf(grp['x'], skip_posterior=skip_posterior)
-            nCells = StatArray.StatArray.fromHdf(grp['nCells'], skip_posterior=skip_posterior)
-            edges = StatArray.StatArray.fromHdf(grp['y/edges'], skip_posterior=skip_posterior)
+            nCells = StatArray.fromHdf(grp['nCells'], skip_posterior=skip_posterior)
+            edges = StatArray.fromHdf(grp['y/edges'], skip_posterior=skip_posterior)
 
             relative_to = None
             if 'y/relative_to' in grp:
-                relative_to = StatArray.StatArray.fromHdf(grp['y/relative_to'], skip_posterior=skip_posterior)
+                relative_to = DataArray.fromHdf(grp['y/relative_to'], skip_posterior=skip_posterior)
                 if npall(isnan(relative_to)):
                     relative_to = None
 

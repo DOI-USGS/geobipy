@@ -3,10 +3,10 @@ Module defining modified order statistics as in Malinverno2002Parsimonious Bayes
 in a nonlinear geophysical problem,Geophysical Journal International
 """
 from copy import deepcopy
-from numpy import arange, cumprod, int32, size, squeeze
+from numpy import arange, cumprod, int32, size, squeeze, hstack
 from numpy import log as nplog
 from scipy.special import factorial
-from ..core import StatArray
+from . import StatArray
 from .baseDistribution import baseDistribution
 
 
@@ -25,6 +25,10 @@ class Order(baseDistribution):
         self.denominator = deepcopy(denominator)
         tmp = cumprod(denominator)
         self.pdf = factorial(i) / tmp
+
+    @property
+    def address(self):
+        return hstack([hex(id(self)), hex(id(self.denominator))])
 
     @property
     def addressof(self):

@@ -1,11 +1,11 @@
 """ @NormalDistribution
 Module defining a normal distribution with statistical procedures
 """
-from numpy import asarray, exp, linspace, log, size, sqrt, squeeze
+from numpy import asarray, exp, linspace, log, size, sqrt, squeeze, hstack
 from .baseDistribution import baseDistribution
 from scipy.stats import norm
 from ...base import plotting as cP
-from ..core import StatArray
+from ..core.DataArray import DataArray
 
 class Normal(baseDistribution):
     """Univariate normal distribution
@@ -28,6 +28,10 @@ class Normal(baseDistribution):
         self._mean = log(mean) if log else asarray(mean).copy()
         self._variance = asarray(variance).copy()
         self.log = log
+
+    @property
+    def address(self):
+        return hstack([hex(id(self)), hex(id(self._mean)), hex(id(self._variance))])
 
     @property
     def addressof(self):
@@ -63,7 +67,7 @@ class Normal(baseDistribution):
         """ For a realization x, compute the probability """
         if self.log:
             x = log(x)
-        return StatArray.StatArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
+        return DataArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
 
 
     def __deepcopy__(self, memo={}):
@@ -111,7 +115,7 @@ class Normal(baseDistribution):
 
 
         bins = self.bins()
-        t = r"$\tilde{N}(\mu="+str(self.mean)+", \sigma^{2}="+str(self.variance)+")$"
+        t = r"$\\tilde{N}(\\mu="+str(self.mean)+", \\sigma^{2}="+str(self.variance)+")$"
 
         cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)
 
@@ -125,9 +129,9 @@ class Normal(baseDistribution):
             x= log(x)
 
         if log:
-            return StatArray.StatArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
+            return DataArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")
         else:
-            return StatArray.StatArray(norm.pdf(x, loc = self._mean, scale = self.variance), "Probability Density")
+            return DataArray(norm.pdf(x, loc = self._mean, scale = self.variance), "Probability Density")
 
     @property
     def summary(self):
@@ -178,4 +182,4 @@ class Normal(baseDistribution):
         tmp = nStd * sqrt(self.variance)
         values = linspace(self._mean - tmp, self._mean + tmp, nBins+1)
 
-        return StatArray.StatArray(exp(values)) if self.log else StatArray.StatArray(values)
+        return DataArray(exp(values)) if self.log else DataArray(values)

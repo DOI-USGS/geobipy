@@ -13,8 +13,6 @@ import h5py
 
 from ...base import utilities as cf
 from ...base import plotting as cP
-from ..statistics.Distribution import Distribution
-from ..statistics.baseDistribution import baseDistribution
 from .myObject import myObject
 from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
@@ -145,8 +143,7 @@ class DataArray(ndarray, myObject):
 
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, ndarray):
-            # shape = deepcopy(shape)
-            self = shape.view(type(self))
+            self = shape.view(cls)
 
         elif isinstance(shape, (float, float32, float64)):
             self = ndarray.__new__(cls, 1, **kwargs)
@@ -174,10 +171,25 @@ class DataArray(ndarray, myObject):
             self._name = None
             self._units = None
 
-    def __array_wrap__(self, out_arr, context=None):
-        return ndarray.__array_wrap__(self, out_arr, context)
+    def __array_wrap__(self, out_arr, context=None, return_scalar=False):
+        return ndarray.__array_wrap__(self, out_arr, context, return_scalar)
 
     # Properties
+    @property
+    def hasPrior(self):
+        return False
+
+    @property
+    def hasProposal(self):
+        return False
+
+    @property
+    def hasPosterior(self):
+        return False
+
+    @property
+    def n_posteriors(self):
+        return 0
 
     @property
     def bounds(self):
@@ -577,6 +589,9 @@ class DataArray(ndarray, myObject):
 
         return (((b - a) * (self - self.min())) / (self.max() - self.min())) + a
 
+    def reset_posteriors(self):
+        return
+
     def resize(self, new_shape):
         """Resize a StatArray
 
@@ -634,11 +649,13 @@ class DataArray(ndarray, myObject):
         if self.size == 0:
             return "None"
 
-        msg = (f'Name: {self.label} {self.address}\n',
-               f'Shape: {self.shape}\n',
-               f'Values: {self}\n',
-               f'Min: {self.min()}\n',
-               f'Max: {self.max()}\n')
+        msg =  f"{self.__class__.__name__}\n"
+        msg += f'Name:   {self.label}\n'
+        msg += f'Address:{self.address}\n'
+        msg += f'Shape:  {self.shape}\n'
+        msg += f'Values: {self}\n'
+        msg += f'Min:    {self.min()}\n'
+        msg += f'Max:    {self.max()}\n'
 
         return msg
 
@@ -715,17 +732,7 @@ class DataArray(ndarray, myObject):
 
     def update_posterior(self, **kwargs):
         """Adds the current values of the StatArray to the attached posterior. """
-        if not self.hasPosterior:
-            return
-
-        if self.n_posteriors > 1:
-            active = atleast_1d(kwargs.get('active', range(self.n_posteriors)))
-            for i in active:
-                self._posterior[i].update(self.take(indices=i, axis=0), **kwargs)
-
-        else:
-            self.posterior.update(squeeze(self), **kwargs)
-
+        return None
     # Plotting Routines
 
     def bar(self, x=None, i=None, **kwargs):
@@ -1001,11 +1008,11 @@ class DataArray(ndarray, myObject):
         cP.stackplot2D(x[j], ma[i], labels=[], **kwargs)
 
     # HDF Routines
-    def createHdf(self, h5obj, name, shape=None, add_axis=None, fillvalue=None):
+    def createHdf(self, h5obj, name, shape=None, add_axis=None, fillvalue=None, **kwargs):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
-        A nested heirarchy will be created e.g., myName/\data, myName/\prior, and myName/\proposal.
+        A nested heirarchy will be created e.g., myName/data, myName/prior, and myName/proposal.
         This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
         and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
         In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
@@ -1063,7 +1070,7 @@ class DataArray(ndarray, myObject):
         """
 
         # create a new group inside h5obj
-        grp = self.create_hdf_group(h5obj, name)
+        grp = self.create_hdf_group(h5obj, name, **kwargs)
 
         if not self._name is None:
             grp.attrs['name'] = self.name
@@ -1089,7 +1096,7 @@ class DataArray(ndarray, myObject):
 
         return grp
 
-    def writeHdf(self, h5obj, name, index=None):
+    def writeHdf(self, h5obj, name, index=None, **kwargs):
         """Write the values of a StatArray to a HDF file
 
         Writes the contents of the StatArray to an already created group in a HDF file under h5obj.
@@ -1145,7 +1152,7 @@ class DataArray(ndarray, myObject):
         return grp
 
     @classmethod
-    def fromHdf(cls, grp, name=None, index=None):
+    def fromHdf(cls, grp, name=None, index=None, **kwargs):
         """Read the StatArray from a HDF group
 
         Given the HDF group object, read the contents into a StatArray.
@@ -1460,30 +1467,3 @@ class DataArray(ndarray, myObject):
                           ndim=ndim, shape=shape, dtype=dtype)
         return cls(tmp, name, units)
 
-    # def IsendToLeft(self, world):
-    #     """ISend an array to the rank left of world.rank.
-
-    #     """
-    #     dest = world.size - 1 if world.rank == 0 else world.rank - 1
-    #     self.Isend(dest=dest, world=world)
-
-    # def IsendToRight(self, world):
-    #     """ISend an array to the rank right of world.rank.
-
-    #     """
-    #     dest = 0 if world.rank == world.size - 1 else world.rank + 1
-    #     self.Isend(dest=dest, world=world)
-
-    # def IrecvFromRight(self, world):
-    #     """IRecv an array from the rank right of world.rank.
-
-    #     """
-    #     source = 0 if world.rank == world.size - 1 else world.rank + 1
-    #     return self.Irecv(source=source, world=world)
-
-    # def IrecvFromLeft(self, world):
-    #     """Irecv an array from the rank left of world.rank.
-
-    #     """
-    #     source = world.size - 1 if world.rank == 0 else world.rank - 1
-    #     return self.Irecv(source=source, world=world)

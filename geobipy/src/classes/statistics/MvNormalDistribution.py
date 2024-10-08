@@ -2,7 +2,7 @@
 Module defining a multivariate normal distribution with statistical procedures
 """
 from copy import deepcopy
-from numpy import all, atleast_1d, diag, diag_indices, dot, empty, exp, float64, full
+from numpy import all, atleast_1d, diag, diag_indices, dot, empty, exp, float64, full, hstack
 from numpy import int32, linspace, maximum, pi, prod, repeat, size, squeeze, sqrt, zeros
 from numpy import ndim as npndim
 from numpy import log as nplog
@@ -10,8 +10,7 @@ from numpy.linalg import inv, slogdet
 from ...base import utilities as cf
 from .baseDistribution import baseDistribution
 from .NormalDistribution import Normal
-from ..core import StatArray
-from scipy.stats import multivariate_normal
+from ..core.DataArray import DataArray
 
 class MvNormal(baseDistribution):
     """Class extension to geobipy.baseDistribution
@@ -69,6 +68,10 @@ class MvNormal(baseDistribution):
             self._constant = True
             self._mean = full(ndim, fill_value=mean)
             self._variance = diag(full(ndim, fill_value=variance))
+
+    @property
+    def address(self):
+        return hstack([hex(id(self)), hex(id(self._mean)), hex(id(self._variance))])
 
     @property
     def addressof(self):
@@ -292,4 +295,4 @@ class MvNormal(baseDistribution):
             if not relative:
                 bins += self._mean
 
-        return StatArray.StatArray(bins)
+        return DataArray(bins)

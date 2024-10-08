@@ -3,7 +3,7 @@ Module defining a uniform distribution with statistical procedures
 """
 from copy import deepcopy
 
-from numpy import asarray, empty, exp, linspace, prod, s_, size, squeeze, sum
+from numpy import asarray, empty, exp, linspace, prod, s_, size, squeeze, sum, hstack
 from numpy import log as nplog
 from numpy import all as npall
 
@@ -11,8 +11,7 @@ from .baseDistribution import baseDistribution
 from ...base import plotting as cP
 
 from scipy.stats import uniform
-from ..core import StatArray
-
+from ..core.DataArray import DataArray
 
 class Uniform(baseDistribution):
     """ Class defining a uniform distribution """
@@ -35,6 +34,10 @@ class Uniform(baseDistribution):
         self._mean = 0.5 * (self._max + self._min)
         # Variance
         self._variance = (1.0 / 12.0) * self.scale**2.0
+
+    @property
+    def address(self):
+        return hstack([hex(id(self)), hex(id(self._min)), hex(id(self._max))])
 
     @property
     def addressof(self):
@@ -155,13 +158,13 @@ class Uniform(baseDistribution):
                 bins = empty([nD, nBins+1])
                 for i in range(nD):
                     bins[i, :] = linspace(self._min[i], self._max[i], nBins+1)
-                values = StatArray.StatArray(squeeze(bins))
+                values = DataArray(squeeze(bins))
             else:
                 bins = empty(nBins+1)
                 bins[:] = linspace(self._min[dim], self._max[dim], nBins+1)
-                values = StatArray.StatArray(squeeze(bins))
+                values = DataArray(squeeze(bins))
 
         else:
-            values = StatArray.StatArray(squeeze(linspace(self._min, self._max, nBins+1)))
+            values = DataArray(squeeze(linspace(self._min, self._max, nBins+1)))
 
         return exp(values) if self.log else values

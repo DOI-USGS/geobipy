@@ -1,6 +1,6 @@
 
 import numpy as np
-from ...classes.core import StatArray
+from ..core.DataArray import DataArray
 from scipy.stats import (multivariate_normal, norm)
 import matplotlib.pyplot as plt
 from .Mixture import Mixture
@@ -102,7 +102,7 @@ class mixNormal(Mixture):
     def probability(self, x, log, component=None):
 
         if component is None:
-            out = StatArray.StatArray(np.empty([np.size(x), self.n_components]), "Probability Density")
+            out = DataArray(np.empty([np.size(x), self.n_components]), "Probability Density")
             for i in range(self.n_components):
                 tmp = self.amplitudes[i] * self._probability(x, log, self.means[i], self.variances[i])
                 out[:, i] = tmp
@@ -114,9 +114,9 @@ class mixNormal(Mixture):
     def _probability(self, x, log, mean, variance):
         """ For a realization x, compute the probability """
         if log:
-            return StatArray.StatArray(norm.logpdf(x, loc = mean, scale = variance), "Probability Density")
+            return DataArray(norm.logpdf(x, loc = mean, scale = variance), "Probability Density")
         else:
-            return StatArray.StatArray(norm.pdf(x, loc = mean, scale = variance), "Probability Density")
+            return DataArray(norm.pdf(x, loc = mean, scale = variance), "Probability Density")
 
 
     def sum(self, x):

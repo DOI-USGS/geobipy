@@ -8,7 +8,8 @@ from numpy import repeat, s_, size, squeeze, swapaxes, take, unravel_index
 from numpy import where, zeros
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from ...classes.core import StatArray
+from ..core.DataArray import DataArray
+from ..statistics.StatArray import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from .RectilinearMesh2D import RectilinearMesh2D
 from scipy.stats import binned_statistic
@@ -495,7 +496,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
             probability[j] = dot(p, pdf[j])
         probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
-        return StatArray.StatArray(probability, name='marginal_probability')
+        return DataArray(probability, name='marginal_probability')
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -676,7 +677,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #         out = t / s
     #     else:
     #         i = where(s > 0.0)
-    #         out = StatArray.StatArray(t.shape)
+    #         out = StatArray(t.shape)
     #         out[i] = t[i] / s[i]
 
     #     return out
@@ -724,7 +725,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #     return squeeze(take_along_axis(centres, i, axis=axis))
 
 
-    def plotGrid(self):
+    def plot_grid(self):
         raise NotImplementedError("Slice a 3D mesh before using plotGrid.")
 
 
@@ -1003,10 +1004,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #     vtk = self.vtkStructure()
 
     #     if not pointData is None:
-    #         assert isinstance(pointData, (StatArray.StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
+    #         assert isinstance(pointData, (StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
     #         if isinstance(pointData, list):
     #             for p in pointData:
-    #                 assert isinstance(p, StatArray.StatArray), TypeError("pointData entries must be a geobipy.StatArray")
+    #                 assert isinstance(p, StatArray), TypeError("pointData entries must be a geobipy.StatArray")
     #                 assert all(p.shape == [self.z.nEdges, self.x.nEdges]), ValueError("pointData entries must have shape {}".format([self.z.nEdges, self.x.nEdges]))
     #                 assert p.hasLabels(), ValueError("StatArray needs a name")
     #                 vtk.point_data.append(Scalars(p.reshape(self.nNodes), p.getNameUnits()))
@@ -1016,10 +1017,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #             vtk.point_data.append(Scalars(pointData.reshape(self.nNodes), pointData.getNameUnits()))
 
     #     if not cellData is None:
-    #         assert isinstance(cellData, (StatArray.StatArray, list)), TypeError("cellData must a geobipy.StatArray or a list of them.")
+    #         assert isinstance(cellData, (StatArray, list)), TypeError("cellData must a geobipy.StatArray or a list of them.")
     #         if isinstance(cellData, list):
     #             for p in cellData:
-    #                 assert isinstance(p, StatArray.StatArray), TypeError("cellData entries must be a geobipy.StatArray")
+    #                 assert isinstance(p, StatArray), TypeError("cellData entries must be a geobipy.StatArray")
     #                 assert all(p.shape == self.shape), ValueError("cellData entries must have shape {}".format(self.shape))
     #                 assert p.hasLabels(), ValueError("StatArray needs a name")
     #                 vtk.cell_data.append(Scalars(p.reshape(self.nCells), p.getNameUnits()))

@@ -14,7 +14,7 @@ from numpy.lib.stride_tricks import as_strided
 
 from numpy.ma import masked_array
 
-from ..classes.core import StatArray
+from ..classes.statistics import StatArray
 import h5py
 from sklearn.mixture import GaussianMixture
 # from smm import SMM
@@ -1166,20 +1166,22 @@ def _power(values, exponent=None):
 def safeEval(string):
 
     # Backwards compatibility
-    if ('NdArray' in string):
-        string = string.replace('NdArray', 'StatArray')
-        return string
-    if ('StatArray' in string):
-        string = string.replace('StatArray', 'StatArray.StatArray')
-        return string
-    if ('EmLoop' in string):
-        string = string.replace('EmLoop', 'CircularLoop')
-        return string
+    # if ('NdArray' in string):
+    #     string = string.replace('NdArray', 'StatArray')
+    #     return string
+    # if ('StatArray' in string):
+        # string = string.replace('StatArray', 'StatArray.StatArray')
+        # return string
+    # if ('EmLoop' in string):
+    #     string = string.replace('EmLoop', 'CircularLoop')
+    #     return string
 
     allowed = (
+    'DataArray',
+    'StatArray',
     'Histogram',
     'Model',
-    'Model1D',
+    # 'Model1D',
     'TempestData',
     'TdemData',
     'FdemData',

@@ -4,7 +4,7 @@ from numpy import int32, vstack
 import matplotlib
 import matplotlib.pyplot as plt
 
-from ..core import StatArray
+from ..statistics import StatArray
 from ..pointcloud.Point import Point
 from .EmLoop import EmLoop
 from .CircularLoop import CircularLoop

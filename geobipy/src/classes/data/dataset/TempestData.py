@@ -14,7 +14,8 @@ from matplotlib.figure import Figure
 from geobipy.src.base import utilities
 from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from ...system.CircularLoop import CircularLoop
 from ...system.Loop_pair import Loop_pair
 from ....base import plotting as cP
@@ -58,16 +59,16 @@ class TempestData(TdemData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._additive_error = StatArray.StatArray((self.nPoints, self.nChannels), "Additive error", "%")
-        self._relative_error = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
+        self._additive_error = DataArray((self.nPoints, self.nChannels), "Additive error", "%")
+        self._relative_error = DataArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
 
-        self._additive_error_multiplier = StatArray.StatArray(ones((self.nPoints, self.n_components * self.nSystems)), "multiplier")
+        self._additive_error_multiplier = DataArray(ones((self.nPoints, self.n_components * self.nSystems)), "multiplier")
 
     @property
     def additive_error(self):
         """The data. """
         if size(self._additive_error, 0) == 0:
-            self._additive_error = StatArray.StatArray((self.nPoints, self.nChannels), "Additive error", "%")
+            self._additive_error = DataArray((self.nPoints, self.nChannels), "Additive error", "%")
         return self._additive_error
 
     @additive_error.setter
@@ -76,7 +77,7 @@ class TempestData(TdemData):
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
             shp = (self.nPoints, self.nChannels)
             if not allclose(self._additive_error.shape, shp):
-                self._additive_error = StatArray.StatArray(values, "Additive error", self.units)
+                self._additive_error = DataArray(values, "Additive error", self.units)
                 return
 
             self._additive_error[:, :] = values
@@ -85,7 +86,7 @@ class TempestData(TdemData):
     def additive_error_multiplier(self):
         """ """
         if size(self._additive_error_multiplier, 0) == 0:
-            self._additive_error_multiplier = StatArray.StatArray((self.nPoints, self.nSystems * self.n_components), "multiplier")
+            self._additive_error_multiplier = DataArray((self.nPoints, self.nSystems * self.n_components), "multiplier")
         return self._additive_error_multiplier
 
     @additive_error_multiplier.setter
@@ -94,7 +95,7 @@ class TempestData(TdemData):
             self.nPoints = size(values, 0)
             shp = (self.nPoints, self.nSystems * self.n_components)
             if not allclose(self._additive_error_multiplier.shape, shp):
-                self._additive_error_multiplier = StatArray.StatArray(values, "multiplier")
+                self._additive_error_multiplier = DataArray(values, "multiplier")
                 return
 
             self._additive_error_multiplier[:, :] = values
@@ -108,7 +109,7 @@ class TempestData(TdemData):
     def relative_error(self):
         """The data. """
         if size(self._relative_error, 0) == 0:
-            self._relative_error = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
+            self._relative_error = DataArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
         return self._relative_error
 
     @relative_error.setter
@@ -117,7 +118,7 @@ class TempestData(TdemData):
             self.nPoints = size(values, 0)
             shp = (self.nPoints, self.n_components * self.nSystems)
             if not allclose(self._relative_error.shape, shp):
-                self._relative_error = StatArray.StatArray(values, "Relative error", "%")
+                self._relative_error = DataArray(values, "Relative error", "%")
                 return
 
             self._relative_error[:, :] = values
@@ -731,7 +732,7 @@ class TempestData(TdemData):
 
         self = super(TempestData, cls).fromHdf(grp, **kwargs)
 
-        self.primary_field = StatArray.StatArray.fromHdf(grp['primary_field'])
-        self.additive_error_multiplier = StatArray.StatArray.fromHdf(grp['additive_error_multiplier'])
+        self.primary_field = DataArray.fromHdf(grp['primary_field'])
+        self.additive_error_multiplier = DataArray.fromHdf(grp['additive_error_multiplier'])
 
         return self

@@ -4,7 +4,7 @@ from numpy import argwhere, ceil, column_stack, diff, floor, hstack, inf, int32,
 from numpy import minimum, maximum, nan, nanmax, nanmin, tile, zeros
 
 from .fileIO import deleteFile
-from ..classes.core import StatArray
+from ..classes.statistics import StatArray
 from . import utilities as cf
 from scipy import interpolate
 from scipy.interpolate import CloughTocher2DInterpolator
@@ -61,8 +61,6 @@ def __sibson_2d_inner(kdtree, values, grid_x, grid_y, max_distance=inf):
 
     c = zeros((ny, nx))
     n = zeros((ny, nx), dtype=int32)
-
-
 
     # For each raster pixel
     for i in range(ny):

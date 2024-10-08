@@ -7,7 +7,7 @@ from numpy import float64, asarray
 
 from ..classes.core.myObject import myObject
 from copy import deepcopy
-from ..classes.core import StatArray
+from ..classes.statistics import StatArray
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
 from ..classes.data.dataset.TempestData import TempestData

@@ -2,7 +2,7 @@ from numpy import asarray, ceil, float64, hstack, int8, int32, minimum, size, un
 from copy import deepcopy
 from matplotlib.figure import Figure
 from matplotlib.pyplot import gcf
-from ..core import StatArray
+from ..statistics import StatArray
 from ..pointcloud.Point import Point
 from ..mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..statistics.Histogram import Histogram
