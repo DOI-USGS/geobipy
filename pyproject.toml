@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geobipy"
-version = "2.2.1"
+version = "2.3.1"
 description = "McMC inversion of airborne electromagnetic data"
 readme = { file = "README.rst", content-type = "text/x-rst" }
 requires-python = ">=3.10"
