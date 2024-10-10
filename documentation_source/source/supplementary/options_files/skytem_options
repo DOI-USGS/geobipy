@@ -34,7 +34,7 @@ n_markov_chains = 100000
 # General GeoBIPy options.
 # -------------------------------------------------------
 # Interactively plot a single data point as it progresses
-interactive_plot = False
+interactive_plot = True
 # How often to update the plot. (lower is generally slower)
 update_plot_every = 5000
 # Save a PNG of the final results for each data point.

@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -140,7 +140,7 @@
 <li><p><strong>groupName</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The group(s) path within the hdf5 file to read from. i.e. ‘/group1/group1a’</p></li>
 <li><p><strong>key</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The key(s) in the group to read</p></li>
 <li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
-<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>)</p></li>
+<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -164,7 +164,7 @@
 <li><p><strong>groupName</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The group(s) path within the hdf5 file(s) to read from. i.e. ‘/group1/group1a’</p></li>
 <li><p><strong>key</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The key(s) in the group to read</p></li>
 <li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
-<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>)</p></li>
+<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -224,7 +224,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>hObj</strong> (<em>h5py._hl.dataset.Dataset</em><em> or </em><em>h5py._hl.group.Group</em>) – A h5py object from which to read entries.</p></li>
 <li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
-<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>)</p></li>
+<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

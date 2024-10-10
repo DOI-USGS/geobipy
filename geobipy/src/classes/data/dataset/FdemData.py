@@ -14,7 +14,8 @@ from .Data import Data
 from ..datapoint.FdemDataPoint import FdemDataPoint
 from ....base import utilities as cF
 from ....base import plotting as cP
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from ...system.FdemSystem import FdemSystem
 from ...system.CircularLoop import CircularLoop
 from ....base import fileIO as fIO
@@ -88,8 +89,8 @@ class FdemData(Data):
         # Data Class containing xyz and channel values
         super().__init__(**kwargs)
 
-        self._powerline = StatArray.StatArray(self._nPoints, "Powerline")
-        self._magnetic = StatArray.StatArray(self._nPoints, "Magnetic")
+        self._powerline = DataArray(self._nPoints, "Powerline")
+        self._magnetic = DataArray(self._nPoints, "Magnetic")
 
         # self.channel_names = kwargs.get('channel_names', None)
 
@@ -112,7 +113,7 @@ class FdemData(Data):
     @property
     def magnetic(self):
         if self._magnetic.size == 0:
-            self._magnetic = StatArray.StatArray(self._nPoints, "Magnetic", "nT")
+            self._magnetic = DataArray(self._nPoints, "Magnetic", "nT")
         return self._magnetic
 
     @magnetic.setter
@@ -120,7 +121,7 @@ class FdemData(Data):
         if values is not None: # Set a default array
             if self._nPoints == 0: self.nPoints = size(values)
             if (self._magnetic.size != self._nPoints):
-                self._magnetic = StatArray.StatArray(values, "Magnetic", "nT")
+                self._magnetic = DataArray(values, "Magnetic", "nT")
                 return
 
             self._magnetic[:] = values
@@ -128,7 +129,7 @@ class FdemData(Data):
     @property
     def powerline(self):
         if self._powerline.size == 0:
-            self._powerline = StatArray.StatArray(self._nPoints, "Powerline")
+            self._powerline = DataArray(self._nPoints, "Powerline")
         return self._powerline
 
     @powerline.setter
@@ -136,7 +137,7 @@ class FdemData(Data):
         if values is not None: # Set a default array
             if self._nPoints == 0: self.nPoints = size(values)
             if (self._powerline.size != self._nPoints):
-                self._powerline = StatArray.StatArray(values, "Powerline")
+                self._powerline = DataArray(values, "Powerline")
                 return
 
             self._powerline[:] = values
@@ -145,7 +146,7 @@ class FdemData(Data):
     @Data.std.getter
     def std(self):
         if size(self._std, 0) == 0:
-            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+            self._std = DataArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
             self._std[:, :] = sqrt((self.relative_error * self.data)**2 + (self.additive_error**2.0))
@@ -821,12 +822,12 @@ class FdemData(Data):
         self._data[:, :] = values[:, 6:6+2*self.nFrequencies[0]]
 
         if not iP is None:
-            self.powerline = StatArray.StatArray(values[:, 6+2*self.nFrequencies[0]])
+            self.powerline = DataArray(values[:, 6+2*self.nFrequencies[0]])
         if not iM is None:
             iM = 6+2*self.nFrequencies[0]
             if not iP is None:
                 iM += 1
-            self.magnetic = StatArray.StatArray(values[:, iM])
+            self.magnetic = DataArray(values[:, iM])
 
 
 
@@ -857,8 +858,8 @@ class FdemData(Data):
                 if "coil configurations" in line:
                     pairs = f.readline().strip('/').split(')  (')
                     nHeaderLines += 1
-                    transmitterLoops = StatArray.StatArray(nFrequencies, dtype=CircularLoop)
-                    receiverLoops = StatArray.StatArray(nFrequencies, dtype=CircularLoop)
+                    transmitterLoops = DataArray(nFrequencies, dtype=CircularLoop)
+                    receiverLoops = DataArray(nFrequencies, dtype=CircularLoop)
                     for i, pair in enumerate(pairs):
                         tmp = pair.split(',')
                         if 'VMD' in tmp[0]:

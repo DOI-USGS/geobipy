@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:04.736** total execution time for 3 files **from examples/Models**:
+**00:05.245** total execution time for 3 files **from examples/Models**:
 
 .. container::
 
@@ -32,12 +32,12 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_examples_Models_plot_model_1d.py` (``plot_model_1d.py``)
-     - 00:03.360
+   * - :ref:`sphx_glr_examples_Models_plot_model_2d.py` (``plot_model_2d.py``)
+     - 00:03.010
      - 0.0
    * - :ref:`sphx_glr_examples_Models_plot_model_3d.py` (``plot_model_3d.py``)
-     - 00:01.140
+     - 00:02.234
      - 0.0
-   * - :ref:`sphx_glr_examples_Models_plot_model_2d.py` (``plot_model_2d.py``)
-     - 00:00.237
+   * - :ref:`sphx_glr_examples_Models_plot_model_1d.py` (``plot_model_1d.py``)
+     - 00:00.000
      - 0.0

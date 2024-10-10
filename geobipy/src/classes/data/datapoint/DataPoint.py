@@ -10,7 +10,8 @@ from numpy import all as npall
 from numpy.random import randn
 
 from ...pointcloud.Point import Point
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from ....base import utilities as cf
 from ....base import plotting as cP
 from ....base import MPI as myMPI
@@ -124,7 +125,7 @@ class DataPoint(Point):
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._additive_error = StatArray.StatArray(values, '$\\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray(values, '$\\epsilon_{Additive}$', self.units)
 
     @property
     def addressof(self):
@@ -167,7 +168,7 @@ class DataPoint(Point):
 
     @fiducial.setter
     def fiducial(self, value):
-        self._fiducial = StatArray.StatArray(value, 'fiducial')
+        self._fiducial = DataArray(value, 'fiducial')
 
     @property
     def lineNumber(self):
@@ -175,7 +176,7 @@ class DataPoint(Point):
 
     @lineNumber.setter
     def lineNumber(self, value):
-        self._lineNumber = StatArray.StatArray(float64(value), 'Line number')
+        self._lineNumber = DataArray(float64(value), 'Line number')
 
     @property
     def n_posteriors(self):
@@ -194,7 +195,7 @@ class DataPoint(Point):
 
     @data.setter
     def data(self, values):
-        self._data = StatArray.StatArray(values, "Data", self.units)
+        self._data = DataArray(values, "Data", self.units)
 
     @property
     def deltaD(self):
@@ -210,7 +211,7 @@ class DataPoint(Point):
             with size equal to the number of active channels.
 
         """
-        return StatArray.StatArray(self.predictedData - self.data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
+        return DataArray(self.predictedData - self.data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
 
     @property
     def n_active_channels(self):
@@ -239,7 +240,7 @@ class DataPoint(Point):
                 values = hstack(values)
             assert size(values) == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
 
-        self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
+        self._predictedData = StatArray(values, "Predicted Data", self.units)
 
     @property
     def relative_error(self):
@@ -258,7 +259,7 @@ class DataPoint(Point):
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
-        self._relative_error = StatArray.StatArray(values, '$\\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray(values, '$\\epsilon_{Relative}x10^{2}$', '%')
 
     @property
     def sensitivity_matrix(self):
@@ -291,7 +292,7 @@ class DataPoint(Point):
                 value = hstack(value)
             assert size(value) == self.nChannels, ValueError("Size of std {} must equal total number of time channels {}".format(size(value), self.nChannels))
 
-        self._std = StatArray.StatArray(value, "Standard deviation", self.units)
+        self._std = DataArray(value, "Standard deviation", self.units)
 
     @property
     def units(self):
@@ -594,6 +595,7 @@ class DataPoint(Point):
         self.set_data_prior(data_prior)
 
     def set_data_prior(self, prior):
+
         if not prior is None:
             self.predictedData.prior = prior
 
@@ -668,12 +670,13 @@ class DataPoint(Point):
 
         """
         if self.relative_error.hasPrior:
-            bins = StatArray.StatArray(atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
+            bins = DataArray(atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
-                mesh = RectilinearMesh1D(edges = b, relativeTo=0.5*(b.max()-b.min()), log=10)
+                mesh = RectilinearMesh1D(edges = b, relative_to=0.5*(b.max()-b.min()), log=10)
                 posterior.append(Histogram(mesh=mesh))
+
             self.relative_error.posterior = posterior
 
     def set_additive_error_posterior(self, log=10):
@@ -681,13 +684,14 @@ class DataPoint(Point):
 
         """
         if self.additive_error.hasPrior:
-            bins = StatArray.StatArray(atleast_2d(self.additive_error.prior.bins()), name=self.additive_error.name, units=self.data.units)
+            bins = DataArray(atleast_2d(self.additive_error.prior.bins()), name=self.additive_error.name, units=self.data.units)
 
             posterior = []
             for i in range(self.nSystems):
                 b = bins[i, :]
-                mesh = RectilinearMesh1D(edges = b, log=log, relativeTo=0.5*(b.max()-b.min()))
+                mesh = RectilinearMesh1D(edges = b, log=log, relative_to=0.5*(b.max()-b.min()))
                 posterior.append(Histogram(mesh=mesh))
+
             self.additive_error.posterior = posterior
 
     # def scaleJ(self, Jin, power=1.0):
@@ -801,26 +805,19 @@ class DataPoint(Point):
         out = super(DataPoint, cls).fromHdf(grp, index=index, **kwargs)
 
         if 'fiducial' in grp:
-            out.fiducial = StatArray.StatArray.fromHdf(grp['fiducial'], index=index)
+            out.fiducial = StatArray.fromHdf(grp['fiducial'], index=index)
         if 'line_number' in grp:
-            out.lineNumber = StatArray.StatArray.fromHdf(grp['line_number'], index=index)
+            out.lineNumber = StatArray.fromHdf(grp['line_number'], index=index)
 
         if 'components' in grp:
             out._components = asarray(grp['components'])
 
-        out.data = StatArray.StatArray.fromHdf(grp['data'], index=index)
-        out.std = StatArray.StatArray.fromHdf(grp['std'], index=index)
-        out.predictedData = StatArray.StatArray.fromHdf(grp['predicted_data'], index=index)
+        out.data = StatArray.fromHdf(grp['data'], index=index)
+        out.std = StatArray.fromHdf(grp['std'], index=index)
+        out.predictedData = StatArray.fromHdf(grp['predicted_data'], index=index)
 
-        # if 'joint_error_posterior_0' in grp:
-        #     i = 0
-        #     self.errorPosterior = []
-        #     while 'joint_error_posterior_{}'.format(i) in grp:
-        #         self.errorPosterior.append(Histogram2D.fromHdf(grp['joint_error_posterior_{}'.format(i)], index=index))
-        #         i += 1
-
-        out._relative_error = StatArray.StatArray.fromHdf(grp['relative_error'], index=index)
-        out._additive_error = StatArray.StatArray.fromHdf(grp['additive_error'], index=index)
+        out._relative_error = StatArray.fromHdf(grp['relative_error'], index=index)
+        out._additive_error = StatArray.fromHdf(grp['additive_error'], index=index)
 
         return out
 
@@ -840,10 +837,10 @@ class DataPoint(Point):
 
         out = super(DataPoint, cls).Irecv(source, world, **kwargs)
 
-        out._lineNumber = StatArray.StatArray.Irecv(source, world)
-        out._fiducial = StatArray.StatArray.Irecv(source, world)
+        out._lineNumber = DataArray.Irecv(source, world)
+        out._fiducial = DataArray.Irecv(source, world)
 
-        out._relative_error = StatArray.StatArray.Irecv(source, world)
-        out._additive_error = StatArray.StatArray.Irecv(source, world)
+        out._relative_error = DataArray.Irecv(source, world)
+        out._additive_error = DataArray.Irecv(source, world)
 
         return out

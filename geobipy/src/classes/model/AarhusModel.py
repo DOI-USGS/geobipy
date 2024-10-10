@@ -1,6 +1,6 @@
 import numpy as np
 from ...base import fileIO as fio
-from ..core.StatArray import StatArray
+from ..statistics.StatArray import StatArray
 from ..mesh.TopoRectilinearMesh2D import TopoRectilinearMesh2D
 from .Model import Model
 

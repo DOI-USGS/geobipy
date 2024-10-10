@@ -61,11 +61,11 @@ Specify some cell centres in x and y
 
     plt.figure()
     plt.subplot(231)
-    rm2.plotGrid()
+    rm2.plot_grid()
     plt.subplot(232)
-    rm3.plotGrid()
+    rm3.plot_grid()
     plt.subplot(233)
-    rm4.plotGrid()
+    rm4.plot_grid()
 
 
 
@@ -88,11 +88,11 @@ Specify some cell centres in x and y
     rm4 = rm[5, 5, :]
 
     plt.subplot(234)
-    rm2.plotGrid()
+    rm2.plot_grid()
     plt.subplot(235)
-    rm3.plotGrid()
+    rm3.plot_grid()
     plt.subplot(236)
-    rm4.plotGrid()
+    rm4.plot_grid()
 
 
 
@@ -131,11 +131,11 @@ Specify some cell centres in x and y
 
     plt.figure()
     plt.subplot(231)
-    rm2.plotGrid()
+    rm2.plot_grid()
     plt.subplot(232)
-    rm3.plotGrid()
+    rm3.plot_grid()
     plt.subplot(233)
-    rm4.plotGrid()
+    rm4.plot_grid()
 
 
 
@@ -170,12 +170,11 @@ We can plot the mesh in 3D!
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 83-105
+.. GENERATED FROM PYTHON SOURCE LINES 83-104
 
 .. code-block:: Python
 
     mesh = rm.pyvista_mesh().save('rm3d_re1.vtk')
-
 
     x_re = StatArray(np.sin(np.repeat(rm.y.centres[:, None], rm.z.nCells, 1)), "x_re")
 
@@ -190,11 +189,11 @@ We can plot the mesh in 3D!
 
     plt.figure()
     plt.subplot(231)
-    rm2.plotGrid()
+    rm2.plot_grid()
     plt.subplot(232)
-    rm3.plotGrid()
+    rm3.plot_grid()
     plt.subplot(233)
-    rm4.plotGrid()
+    rm4.plot_grid()
 
 
 
@@ -208,11 +207,11 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 106-107
+.. GENERATED FROM PYTHON SOURCE LINES 105-106
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-109
+.. GENERATED FROM PYTHON SOURCE LINES 106-108
 
 .. code-block:: Python
 
@@ -225,11 +224,11 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-111
+.. GENERATED FROM PYTHON SOURCE LINES 109-110
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-137
+.. GENERATED FROM PYTHON SOURCE LINES 110-136
 
 .. code-block:: Python
 
@@ -253,11 +252,11 @@ We can plot the mesh in 3D!
 
     plt.figure()
     plt.subplot(231)
-    rm2.plotGrid()
+    rm2.plot_grid()
     plt.subplot(232)
-    rm3.plotGrid()
+    rm3.plot_grid()
     plt.subplot(233)
-    rm4.plotGrid()
+    rm4.plot_grid()
 
 
 
@@ -271,11 +270,11 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 138-139
+.. GENERATED FROM PYTHON SOURCE LINES 137-138
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-141
+.. GENERATED FROM PYTHON SOURCE LINES 138-140
 
 .. code-block:: Python
 
@@ -288,11 +287,11 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-143
+.. GENERATED FROM PYTHON SOURCE LINES 141-142
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 143-154
+.. GENERATED FROM PYTHON SOURCE LINES 142-153
 
 .. code-block:: Python
 
@@ -317,7 +316,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 11.321 seconds)
+   **Total running time of the script:** (0 minutes 1.145 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py:
@@ -333,6 +332,10 @@ We can plot the mesh in 3D!
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_rectilinear_mesh_3d.py <plot_rectilinear_mesh_3d.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_rectilinear_mesh_3d.zip <plot_rectilinear_mesh_3d.zip>`
 
 
 .. only:: html

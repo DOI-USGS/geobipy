@@ -21,7 +21,8 @@ from .src.classes.statistics import get_prng
 # from .src.base.HDF import hdfWrite
 # Classes within geobipy
 # Core
-from .src.classes.core.StatArray import StatArray
+from .src.classes.core.DataArray import DataArray
+from .src.classes.statistics.StatArray import StatArray
 # from .src.classes.core.Stopwatch import Stopwatch
 # Data points
 from .src.classes.data.datapoint.DataPoint import DataPoint
@@ -74,9 +75,7 @@ killSwitch = 9
 
 def checkCommandArguments():
     """Check the users command line arguments. """
-    import warnings
-    # warnings.filterwarnings('error')
-
+    import argparse
     Parser = argparse.ArgumentParser(description="GeoBIPy", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     Parser.add_argument('options_file', help='User options file')
     Parser.add_argument('output_directory', help='Output directory for results')

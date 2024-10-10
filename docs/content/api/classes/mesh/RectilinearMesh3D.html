@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -106,12 +106,21 @@
              
   <section id="rectilinearmesh3d">
 <h1>RectilinearMesh3D<a class="headerlink" href="#rectilinearmesh3d" title="Link to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-9c864059254fcc1e3b441445a469437ee047386d.png" alt="Inheritance diagram of geobipy.src.classes.mesh.RectilinearMesh3D" usemap="#inheritanceb5cabbf6a5" class="inheritance graphviz" /></div>
-<map id="inheritanceb5cabbf6a5" name="inheritanceb5cabbf6a5">
-<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
-<area shape="rect" id="node4" href="RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D" target="_top" title="Class defining a 2D rectilinear mesh with cell centres and edges." alt="" coords="371,5,503,32"/>
-<area shape="rect" id="node5" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D" target="_top" title="Class defining a 3D rectilinear mesh with cell centres and edges." alt="" coords="551,5,683,32"/>
-</map><p id="module-geobipy.src.classes.mesh.RectilinearMesh3D">&#64;RectilinearMesh2D_Class
+digraph inheritanceb5cabbf6a5 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Mesh&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Abstract Base Class&quot;];
+  &quot;myObject&quot; -&gt; &quot;Mesh&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;RectilinearMesh2D&quot; [URL=&quot;RectilinearMesh2D.html#geobipy.src.classes.mesh.RectilinearMesh2D.RectilinearMesh2D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 2D rectilinear mesh with cell centres and edges.&quot;];
+  &quot;Mesh&quot; -&gt; &quot;RectilinearMesh2D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;RectilinearMesh3D&quot; [URL=&quot;#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 3D rectilinear mesh with cell centres and edges.&quot;];
+  &quot;RectilinearMesh2D&quot; -&gt; &quot;RectilinearMesh3D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<p id="module-geobipy.src.classes.mesh.RectilinearMesh3D">&#64;RectilinearMesh2D_Class
 Module describing a 2D Rectilinear Mesh class with x and y axes specified</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D">
@@ -137,16 +146,16 @@ If x, y, and z are specified, plots can be made against distance which calculate
 <li><p><strong>y_edges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges, in the “y” direction. Only y_centres or y_edges can be given.</p></li>
 <li><p><strong>z_centres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the centre of each cell in the “z” direction. Only z_centres or z_edges can be given.</p></li>
 <li><p><strong>z_edges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges, in the “z” direction. Only z_centres or z_edges can be given.</p></li>
-<li><p><strong>relativeToCentres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The relativeTo of each point at the x, y locations. Only relativeToCentres or relativeToEdges can be given, not both.
+<li><p><strong>relative_toCentres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The relative_to of each point at the x, y locations. Only relative_toCentres or relative_toEdges can be given, not both.
 Has shape (y.nCells, x.nCells).</p></li>
-<li><p><strong>relativeToEdges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The relativeTo of each point at the x, y locations of the edges of each cell, including the outermost edges. Only relativeToCentres or relativeToEdges can be given, not both.
+<li><p><strong>relative_toEdges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The relative_to of each point at the x, y locations of the edges of each cell, including the outermost edges. Only relative_toCentres or relative_toEdges can be given, not both.
 Has shape (y.nEdges, x.nEdges).</p></li>
 <li><p><strong>[</strong><strong>x</strong> (<em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for log description.</p></li>
 <li><p><strong>y</strong> (<em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for log description.</p></li>
 <li><p><strong>z</strong><strong>]</strong><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for log description.</p></li>
-<li><p><strong>[</strong><strong>x</strong> – See geobipy.RectilinearMesh1D for relativeTo description.</p></li>
-<li><p><strong>y</strong> – See geobipy.RectilinearMesh1D for relativeTo description.</p></li>
-<li><p><strong>z</strong><strong>]</strong><strong>relativeTo</strong> (<em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for relativeTo description.</p></li>
+<li><p><strong>[</strong><strong>x</strong> – See geobipy.RectilinearMesh1D for relative_to description.</p></li>
+<li><p><strong>y</strong> – See geobipy.RectilinearMesh1D for relative_to description.</p></li>
+<li><p><strong>z</strong><strong>]</strong><strong>relative_to</strong> (<em>float</em><em>, </em><em>optional</em>) – See geobipy.RectilinearMesh1D for relative_to description.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -241,8 +250,8 @@ myName: Name of the group</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.plotGrid">
-<span class="sig-name descname"><span class="pre">plotGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.plotGrid" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.plot_grid">
+<span class="sig-name descname"><span class="pre">plot_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh3D.RectilinearMesh3D.plot_grid" title="Link to this definition"></a></dt>
 <dd><p>Plot the mesh grid lines.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

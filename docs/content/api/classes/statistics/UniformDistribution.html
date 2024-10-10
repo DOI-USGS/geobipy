@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -110,12 +110,19 @@
              
   <section id="uniform-distribution">
 <h1>Uniform distribution<a class="headerlink" href="#uniform-distribution" title="Link to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-44c11d2bf5c3a029b973cd3c6c261dd6a59757d5.png" alt="Inheritance diagram of geobipy.src.classes.statistics.UniformDistribution" usemap="#inheritancea4de341619" class="inheritance graphviz" /></div>
-<map id="inheritancea4de341619" name="inheritancea4de341619">
-<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
-<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.UniformDistribution.Uniform" target="_top" title="Class defining a uniform distribution" alt="" coords="414,5,486,32"/>
-<area shape="rect" id="node3" href="baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution" target="_top" title="Define an abstract base distribution class" alt="" coords="251,5,366,32"/>
-</map><p id="module-geobipy.src.classes.statistics.UniformDistribution">&#64;UniformDistribution
+digraph inheritancea4de341619 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Uniform&quot; [URL=&quot;#geobipy.src.classes.statistics.UniformDistribution.Uniform&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a uniform distribution&quot;];
+  &quot;baseDistribution&quot; -&gt; &quot;Uniform&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;baseDistribution&quot; [URL=&quot;baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Define an abstract base distribution class&quot;];
+  &quot;myObject&quot; -&gt; &quot;baseDistribution&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<p id="module-geobipy.src.classes.statistics.UniformDistribution">&#64;UniformDistribution
 Module defining a uniform distribution with statistical procedures</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.UniformDistribution.Uniform">

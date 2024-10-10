@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:48.096** total execution time for 4 files **from examples/Statistics**:
+**00:16.153** total execution time for 5 files **from examples/Statistics**:
 
 .. container::
 
@@ -32,15 +32,18 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_examples_Statistics_plot_histogram_2d.py` (``plot_histogram_2d.py``)
-     - 00:32.906
-     - 0.0
    * - :ref:`sphx_glr_examples_Statistics_plot_histogram_3d.py` (``plot_histogram_3d.py``)
-     - 00:11.648
+     - 00:05.881
+     - 0.0
+   * - :ref:`sphx_glr_examples_Statistics_plot_histogram_2d.py` (``plot_histogram_2d.py``)
+     - 00:04.953
      - 0.0
    * - :ref:`sphx_glr_examples_Statistics_plot_StatArray.py` (``plot_StatArray.py``)
-     - 00:03.542
+     - 00:04.117
      - 0.0
    * - :ref:`sphx_glr_examples_Statistics_plot_histogram_1d.py` (``plot_histogram_1d.py``)
-     - 00:00.000
+     - 00:01.198
+     - 0.0
+   * - :ref:`sphx_glr_examples_Statistics_plot_DataArray.py` (``plot_DataArray.py``)
+     - 00:00.004
      - 0.0

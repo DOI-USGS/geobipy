@@ -7,7 +7,7 @@ from numpy import log as nplog
 
 from ...base  import utilities
 from .baseDistribution import baseDistribution
-from ..core import StatArray
+from ..core.DataArray import DataArray
 from .MvNormalDistribution import MvNormal
 from scipy.stats import multivariate_normal
 
@@ -112,7 +112,7 @@ class MvLogNormal(MvNormal):
         nD = self.ndim
         if (nD > 1):
             if axis is None:
-                bins = StatArray.StatArray(empty([nD, nBins+1]), name=utilities.getName(self.mean), units=utilities.getUnits(self.mean))
+                bins = DataArray(empty([nD, nBins+1]), name=utilities.getName(self.mean), units=utilities.getUnits(self.mean))
                 for i in range(nD):
                     tmp = squeeze(nStd * self.std[i, i])
                     t = linspace(-tmp, tmp, nBins+1)
@@ -133,7 +133,7 @@ class MvLogNormal(MvNormal):
             if not relative:
                 bins += self._mean
 
-        return (exp(bins)) if self.linearSpace else StatArray.StatArray(bins)
+        return (exp(bins)) if self.linearSpace else DataArray(bins)
 
     @property
     def summary(self):

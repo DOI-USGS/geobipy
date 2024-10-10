@@ -8,13 +8,11 @@ from numpy import shape as npshape
 from numpy import set_printoptions
 from matplotlib.axes import SubplotBase
 import h5py
-import scipy.stats as st
+# import scipy.stats as st
 
 
 from ...base import utilities as cf
 from ...base import plotting as cP
-from ..statistics.Distribution import Distribution
-from ..statistics.baseDistribution import baseDistribution
 from .myObject import myObject
 from ...base.HDF.hdfWrite import write_nd
 from ...base import MPI as myMPI
@@ -22,7 +20,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.figure import Figure
 
-class StatArray(ndarray, myObject):
+class DataArray(ndarray, myObject):
     """Class extension to numpy.ndarray
 
     This subclass to a numpy array contains extra attributes that can describe the parameters it represents.
@@ -107,7 +105,7 @@ class StatArray(ndarray, myObject):
 
     # "hidden" methods
 
-    def __new__(subtype, shape=None, name=None, units=None, verbose=False, **kwargs):
+    def __new__(cls, shape=None, name=None, units=None, verbose=False, **kwargs):
         """Instantiate a new StatArray """
         # Create the ndarray instance of our type, given the usual
         # ndarray input arguments.  This will call the standard
@@ -130,20 +128,14 @@ class StatArray(ndarray, myObject):
             shape = asarray(shape)
 
         # Copies a StatArray but can reassign the name and units
-        if isinstance(shape, StatArray):
+        if isinstance(shape, DataArray):
             if ndim(shape) == 0:
-                self = ndarray.__new__(subtype, 1, **kwargs)
+                self = ndarray.__new__(cls, 1, **kwargs)
                 self[:] = shape
             else:
                 shp = npshape(shape)
-                self = StatArray(shp, **kwargs) + shape
+                self = cls(shp, **kwargs) + shape
 
-            if (shape.hasPrior):
-                self._prior = deepcopy(shape._prior)
-            if (shape.hasProposal):
-                self._proposal = deepcopy(shape._proposal)
-            if (shape.hasPosterior):
-                self._posterior = shape._posterior
             if name is None and not shape._name is None:
                 name = shape._name
             if units is None and not shape._units is None:
@@ -151,15 +143,14 @@ class StatArray(ndarray, myObject):
 
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, ndarray):
-            # shape = deepcopy(shape)
-            self = shape.view(StatArray)
+            self = shape.view(cls)
 
         elif isinstance(shape, (float, float32, float64)):
-            self = ndarray.__new__(subtype, 1, **kwargs)
+            self = ndarray.__new__(cls, 1, **kwargs)
             self[:] = shape
 
         else:
-            self = ndarray.__new__(subtype, asarray(shape), **kwargs)
+            self = ndarray.__new__(cls, asarray(shape), **kwargs)
             self[:] = 0
 
         # Set the name of the StatArray
@@ -180,10 +171,25 @@ class StatArray(ndarray, myObject):
             self._name = None
             self._units = None
 
-    def __array_wrap__(self, out_arr, context=None):
-        return ndarray.__array_wrap__(self, out_arr, context)
+    def __array_wrap__(self, out_arr, context=None, return_scalar=False):
+        return ndarray.__array_wrap__(self, out_arr, context, return_scalar)
 
     # Properties
+    @property
+    def hasPrior(self):
+        return False
+
+    @property
+    def hasProposal(self):
+        return False
+
+    @property
+    def hasPosterior(self):
+        return False
+
+    @property
+    def n_posteriors(self):
+        return 0
 
     @property
     def bounds(self):
@@ -202,68 +208,6 @@ class StatArray(ndarray, myObject):
             self._name = values
 
     @property
-    def n_posteriors(self):
-        if self.hasPosterior:
-            return size(self._posterior)
-        return 0
-
-    @property
-    def posterior(self):
-        """Returns the posterior if available. """
-        if self.hasPosterior:
-            return self._posterior
-        else:
-            return None
-
-    @posterior.setter
-    def posterior(self, value):
-        if value is None:
-            self._posterior = None
-            return
-
-        nP = size(value)
-        if nP > 1:
-            assert nP == self.shape[-1] or (self.shape[-1]%nP == 0), ValueError("Number of posteriors must match size of StatArray's first dimension")
-
-        if nP == 1:
-            if isinstance(value, list):
-                value = value[0]
-
-        self._posterior = value
-
-    @property
-    def prior(self):
-        """Returns the prior if available. """
-        if self.hasPrior:
-            return self._prior
-        else:
-            return None
-
-    @prior.setter
-    def prior(self, value):
-        if value is None:
-            self._prior = None
-            return
-        assert isinstance(value, baseDistribution), TypeError('prior must be a Distribution')
-        self._prior = value
-
-    @property
-    def proposal(self):
-        """Returns the prior if available. """
-        if self.hasProposal:
-            return self._proposal
-        else:
-            return None
-
-    @proposal.setter
-    def proposal(self, value):
-        if value is None:
-            self._proposal = None
-            return
-        assert isinstance(value, baseDistribution), TypeError('proposal must be a Distribution')
-        self._proposal = value
-
-    @property
     def units(self):
         return "" if self._units is None else self._units
 
@@ -276,33 +220,17 @@ class StatArray(ndarray, myObject):
             self._units = values
 
     # Methods
-
     def hasLabels(self):
         return not self.getNameUnits() == ""
 
     @property
     def addressof(self):
-        msg = 'StatArray: {} {}\n'.format(self.getNameUnits(), hex(id(self)))
-        if self.hasPrior:
-            msg += "Prior:\n{}".format(("|   "+self.prior.addressof.replace("\n", "\n|   "))[:-4])
-        if self.hasProposal:
-            msg += "Proposal:\n{}".format(("|   "+self.proposal.addressof.replace("\n", "\n|   "))[:-4])
-        if self.hasPosterior:
-            if self.n_posteriors > 1:
-                for posterior in self.posterior:
-                    msg += "Posterior:\n{}".format(("|   "+posterior.addressof.replace("\n", "\n|   "))[:-4])
-            else:
-                msg += "Posterior:\n{}".format(("|   "+self.posterior.addressof.replace("\n", "\n|   "))[:-4])
+        msg = f'{type(self)}: {self.label} {hex(id(self))}\n'
         return msg
 
     @property
     def address(self):
-        out = asarray([hex(id(self))])
-        if self.hasPrior:
-            out = out.hstack([out, self.prior.address])
-        if self.hasProposal:
-            out = out.hstack([out, self.proposal.address])
-        return out
+        return asarray([hex(id(self))])
 
     def abs(self):
         """Take the absolute value.  In-place operation.
@@ -374,46 +302,18 @@ class StatArray(ndarray, myObject):
         # Get the discretization
         assert spacing > 0.0, ValueError("spacing must be positive!")
         sp = 0.5 * spacing
-        return StatArray(arange(self.bounds[0] - sp, self.bounds[1] + (2*sp), spacing), self.name, self.units)
+        return type(self)(arange(self.bounds[0] - sp, self.bounds[1] + (2*sp), spacing), self.name, self.units)
 
-    def confidence_interval(self, interval):
-        values = self.flatten()
-        return st.t.interval(interval, self.size - 1, loc=mean(values), scale=st.sem(values))
+    # def confidence_interval(self, interval):
+    #     values = self.flatten()
+    #     return st.t.interval(interval, self.size - 1, loc=mean(values), scale=st.sem(values))
 
     def copy(self, order='F'):
-        return StatArray(self)
-
-    def copyStats(self, other):
-        """Copy statistical properties from other to self
-
-        [extended_summary]
-
-        Parameters
-        ----------
-        other : [type]
-            [description]
-        """
-        if other.hasPrior:
-            self._prior = deepcopy(other._prior)
-        if other.hasProposal:
-            self._proposal = deepcopy(other._proposal)
-        if other.hasPosterior:
-            self._posterior = other._posterior
+        return type(self)(self)
 
     def __deepcopy__(self, memo={}):
 
-        other = StatArray(self, dtype=self.dtype)
-
-        # other._name = self._name
-        # other._units = self._units
-
-        # if (self.hasPrior):
-        #     other._prior = deepcopy(self._prior)
-        # if (self.hasProposal):
-        #     other._proposal = deepcopy(self._proposal)
-        # if (self.hasPosterior):
-        #     other._posterior = self._posterior  # deepcopy(self._posterior)
-
+        other = type(self)(self, dtype=self.dtype)
         return other
 
     def delete(self, i, axis=None):
@@ -437,7 +337,6 @@ class StatArray(ndarray, myObject):
         out = self.resize(tmp.shape)
         out[:] = tmp[:]
 
-        out.copyStats(self)
         return out
 
     def edges(self, min=None, max=None, axis=-1):
@@ -466,7 +365,7 @@ class StatArray(ndarray, myObject):
         """
         if self.size == 1:
             d = squeeze(asarray([self - 1, self + 1]))
-            return StatArray(d, self.name, self.units)
+            return type(self)(d, self.name, self.units)
         else:
             d = 0.5 * diff(self, axis=axis)
 
@@ -485,7 +384,7 @@ class StatArray(ndarray, myObject):
 
         edges = concatenate([e0, e1, e2], axis=axis)
 
-        return StatArray(edges, self.name, self.units)
+        return type(self)(edges, self.name, self.units)
 
     def firstNonZero(self, axis=0, invalid_val=-1):
         """Find the indices of the first non zero values along the axis.
@@ -526,34 +425,6 @@ class StatArray(ndarray, myObject):
         u = self.units
         return out if u == "" else "{} ({})".format(out, u)
 
-    # def getName(self):
-    #     """Get the name of the StatArray
-
-    #     If the name has not been attached, returns an empty string
-
-    #     Returns
-    #     -------
-    #     out : str
-    #         The name of the StatArray.
-
-    #     """
-
-    #     return "" if self.name is None else self.name
-
-    # def getUnits(self):
-    #     """Get the units of the StatArray
-
-    #     If the units have not been attached, returns an empty string
-
-    #     Returns
-    #     -------
-    #     out : str
-    #         The unist of the StatArray
-
-    #     """
-
-    #     return "" if self.units is None else self.units
-
     def insert(self, i, values, axis=0):
         """ Insert values
 
@@ -577,7 +448,6 @@ class StatArray(ndarray, myObject):
         out = self.resize(tmp.shape)  # Keeps the prior and proposal if set.
         out[:] = tmp[:]
 
-        out.copyStats(self)
         return out
 
     def interleave(self, other):
@@ -596,7 +466,7 @@ class StatArray(ndarray, myObject):
         """
         assert self.size == other.size, ValueError(
             "other must have size {}".format(self.size))
-        out = StatArray((self.size + other.size), dtype=self.dtype)
+        out = type(self)((self.size + other.size), dtype=self.dtype)
         out[0::2] = self
         out[1::2] = other
         return out
@@ -618,60 +488,12 @@ class StatArray(ndarray, myObject):
         x2 = self.take(indices=arange(self.shape[axis]-1), axis=axis)
         edges = x2 + d
 
-        return StatArray(edges, self.name, self.units)
+        return type(self)(edges, self.name, self.units)
 
     def diff(self, axis=-1):
         assert (self.size > 1), ValueError("Size of StatArray must be > 1")
 
-        return StatArray(diff(self, axis=axis), self.name, self.units)
-
-    @property
-    def hasPosterior(self):
-        """Check that the StatArray has an attached posterior.
-
-        Returns
-        -------
-        out : bool
-            Has an attached posterior.
-
-        """
-
-        try:
-            return not self._posterior is None
-        except:
-            return False
-
-    @property
-    def hasPrior(self):
-        """Check that the StatArray has an attached prior.
-
-        Returns
-        -------
-        out : bool
-            Has an attached prior.
-
-        """
-
-        try:
-            return not self._prior is None
-        except:
-            return False
-
-    @property
-    def hasProposal(self):
-        """Check that the StatArray has an attached proposal.
-
-        Returns
-        -------
-        out : bool
-            Has an attached proposal.
-
-        """
-
-        try:
-            return not self._proposal is None
-        except:
-            return False
+        return type(self)(diff(self, axis=axis), self.name, self.units)
 
     def index(self, values):
         """Find the index of values.
@@ -692,35 +514,6 @@ class StatArray(ndarray, myObject):
 
         return self.searchsorted(values, side='right') - 1
 
-    def priorDerivative(self, order, i=None):
-        """ Get the derivative of the prior.
-
-        Parameters
-        ----------
-        order : int
-            1 or 2 for first or second order derivative
-
-        """
-        assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
-        if i is None:
-            i = s_[:]
-        out = self.prior.derivative(self[i], order)
-        return out
-
-    def proposal_derivative(self, order, i=None):
-        """ Get the derivative of the proposal.
-
-        Parameters
-        ----------
-        order : int
-            1 or 2 for first or second order derivative
-
-        """
-        assert self.hasProposal, TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
-        if i is None:
-            i = s_[:]
-        return self.proposal.derivative(self[i], order)
-
     def lastNonZero(self, axis=0, invalid_val=-1):
         """Find the indices of the first non zero values along the axis.
 
@@ -739,10 +532,6 @@ class StatArray(ndarray, myObject):
         msk = self != 0.0
         val = self.shape[axis] - flip(msk, axis=axis).argmax(axis=axis)
         return where(msk.any(axis=axis), val, invalid_val)
-
-    def mahalanobis(self):
-        assert self.hasPrior, ValueError("No prior attached")
-        return self.prior.mahalanobis(self)
 
     def nanmin(self):
         return nanmin(self)
@@ -801,12 +590,7 @@ class StatArray(ndarray, myObject):
         return (((b - a) * (self - self.min())) / (self.max() - self.min())) + a
 
     def reset_posteriors(self):
-        np = self.n_posteriors
-        if np > 1:
-            for post in self.posterior:
-                post.reset()
-        elif np == 1:
-            self.posterior.reset()
+        return
 
     def resize(self, new_shape):
         """Resize a StatArray
@@ -828,12 +612,10 @@ class StatArray(ndarray, myObject):
         numpy.resize : For more information.
 
         """
-        out = StatArray(resize(self, new_shape), self.name, self.units)
-        out.copyStats(self)
-        return out
+        return type(self)(resize(self, new_shape), self.name, self.units)
 
     def smooth(self, a):
-        return StatArray(cf.smooth(self, a))
+        return type(self)(cf.smooth(self, a))
 
     def standardize(self, axis=None):
         """Standardize by subtracting the mean and dividing by the standard deviation. """
@@ -867,48 +649,15 @@ class StatArray(ndarray, myObject):
         if self.size == 0:
             return "None"
 
-        msg = ('Name: {} {}\n'
-               'Shape: {}\n'
-               'Values: {}\n'
-               'Min: {}\n'
-               'Max: {}\n').format(self.getNameUnits(), hex(id(self)), self.shape, self, self.min(), self.max())
-        if self.hasPrior:
-            msg += "Prior:\n{}".format(("|   "+self.prior.summary.replace("\n", "\n|   "))[:-4])
-
-        if self.hasProposal:
-            msg += "Proposal:\n{}".format(("|   "+self.proposal.summary.replace("\n", "\n|   "))[:-4])
-
-        msg += 'has_posterior: {}\n'.format(self.hasPosterior)
-        #     if self.n_posteriors > 1:
-        #         for p in self.posterior:
-        #             msg += "Posterior:\n{}".format(("|   "+p.summary.replace("\n", "\n|   "))[:-4])
-        #     else:
-        #         msg += "Posterior:\n{}".format(("|   "+self.posterior.summary.replace("\n", "\n|   "))[:-4])
+        msg =  f"{self.__class__.__name__}\n"
+        msg += f'Name:   {self.label}\n'
+        msg += f'Address:{self.address}\n'
+        msg += f'Shape:  {self.shape}\n'
+        msg += f'Values: {self}\n'
+        msg += f'Min:    {self.min()}\n'
+        msg += f'Max:    {self.max()}\n'
 
         return msg
-
-    def summaryPlot(self, **kwargs):
-        """ Creates a summary plot of the StatArray with any attached priors, proposal, or posteriors. """
-
-        gs1 = gridspec.GridSpec(
-            nrows=1, ncols=1, left=0.5, right=0.92, wspace=0.01, hspace=0.13)
-        gs2 = gridspec.GridSpec(
-            nrows=2, ncols=1, left=0.085, right=0.40, wspace=0.06, hspace=0.5)
-
-        ax = plt.subplot(gs2[0, 0])
-        self.prior.plot_pdf()
-        ax.set_xlabel(self.getNameUnits())
-        ax.set_title('Prior')
-
-        tmp = plt.subplot(gs2[1, 0], sharex=ax, sharey=ax)
-        self.proposal.plot_pdf()
-        tmp.set_title('Proposal')
-        tmp.set_xlabel(self.getNameUnits())
-
-        tmp = plt.subplot(gs1[0, 0])
-        self.posterior.plot(**kwargs)
-        tmp.set_title("Posterior")
-        tmp.set_xlabel(self.getNameUnits())
 
     @property
     def values(self):
@@ -934,8 +683,6 @@ class StatArray(ndarray, myObject):
         tmp = diff(self, axis=axis)
         return allclose(tmp, tmp[0])
 
-    # Statistical Routines
-
     def hist(self, bins=10, **kwargs):
         """Plot a histogram of the StatArray
 
@@ -959,7 +706,7 @@ class StatArray(ndarray, myObject):
         """
         cnts, bins = histogram(
             self, bins=bins, **kwargs)
-        bins = StatArray(bins, name=self.name, units=self.units)
+        bins = DataArray(bins, name=self.name, units=self.units)
         cP.bar(cnts, bins, **kwargs)
 
     def pad(self, N):
@@ -977,154 +724,15 @@ class StatArray(ndarray, myObject):
 
         """
 
-        out = StatArray(N, name=self.name, units=self.units)
-        try:
-            pTmp = self.prior.pad(N)
-            out._prior = pTmp
-        except:
-            pass
-        try:
-            pTmp = self.proposal.pad(N)
-            out._proposal = pTmp
-        except:
-            pass
-        if self.hasPosterior:
-            out.posterior = deepcopy(self.posterior)
-        return out
-
-    def perturb(self, i=s_[:], relative=False, imposePrior=False, log=False):
-        """Perturb the values of the StatArray using the attached proposal
-
-        The StatArray must have had a proposal set using StatArray.setProposal()
-
-        Parameters
-        ----------
-        i : slice or int or sequence of ints, optional
-            Index or indices of self that should be perturbed.
-        relative : bool
-            Update the StatArray relative to the current values or assign the new samples to the StatArray.
-
-        Raises
-        ------
-        TypeError
-            If the proposal has not been set
-
-        """
-        self[i] = self.propose(i, relative, imposePrior, log)
-
-    def probability(self, log, x=None, i=None, active=None):
-        """Evaluate the probability of the values in self using the attached prior distribution
-
-        Parameters
-        ----------
-        arg1 : array_like, optional
-            Will evaluate the probability of the numbers in the arg1 using the prior attached to self
-        i : slice or int or sequence of ints, optional
-            Index or indices of self that should be evaluated.
-
-        Returns
-        -------
-        out
-            numpy.float
-
-        Raises
-        ------
-        TypeError
-            If the prior has not been set
-
-        """
-
-        assert (self.hasPrior), TypeError(
-            'No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
-
-        samples = self[:]
-        if not x is None:
-            samples = x
-
-        if not i is None:
-            samples = samples[i]
-
-        return self.prior.probability(x=samples, log=log, i=active)
-
-    def propose(self, i=s_[:], relative=False, imposePrior=False, log=False):
-        """Propose new values using the attached proposal distribution
-
-        Parameters
-        ----------
-        i : ints, optional
-            Only propose values for these indices.
-        relative : bool, optional
-            Use the proposal distribution as a relative change to the parameter values.
-        imposePrior : bool, optional
-            Continue to propose new values until the prior probability is non-zero or -infinity.
-        log : bool, required if imposePrior is True.
-            Use log probability when imposing the prior.
-
-        Returns
-        -------
-        out : array_like
-            Valuese generated from the proposal.
-
-        """
-
-        assert (self.hasProposal), TypeError('No proposal defined on variable {}. Use StatArray.setProposal()'.format(self.name))
-
-        mv = self.proposal.multivariate
-
-        if mv:
-            nSamples = 1
-            assert self.proposal.ndim == self.size, ValueError(
-                ("Trying to generate {} samples from an {}-dimensional distribution."
-                "Proposal dimensions must match self.size.").format(self.size, self.proposal.ndim))
-        else:
-            nSamples = self.size
-
-        # Generate new values
-        proposed = self.proposal.rng(nSamples)
-
-        if relative:
-            proposed = self + proposed
-
-        if not imposePrior:
-            return proposed[i] if mv else proposed
-
-        assert self.hasPrior, TypeError('No prior defined on variable {}. Use StatArray.set_prior()'.format(self.name))
-
-        p = self.probability(x=proposed, log=log, active=i)
-
-        num = -inf if log else 0.0
-        tries = 0
-        while p == num:
-            proposed = self.proposal.rng(nSamples)
-
-            if relative:
-                proposed = self + proposed
-
-            p = self.probability(x=proposed, log=log, active=i)
-            tries += 1
-            if tries == 10:
-                # print("Could not propose values for {}. Continually produced P(X)={}".format(self.summary, num), flush=True)
-                return asarray(self[i]) if mv else self.item()
-
-        return proposed[i] if mv else proposed
+        return type(self)(N, name=self.name, units=self.units)
 
     def rolling(self, numpyFunction, window=1):
         wd = cf.rolling_window(self, window)
-        return StatArray(numpyFunction(wd, -1), self.name, self.units)
+        return type(self)(numpyFunction(wd, -1), self.name, self.units)
 
     def update_posterior(self, **kwargs):
         """Adds the current values of the StatArray to the attached posterior. """
-        if not self.hasPosterior:
-            return
-
-        if self.n_posteriors > 1:
-            active = atleast_1d(kwargs.get('active', range(self.n_posteriors)))
-            for i in active:
-                self._posterior[i].update(self.take(indices=i, axis=0), **kwargs)
-
-        else:
-            self.posterior.update(squeeze(self), **kwargs)
-
+        return None
     # Plotting Routines
 
     def bar(self, x=None, i=None, **kwargs):
@@ -1150,9 +758,7 @@ class StatArray(ndarray, myObject):
 
         """
         if (x is None):
-            x = StatArray(arange(size(self)+1), name="Array index")
-        # if i is not None:
-        #     x = x[i]
+            x = DataArray(arange(size(self)+1), name="Array index")
 
         return cP.bar(self, x, **kwargs)
 
@@ -1215,7 +821,7 @@ class StatArray(ndarray, myObject):
 
         my = y
         if (not y is None):
-            assert (isinstance(y, StatArray)), TypeError(
+            assert (isinstance(y, DataArray)), TypeError(
                 "y must be a StatArray")
             if size(y) == self.size:
                 try:
@@ -1228,7 +834,7 @@ class StatArray(ndarray, myObject):
         else:
             mx = x
             if (not x is None):
-                assert (isinstance(x, StatArray)), TypeError(
+                assert (isinstance(x, DataArray)), TypeError(
                     "x must be a StatArray")
                 if size(x) == self.size:
                     try:
@@ -1281,13 +887,13 @@ class StatArray(ndarray, myObject):
 
         if (self.ndim == 1):
             if (x is None):
-                x = StatArray(arange(self.size), 'Array Index')
+                x = DataArray(arange(self.size), 'Array Index')
             if (i is None):
                 i = s_[:self.size]
             j = i
         else:
             if (x is None):
-                x = StatArray(arange(self.shape[axis]), 'Array Index')
+                x = DataArray(arange(self.shape[axis]), 'Array Index')
             if (i is None):
                 i = s_[:self.shape[0], :self.shape[1]]
             j = i[axis]
@@ -1298,89 +904,6 @@ class StatArray(ndarray, myObject):
             this = cf.smooth(self[i], smooth)
 
         return cP.plot(x[j], this, **kwargs)
-
-    def _init_posterior_plots(self, gs):
-        """Initialize axes for posterior plots
-
-        Parameters
-        ----------
-        gs : matplotlib.gridspec.Gridspec
-            Gridspec to split
-
-        """
-        if not self.hasPosterior:
-            return
-
-        if isinstance(gs, Figure):
-            gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
-
-        if self.n_posteriors == 1:
-            ax = plt.subplot(gs)
-            cP.pretty(ax)
-
-        else:
-            gs = gs.subgridspec(self.n_posteriors, 1, hspace=1)
-            ax = [plt.subplot(gs[0, 0])]
-            ax += [plt.subplot(gs[i, 0], sharex=ax[0]) for i in range(1, self.n_posteriors)]
-
-            for a in ax:
-                cP.pretty(a)
-
-        return ax
-
-    def plot_posteriors(self, **kwargs):
-        """Plot the posteriors of the StatArray.
-
-        Parameters
-        ----------
-        ax : matplotlib axis or list of ax, optional
-            Must match the number of attached posteriors.
-            * If not specified, subplots are created vertically.
-
-        """
-        if not self.hasPosterior:
-            return
-
-        if kwargs.get('ax') is None:
-            kwargs['ax'] = kwargs.pop('fig', plt.gcf())
-        if not isinstance(kwargs['ax'], (list, SubplotBase)):
-            kwargs['ax'] = self._init_posterior_plots(kwargs['ax'])
-
-        ax = kwargs['ax']
-
-        kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
-        kwargs['normalize'] = kwargs.get('normalize', True)
-
-        if size(ax) > 1:
-            assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(size(ax), self.n_posteriors))
-            if 'overlay' in kwargs:
-                assert len(kwargs['overlay']) == len(ax), ValueError("line in kwargs must have size {}".format(len(ax)))
-            overlay = kwargs.pop('overlay', asarray([None for i in range(len(ax))]))
-
-            ax = kwargs.pop('ax')
-            for i in range(self.n_posteriors):
-                ax[i].set_xscale('linear'); ax[i].cla()
-                self.posterior[i].plot(overlay=overlay[i], ax=ax[i], **kwargs)
-        else:
-            if isinstance(ax, list):
-                ax = ax[0]
-            ax.cla()
-            self.posterior.plot(**kwargs)
-
-    def overlay_on_posteriors(self, overlay, ax, **kwargs):
-
-        if size(ax) > 1:
-            assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(size(ax), self.n_posteriors))
-            assert len(overlay) == len(ax), ValueError("line in kwargs must have size {}".format(len(ax)))
-            # overlay = kwargs.pop('overlay', asarray([None for i in range(len(ax))]))
-
-            for i in range(self.n_posteriors):
-                self.posterior[i].plot_overlay(value=overlay[i], ax=ax[i], **kwargs)
-        else:
-            if isinstance(ax, list):
-                ax = ax[0]
-
-            self.posterior.plot_overlay(value=overlay, ax=ax, **kwargs)
 
     def scatter(self, x=None, y=None, i=None, **kwargs):
         """Create a 2D scatter plot.
@@ -1410,7 +933,7 @@ class StatArray(ndarray, myObject):
             'scatter only works with a 1D array')
 
         if (x is None):
-            x = StatArray(arange(self.size), 'Array Index')
+            x = DataArray(arange(self.size), 'Array Index')
         else:
             assert size(x) == self.size, ValueError(
                 'x must be size '+str(self.size))
@@ -1463,7 +986,7 @@ class StatArray(ndarray, myObject):
                 "i must be a slice, use s_[]")
 
         if (x is None):
-            x = StatArray(arange(self.shape[axis]), 'Array Index')
+            x = DataArray(arange(self.shape[axis]), 'Array Index')
         else:
             assert size(x) == self.shape[axis], ValueError(
                 'x must be size '+str(self.shape[axis]))
@@ -1485,28 +1008,11 @@ class StatArray(ndarray, myObject):
         cP.stackplot2D(x[j], ma[i], labels=[], **kwargs)
 
     # HDF Routines
-
-    @property
-    def hdf_name(self):
-        """Create a string that describes class instantiation
-
-        Returns a string that should be used as an attr['repr'] in a HDF group.
-        This allows reading of the attribute from the hdf file, evaluating it to return an object,
-        and then reading the hdf contents via the object's methods.
-
-        Returns
-        -------
-        out
-            str
-
-        """
-        return(r'StatArray()')
-
-    def createHdf(self, h5obj, name, shape=None, withPosterior=True, add_axis=None, fillvalue=None, upcast=True):
+    def createHdf(self, h5obj, name, shape=None, add_axis=None, fillvalue=None, **kwargs):
         """Create the Metadata for a StatArray in a HDF file
 
         Creates a new group in a HDF file under h5obj.
-        A nested heirarchy will be created e.g., myName/\data, myName/\prior, and myName/\proposal.
+        A nested heirarchy will be created e.g., myName/data, myName/prior, and myName/proposal.
         This method can be used in an MPI parallel environment, if so however, a) the hdf file must have been opened with the mpio driver,
         and b) createHdf must be called collectively, i.e., called by every core in the MPI communicator that was used to open the file.
         In order to create large amounts of empty space before writing to it in parallel, the nRepeats parameter will extend the memory
@@ -1564,16 +1070,13 @@ class StatArray(ndarray, myObject):
         """
 
         # create a new group inside h5obj
-        grp = self.create_hdf_group(h5obj, name)
+        grp = self.create_hdf_group(h5obj, name, **kwargs)
 
         if not self._name is None:
             grp.attrs['name'] = self.name
         if not self._units is None:
             grp.attrs['units'] = self.units
 
-        # if shape is not None:
-        #     grp.create_dataset('data', shape, dtype=self.dtype, fillvalue=fillvalue)
-        # else:
         if (add_axis is None):
             shape = self.shape if shape is None else shape
             grp.create_dataset('data', shape, dtype=self.dtype, fillvalue=fillvalue)
@@ -1591,21 +1094,9 @@ class StatArray(ndarray, myObject):
                 shape = self.shape if shape is None else shape
                 grp.create_dataset('data', [*shap, *shape], dtype=self.dtype, fillvalue=fillvalue)
 
-        if withPosterior:
-            self.create_posterior_hdf(grp, add_axis, fillvalue, upcast)
-
         return grp
 
-    def create_posterior_hdf(self, grp, add_axis, fillvalue, upcast):
-        if self.hasPosterior:
-            grp.create_dataset('n_posteriors', data=self.n_posteriors)
-            if self.n_posteriors > 1:
-                for i in range(self.n_posteriors):
-                    self.posterior[i].createHdf(grp, 'posterior{}'.format(i), add_axis=add_axis, fillvalue=fillvalue, withPosterior=False, upcast=upcast)
-            else:
-                self.posterior.createHdf(grp, 'posterior', add_axis=add_axis, fillvalue=fillvalue, withPosterior=False, upcast=upcast)
-
-    def writeHdf(self, h5obj, name, withPosterior=True, index=None):
+    def writeHdf(self, h5obj, name, index=None, **kwargs):
         """Write the values of a StatArray to a HDF file
 
         Writes the contents of the StatArray to an already created group in a HDF file under h5obj.
@@ -1658,23 +1149,10 @@ class StatArray(ndarray, myObject):
         if self.size > 0:
             write_nd(self, grp, 'data', index=index)
 
-            if withPosterior:
-                self.write_posterior_hdf(grp, index)
-
         return grp
 
-    def write_posterior_hdf(self, grp, index=None):
-        if self.hasPosterior:
-            if ndim(index) > 0:
-                index = index[0]
-            if self.n_posteriors > 1:
-                for i in range(self.n_posteriors):
-                    self.posterior[i].writeHdf(grp, 'posterior{}'.format(i), index=index)
-            else:
-                self.posterior.writeHdf(grp, 'posterior', index=index)
-
     @classmethod
-    def fromHdf(cls, grp, name=None, index=None, skip_posterior=False, posterior_index=None):
+    def fromHdf(cls, grp, name=None, index=None, **kwargs):
         """Read the StatArray from a HDF group
 
         Given the HDF group object, read the contents into a StatArray.
@@ -1707,63 +1185,32 @@ class StatArray(ndarray, myObject):
         if ndim(d) >= 2:
             d = squeeze(d)
 
-        # Do not use self, return self here.  You tried it, it doesnt work.
-        name = None
-        if 'name' in grp.attrs:
-            name = grp.attrs['name']
-        else:  # Try to get it from the repr
-            if '"' in grp.attrs['repr']:
-                name = grp.attrs['repr'].split('"')[1]
+        # Do not use self, return self here.
+        # You tried it, it doesnt work.
+        # name = None
+        # if 'name' in grp.attrs:
+        #     name = grp.attrs['name']
+        # else:  # Try to get it from the repr
+        #     if '"' in grp.attrs['repr']:
+        #         name = grp.attrs['repr'].split('"')[1]
 
-        units = None
-        if 'units' in grp.attrs:
-            units = grp.attrs['units']
-        else:  # Try to get it from the repr
-            if '"' in grp.attrs['repr']:
-                units = grp.attrs['repr'].split('"')[3]
+        # units = None
+        # if 'units' in grp.attrs:
+        #     units = grp.attrs['units']
+        # else:  # Try to get it from the repr
+        #     if '"' in grp.attrs['repr']:
+        #         units = grp.attrs['repr'].split('"')[3]
 
-        if 'StatArray((1,)' in grp.attrs['repr']:
-            out = cls(1, name, units) + d
-        else:
-            out = cls(d, name, units)
+        # if 'StatArray((1,)' in grp.attrs['repr']:
+        #     out = cls(1, name, units) + d
+        # else:
 
-        if not skip_posterior:
-            if posterior_index is None:
-                posterior_index = index
-            out.posteriors_from_hdf(grp, posterior_index)
+        out = cls(d, grp.attrs.get('name'), grp.attrs.get('units'))
 
         if is_file:
             file.close()
 
         return out
-
-    def posteriors_from_hdf(self, grp, index):
-        from ..statistics.Histogram import Histogram
-        n_posteriors = 0
-        if 'n_posteriors' in grp:
-            n_posteriors = asarray(grp['n_posteriors'])
-        if 'nPosteriors' in grp:
-            n_posteriors = asarray(grp['nPosteriors'])
-
-        if n_posteriors == 0:
-            self.posterior = None
-            return
-
-        posterior = None
-        iTmp = index
-        if index is not None:
-            if ndim(index) > 0:
-                iTmp = index[0]
-
-        if n_posteriors == 1:
-            posterior = Histogram.fromHdf(grp['posterior'], index=iTmp)
-
-        elif n_posteriors > 1:
-            posterior = []
-            for i in range(n_posteriors):
-                posterior.append(Histogram.fromHdf(grp['posterior{}'.format(i)], index=iTmp))
-
-        self.posterior = posterior
 
     # Classification Routines
     def kMeans(self, nClusters, standardize=False, nIterations=10, plot=False, **kwargs):
@@ -1776,7 +1223,7 @@ class StatArray(ndarray, myObject):
         kmeans = KMeans(init='k-means++', n_clusters=nClusters,
                         n_init=nIterations)
         kmeans.fit(tmp)
-        clusterID = StatArray(kmeans.predict(tmp), name='cluster ID')
+        clusterID = DataArray(kmeans.predict(tmp), name='cluster ID')
 
         if (plot):
             if (self.ndim == 1):
@@ -1970,13 +1417,11 @@ class StatArray(ndarray, myObject):
             The broadcast StatArray on every rank in the MPI communicator.
 
         """
-        name = " " + self.name
-        units = " " + self.units
-        tmp = name + ',' + units
+        tmp = f" {self.name}, {self.units}"
         nameUnits = world.bcast(tmp)
         name, units = nameUnits.split(',')
         tmp = myMPI.Bcast(self, world, root=root)
-        return StatArray(tmp, name, units, dtype=tmp.dtype)
+        return type(self)(tmp, name, units, dtype=tmp.dtype)
 
     def Scatterv(self, starts, chunks, world, axis=0, root=0):
         """Scatter variable lengths of the StatArray using MPI
@@ -2002,18 +1447,14 @@ class StatArray(ndarray, myObject):
             The StatArray distributed amongst ranks.
 
         """
-        name = " " + self.name
-        units = " " + self.units
-        tmp = name + ',' + units
+        tmp = f" {self.name}, {self.units}"
         nameUnits = world.bcast(tmp)
         name, units = nameUnits.split(',')
         tmp = myMPI.Scatterv(self, starts, chunks, world, axis, root)
-        return StatArray(tmp, name, units, dtype=tmp.dtype)
+        return type(self)(tmp, name, units, dtype=tmp.dtype)
 
     def Isend(self, dest, world, ndim=None, shape=None, dtype=None):
-        name = " " + self.name
-        units = " " + self.units
-        tmp = name + ',' + units
+        tmp = f" {self.name}, {self.units}"
         world.send(tmp, dest=dest)
         myMPI.Isend(self, dest=dest, world=world,
                     ndim=ndim, shape=shape, dtype=dtype)
@@ -2026,30 +1467,3 @@ class StatArray(ndarray, myObject):
                           ndim=ndim, shape=shape, dtype=dtype)
         return cls(tmp, name, units)
 
-    def IsendToLeft(self, world):
-        """ISend an array to the rank left of world.rank.
-
-        """
-        dest = world.size - 1 if world.rank == 0 else world.rank - 1
-        self.Isend(dest=dest, world=world)
-
-    def IsendToRight(self, world):
-        """ISend an array to the rank right of world.rank.
-
-        """
-        dest = 0 if world.rank == world.size - 1 else world.rank + 1
-        self.Isend(dest=dest, world=world)
-
-    def IrecvFromRight(self, world, wrap=True):
-        """IRecv an array from the rank right of world.rank.
-
-        """
-        source = 0 if world.rank == world.size - 1 else world.rank + 1
-        return self.Irecv(source=source, world=world)
-
-    def IrecvFromLeft(self, world, wrap=True):
-        """Irecv an array from the rank left of world.rank.
-
-        """
-        source = world.size - 1 if world.rank == 0 else world.rank - 1
-        return self.Irecv(source=source, world=world)

@@ -147,7 +147,7 @@ Get the median, and 95% confidence values
 
  .. code-block:: none
 
-    (-0.030000000000000027, -2.01, 1.8299999999999996)
+    (np.float64(-0.030000000000000027), np.float64(-2.01), np.float64(1.9499999999999997))
 
 
 
@@ -439,38 +439,45 @@ We can update the histogram with some new values
     |   Number of Cells:
     |   |   100
     |   Cell Centres:
-    |   |   Name: bins (m) 0x166a0bed0
-    |   |   Shape: (100,)
+    |   |   StatArray
+    |   |   Name:   bins (m)
+    |   |   Address:['0x15560cc50']
+    |   |   Shape:  (100,)
     |   |   Values: [-2.97 -2.91 -2.85 ...  2.85  2.91  2.97]
-    |   |   Min: -2.9699999999999998
-    |   |   Max: 2.9699999999999998
+    |   |   Min:    -2.9699999999999998
+    |   |   Max:    2.9699999999999998
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: bins (m) 0x166a0a950
-    |   |   Shape: (101,)
+    |   |   StatArray
+    |   |   Name:   bins (m)
+    |   |   Address:['0x15560cad0']
+    |   |   Shape:  (101,)
     |   |   Values: [-3.   -2.94 -2.88 ...  2.88  2.94  3.  ]
-    |   |   Min: -3.0
-    |   |   Max: 3.0
+    |   |   Min:    -3.0
+    |   |   Max:    3.0
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name:  0x167d420d0
-    |   |   Shape: (1,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   
+    |   |   Address:['0x159d83550']
+    |   |   Shape:  (1,)
     |   |   Values: [0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     values:
-    |   Name: Frequency 0x167d41ad0
-    |   Shape: (100,)
-    |   Values: [0 0 2 ... 2 2 0]
-    |   Min: 0
-    |   Max: 86
-    |   has_posterior: False
+    |   DataArray
+    |   Name:   Frequency
+    |   Address:['0x159d825d0']
+    |   Shape:  (100,)
+    |   Values: [1 1 0 ... 0 2 1]
+    |   Min:    0
+    |   Max:    82
 
 
 
@@ -480,7 +487,7 @@ We can update the histogram with some new values
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.342 seconds)
+   **Total running time of the script:** (0 minutes 1.198 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:
@@ -496,6 +503,10 @@ We can update the histogram with some new values
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_histogram_1d.py <plot_histogram_1d.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_histogram_1d.zip <plot_histogram_1d.zip>`
 
 
 .. only:: html

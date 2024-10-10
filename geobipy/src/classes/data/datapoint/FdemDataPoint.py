@@ -7,7 +7,8 @@ from numpy import asarray, exp
 from numpy import int32, isinf, log10, logspace, s_, squeeze, tile
 from numpy import all as npall
 
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from ...forwardmodelling.Electromagnetic.FD.fdem1d import fdem1dfwd, fdem1dsen
 from .EmDataPoint import EmDataPoint
 from ...model.Model import Model
@@ -75,7 +76,7 @@ class FdemDataPoint(EmDataPoint):
 
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
-        # self.calibration = StatArray.StatArray([self.nChannels * 2], 'Calibration Parameters')
+        # self.calibration = DataArray([self.nChannels * 2], 'Calibration Parameters')
 
         self.channel_names = None
 
@@ -195,7 +196,7 @@ class FdemDataPoint(EmDataPoint):
 
     def frequencies(self, system=0):
         """ Return the frequencies in an StatArray """
-        return StatArray.StatArray(self.system[system].frequencies, name='Frequency', units='Hz')
+        return DataArray(self.system[system].frequencies, name='Frequency', units='Hz')
 
 
     def inphase(self, system=0):
@@ -266,13 +267,13 @@ class FdemDataPoint(EmDataPoint):
         if self.predictedData.hasPrior:
             freqs = log10(self.frequencies())
             xbuf = 0.05*(freqs[-1] - freqs[0])
-            xbins = StatArray.StatArray(logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
+            xbins = DataArray(logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
 
             data = log10(self.data[self.active])
             a = data.min()
             b = data.max()
             buf = 0.5*(b - a)
-            ybins = StatArray.StatArray(logspace(a-buf, b+buf, 200), data.name, data.units)
+            ybins = DataArray(logspace(a-buf, b+buf, 200), data.name, data.units)
 
             mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
             self.predictedData.posterior = Histogram(mesh=mesh)
@@ -489,7 +490,7 @@ class FdemDataPoint(EmDataPoint):
     #     c1 = log10(maxConductivity)
     #     cnew = 0.5 * (c0 + c1)
     #     # Initialize a single layer model
-    #     p = StatArray.StatArray(1, 'Conductivity', r'$\frac{S}{m}$')
+    #     p = DataArray(1, 'Conductivity', r'$\frac{S}{m}$')
     #     model = Model(mesh=RectilinearMesh1D(edges=asarray([0.0, inf])), values=p)
     #     # Initialize the first conductivity
     #     model._values[0] = 10.0**c0
@@ -522,16 +523,14 @@ class FdemDataPoint(EmDataPoint):
 
     def forward(self, mod):
         """ Forward model the data from the given model """
-
         assert isinstance(mod, Model), TypeError("Invalid model class for forward modeling [1D]")
         self._forward1D(mod)
 
 
     def sensitivity(self, mod, **kwargs):
         """ Compute the sensitivty matrix for the given model """
-
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        return StatArray.StatArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        return DataArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
     def fm_dlogc(self, mod):
         self.forward(mod)
@@ -550,7 +549,7 @@ class FdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
-        self._sensitivity_matrix = StatArray.StatArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        self._sensitivity_matrix = DataArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', '$\\frac{ppm.m}{S}$')
 
         for j, s in enumerate(self.system):
             Jtmp = fdem1dsen(s, mod, self.z.item())
@@ -581,7 +580,7 @@ class FdemDataPoint(EmDataPoint):
 
         out = super(FdemDataPoint, cls).Irecv(source, world, **kwargs)
 
-        out._data = StatArray.StatArray.Irecv(source, world)
-        out._predictedData = StatArray.StatArray.Irecv(source, world)
+        out._data = StatArray.Irecv(source, world)
+        out._predictedData = StatArray.Irecv(source, world)
 
         return out

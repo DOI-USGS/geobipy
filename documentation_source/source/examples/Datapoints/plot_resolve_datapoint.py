@@ -166,7 +166,7 @@ print(fdp.data_misfit())
 
 
 # Define the distributions used as priors.
-zPrior = Distribution('Uniform', min=np.float64(fdp.z) - 2.0, max=np.float64(fdp.z) + 2.0, prng=prng)
+zPrior = Distribution('Uniform', min=fdp.z - 2.0, max=fdp.z + 2.0, prng=prng)
 relativePrior = Distribution('Uniform', min=0.01, max=0.5, prng=prng)
 additivePrior = Distribution('Uniform', min=5, max=15, prng=prng)
 fdp.set_priors(z_prior=zPrior, relative_error_prior=relativePrior, additive_error_prior=additivePrior, prng=prng)
@@ -195,7 +195,7 @@ for i in range(10):
 
 
 # Plot the posterior distributions
-# fig = plt.figure()
+fig = plt.figure()
 fdp.plot_posteriors(overlay=fdp)
 
 import h5py
@@ -206,6 +206,7 @@ with h5py.File('fdp.h5', 'w') as f:
 with h5py.File('fdp.h5', 'r') as f:
     fdp1 = FdemDataPoint.fromHdf(f['fdp'])
 
+plt.figure()
 fdp1.plot_posteriors(overlay=fdp1)
 
 import h5py

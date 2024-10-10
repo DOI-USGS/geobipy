@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -110,12 +110,19 @@
              
   <section id="histogram">
 <h1>Histogram<a class="headerlink" href="#histogram" title="Link to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-9377f4f566c8e8671b4494a8f0c965de58d1c4cb.png" alt="Inheritance diagram of geobipy.src.classes.statistics.Histogram" usemap="#inheritance05266a41c8" class="inheritance graphviz" /></div>
-<map id="inheritance05266a41c8" name="inheritance05266a41c8">
-<area shape="rect" id="node4" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
-<area shape="rect" id="node2" href="#geobipy.src.classes.statistics.Histogram.Histogram" target="_top" title="Histogram" alt="" coords="371,5,452,32"/>
-<area shape="rect" id="node3" href="../model/Model_.html#geobipy.src.classes.model.Model.Model" target="_top" title="Generic model class with an attached mesh." alt="" coords="251,5,323,32"/>
-</map><dl class="py class" id="module-geobipy.src.classes.statistics.Histogram">
+digraph inheritance05266a41c8 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Histogram&quot; [URL=&quot;#geobipy.src.classes.statistics.Histogram.Histogram&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;Model&quot; -&gt; &quot;Histogram&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Model&quot; [URL=&quot;../model/Model_.html#geobipy.src.classes.model.Model.Model&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Generic model class with an attached mesh.&quot;];
+  &quot;myObject&quot; -&gt; &quot;Model&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<dl class="py class" id="module-geobipy.src.classes.statistics.Histogram">
 <dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram.Histogram">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.Histogram.</span></span><span class="sig-name descname"><span class="pre">Histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram.Histogram" title="Link to this definition"></a></dt>
 <dd><dl class="py method">
@@ -215,7 +222,7 @@ Plotting is in log space.</p></li>
 <dd class="field-even"><p><strong>out</strong> – The means along the axis.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>geobipy.StatArray</p>
+<dd class="field-odd"><p>geobipy.DataArray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -357,7 +364,7 @@ The number of samples generated per bin is scaled by the count for that bin usin
 <dd class="field-even"><p><strong>out</strong> – The samples.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>geobipy.StatArray</p>
+<dd class="field-odd"><p>geobipy.DataArray</p>
 </dd>
 </dl>
 </dd></dl>
@@ -385,53 +392,6 @@ Else: Take the ratio of the credible intervals.</p></li>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geobipy.src.classes.statistics.Histogram.rand">
-<span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.Histogram.</span></span><span class="sig-name descname"><span class="pre">rand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Histogram.rand" title="Link to this definition"></a></dt>
-<dd><p>Random values in a given shape.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This is a convenience function for users porting code from Matlab,
-and wraps <cite>random_sample</cite>. That function takes a
-tuple to specify the size of the output, which is consistent with
-other NumPy functions like <cite>numpy.zeros</cite> and <cite>numpy.ones</cite>.</p>
-</div>
-<p>Create an array of the given shape and populate it with
-random samples from a uniform distribution
-over <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1)</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>d0</strong> (<em>int</em><em>, </em><em>optional</em>) – The dimensions of the returned array, must be non-negative.
-If no argument is given a single Python float is returned.</p></li>
-<li><p><strong>d1</strong> (<em>int</em><em>, </em><em>optional</em>) – The dimensions of the returned array, must be non-negative.
-If no argument is given a single Python float is returned.</p></li>
-<li><p><strong>...</strong> (<em>int</em><em>, </em><em>optional</em>) – The dimensions of the returned array, must be non-negative.
-If no argument is given a single Python float is returned.</p></li>
-<li><p><strong>dn</strong> (<em>int</em><em>, </em><em>optional</em>) – The dimensions of the returned array, must be non-negative.
-If no argument is given a single Python float is returned.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>out</strong> – Random values.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>ndarray, shape <code class="docutils literal notranslate"><span class="pre">(d0,</span> <span class="pre">d1,</span> <span class="pre">...,</span> <span class="pre">dn)</span></code></p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">random</span></code></p>
-</div>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
-<span class="go">array([[ 0.14022471,  0.96360618],  #random</span>
-<span class="go">       [ 0.37601032,  0.25528411],  #random</span>
-<span class="go">       [ 0.49313049,  0.94909878]]) #random</span>
-</pre></div>
-</div>
 </dd></dl>
 
 </section>

@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -26,7 +26,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Histogram 1D" href="../Statistics/plot_histogram_1d.html" />
+    <link rel="next" title="DataArray Class" href="../Statistics/plot_DataArray.html" />
     <link rel="prev" title="Examples" href="../index.html" /> 
 </head>
 
@@ -118,12 +118,6 @@ to download the full example code.</p>
 <span class="n">prng</span> <span class="o">=</span> <span class="n">Generator</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh1D.py:693: SyntaxWarning: invalid escape sequence &#39;\s&#39;
-  &quot;&quot;&quot;Compute the gradient
-/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/mesh/RectilinearMesh1D.py:1448: SyntaxWarning: invalid escape sequence &#39;\l&#39;
-  &quot;&quot;&quot;Setup the priors of the mesh.
-</pre></div>
-</div>
 </section>
 <section id="univariate-normal-distribution">
 <h1>Univariate Normal Distribution<a class="headerlink" href="#univariate-normal-distribution" title="Link to this heading"></a></h1>
@@ -143,7 +137,7 @@ to download the full example code.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="n">pdf</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_distributions_001.png" srcset="../../_images/sphx_glr_plot_distributions_001.png" alt="plot distributions" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D object at 0x167083620&gt;]
+<img src="../../_images/sphx_glr_plot_distributions_001.png" srcset="../../_images/sphx_glr_plot_distributions_001.png" alt="plot distributions" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D object at 0x14ba06c00&gt;]
 </pre></div>
 </div>
 </section>
@@ -161,7 +155,7 @@ to download the full example code.</p>
 <span class="n">D</span><span class="o">.</span><span class="n">bins</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray([0.        , 0.01010101, 0.02020202, 0.03030303, 0.04040404,
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>DataArray([0.        , 0.01010101, 0.02020202, 0.03030303, 0.04040404,
            0.05050505, 0.06060606, 0.07070707, 0.08080808, 0.09090909,
            0.1010101 , 0.11111111, 0.12121212, 0.13131313, 0.14141414,
            0.15151515, 0.16161616, 0.17171717, 0.18181818, 0.19191919,
@@ -183,13 +177,16 @@ to download the full example code.</p>
            0.95959596, 0.96969697, 0.97979798, 0.98989899, 1.        ])
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 35.141 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.949 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-distributions-plot-distributions-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/fbbc3367a4d5c657e951c760d8b85bb4/plot_distributions.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_distributions.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/ec453d00c4b1863c6db7fb665ba67ecb/plot_distributions.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_distributions.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/a54a8abe32f99b7dd05f1ec6da162902/plot_distributions.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_distributions.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
@@ -200,7 +197,7 @@ to download the full example code.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../index.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../Statistics/plot_histogram_1d.html" class="btn btn-neutral float-right" title="Histogram 1D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../Statistics/plot_DataArray.html" class="btn btn-neutral float-right" title="DataArray Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

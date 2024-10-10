@@ -7,7 +7,8 @@ from ...classes.core.myObject import myObject
 from pandas import read_csv
 from matplotlib.figure import Figure
 from matplotlib.pyplot import gcf
-from ...classes.core import StatArray
+from ..core.DataArray import DataArray
+from ..statistics.StatArray import StatArray
 from ...base import fileIO as fIO
 from ...base import utilities as cf
 from ...base import plotting as cP
@@ -65,18 +66,14 @@ class Point(myObject):
 
         # # Number of points in the cloud
         self._nPoints = 0
-        self._x = StatArray.StatArray(self._nPoints, "Easting", "m")
-        self._y = StatArray.StatArray(self._nPoints, "Northing", "m")
-        self._z = StatArray.StatArray(self._nPoints, "Height", "m")
-        self._elevation = StatArray.StatArray(self._nPoints, "Elevation", "m")
+        self._x = StatArray(self._nPoints, "Easting", "m")
+        self._y = StatArray(self._nPoints, "Northing", "m")
+        self._z = StatArray(self._nPoints, "Height", "m")
+        self._elevation = StatArray(self._nPoints, "Elevation", "m")
 
-        # StatArray of the x co-ordinates
         self.x = x
-        # StatArray of the y co-ordinates
         self.y = y
-        # StatArray of the z co-ordinates
         self.z = z
-        # StatArray of elevation
         self.elevation = elevation
 
         self._kdtree = None
@@ -215,7 +212,7 @@ class Point(myObject):
     @property
     def x(self):
         if self._x.size == 0:
-            self._x = StatArray.StatArray(self._nPoints, "Easting", "m")
+            self._x = StatArray(self._nPoints, "Easting", "m")
         return self._x
 
     @x.setter
@@ -223,7 +220,7 @@ class Point(myObject):
         if values is not None: # Set a default array
             self.nPoints = size(values)
             if (self._x.size != self._nPoints):
-                self._x = StatArray.StatArray(values, "Easting", "m")
+                self._x = StatArray(values, "Easting", "m")
                 return
 
             self._x[:] = values
@@ -231,7 +228,7 @@ class Point(myObject):
     @property
     def y(self):
         if self._y.size == 0:
-            self._y = StatArray.StatArray(self._nPoints, "Northing", "m")
+            self._y = StatArray(self._nPoints, "Northing", "m")
         return self._y
 
     @y.setter
@@ -239,14 +236,14 @@ class Point(myObject):
         if values is not None:
             self.nPoints = size(values)
             if (self._y.size != self._nPoints):
-                self._y = StatArray.StatArray(values, "Northing", "m")
+                self._y = StatArray(values, "Northing", "m")
                 return
             self._y[:] = values
 
     @property
     def z(self):
         if self._z.size == 0:
-            self._z = StatArray.StatArray(self._nPoints, "Height", "m")
+            self._z = StatArray(self._nPoints, "Height", "m")
         return self._z
 
     @z.setter
@@ -254,14 +251,14 @@ class Point(myObject):
         if values is not None: # Set a default array
             self.nPoints = size(values)
             if (self._z.size != self._nPoints):
-                self._z = StatArray.StatArray(values, "Height", "m")
+                self._z = StatArray(values, "Height", "m")
                 return
             self._z[:] = values
 
     @property
     def elevation(self):
         if self._elevation.size == 0:
-            self._elevation = StatArray.StatArray(self._nPoints, "Elevation", "m")
+            self._elevation = StatArray(self._nPoints, "Elevation", "m")
         return self._elevation
 
     @elevation.setter
@@ -269,7 +266,7 @@ class Point(myObject):
         if values is not None: # Set a default array
             self.nPoints = size(values)
             if (self._elevation.size != self._nPoints):
-                self._elevation = StatArray.StatArray(values, "Elevation", "m", dtype=float64)
+                self._elevation = StatArray(values, "Elevation", "m", dtype=float64)
                 return
             self._elevation[:] = values
 
@@ -425,7 +422,7 @@ class Point(myObject):
         """
         assert axis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("axis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
         if axis == 'index':
-            return StatArray.StatArray(arange(self.x.size), name="Index")
+            return DataArray(arange(self.x.size), name="Index")
         elif axis == 'x':
             return self.x
         elif axis == 'y':
@@ -434,12 +431,12 @@ class Point(myObject):
             return self.z
         elif axis == 'r2d':
             r = diff(self.x)**2.0 + diff(self.y)**2.0
-            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+            distance = DataArray(zeros(self.x.size), 'Distance', self.x.units)
             distance[1:] = cumsum(sqrt(r))
             return distance
         elif axis == 'r3d':
             r = diff(self.x)**2.0 + diff(self.y)**2.0 + diff(self.z)**2.0
-            distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+            distance = DataArray(zeros(self.x.size), 'Distance', self.x.units)
             distance[1:] = cumsum(sqrt(r))
             return distance
 
@@ -593,7 +590,7 @@ class Point(myObject):
     def distance_2d(self):
         r = diff(self.x)**2.0
         r += diff(self.y)**2.0
-        distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+        distance = DataArray(zeros(self.x.size), 'Distance', self.x.units)
         distance[1:] = cumsum(sqrt(r))
         return distance
 
@@ -602,7 +599,7 @@ class Point(myObject):
         r = diff(self.x)**2.0
         r += diff(self.y)**2.0
         r += diff(self.z)**2.0
-        distance = StatArray.StatArray(zeros(self.x.size), 'Distance', self.x.units)
+        distance = DataArray(zeros(self.x.size), 'Distance', self.x.units)
         distance[1:] = cumsum(sqrt(r))
         return distance
 
@@ -667,7 +664,7 @@ class Point(myObject):
         """
         assert xAxis in ['index', 'x', 'y', 'z', 'r2d', 'r3d'], Exception("xAxis must be either 'index', x', 'y', 'z', 'r2d', or 'r3d'")
         if xAxis == 'index':
-            return StatArray.StatArray(arange(self.x.size), name="Index")
+            return DataArray(arange(self.x.size), name="Index")
         elif xAxis == 'x':
             return self.x
         elif xAxis == 'y':
@@ -731,7 +728,7 @@ class Point(myObject):
 
         vals = sibson(self.x, self.y, values, grid_x=mesh.x.edges, grid_y=mesh.y.edges, max_distance=mask)
 
-        vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
+        vals = DataArray(vals, name=cf.getName(values), units = cf.getUnits(values))
         out =  Model(mesh=mesh, values=vals.T)
         return out, kwargs
 
@@ -773,7 +770,7 @@ class Point(myObject):
         vals = f(query).reshape(*mesh.shape)
 
         # Reshape to a 2D array
-        vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
+        vals = DataArray(vals, name=cf.getName(values), units = cf.getUnits(values))
 
         if mask or extrapolate:
             if (kdtree is None):
@@ -883,7 +880,7 @@ class Point(myObject):
             dists, indexes = kdt.query(xi)
             vals[dists > mask] = nan
 
-        vals = StatArray.StatArray(vals, name=cf.getName(values), units = cf.getUnits(values))
+        vals = DataArray(vals, name=cf.getName(values), units = cf.getUnits(values))
 
         out = Model(mesh=mesh, values=vals.T)
 
@@ -1001,24 +998,26 @@ class Point(myObject):
 
         """
         if self.x.hasPrior:
-            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.x.prior.bins(), name=self.x.name, units=self.x.units), relativeTo=self.x)
+            mesh = RectilinearMesh1D(edges = DataArray(self.x.prior.bins(), name=self.x.name, units=self.x.units), relative_to=self.x)
             self.x.posterior = Histogram(mesh=mesh)
 
     def set_y_posterior(self):
         """
 
         """
-        if self.y.hasPrior:
-            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.y.prior.bins(), name=self.y.name, units=self.y.units), relativeTo=self.y)
-            self.y.posterior = Histogram(mesh=mesh)
+        if isinstance(self.y, StatArray):
+            if self.y.hasPrior:
+                mesh = RectilinearMesh1D(edges = DataArray(self.y.prior.bins(), name=self.y.name, units=self.y.units), relative_to=self.y)
+                self.y.posterior = Histogram(mesh=mesh)
 
     def set_z_posterior(self):
         """
 
         """
-        if self.z.hasPrior:
-            mesh = RectilinearMesh1D(edges = StatArray.StatArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relativeTo=self.z)
-            self.z.posterior = Histogram(mesh=mesh)
+        if isinstance(self.z, StatArray):
+            if self.z.hasPrior:
+                mesh = RectilinearMesh1D(edges = DataArray(self.z.prior.bins(), name=self.z.name, units=self.z.units), relative_to=self.z)
+                self.z.posterior = Histogram(mesh=mesh)
 
     def update_posteriors(self):
         self.x.update_posterior()
@@ -1386,10 +1385,10 @@ class Point(myObject):
         vtk = self.vtkStructure()
 
         if not pointData is None:
-            assert isinstance(pointData, (StatArray.StatArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
+            assert isinstance(pointData, (DataArray, list)), TypeError("pointData must a geobipy.StatArray or a list of them.")
             if isinstance(pointData, list):
                 for p in pointData:
-                    assert isinstance(p, StatArray.StatArray), TypeError("pointData entries must be a geobipy.StatArray")
+                    assert isinstance(p, DataArray), TypeError("pointData entries must be a geobipy.StatArray")
                     assert size(p) == self.nPoints, ValueError("pointData entries must have size {}".format(self.nPoints))
                     assert p.hasLabels(), ValueError("StatArray needs a name")
                     vtk.point_data.append(Scalars(p, p.getNameUnits()))
@@ -1445,13 +1444,13 @@ class Point(myObject):
 
         out = cls(**kwargs)
         if 'x' in grp:
-            out.x = StatArray.StatArray.fromHdf(grp['x'], index=index)
+            out.x = StatArray.fromHdf(grp['x'], index=index)
         if 'y' in grp:
-            out.y = StatArray.StatArray.fromHdf(grp['y'], index=index)
+            out.y = StatArray.fromHdf(grp['y'], index=index)
         if 'z' in grp:
-            out.z = StatArray.StatArray.fromHdf(grp['z'], index=index)
+            out.z = StatArray.fromHdf(grp['z'], index=index)
         if 'elevation' in grp:
-            out.elevation = StatArray.StatArray.fromHdf(grp['elevation'], index=index)
+            out.elevation = StatArray.fromHdf(grp['elevation'], index=index)
 
         return out
 
@@ -1495,10 +1494,10 @@ class Point(myObject):
     @classmethod
     def Irecv(cls, source, world, **kwargs):
         out = cls(**kwargs)
-        out._x = StatArray.StatArray.Irecv(source, world)
-        out._y = StatArray.StatArray.Irecv(source, world)
-        out._z = StatArray.StatArray.Irecv(source, world)
-        out._elevation = StatArray.StatArray.Irecv(source, world)
+        out._x = DataArray.Irecv(source, world)
+        out._y = DataArray.Irecv(source, world)
+        out._z = DataArray.Irecv(source, world)
+        out._elevation = DataArray.Irecv(source, world)
 
         return out
 

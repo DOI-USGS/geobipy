@@ -2,7 +2,7 @@ from copy import deepcopy
 from numpy import asarray, float64, pi, size
 from ...base import MPI as myMPI
 from .EmLoop import EmLoop
-from ..core import StatArray
+from ..statistics import StatArray
 from ..statistics.Distribution import Distribution
 
 class CircularLoop(EmLoop):
