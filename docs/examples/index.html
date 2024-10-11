@@ -26,7 +26,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="3D Point Cloud class" href="Data/plot_pointcloud3d.html" />
+    <link rel="next" title="Distribution Class" href="Distributions/plot_distributions.html" />
     <link rel="prev" title="Time domain system" href="../content/api/classes/system/TdemSystem.html" /> 
 </head>
 
@@ -56,39 +56,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../content/getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#data">Data</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Data/plot_pointcloud3d.html">3D Point Cloud class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Data/plot_frequency_dataset.html">Frequency domain dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Data/plot_skytem_dataset.html">Skytem dataset</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Data/plot_tempest_dataset.html">Tempest dataset</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#datapoints">Datapoints</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Datapoints/plot_resolve_datapoint.html">Frequency domain datapoint</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Datapoints/plot_skytem_datapoint.html">Skytem Datapoint Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Datapoints/plot_tempest_datapoint.html">Tempest Datapoint Class</a></li>
-</ul>
-</li>
 <li class="toctree-l2"><a class="reference internal" href="#distributions">Distributions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html">Distribution Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html#univariate-normal-distribution">Univariate Normal Distribution</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Distributions/plot_distributions.html#multivariate-normal-distribution">Multivariate Normal Distribution</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#hdf-5">HDF 5</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="HDF5/hdf5.html">Using HDF5 within GeoBIPy</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#d-inference">1D Inference</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Inference_1D/plot_inference_1d_resolve.html">Running GeoBIPy to invert Resolve data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Inference_1D/plot_inference_1d_skytem.html">Running GeoBIPy to invert Skytem data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Inference_1D/plot_inference_1d_tempest.html">Running GeoBIPy to invert Tempest data</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#id1">2D Inference</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Inference_2D/plot_inference_2d_resolve.html">2D Posterior analysis of Resolve inference</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Inference_2D/plot_inference_2d_skytem.html">2D Posterior analysis of Skytem inference</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Inference_2D/plot_inference_2d_tempest.html">2D Posterior analysis of Tempest inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_1d.html">Histogram 1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_2d.html">Histogram 2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_3d.html">Histogram 3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_StatArray.html">StatArray Class</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#meshes">Meshes</a><ul>
@@ -103,12 +81,33 @@
 <li class="toctree-l3"><a class="reference internal" href="Models/plot_model_3d.html">3D Rectilinear Model</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_DataArray.html">DataArray Class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_1d.html">Histogram 1D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_2d.html">Histogram 2D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_3d.html">Histogram 3D</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_StatArray.html">StatArray Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data">Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Data/plot_pointcloud3d.html">3D Point Cloud class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Data/plot_frequency_dataset.html">Frequency domain dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Data/plot_skytem_dataset.html">Skytem dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Data/plot_tempest_dataset.html">Tempest dataset</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#datapoints">Datapoints</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Datapoints/plot_resolve_datapoint.html">Frequency domain datapoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Datapoints/plot_skytem_datapoint.html">Skytem Datapoint Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Datapoints/plot_tempest_datapoint.html">Tempest Datapoint Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#d-inference">1D Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Inference_1D/plot_inference_1d_resolve.html">Running GeoBIPy to invert Resolve data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Inference_1D/plot_inference_1d_skytem.html">Running GeoBIPy to invert Skytem data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Inference_1D/plot_inference_1d_tempest.html">Running GeoBIPy to invert Tempest data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">2D Inference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Inference_2D/plot_inference_2d_resolve.html">2D Posterior analysis of Resolve inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Inference_2D/plot_inference_2d_skytem.html">2D Posterior analysis of Skytem inference</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Inference_2D/plot_inference_2d_tempest.html">2D Posterior analysis of Tempest inference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hdf-5">HDF 5</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="HDF5/hdf5.html">Using HDF5 within GeoBIPy</a></li>
 </ul>
 </li>
 </ul>
@@ -141,7 +140,60 @@
              
   <section id="examples">
 <h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
-<div class="sphx-glr-thumbnails"></div><section id="data">
+<div class="sphx-glr-thumbnails"></div><section id="distributions">
+<h2>Distributions<a class="headerlink" href="#distributions" title="Link to this heading"></a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution"><img alt="" src="../_images/sphx_glr_plot_distributions_thumb.png" />
+<p><a class="reference internal" href="Distributions/plot_distributions.html#sphx-glr-examples-distributions-plot-distributions-py"><span class="std std-ref">Distribution Class</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Distribution Class</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="statistics">
+<h2>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5"><img alt="" src="../_images/sphx_glr_plot_histogram_1d_thumb.png" />
+<p><a class="reference internal" href="Statistics/plot_histogram_1d.html#sphx-glr-examples-statistics-plot-histogram-1d-py"><span class="std std-ref">Histogram 1D</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Histogram 1D</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This 2D histogram class allows efficient updating of histograms, plotting and saving as HDF5."><img alt="" src="../_images/sphx_glr_plot_histogram_2d_thumb.png" />
+<p><a class="reference internal" href="Statistics/plot_histogram_2d.html#sphx-glr-examples-statistics-plot-histogram-2d-py"><span class="std std-ref">Histogram 2D</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Histogram 2D</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This 3D histogram class allows efficient updating of histograms, plotting and saving as HDF5."><img alt="" src="../_images/sphx_glr_plot_histogram_3d_thumb.png" />
+<p><a class="reference internal" href="Statistics/plot_histogram_3d.html#sphx-glr-examples-statistics-plot-histogram-3d-py"><span class="std std-ref">Histogram 3D</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Histogram 3D</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us to attach statistical descriptors of the array. The direct extension to numpy maintains speed and functionality of numpy arrays."><img alt="" src="../_images/sphx_glr_plot_StatArray_thumb.png" />
+<p><a class="reference internal" href="Statistics/plot_StatArray.html#sphx-glr-examples-statistics-plot-statarray-py"><span class="std std-ref">StatArray Class</span></a></p>
+  <div class="sphx-glr-thumbnail-title">StatArray Class</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="meshes">
+<h2>Meshes<a class="headerlink" href="#meshes" title="Link to this heading"></a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="1D Rectilinear Mesh"><img alt="" src="../_images/sphx_glr_plot_rectilinear_mesh_1d_thumb.png" />
+<p><a class="reference internal" href="Meshes/plot_rectilinear_mesh_1d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-1d-py"><span class="std std-ref">1D Rectilinear Mesh</span></a></p>
+  <div class="sphx-glr-thumbnail-title">1D Rectilinear Mesh</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="It can be instantiated in two ways."><img alt="" src="../_images/sphx_glr_plot_rectilinear_mesh_2d_thumb.png" />
+<p><a class="reference internal" href="Meshes/plot_rectilinear_mesh_2d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-2d-py"><span class="std std-ref">2D Rectilinear Mesh</span></a></p>
+  <div class="sphx-glr-thumbnail-title">2D Rectilinear Mesh</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="3D Rectilinear Mesh"><img alt="" src="../_images/sphx_glr_plot_rectilinear_mesh_3d_thumb.png" />
+<p><a class="reference internal" href="Meshes/plot_rectilinear_mesh_3d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-3d-py"><span class="std std-ref">3D Rectilinear Mesh</span></a></p>
+  <div class="sphx-glr-thumbnail-title">3D Rectilinear Mesh</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="models">
+<h2>Models<a class="headerlink" href="#models" title="Link to this heading"></a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="1D Model with an infinite halfspace"><img alt="" src="../_images/sphx_glr_plot_model_1d_thumb.png" />
+<p><a class="reference internal" href="Models/plot_model_1d.html#sphx-glr-examples-models-plot-model-1d-py"><span class="std std-ref">1D Model with an infinite halfspace</span></a></p>
+  <div class="sphx-glr-thumbnail-title">1D Model with an infinite halfspace</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="2D Rectilinear Model"><img alt="" src="../_images/sphx_glr_plot_model_2d_thumb.png" />
+<p><a class="reference internal" href="Models/plot_model_2d.html#sphx-glr-examples-models-plot-model-2d-py"><span class="std std-ref">2D Rectilinear Model</span></a></p>
+  <div class="sphx-glr-thumbnail-title">2D Rectilinear Model</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="3D Rectilinear Model"><img alt="" src="../_images/sphx_glr_plot_model_3d_thumb.png" />
+<p><a class="reference internal" href="Models/plot_model_3d.html#sphx-glr-examples-models-plot-model-3d-py"><span class="std std-ref">3D Rectilinear Model</span></a></p>
+  <div class="sphx-glr-thumbnail-title">3D Rectilinear Model</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="data">
 <h2>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h2>
 <div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="3D Point Cloud class"><img alt="" src="../_images/sphx_glr_plot_pointcloud3d_thumb.png" />
 <p><a class="reference internal" href="Data/plot_pointcloud3d.html#sphx-glr-examples-data-plot-pointcloud3d-py"><span class="std std-ref">3D Point Cloud class</span></a></p>
@@ -169,22 +221,6 @@
 </div><div class="sphx-glr-thumbcontainer" tooltip="Tempest Datapoint Class"><img alt="" src="../_images/sphx_glr_plot_tempest_datapoint_thumb.png" />
 <p><a class="reference internal" href="Datapoints/plot_tempest_datapoint.html#sphx-glr-examples-datapoints-plot-tempest-datapoint-py"><span class="std std-ref">Tempest Datapoint Class</span></a></p>
   <div class="sphx-glr-thumbnail-title">Tempest Datapoint Class</div>
-</div></div><div class="toctree-wrapper compound">
-</div>
-</section>
-<section id="distributions">
-<h2>Distributions<a class="headerlink" href="#distributions" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Handles the initialization of different statistical distribution"><img alt="" src="../_images/sphx_glr_plot_distributions_thumb.png" />
-<p><a class="reference internal" href="Distributions/plot_distributions.html#sphx-glr-examples-distributions-plot-distributions-py"><span class="std std-ref">Distribution Class</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Distribution Class</div>
-</div></div><div class="toctree-wrapper compound">
-</div>
-</section>
-<section id="hdf-5">
-<h2>HDF 5<a class="headerlink" href="#hdf-5" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory systems. A common bottleneck with large parallel algorithms is the input output of information to disk. We use HDF5 to read and write data in order to leverage the parallel capabililties of the HDF5 API."><img alt="" src="../_images/sphx_glr_hdf5_thumb.png" />
-<p><a class="reference internal" href="HDF5/hdf5.html#sphx-glr-examples-hdf5-hdf5-py"><span class="std std-ref">Using HDF5 within GeoBIPy</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Using HDF5 within GeoBIPy</div>
 </div></div><div class="toctree-wrapper compound">
 </div>
 </section>
@@ -222,51 +258,11 @@ In both cases, you will need to write an options file (also shown in these examp
 </div></div><div class="toctree-wrapper compound">
 </div>
 </section>
-<section id="meshes">
-<h2>Meshes<a class="headerlink" href="#meshes" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="1D Rectilinear Mesh"><img alt="" src="../_images/sphx_glr_plot_rectilinear_mesh_1d_thumb.png" />
-<p><a class="reference internal" href="Meshes/plot_rectilinear_mesh_1d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-1d-py"><span class="std std-ref">1D Rectilinear Mesh</span></a></p>
-  <div class="sphx-glr-thumbnail-title">1D Rectilinear Mesh</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="It can be instantiated in two ways."><img alt="" src="../_images/sphx_glr_plot_rectilinear_mesh_2d_thumb.png" />
-<p><a class="reference internal" href="Meshes/plot_rectilinear_mesh_2d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-2d-py"><span class="std std-ref">2D Rectilinear Mesh</span></a></p>
-  <div class="sphx-glr-thumbnail-title">2D Rectilinear Mesh</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="3D Rectilinear Mesh"><img alt="" src="../_images/sphx_glr_plot_rectilinear_mesh_3d_thumb.png" />
-<p><a class="reference internal" href="Meshes/plot_rectilinear_mesh_3d.html#sphx-glr-examples-meshes-plot-rectilinear-mesh-3d-py"><span class="std std-ref">3D Rectilinear Mesh</span></a></p>
-  <div class="sphx-glr-thumbnail-title">3D Rectilinear Mesh</div>
-</div></div><div class="toctree-wrapper compound">
-</div>
-</section>
-<section id="models">
-<h2>Models<a class="headerlink" href="#models" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="1D Model with an infinite halfspace"><img alt="" src="../_images/sphx_glr_plot_model_1d_thumb.png" />
-<p><a class="reference internal" href="Models/plot_model_1d.html#sphx-glr-examples-models-plot-model-1d-py"><span class="std std-ref">1D Model with an infinite halfspace</span></a></p>
-  <div class="sphx-glr-thumbnail-title">1D Model with an infinite halfspace</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="2D Rectilinear Model"><img alt="" src="../_images/sphx_glr_plot_model_2d_thumb.png" />
-<p><a class="reference internal" href="Models/plot_model_2d.html#sphx-glr-examples-models-plot-model-2d-py"><span class="std std-ref">2D Rectilinear Model</span></a></p>
-  <div class="sphx-glr-thumbnail-title">2D Rectilinear Model</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="3D Rectilinear Model"><img alt="" src="../_images/sphx_glr_plot_model_3d_thumb.png" />
-<p><a class="reference internal" href="Models/plot_model_3d.html#sphx-glr-examples-models-plot-model-3d-py"><span class="std std-ref">3D Rectilinear Model</span></a></p>
-  <div class="sphx-glr-thumbnail-title">3D Rectilinear Model</div>
-</div></div><div class="toctree-wrapper compound">
-</div>
-</section>
-<section id="statistics">
-<h2>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us to attach statistical descriptors of the array. The direct extension to numpy maintains speed and functionality of numpy arrays."><img alt="" src="../_images/sphx_glr_plot_DataArray_thumb.png" />
-<p><a class="reference internal" href="Statistics/plot_DataArray.html#sphx-glr-examples-statistics-plot-dataarray-py"><span class="std std-ref">DataArray Class</span></a></p>
-  <div class="sphx-glr-thumbnail-title">DataArray Class</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5"><img alt="" src="../_images/sphx_glr_plot_histogram_1d_thumb.png" />
-<p><a class="reference internal" href="Statistics/plot_histogram_1d.html#sphx-glr-examples-statistics-plot-histogram-1d-py"><span class="std std-ref">Histogram 1D</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Histogram 1D</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="This 2D histogram class allows efficient updating of histograms, plotting and saving as HDF5."><img alt="" src="../_images/sphx_glr_plot_histogram_2d_thumb.png" />
-<p><a class="reference internal" href="Statistics/plot_histogram_2d.html#sphx-glr-examples-statistics-plot-histogram-2d-py"><span class="std std-ref">Histogram 2D</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Histogram 2D</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="This 3D histogram class allows efficient updating of histograms, plotting and saving as HDF5."><img alt="" src="../_images/sphx_glr_plot_histogram_3d_thumb.png" />
-<p><a class="reference internal" href="Statistics/plot_histogram_3d.html#sphx-glr-examples-statistics-plot-histogram-3d-py"><span class="std std-ref">Histogram 3D</span></a></p>
-  <div class="sphx-glr-thumbnail-title">Histogram 3D</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us to attach statistical descriptors of the array. The direct extension to numpy maintains speed and functionality of numpy arrays."><img alt="" src="../_images/sphx_glr_plot_StatArray_thumb.png" />
-<p><a class="reference internal" href="Statistics/plot_StatArray.html#sphx-glr-examples-statistics-plot-statarray-py"><span class="std std-ref">StatArray Class</span></a></p>
-  <div class="sphx-glr-thumbnail-title">StatArray Class</div>
+<section id="hdf-5">
+<h2>HDF 5<a class="headerlink" href="#hdf-5" title="Link to this heading"></a></h2>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory systems. A common bottleneck with large parallel algorithms is the input output of information to disk. We use HDF5 to read and write data in order to leverage the parallel capabililties of the HDF5 API."><img alt="" src="../_images/sphx_glr_hdf5_thumb.png" />
+<p><a class="reference internal" href="HDF5/hdf5.html#sphx-glr-examples-hdf5-hdf5-py"><span class="std std-ref">Using HDF5 within GeoBIPy</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Using HDF5 within GeoBIPy</div>
 </div></div><div class="toctree-wrapper compound">
 </div>
 <div class="sphx-glr-footer sphx-glr-footer-gallery docutils container">
@@ -286,7 +282,7 @@ In both cases, you will need to write an options file (also shown in these examp
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../content/api/classes/system/TdemSystem.html" class="btn btn-neutral float-left" title="Time domain system" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Data/plot_pointcloud3d.html" class="btn btn-neutral float-right" title="3D Point Cloud class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Distributions/plot_distributions.html" class="btn btn-neutral float-right" title="Distribution Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -1,0 +1,10 @@
+StatArray
+---------
+
+.. inheritance-diagram:: geobipy.src.classes.statistics.StatArray.StatArray
+   :parts: 1
+
+.. automodule:: geobipy.src.classes.statistics.StatArray
+   :members:
+   :undoc-members:
+

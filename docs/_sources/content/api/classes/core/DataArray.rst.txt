@@ -1,4 +1,4 @@
-StatArray
+DataArray
 ---------
 
 .. inheritance-diagram:: geobipy.src.classes.core.DataArray.DataArray

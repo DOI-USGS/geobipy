@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StatArray &mdash; GeoBIPy 2.3.1 documentation</title>
+  <title>DataArray &mdash; GeoBIPy 2.3.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
@@ -59,7 +59,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="core.html">Core classes</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="myObject.html">Core object class</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">StatArray</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">DataArray</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
@@ -92,9 +92,9 @@
           <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
           <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
           <li class="breadcrumb-item"><a href="core.html">Core classes</a></li>
-      <li class="breadcrumb-item active">StatArray</li>
+      <li class="breadcrumb-item active">DataArray</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../../_sources/content/api/classes/core/StatArray.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../../_sources/content/api/classes/core/DataArray.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -102,8 +102,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="statarray">
-<h1>StatArray<a class="headerlink" href="#statarray" title="Link to this heading"></a></h1>
+  <section id="dataarray">
+<h1>DataArray<a class="headerlink" href="#dataarray" title="Link to this heading"></a></h1>
 digraph inheritance824f77954e {
 bgcolor=transparent;
 rankdir=LR;
@@ -124,7 +124,7 @@ size=&quot;8.0, 12.0&quot;;
 One can also attach prior and proposal distributions so that it may be used in an MCMC algorithm easily.
 Because this is a subclass to numpy, the StatArray contains all numpy array methods and when passed to an
 in-place numpy function will return a StatArray.  See the example section for more information.</p>
-<p>StatArray(shape, name=None, units=None, <a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs)</p>
+<p>StatArray(shape, name=None, units=None, **kwargs)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

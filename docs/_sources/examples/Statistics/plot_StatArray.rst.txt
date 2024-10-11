@@ -50,7 +50,7 @@ Instantiating a new StatArray class
 +++++++++++++++++++++++++++++++++++
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 23-69
+.. GENERATED FROM PYTHON SOURCE LINES 23-66
 
 .. code-block:: Python
 
@@ -94,9 +94,6 @@ Instantiating a new StatArray class
     assert isinstance(test, StatArray) and test.size ==  10, TypeError("da 6")
     print(test.summary)
 
-
-
-
     # The StatArray can take any numpy function that returns an array as an input.
     # The name and units of the variable can be assigned to the StatArray.
 
@@ -110,7 +107,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   1
-    Address:['0x154bfe950']
+    Address:['0x140b98bd0']
     Shape:  (1,)
     Values: [0.]
     Min:    0.0
@@ -119,7 +116,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   10
-    Address:['0x17f089a50']
+    Address:['0x140b998d0']
     Shape:  (10,)
     Values: [0. 0. 0. ... 0. 0. 0.]
     Min:    0.0
@@ -128,7 +125,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   (2, 10)
-    Address:['0x17f08a7d0']
+    Address:['0x140b9a2d0']
     Shape:  (2, 10)
     Values: [[0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]]
@@ -138,7 +135,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   (2, 10)
-    Address:['0x17f6825d0']
+    Address:['0x140b9add0']
     Shape:  (2,)
     Values: [ 2 10]
     Min:    2
@@ -147,7 +144,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   45.454
-    Address:['0x17f08a7d0']
+    Address:['0x10390a350']
     Shape:  (1,)
     Values: [45.454]
     Min:    45.454
@@ -156,7 +153,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   45.454
-    Address:['0x17f680a50']
+    Address:['0x140b9b150']
     Shape:  (1,)
     Values: [45.454]
     Min:    45.454
@@ -165,16 +162,16 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x17f08a7d0']
+    Address:['0x10390a350']
     Shape:  (1,)
-    Values: [-0.70419088]
-    Min:    -0.7041908829549965
-    Max:    -0.7041908829549965
+    Values: [-0.30357293]
+    Min:    -0.30357293062816576
+    Max:    -0.30357293062816576
     has_posterior: False
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x17f6819d0']
+    Address:['0x140b9b2d0']
     Shape:  (10,)
     Values: [0. 1. 2. ... 7. 8. 9.]
     Min:    0.0
@@ -183,7 +180,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x17f680a50']
+    Address:['0x140b9b150']
     Shape:  (10,)
     Values: [0. 1. 2. ... 7. 8. 9.]
     Min:    0.0
@@ -194,7 +191,7 @@ Instantiating a new StatArray class
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 70-89
+.. GENERATED FROM PYTHON SOURCE LINES 67-86
 
 Attaching Prior and Proposal Distributions to a StatArray
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -216,7 +213,7 @@ Two types of distributions can be attached to the StatArray.
     sample when we wish to perturb the variable
     https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm
 
-.. GENERATED FROM PYTHON SOURCE LINES 89-101
+.. GENERATED FROM PYTHON SOURCE LINES 86-98
 
 .. code-block:: Python
 
@@ -239,11 +236,11 @@ Two types of distributions can be attached to the StatArray.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 102-103
+.. GENERATED FROM PYTHON SOURCE LINES 99-100
 
 We can also attach a proposal distribution
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-109
+.. GENERATED FROM PYTHON SOURCE LINES 100-106
 
 .. code-block:: Python
 
@@ -263,8 +260,8 @@ We can also attach a proposal distribution
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x154bfd7d0' '0x17f652360' '0x181310930' ... '0x17f652180' '0x181313b10'
-     '0x1813134b0']
+    Address:['0x106d683d0' '0x13c904ec0' '0x13de4f810' ... '0x140b7ee40' '0x13de4f870'
+     '0x13de4f8d0']
     Shape:  (1,)
     Values: [10.]
     Min:    10.0
@@ -285,13 +282,13 @@ We can also attach a proposal distribution
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-113
+.. GENERATED FROM PYTHON SOURCE LINES 107-110
 
 The values in the variable can be evaluated against the prior.
 In this case, we have 3 elements in the variable, and a univariate Normal for the prior.
 Therefore each element is evaluated to get 3 probabilities, one for each element.
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-115
+.. GENERATED FROM PYTHON SOURCE LINES 110-112
 
 .. code-block:: Python
 
@@ -310,11 +307,11 @@ Therefore each element is evaluated to get 3 probabilities, one for each element
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-117
+.. GENERATED FROM PYTHON SOURCE LINES 113-114
 
 The univariate proposal distribution can generate random samples from itself.
 
-.. GENERATED FROM PYTHON SOURCE LINES 117-119
+.. GENERATED FROM PYTHON SOURCE LINES 114-116
 
 .. code-block:: Python
 
@@ -333,12 +330,12 @@ The univariate proposal distribution can generate random samples from itself.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 120-122
+.. GENERATED FROM PYTHON SOURCE LINES 117-119
 
 From a sampling stand point we can either sample using only the proposal
 Or we can only generate samples that simultaneously satisfy the prior.
 
-.. GENERATED FROM PYTHON SOURCE LINES 122-124
+.. GENERATED FROM PYTHON SOURCE LINES 119-121
 
 .. code-block:: Python
 
@@ -357,11 +354,11 @@ Or we can only generate samples that simultaneously satisfy the prior.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-126
+.. GENERATED FROM PYTHON SOURCE LINES 122-123
 
 We can perturb the variable by drawing from the attached proposal distribution.
 
-.. GENERATED FROM PYTHON SOURCE LINES 126-130
+.. GENERATED FROM PYTHON SOURCE LINES 123-127
 
 .. code-block:: Python
 
@@ -379,8 +376,8 @@ We can perturb the variable by drawing from the attached proposal distribution.
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x154bfd7d0' '0x17f652360' '0x181310930' ... '0x17f652180' '0x181313b10'
-     '0x1813134b0']
+    Address:['0x106d683d0' '0x13c904ec0' '0x13de4f810' ... '0x140b7ee40' '0x13de4f870'
+     '0x13de4f8d0']
     Shape:  (1,)
     Values: [0.38188467]
     Min:    0.38188466718060166
@@ -399,7 +396,7 @@ We can perturb the variable by drawing from the attached proposal distribution.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 131-136
+.. GENERATED FROM PYTHON SOURCE LINES 128-133
 
 Attaching a Histogram to capture the posterior distribution
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -407,7 +404,7 @@ The StatArray can perturb itself, evaluate its current probability given its pri
 and a histogram can be attached to capture its posterior distribution.
 As an example, lets create a Histogram class with bins generated from the prior.
 
-.. GENERATED FROM PYTHON SOURCE LINES 136-137
+.. GENERATED FROM PYTHON SOURCE LINES 133-134
 
 .. code-block:: Python
 
@@ -419,11 +416,11 @@ As an example, lets create a Histogram class with bins generated from the prior.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 138-139
+.. GENERATED FROM PYTHON SOURCE LINES 135-136
 
 Attach the histogram
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-141
+.. GENERATED FROM PYTHON SOURCE LINES 136-138
 
 .. code-block:: Python
 
@@ -436,11 +433,11 @@ Attach the histogram
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-143
+.. GENERATED FROM PYTHON SOURCE LINES 139-140
 
 In an iterative sense, we can propose and evaluate new values, and update the posterior
 
-.. GENERATED FROM PYTHON SOURCE LINES 143-150
+.. GENERATED FROM PYTHON SOURCE LINES 140-147
 
 .. code-block:: Python
 
@@ -458,7 +455,7 @@ In an iterative sense, we can propose and evaluate new values, and update the po
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 151-154
+.. GENERATED FROM PYTHON SOURCE LINES 148-151
 
 .. code-block:: Python
 
@@ -477,14 +474,14 @@ In an iterative sense, we can propose and evaluate new values, and update the po
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 155-159
+.. GENERATED FROM PYTHON SOURCE LINES 152-156
 
 Attach a multivariate normal distribution as the prior and proposal
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 Attach the multivariate prior
 
-.. GENERATED FROM PYTHON SOURCE LINES 159-165
+.. GENERATED FROM PYTHON SOURCE LINES 156-162
 
 .. code-block:: Python
 
@@ -501,13 +498,13 @@ Attach the multivariate prior
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 166-169
+.. GENERATED FROM PYTHON SOURCE LINES 163-166
 
 Since the prior is multivariate, the appropriate equations are used to
 evaluate the probability for all elements in the StatArray.
 This produces a single probability.
 
-.. GENERATED FROM PYTHON SOURCE LINES 169-172
+.. GENERATED FROM PYTHON SOURCE LINES 166-169
 
 .. code-block:: Python
 
@@ -522,16 +519,16 @@ This produces a single probability.
 
  .. code-block:: none
 
-    0.16541198455442488
+    0.3796768180063585
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 173-174
+.. GENERATED FROM PYTHON SOURCE LINES 170-171
 
 Attach the multivariate proposal
 
-.. GENERATED FROM PYTHON SOURCE LINES 174-180
+.. GENERATED FROM PYTHON SOURCE LINES 171-177
 
 .. code-block:: Python
 
@@ -548,11 +545,11 @@ Attach the multivariate proposal
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 181-182
+.. GENERATED FROM PYTHON SOURCE LINES 178-179
 
 Perturb the variables using the multivariate proposal.
 
-.. GENERATED FROM PYTHON SOURCE LINES 182-197
+.. GENERATED FROM PYTHON SOURCE LINES 179-194
 
 .. code-block:: Python
 
@@ -578,7 +575,7 @@ Perturb the variables using the multivariate proposal.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 198-209
+.. GENERATED FROM PYTHON SOURCE LINES 195-206
 
 Basic manipulation
 ++++++++++++++++++
@@ -592,7 +589,7 @@ and if any prior or proposal are set, those will be carried through too.
 1D example
 __________
 
-.. GENERATED FROM PYTHON SOURCE LINES 209-213
+.. GENERATED FROM PYTHON SOURCE LINES 206-210
 
 .. code-block:: Python
 
@@ -613,7 +610,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 214-219
+.. GENERATED FROM PYTHON SOURCE LINES 211-216
 
 .. code-block:: Python
 
@@ -635,7 +632,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 220-225
+.. GENERATED FROM PYTHON SOURCE LINES 217-222
 
 .. code-block:: Python
 
@@ -657,7 +654,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 226-231
+.. GENERATED FROM PYTHON SOURCE LINES 223-228
 
 .. code-block:: Python
 
@@ -679,7 +676,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 232-237
+.. GENERATED FROM PYTHON SOURCE LINES 229-234
 
 .. code-block:: Python
 
@@ -701,7 +698,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 238-243
+.. GENERATED FROM PYTHON SOURCE LINES 235-240
 
 .. code-block:: Python
 
@@ -723,7 +720,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 244-249
+.. GENERATED FROM PYTHON SOURCE LINES 241-246
 
 .. code-block:: Python
 
@@ -745,7 +742,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 250-255
+.. GENERATED FROM PYTHON SOURCE LINES 247-252
 
 .. code-block:: Python
 
@@ -767,7 +764,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 256-261
+.. GENERATED FROM PYTHON SOURCE LINES 253-258
 
 .. code-block:: Python
 
@@ -789,7 +786,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 262-267
+.. GENERATED FROM PYTHON SOURCE LINES 259-264
 
 .. code-block:: Python
 
@@ -811,7 +808,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 268-273
+.. GENERATED FROM PYTHON SOURCE LINES 265-270
 
 .. code-block:: Python
 
@@ -833,7 +830,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 274-279
+.. GENERATED FROM PYTHON SOURCE LINES 271-276
 
 .. code-block:: Python
 
@@ -855,12 +852,12 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 280-282
+.. GENERATED FROM PYTHON SOURCE LINES 277-279
 
 2D example
 __________
 
-.. GENERATED FROM PYTHON SOURCE LINES 282-287
+.. GENERATED FROM PYTHON SOURCE LINES 279-284
 
 .. code-block:: Python
 
@@ -884,7 +881,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 288-293
+.. GENERATED FROM PYTHON SOURCE LINES 285-290
 
 .. code-block:: Python
 
@@ -909,7 +906,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 294-299
+.. GENERATED FROM PYTHON SOURCE LINES 291-296
 
 .. code-block:: Python
 
@@ -933,7 +930,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 300-305
+.. GENERATED FROM PYTHON SOURCE LINES 297-302
 
 .. code-block:: Python
 
@@ -957,7 +954,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 306-311
+.. GENERATED FROM PYTHON SOURCE LINES 303-308
 
 .. code-block:: Python
 
@@ -982,7 +979,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 312-317
+.. GENERATED FROM PYTHON SOURCE LINES 309-314
 
 .. code-block:: Python
 
@@ -1006,7 +1003,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 318-323
+.. GENERATED FROM PYTHON SOURCE LINES 315-320
 
 .. code-block:: Python
 
@@ -1031,7 +1028,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 324-329
+.. GENERATED FROM PYTHON SOURCE LINES 321-326
 
 .. code-block:: Python
 
@@ -1057,7 +1054,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 330-335
+.. GENERATED FROM PYTHON SOURCE LINES 327-332
 
 .. code-block:: Python
 
@@ -1079,7 +1076,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 336-341
+.. GENERATED FROM PYTHON SOURCE LINES 333-338
 
 .. code-block:: Python
 
@@ -1102,7 +1099,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 342-347
+.. GENERATED FROM PYTHON SOURCE LINES 339-344
 
 .. code-block:: Python
 
@@ -1124,7 +1121,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 348-353
+.. GENERATED FROM PYTHON SOURCE LINES 345-350
 
 .. code-block:: Python
 
@@ -1146,7 +1143,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 354-359
+.. GENERATED FROM PYTHON SOURCE LINES 351-356
 
 .. code-block:: Python
 
@@ -1168,7 +1165,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 360-365
+.. GENERATED FROM PYTHON SOURCE LINES 357-362
 
 .. code-block:: Python
 
@@ -1190,7 +1187,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 366-371
+.. GENERATED FROM PYTHON SOURCE LINES 363-368
 
 .. code-block:: Python
 
@@ -1214,7 +1211,7 @@ __________
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 372-377
+.. GENERATED FROM PYTHON SOURCE LINES 369-374
 
 Plotting
 ++++++++
@@ -1222,7 +1219,7 @@ Plotting
 We can easily plot the StatArray with its built in plotting functions.
 All plotting functions can take matplotlib keywords
 
-.. GENERATED FROM PYTHON SOURCE LINES 377-385
+.. GENERATED FROM PYTHON SOURCE LINES 374-382
 
 .. code-block:: Python
 
@@ -1241,7 +1238,7 @@ All plotting functions can take matplotlib keywords
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 386-391
+.. GENERATED FROM PYTHON SOURCE LINES 383-388
 
 .. code-block:: Python
 
@@ -1262,11 +1259,11 @@ All plotting functions can take matplotlib keywords
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 392-393
+.. GENERATED FROM PYTHON SOURCE LINES 389-390
 
 We can quickly plot a bar graph.
 
-.. GENERATED FROM PYTHON SOURCE LINES 393-398
+.. GENERATED FROM PYTHON SOURCE LINES 390-395
 
 .. code-block:: Python
 
@@ -1287,11 +1284,11 @@ We can quickly plot a bar graph.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 399-400
+.. GENERATED FROM PYTHON SOURCE LINES 396-397
 
 We can scatter the contents of the StatArray if it is 1D
 
-.. GENERATED FROM PYTHON SOURCE LINES 400-405
+.. GENERATED FROM PYTHON SOURCE LINES 397-402
 
 .. code-block:: Python
 
@@ -1312,7 +1309,7 @@ We can scatter the contents of the StatArray if it is 1D
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 406-413
+.. GENERATED FROM PYTHON SOURCE LINES 403-410
 
 Histogram Equalization
 ______________________
@@ -1322,7 +1319,7 @@ This approach forces all colours in the images to have an equal weight.
 This distorts the colour bar, but can really highlight the lower and higher
 ends of whatever you are plotting. Just add the equalize keyword!
 
-.. GENERATED FROM PYTHON SOURCE LINES 413-418
+.. GENERATED FROM PYTHON SOURCE LINES 410-415
 
 .. code-block:: Python
 
@@ -1343,13 +1340,13 @@ ends of whatever you are plotting. Just add the equalize keyword!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 419-422
+.. GENERATED FROM PYTHON SOURCE LINES 416-419
 
 Take the log base(x) of the data
 
 We can also take the data to a log, log10, log2, or a custom number!
 
-.. GENERATED FROM PYTHON SOURCE LINES 422-426
+.. GENERATED FROM PYTHON SOURCE LINES 419-423
 
 .. code-block:: Python
 
@@ -1369,13 +1366,13 @@ We can also take the data to a log, log10, log2, or a custom number!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 427-430
+.. GENERATED FROM PYTHON SOURCE LINES 424-427
 
 X and Y axes
 
 We can specify the x axis of the scatter plot.
 
-.. GENERATED FROM PYTHON SOURCE LINES 430-436
+.. GENERATED FROM PYTHON SOURCE LINES 427-433
 
 .. code-block:: Python
 
@@ -1397,7 +1394,7 @@ We can specify the x axis of the scatter plot.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 437-444
+.. GENERATED FROM PYTHON SOURCE LINES 434-441
 
 Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray.
 In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.
@@ -1407,7 +1404,7 @@ I can however force the y co-ordinates by specifying it as input.
 In the second subplot I explicitly plot distance on the y axis.
 In the first subplot, the y axis is the same as the colourbar.
 
-.. GENERATED FROM PYTHON SOURCE LINES 444-453
+.. GENERATED FROM PYTHON SOURCE LINES 441-450
 
 .. code-block:: Python
 
@@ -1432,13 +1429,13 @@ In the first subplot, the y axis is the same as the colourbar.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 454-457
+.. GENERATED FROM PYTHON SOURCE LINES 451-454
 
 Point sizes
 
 Since the plotting functions take matplotlib keywords, I can also specify the size of each points.
 
-.. GENERATED FROM PYTHON SOURCE LINES 459-474
+.. GENERATED FROM PYTHON SOURCE LINES 456-471
 
 .. code-block:: Python
 
@@ -1469,11 +1466,11 @@ Since the plotting functions take matplotlib keywords, I can also specify the si
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 475-476
+.. GENERATED FROM PYTHON SOURCE LINES 472-473
 
 Of course we can still take the log, or equalize the colour histogram
 
-.. GENERATED FROM PYTHON SOURCE LINES 476-481
+.. GENERATED FROM PYTHON SOURCE LINES 473-478
 
 .. code-block:: Python
 
@@ -1494,11 +1491,11 @@ Of course we can still take the log, or equalize the colour histogram
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 482-483
+.. GENERATED FROM PYTHON SOURCE LINES 479-480
 
 Typically pcolor only works with 2D arrays. The StatArray has a pcolor method that will pcolor a 1D array
 
-.. GENERATED FROM PYTHON SOURCE LINES 483-495
+.. GENERATED FROM PYTHON SOURCE LINES 480-492
 
 .. code-block:: Python
 
@@ -1526,13 +1523,13 @@ Typically pcolor only works with 2D arrays. The StatArray has a pcolor method th
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 496-499
+.. GENERATED FROM PYTHON SOURCE LINES 493-496
 
 We can add grid lines, and add opacity to each element in the pcolor image
 
 This is useful if the colour values need to be scaled by another variable e.g. variance.
 
-.. GENERATED FROM PYTHON SOURCE LINES 499-509
+.. GENERATED FROM PYTHON SOURCE LINES 496-506
 
 .. code-block:: Python
 
@@ -1558,11 +1555,11 @@ This is useful if the colour values need to be scaled by another variable e.g. v
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 510-511
+.. GENERATED FROM PYTHON SOURCE LINES 507-508
 
 We can plot a histogram of the StatArray
 
-.. GENERATED FROM PYTHON SOURCE LINES 511-516
+.. GENERATED FROM PYTHON SOURCE LINES 508-513
 
 .. code-block:: Python
 
@@ -1583,11 +1580,11 @@ We can plot a histogram of the StatArray
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 517-518
+.. GENERATED FROM PYTHON SOURCE LINES 514-515
 
 We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can include compression.  They allow quick and easy access to parts of the file, and can also be written to and read from in parallel!
 
-.. GENERATED FROM PYTHON SOURCE LINES 518-523
+.. GENERATED FROM PYTHON SOURCE LINES 515-520
 
 .. code-block:: Python
 
@@ -1603,12 +1600,12 @@ We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 524-526
+.. GENERATED FROM PYTHON SOURCE LINES 521-523
 
 We can then read the StatArray from the file
 Here x is a new variable, that is read in from the hdf5 file we just wrote.
 
-.. GENERATED FROM PYTHON SOURCE LINES 526-533
+.. GENERATED FROM PYTHON SOURCE LINES 523-530
 
 .. code-block:: Python
 
@@ -1633,11 +1630,11 @@ Here x is a new variable, that is read in from the hdf5 file we just wrote.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 534-535
+.. GENERATED FROM PYTHON SOURCE LINES 531-532
 
 We can also define a 2D array
 
-.. GENERATED FROM PYTHON SOURCE LINES 535-540
+.. GENERATED FROM PYTHON SOURCE LINES 532-537
 
 .. code-block:: Python
 
@@ -1655,17 +1652,17 @@ We can also define a 2D array
  .. code-block:: none
 
 
-    "StatArray\nName:   Density ($\\frac{g}{cc}$)\nAddress:['0x17f4e05d0']\nShape:  (50, 100)\nValues: [[ 0.14104158  0.47155933  1.95502179 ...  1.76214533  1.24396239\n   0.1215391 ]\n [-1.85725407 -1.83481902  1.04987135 ...  0.85985878 -0.34529634\n  -0.85558253]\n [ 0.76292177  1.13113089 -1.35816931 ...  1.31159774  0.46698778\n   1.68630769]\n ...\n [ 0.48384681  0.22774246 -0.51285518 ... -0.24617681  0.81498656\n   1.57095942]\n [-0.13056782  1.72508382 -1.33506224 ... -1.17319374  0.27482725\n   0.39378825]\n [ 1.36799972  0.26714623 -0.02588039 ... -0.28979426 -0.8747471\n  -0.98512505]]\nMin:    -3.2750329304041186\nMax:    3.445969826454679\nhas_posterior: False\n"
+    "StatArray\nName:   Density ($\\frac{g}{cc}$)\nAddress:['0x14c27bb50']\nShape:  (50, 100)\nValues: [[ 0.43031444  0.16747392 -1.02201373 ...  0.74153721  1.90862961\n  -1.96298093]\n [-1.14462562 -0.35617089 -0.26110976 ... -0.23504484  0.90603323\n   0.24712065]\n [-0.14957468  0.72207578 -0.88557489 ... -0.17089164 -0.17362076\n  -0.63489297]\n ...\n [-1.159864    0.20198017 -1.45020582 ... -0.09188611  0.51429009\n  -2.29873304]\n [ 0.05110857  0.16473781  0.39133135 ... -0.772846    1.47108002\n   0.36929033]\n [ 1.88347735 -0.83146739 -0.92242455 ... -0.48809595  1.23172139\n   1.86073707]]\nMin:    -4.160360372326481\nMax:    3.7432694562093096\nhas_posterior: False\n"
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 541-544
+.. GENERATED FROM PYTHON SOURCE LINES 538-541
 
 The StatArray Class's functions work whether it is 1D or 2D
 
 We can still do a histogram
 
-.. GENERATED FROM PYTHON SOURCE LINES 544-549
+.. GENERATED FROM PYTHON SOURCE LINES 541-546
 
 .. code-block:: Python
 
@@ -1686,11 +1683,11 @@ We can still do a histogram
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 550-551
+.. GENERATED FROM PYTHON SOURCE LINES 547-548
 
 And we can use pcolor to plot the 2D array
 
-.. GENERATED FROM PYTHON SOURCE LINES 551-556
+.. GENERATED FROM PYTHON SOURCE LINES 548-553
 
 .. code-block:: Python
 
@@ -1711,13 +1708,13 @@ And we can use pcolor to plot the 2D array
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 557-560
+.. GENERATED FROM PYTHON SOURCE LINES 554-557
 
 The StatArray comes with extra plotting options
 
 Here we specify the x and y axes for the 2D array using two other 1D StatArrays
 
-.. GENERATED FROM PYTHON SOURCE LINES 560-567
+.. GENERATED FROM PYTHON SOURCE LINES 557-564
 
 .. code-block:: Python
 
@@ -1740,13 +1737,13 @@ Here we specify the x and y axes for the 2D array using two other 1D StatArrays
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 568-571
+.. GENERATED FROM PYTHON SOURCE LINES 565-568
 
 We can plot using a log10 scale, in this case, we have values that are less
 than or equal to 0.0.  Plotting with the log option will by default mask any
 of those values, and will let you know that it has done so!
 
-.. GENERATED FROM PYTHON SOURCE LINES 571-576
+.. GENERATED FROM PYTHON SOURCE LINES 568-573
 
 .. code-block:: Python
 
@@ -1767,14 +1764,14 @@ of those values, and will let you know that it has done so!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 577-581
+.. GENERATED FROM PYTHON SOURCE LINES 574-578
 
 A neat trick with colourmaps is histogram equalization.
 This approach forces all colours in the image to have an equal amount.
 This distorts the colours, but can really highlight the lower and higher
 ends of whatever you are plotting
 
-.. GENERATED FROM PYTHON SOURCE LINES 581-586
+.. GENERATED FROM PYTHON SOURCE LINES 578-583
 
 .. code-block:: Python
 
@@ -1795,11 +1792,11 @@ ends of whatever you are plotting
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 587-588
+.. GENERATED FROM PYTHON SOURCE LINES 584-585
 
 We can equalize the log10 plot too :)
 
-.. GENERATED FROM PYTHON SOURCE LINES 588-593
+.. GENERATED FROM PYTHON SOURCE LINES 585-590
 
 .. code-block:: Python
 
@@ -1820,11 +1817,11 @@ We can equalize the log10 plot too :)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 594-595
+.. GENERATED FROM PYTHON SOURCE LINES 591-592
 
 We can add opacity to each pixel in the image
 
-.. GENERATED FROM PYTHON SOURCE LINES 595-599
+.. GENERATED FROM PYTHON SOURCE LINES 592-596
 
 .. code-block:: Python
 
@@ -1839,7 +1836,7 @@ We can add opacity to each pixel in the image
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 600-611
+.. GENERATED FROM PYTHON SOURCE LINES 597-608
 
 .. code-block:: Python
 
@@ -1866,11 +1863,11 @@ We can add opacity to each pixel in the image
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 612-613
+.. GENERATED FROM PYTHON SOURCE LINES 609-610
 
 If the array potentially has a lot of white space around the edges, we can trim the image
 
-.. GENERATED FROM PYTHON SOURCE LINES 613-625
+.. GENERATED FROM PYTHON SOURCE LINES 610-622
 
 .. code-block:: Python
 
@@ -1898,11 +1895,11 @@ If the array potentially has a lot of white space around the edges, we can trim 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 626-627
+.. GENERATED FROM PYTHON SOURCE LINES 623-624
 
 Create a stacked area plot of a 2D StatArray
 
-.. GENERATED FROM PYTHON SOURCE LINES 627-637
+.. GENERATED FROM PYTHON SOURCE LINES 624-634
 
 .. code-block:: Python
 
@@ -1931,7 +1928,7 @@ Create a stacked area plot of a 2D StatArray
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.767 seconds)
+   **Total running time of the script:** (0 minutes 6.330 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_StatArray.py:

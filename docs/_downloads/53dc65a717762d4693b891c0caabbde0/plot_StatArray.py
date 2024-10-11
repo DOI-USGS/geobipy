@@ -60,9 +60,6 @@ test = StatArray(test)
 assert isinstance(test, StatArray) and test.size ==  10, TypeError("da 6")
 print(test.summary)
 
-
-
-
 # The StatArray can take any numpy function that returns an array as an input.
 # The name and units of the variable can be assigned to the StatArray.
 

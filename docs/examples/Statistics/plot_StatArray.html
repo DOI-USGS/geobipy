@@ -26,6 +26,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="1D Rectilinear Mesh" href="../Meshes/plot_rectilinear_mesh_1d.html" />
     <link rel="prev" title="Histogram 3D" href="plot_histogram_3d.html" /> 
 </head>
 
@@ -55,16 +56,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="plot_DataArray.html">DataArray Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="plot_histogram_3d.html">Histogram 3D</a></li>
@@ -79,6 +72,13 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
 </ul>
 </li>
 </ul>
@@ -168,16 +168,13 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">10</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 6&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
 
-
-
-
 <span class="c1"># The StatArray can take any numpy function that returns an array as an input.</span>
 <span class="c1"># The name and units of the variable can be assigned to the StatArray.</span>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
 Name:   1
-Address:[&#39;0x154bfe950&#39;]
+Address:[&#39;0x140b98bd0&#39;]
 Shape:  (1,)
 Values: [0.]
 Min:    0.0
@@ -186,7 +183,7 @@ has_posterior: False
 
 StatArray
 Name:   10
-Address:[&#39;0x17f089a50&#39;]
+Address:[&#39;0x140b998d0&#39;]
 Shape:  (10,)
 Values: [0. 0. 0. ... 0. 0. 0.]
 Min:    0.0
@@ -195,7 +192,7 @@ has_posterior: False
 
 StatArray
 Name:   (2, 10)
-Address:[&#39;0x17f08a7d0&#39;]
+Address:[&#39;0x140b9a2d0&#39;]
 Shape:  (2, 10)
 Values: [[0. 0. 0. ... 0. 0. 0.]
  [0. 0. 0. ... 0. 0. 0.]]
@@ -205,7 +202,7 @@ has_posterior: False
 
 StatArray
 Name:   (2, 10)
-Address:[&#39;0x17f6825d0&#39;]
+Address:[&#39;0x140b9add0&#39;]
 Shape:  (2,)
 Values: [ 2 10]
 Min:    2
@@ -214,7 +211,7 @@ has_posterior: False
 
 StatArray
 Name:   45.454
-Address:[&#39;0x17f08a7d0&#39;]
+Address:[&#39;0x10390a350&#39;]
 Shape:  (1,)
 Values: [45.454]
 Min:    45.454
@@ -223,7 +220,7 @@ has_posterior: False
 
 StatArray
 Name:   45.454
-Address:[&#39;0x17f680a50&#39;]
+Address:[&#39;0x140b9b150&#39;]
 Shape:  (1,)
 Values: [45.454]
 Min:    45.454
@@ -232,16 +229,16 @@ has_posterior: False
 
 StatArray
 Name:   test ($\frac{g}{cc}$)
-Address:[&#39;0x17f08a7d0&#39;]
+Address:[&#39;0x10390a350&#39;]
 Shape:  (1,)
-Values: [-0.70419088]
-Min:    -0.7041908829549965
-Max:    -0.7041908829549965
+Values: [-0.30357293]
+Min:    -0.30357293062816576
+Max:    -0.30357293062816576
 has_posterior: False
 
 StatArray
 Name:   test ($\frac{g}{cc}$)
-Address:[&#39;0x17f6819d0&#39;]
+Address:[&#39;0x140b9b2d0&#39;]
 Shape:  (10,)
 Values: [0. 1. 2. ... 7. 8. 9.]
 Min:    0.0
@@ -250,7 +247,7 @@ has_posterior: False
 
 StatArray
 Name:   test ($\frac{g}{cc}$)
-Address:[&#39;0x17f680a50&#39;]
+Address:[&#39;0x140b9b150&#39;]
 Shape:  (10,)
 Values: [0. 1. 2. ... 7. 8. 9.]
 Min:    0.0
@@ -303,8 +300,8 @@ sample when we wish to perturb the variable
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
 Name:   test ($\frac{g}{cc}$)
-Address:[&#39;0x154bfd7d0&#39; &#39;0x17f652360&#39; &#39;0x181310930&#39; ... &#39;0x17f652180&#39; &#39;0x181313b10&#39;
- &#39;0x1813134b0&#39;]
+Address:[&#39;0x106d683d0&#39; &#39;0x13c904ec0&#39; &#39;0x13de4f810&#39; ... &#39;0x140b7ee40&#39; &#39;0x13de4f870&#39;
+ &#39;0x13de4f8d0&#39;]
 Shape:  (1,)
 Values: [10.]
 Min:    10.0
@@ -354,8 +351,8 @@ Or we can only generate samples that simultaneously satisfy the prior.</p>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
 Name:   test ($\frac{g}{cc}$)
-Address:[&#39;0x154bfd7d0&#39; &#39;0x17f652360&#39; &#39;0x181310930&#39; ... &#39;0x17f652180&#39; &#39;0x181313b10&#39;
- &#39;0x1813134b0&#39;]
+Address:[&#39;0x106d683d0&#39; &#39;0x13c904ec0&#39; &#39;0x13de4f810&#39; ... &#39;0x140b7ee40&#39; &#39;0x13de4f870&#39;
+ &#39;0x13de4f8d0&#39;]
 Shape:  (1,)
 Values: [0.38188467]
 Min:    0.38188466718060166
@@ -412,7 +409,7 @@ This produces a single probability.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.16541198455442488
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.3796768180063585
 </pre></div>
 </div>
 <p>Attach the multivariate proposal</p>
@@ -765,7 +762,7 @@ x has its own memory allocated (not a reference/pointer)?  True
 <span class="n">Density</span><span class="o">.</span><span class="n">summary</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;StatArray\nName:   Density ($\\frac{g}{cc}$)\nAddress:[&#39;0x17f4e05d0&#39;]\nShape:  (50, 100)\nValues: [[ 0.14104158  0.47155933  1.95502179 ...  1.76214533  1.24396239\n   0.1215391 ]\n [-1.85725407 -1.83481902  1.04987135 ...  0.85985878 -0.34529634\n  -0.85558253]\n [ 0.76292177  1.13113089 -1.35816931 ...  1.31159774  0.46698778\n   1.68630769]\n ...\n [ 0.48384681  0.22774246 -0.51285518 ... -0.24617681  0.81498656\n   1.57095942]\n [-0.13056782  1.72508382 -1.33506224 ... -1.17319374  0.27482725\n   0.39378825]\n [ 1.36799972  0.26714623 -0.02588039 ... -0.28979426 -0.8747471\n  -0.98512505]]\nMin:    -3.2750329304041186\nMax:    3.445969826454679\nhas_posterior: False\n&quot;
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;StatArray\nName:   Density ($\\frac{g}{cc}$)\nAddress:[&#39;0x14c27bb50&#39;]\nShape:  (50, 100)\nValues: [[ 0.43031444  0.16747392 -1.02201373 ...  0.74153721  1.90862961\n  -1.96298093]\n [-1.14462562 -0.35617089 -0.26110976 ... -0.23504484  0.90603323\n   0.24712065]\n [-0.14957468  0.72207578 -0.88557489 ... -0.17089164 -0.17362076\n  -0.63489297]\n ...\n [-1.159864    0.20198017 -1.45020582 ... -0.09188611  0.51429009\n  -2.29873304]\n [ 0.05110857  0.16473781  0.39133135 ... -0.772846    1.47108002\n   0.36929033]\n [ 1.88347735 -0.83146739 -0.92242455 ... -0.48809595  1.23172139\n   1.86073707]]\nMin:    -4.160360372326481\nMax:    3.7432694562093096\nhas_posterior: False\n&quot;
 </pre></div>
 </div>
 <p>The StatArray Class’s functions work whether it is 1D or 2D</p>
@@ -844,7 +841,7 @@ ends of whatever you are plotting</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.767 seconds)</p>
+<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 6.330 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e43324a965564fecaa251424c676fc0e/plot_StatArray.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_StatArray.ipynb</span></code></a></p>
@@ -866,6 +863,7 @@ ends of whatever you are plotting</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="plot_histogram_3d.html" class="btn btn-neutral float-left" title="Histogram 3D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Meshes/plot_rectilinear_mesh_1d.html" class="btn btn-neutral float-right" title="1D Rectilinear Mesh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

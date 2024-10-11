@@ -5,5 +5,5 @@ Core classes
    :maxdepth: 1
 
    myObject
-   StatArray
+   DataArray
 
