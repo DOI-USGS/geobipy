@@ -125,7 +125,7 @@ class DataPoint(Point):
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._additive_error = StatArray(values, '$\\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray(values, r'$\epsilon_{Additive}$', self.units)
 
     @property
     def addressof(self):
@@ -199,10 +199,10 @@ class DataPoint(Point):
 
     @property
     def deltaD(self):
-        """Get the difference between the predicted and observed data,
+        r"""Get the difference between the predicted and observed data,
 
         .. math::
-            \\delta \\mathbf{d} = \\mathbf{d}^{pre} - \\mathbf{d}^{obs}.
+            \delta \mathbf{d} = \mathbf{d}^{pre} - \mathbf{d}^{obs}.
 
         Returns
         -------
@@ -211,7 +211,7 @@ class DataPoint(Point):
             with size equal to the number of active channels.
 
         """
-        return DataArray(self.predictedData - self.data, name="$\\mathbf{Fm} - \\mathbf{d}_{obs}$", units=self.units)
+        return DataArray(self.predictedData - self.data, name=r"$\mathbf{Fm} - \mathbf{d}_{obs}$", units=self.units)
 
     @property
     def n_active_channels(self):
@@ -259,7 +259,7 @@ class DataPoint(Point):
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
-        self._relative_error = StatArray(values, '$\\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray(values, r'$\epsilon_{Relative}x10^{2}$', '%')
 
     @property
     def sensitivity_matrix(self):
@@ -500,12 +500,12 @@ class DataPoint(Point):
         return self.predictedData.probability(i=self.active, log=log)
 
     def data_misfit(self):
-        """Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
+        r"""Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
 
         .. math::
-            \\| \\mathbf{W}_{d} (\\mathbf{d}^{obs}-\\mathbf{d}^{pre})\\|_{2}^{2},
+            \| \mathbf{W}_{d} (\mathbf{d}^{obs}-\mathbf{d}^{pre})\|_{2}^{2},
 
-        where :math:`\\mathbf{W}_{d}` are the reciprocal data errors.
+        where :math:`\mathbf{W}_{d}` are the reciprocal data errors.
 
         Parameters
         ----------

@@ -1679,7 +1679,7 @@ class Inference2D(myObject):
         degrees = None
         with h5py.File(fit_file, 'r') as f:
             if 'm' in components:
-                means = StatArray(asarray(f['means/data']), 'Conductivity', '$\\frac{S}{m}$')
+                means = StatArray(asarray(f['means/data']), 'Conductivity', r'$\frac{S}{m}$')
             if 'a' in components:
                 amplitudes = StatArray(asarray(f['amplitudes/data']), 'Amplitude')
             if 'v' in components:
@@ -1736,7 +1736,7 @@ class Inference2D(myObject):
         if 'a' in components:
             amplitudes = StatArray(d[:, :, 0::4], 'Amplitude')
         if 'm' in components:
-            means = StatArray(d[:, :, 1::4], 'Conductivity', '$\\frac{S}{m}$')
+            means = StatArray(d[:, :, 1::4], 'Conductivity', r'$\frac{S}{m}$')
         if 's' in components:
             stds = StatArray(d[:, :, 2::4]**2.0, 'Standard deviation')
         if 'e' in components:

@@ -447,7 +447,7 @@ class TempestData(TdemData):
 
     @classmethod
     def read_netcdf(cls, dataFilename, systemFilename, indices=None):
-        """Reads the data and system parameters from file
+        r"""Reads the data and system parameters from file
 
         Parameters
         ----------
@@ -474,7 +474,7 @@ class TempestData(TdemData):
             Northing co-ordinate of the data point
         y or easting or e
             Easting co-ordinate of the data point
-        z or dtm or dem\\_elev or dem\\_np or topo
+        z or dtm or dem\_elev or dem\_np or topo
             Elevation of the ground at the data point
         alt or laser or bheight
             Altitude of the transmitter coil

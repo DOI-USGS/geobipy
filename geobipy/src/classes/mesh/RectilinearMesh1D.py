@@ -689,21 +689,21 @@ class RectilinearMesh1D(Mesh):
         return out
 
     def gradient(self, values):
-        """Compute the gradient
+        r"""Compute the gradient
 
-        Parameter gradient :math:`\\nabla_{z}\\sigma` at the ith layer is computed via
+        Parameter gradient :math:`\nabla_{z}\sigma` at the ith layer is computed via
 
         .. math::
             :label: dpdz1
 
-            \\nabla_{z}^{i}\\sigma = \\frac{\\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
+            \nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}
 
-        where :math:`\\sigma_{i+1}` and :math:`\\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
+        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
 
         .. math::
             :label: minThickness1
 
-            h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
+            h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}
 
         where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
 
@@ -1350,14 +1350,14 @@ class RectilinearMesh1D(Mesh):
 
     @property
     def probability(self):
-        """Evaluate the prior probability for the mesh.
+        r"""Evaluate the prior probability for the mesh.
 
         The following equation describes the components of the prior that correspond to the Model1D,
 
         .. math::
-            p(k | I)p(\\boldsymbol{e}| k, I),
+            p(k | I)p(\boldsymbol{e}| k, I),
 
-        where :math:`k, I, \\boldsymbol{e}` are the number of cells, prior information, edge location respectively.
+        where :math:`k, I, \boldsymbol{e}` are the number of cells, prior information, edge location respectively.
 
         The multiplication here can be turned into a summation by taking the log of the components.
 
@@ -1455,7 +1455,7 @@ class RectilinearMesh1D(Mesh):
             self.edges.posterior = Histogram.Histogram(mesh=mesh)
 
     def set_priors(self, n_cells_prior=None, edges_prior=None, **kwargs):
-        """Setup the priors of the mesh.
+        r"""Setup the priors of the mesh.
 
         By default the following priors are set unless explictly specified.
 
@@ -1467,10 +1467,10 @@ class RectilinearMesh1D(Mesh):
             :label: layers
 
             p(k | I) =
-            \\begin{cases}
-            \\frac{1}{k_{max} - 1} & \\quad 1 \\leq k \\leq k_{max} \\newline
-            0 & \\quad otherwise
-            \\end{cases}.
+            \begin{cases}
+            \frac{1}{k_{max} - 1} & \quad 1 \leq k \leq k_{max} \newline
+            0 & \quad otherwise
+            \end{cases}.
 
         **Prior on the cell edges**
 
@@ -1479,10 +1479,10 @@ class RectilinearMesh1D(Mesh):
         .. math::
             :label: depth
 
-            p(\\boldsymbol{e} | k, I) = \\frac{(k -1)!}{\\prod_{i=0}^{k-1} \\Delta e_{i}},
+            p(\boldsymbol{e} | k, I) = \frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta e_{i}},
 
         where the numerator describes the number of ways that :math:`(k - 1)` interfaces can be ordered and
-        :math:`\\Delta e_{i} = (e_{max} - e_{min}) - 2 i h_{min}` describes the interval that is available to place an edge when there are already i edges in the model
+        :math:`\Delta e_{i} = (e_{max} - e_{min}) - 2 i h_{min}` describes the interval that is available to place an edge when there are already i edges in the model
 
         Parameters
         ----------
@@ -1671,7 +1671,6 @@ class RectilinearMesh1D(Mesh):
             self.createHdf(out, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
 
         else:
-            print(self.summary)
             mesh = RectilinearMesh2D_stitched(x=x, relative_to=self.relative_to, max_cells=self.max_cells)
             if self.nCells.hasPosterior:
                 mesh.nCells.posterior = Histogram.Histogram(mesh=RectilinearMesh2D(x=mesh.x, y=self.nCells.posterior.mesh))

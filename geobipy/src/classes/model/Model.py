@@ -72,9 +72,9 @@ class Model(myObject):
 
     @property
     def gradient(self):
-        """Compute the gradient
+        r"""Compute the gradient
 
-        Parameter gradient :math:"\\nabla_{z}\\sigma" at the ith layer is computed via
+        Parameter gradient :math:"\nabla_{z}\sigma" at the ith layer is computed via
 
         """
         # if self._gradient is None:
@@ -575,21 +575,21 @@ class Model(myObject):
         return probability
 
     def proposal_probabilities(self, remapped_model, observation=None, structure_only=False, alpha=1.0):
-        """Return the forward and reverse proposal probabilities for the model
+        r"""Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
 
         .. math::
             :label: proposal numerator
 
-            q(k, \\boldsymbol{z} | \\boldsymbol{m}^{'})
+            q(k, \boldsymbol{z} | \boldsymbol{m}^{'})
 
         and
 
         .. math::
             :label: proposal denominator
 
-            q(k^{'}, \\boldsymbol{z}^{'} | \\boldsymbol{m})
+            q(k^{'}, \boldsymbol{z}^{'} | \boldsymbol{m})
 
         Each component is dependent on the event that was chosen during perturbation.
 
@@ -907,7 +907,7 @@ class Model(myObject):
                         'ice_over_salt_water' : np.r_[1e-4, 1e-2, 1] # Antarctica glacier ice over salt water
         }
 
-        conductivity = DataArray(conductivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
+        conductivity = DataArray(conductivities[model_type], name="Conductivity", units=r'$\frac{S}{m}$')
 
         x = RectilinearMesh1D(centres=DataArray(np.arange(n_points, dtype=np.float64), name='x'))
         mesh = RectilinearMesh2D_stitched(3, x=x)
