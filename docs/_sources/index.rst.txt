@@ -1,18 +1,17 @@
-############################################################
-Welcome to GeoBIPy: Geophysical Bayesian Inference in Python
-############################################################
+.. geobipy documentation master file, created by
+   sphinx-quickstart on Fri Oct 11 10:02:08 2024.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
-This package uses a Bayesian formulation and Markov chain Monte Carlo sampling methods to
-derive posterior distributions of subsurface and measured data properties.
-The current implementation is applied to time and frequency domain electromagnetic data.
-Application outside of these data types is in development.
+geobipy documentation
+=====================
 
-Currently there are two types of data that we have implemented; frequency domain electromagnetic data,
-and time domain electromagnetic data.
-The package comes with a frequency domain forward modeller, but it does not come with a time domain forward modeller.
+Add your content using ``reStructuredText`` syntax. See the
+`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
+documentation for details.
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   content/getting_started
 
