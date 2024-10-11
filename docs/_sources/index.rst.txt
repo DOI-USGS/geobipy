@@ -10,11 +10,9 @@ Application outside of these data types is in development.
 Currently there are two types of data that we have implemented; frequency domain electromagnetic data,
 and time domain electromagnetic data.
 The package comes with a frequency domain forward modeller, but it does not come with a time domain forward modeller.
-See the section :ref:`Installing_time_domain_forward_modeller` for more information.
-
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   content/api/api
+   content/getting_started
 

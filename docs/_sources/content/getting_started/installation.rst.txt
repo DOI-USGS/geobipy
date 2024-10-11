@@ -15,8 +15,8 @@ If you require parallel file reading and writing, you will also need to install 
 
 If you need to install the parallel IO version of the code, we would recommend that you start with a clean install of Python. This makes it easier to determine whether you have installed and linked the correct version of the parallel HDF5 library.
 
-
 There are two versions when installing GeoBIPy, a serial version, and a parallel version. Since GeoBIPy uses a Fortran backend for forward modelling frequency domain data, you will need to have a Fortran compiler installed. Make sure that the compiler can handle derived data types since I make use of object oriented programming in Fortran.
+
 
 Installing a serial version of GeoBIPy
 ======================================
@@ -27,6 +27,7 @@ Simply clone the git repository, navigate to the package folder that contains th
 You should then be able to import modules from geobipy.  For this type of installation mpi will not need to be installed, and the serial version of h5py will suffice i.e. the standard "pip install h5py" is fine.  h5py will automatically be installed during the install of GeoBIPy since it is a dependency.
 
 **Side note:**  Let's say you ran a production run on a parallel machine with MPI and parallel HDF capabilities. You generated all the results, copied them back to your local machine, and wish to make plots and images.  You will only need to install the serial version of the code on your local machine to do this.
+
 
 Installing a parallel version of GeoBIPy
 ========================================
