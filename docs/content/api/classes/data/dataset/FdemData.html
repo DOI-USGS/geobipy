@@ -4,14 +4,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FdemData &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>FdemData &mdash; geobipy 2.3.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=d2d258e8" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
   
   <!--[if lt IE 9]>
@@ -20,14 +16,12 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../../../_static/documentation_options.js?v=67b02a41"></script>
         <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../../../search.html" />
-    <link rel="next" title="TdemData" href="TdemData.html" />
-    <link rel="prev" title="Data" href="Data.html" /> 
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,11 +33,8 @@
           
           
           <a href="../../../../../index.html" class="icon icon-home">
-            GeoBIPy
+            geobipy
           </a>
-              <div class="version">
-                1.0.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -52,36 +43,39 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started/getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../../api.html">API</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../../base/base.html">Core routines needed for GeoBIPy</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../../classes.html">Classes used in GeoBIPy</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../../core/core.html">Core classes</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="../data.html">Data classes</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="dataset.html">Dataset classes</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../datapoint/datapointrst.html">Datapoint classes</a></li>
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">FdemData</a><ul>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData"><code class="docutils literal notranslate"><span class="pre">FdemData</span></code></a><ul>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.Bcast"><code class="docutils literal notranslate"><span class="pre">FdemData.Bcast()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.Scatterv"><code class="docutils literal notranslate"><span class="pre">FdemData.Scatterv()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.append"><code class="docutils literal notranslate"><span class="pre">FdemData.append()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.createHdf"><code class="docutils literal notranslate"><span class="pre">FdemData.createHdf()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.datapoint"><code class="docutils literal notranslate"><span class="pre">FdemData.datapoint()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fileInformation"><code class="docutils literal notranslate"><span class="pre">FdemData.fileInformation()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.fromHdf"><code class="docutils literal notranslate"><span class="pre">FdemData.fromHdf()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.getFrequency"><code class="docutils literal notranslate"><span class="pre">FdemData.getFrequency()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.getMeasurementType"><code class="docutils literal notranslate"><span class="pre">FdemData.getMeasurementType()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.nActiveData"><code class="docutils literal notranslate"><span class="pre">FdemData.nActiveData</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.plotLine"><code class="docutils literal notranslate"><span class="pre">FdemData.plotLine()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.plot_data"><code class="docutils literal notranslate"><span class="pre">FdemData.plot_data()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.readAarhusFile"><code class="docutils literal notranslate"><span class="pre">FdemData.readAarhusFile()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.read_csv"><code class="docutils literal notranslate"><span class="pre">FdemData.read_csv()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.single"><code class="docutils literal notranslate"><span class="pre">FdemData.single</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.classes.data.dataset.FdemData.FdemData.std"><code class="docutils literal notranslate"><span class="pre">FdemData.std</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../mesh/mesh.html">Mesh classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../model/model.html">Model classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../pointcloud/pointcloud.html">Pointcloud classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../statistics/statistics.html">Statistics classes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../system/system.html">System classes</a></li>
 </ul>
 </li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../examples/index.html">Examples</a></li>
-</ul>
-
+</div>
         </div>
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../../../index.html">GeoBIPy</a>
+          <a href="../../../../../index.html">geobipy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -89,10 +83,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../../../api.html">API</a></li>
-          <li class="breadcrumb-item"><a href="../../classes.html">Classes used in GeoBIPy</a></li>
-          <li class="breadcrumb-item"><a href="../data.html">Data classes</a></li>
-          <li class="breadcrumb-item"><a href="dataset.html">Dataset classes</a></li>
       <li class="breadcrumb-item active">FdemData</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../../../_sources/content/api/classes/data/dataset/FdemData.rst.txt" rel="nofollow"> View page source</a>
@@ -447,15 +437,12 @@ t/rx,y,z are the loop offsets from the observation locations in the data file.</
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Data.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="TdemData.html" class="btn btn-neutral float-right" title="TdemData" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright None.</p>
+    <p>&#169; Copyright 2024, Leon Foks, Burke Minsley.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

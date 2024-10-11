@@ -4,14 +4,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>plotting &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>plotting &mdash; geobipy 2.3.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
   
   <!--[if lt IE 9]>
@@ -20,14 +16,12 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/documentation_options.js?v=67b02a41"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="fileIO" href="fileIO.html" />
-    <link rel="prev" title="utilities" href="utilities.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,11 +33,8 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            GeoBIPy
+            geobipy
           </a>
-              <div class="version">
-                1.0.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -52,51 +43,38 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="base.html">Core routines needed for GeoBIPy</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="utilities.html">utilities</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">plotting</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.bar"><code class="docutils literal notranslate"><span class="pre">bar()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.clabel"><code class="docutils literal notranslate"><span class="pre">clabel()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.generate_subplots"><code class="docutils literal notranslate"><span class="pre">generate_subplots()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.hillshade"><code class="docutils literal notranslate"><span class="pre">hillshade()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.hlines"><code class="docutils literal notranslate"><span class="pre">hlines()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.make_colourmap"><code class="docutils literal notranslate"><span class="pre">make_colourmap()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pause"><code class="docutils literal notranslate"><span class="pre">pause()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pcolor"><code class="docutils literal notranslate"><span class="pre">pcolor()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pcolor_1D"><code class="docutils literal notranslate"><span class="pre">pcolor_1D()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pcolor_as_bar"><code class="docutils literal notranslate"><span class="pre">pcolor_as_bar()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pretty"><code class="docutils literal notranslate"><span class="pre">pretty()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.scatter2D"><code class="docutils literal notranslate"><span class="pre">scatter2D()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.setAlphaPerPcolormeshPixel"><code class="docutils literal notranslate"><span class="pre">setAlphaPerPcolormeshPixel()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.sizeLegend"><code class="docutils literal notranslate"><span class="pre">sizeLegend()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.stackplot2D"><code class="docutils literal notranslate"><span class="pre">stackplot2D()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.step"><code class="docutils literal notranslate"><span class="pre">step()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.vlines"><code class="docutils literal notranslate"><span class="pre">vlines()</span></code></a></li>
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">plotting</a><ul>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.bar"><code class="docutils literal notranslate"><span class="pre">bar()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.clabel"><code class="docutils literal notranslate"><span class="pre">clabel()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.generate_subplots"><code class="docutils literal notranslate"><span class="pre">generate_subplots()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.hillshade"><code class="docutils literal notranslate"><span class="pre">hillshade()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.hlines"><code class="docutils literal notranslate"><span class="pre">hlines()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.make_colourmap"><code class="docutils literal notranslate"><span class="pre">make_colourmap()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.pause"><code class="docutils literal notranslate"><span class="pre">pause()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.pcolor"><code class="docutils literal notranslate"><span class="pre">pcolor()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.pcolor_1D"><code class="docutils literal notranslate"><span class="pre">pcolor_1D()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.pcolor_as_bar"><code class="docutils literal notranslate"><span class="pre">pcolor_as_bar()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.pretty"><code class="docutils literal notranslate"><span class="pre">pretty()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.scatter2D"><code class="docutils literal notranslate"><span class="pre">scatter2D()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.setAlphaPerPcolormeshPixel"><code class="docutils literal notranslate"><span class="pre">setAlphaPerPcolormeshPixel()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.sizeLegend"><code class="docutils literal notranslate"><span class="pre">sizeLegend()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.stackplot2D"><code class="docutils literal notranslate"><span class="pre">stackplot2D()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.step"><code class="docutils literal notranslate"><span class="pre">step()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.plotting.vlines"><code class="docutils literal notranslate"><span class="pre">vlines()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="fileIO.html">fileIO</a></li>
-<li class="toctree-l3"><a class="reference internal" href="interpolation.html">Interpolation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="HDF.html">Heirarchical Data Format (HDF)</a></li>
-<li class="toctree-l3"><a class="reference internal" href="MPI.html">MPI wrapper functions</a></li>
 </ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../classes/classes.html">Classes used in GeoBIPy</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
-</ul>
-
+</div>
         </div>
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">GeoBIPy</a>
+          <a href="../../../index.html">geobipy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -104,8 +82,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
-          <li class="breadcrumb-item"><a href="base.html">Core routines needed for GeoBIPy</a></li>
       <li class="breadcrumb-item active">plotting</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/content/api/base/plotting.rst.txt" rel="nofollow"> View page source</a>
@@ -611,15 +587,12 @@ Values in c that are &lt;= 0 are masked.</p></li>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="utilities.html" class="btn btn-neutral float-left" title="utilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="fileIO.html" class="btn btn-neutral float-right" title="fileIO" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright None.</p>
+    <p>&#169; Copyright 2024, Leon Foks, Burke Minsley.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

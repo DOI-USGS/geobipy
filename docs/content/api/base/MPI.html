@@ -4,14 +4,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MPI wrapper functions &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>MPI wrapper functions &mdash; geobipy 2.3.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
 
   
   <!--[if lt IE 9]>
@@ -20,14 +16,12 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/documentation_options.js?v=67b02a41"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Classes used in GeoBIPy" href="../classes/classes.html" />
-    <link rel="prev" title="Heirarchical Data Format (HDF)" href="HDF.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,11 +33,8 @@
           
           
           <a href="../../../index.html" class="icon icon-home">
-            GeoBIPy
+            geobipy
           </a>
-              <div class="version">
-                1.0.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -52,55 +43,42 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="base.html">Core routines needed for GeoBIPy</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="utilities.html">utilities</a></li>
-<li class="toctree-l3"><a class="reference internal" href="plotting.html">plotting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="fileIO.html">fileIO</a></li>
-<li class="toctree-l3"><a class="reference internal" href="interpolation.html">Interpolation</a></li>
-<li class="toctree-l3"><a class="reference internal" href="HDF.html">Heirarchical Data Format (HDF)</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">MPI wrapper functions</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Bcast"><code class="docutils literal notranslate"><span class="pre">Bcast()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Bcast_1int"><code class="docutils literal notranslate"><span class="pre">Bcast_1int()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Bcast_list"><code class="docutils literal notranslate"><span class="pre">Bcast_list()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Irecv"><code class="docutils literal notranslate"><span class="pre">Irecv()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.IrecvFromLeft"><code class="docutils literal notranslate"><span class="pre">IrecvFromLeft()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.IrecvFromRight"><code class="docutils literal notranslate"><span class="pre">IrecvFromRight()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Irecv_1int"><code class="docutils literal notranslate"><span class="pre">Irecv_1int()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Isend"><code class="docutils literal notranslate"><span class="pre">Isend()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.IsendToLeft"><code class="docutils literal notranslate"><span class="pre">IsendToLeft()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.IsendToRight"><code class="docutils literal notranslate"><span class="pre">IsendToRight()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Isend_1int"><code class="docutils literal notranslate"><span class="pre">Isend_1int()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv"><code class="docutils literal notranslate"><span class="pre">Scatterv()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv_list"><code class="docutils literal notranslate"><span class="pre">Scatterv_list()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv_numpy"><code class="docutils literal notranslate"><span class="pre">Scatterv_numpy()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.banner"><code class="docutils literal notranslate"><span class="pre">banner()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.bcastType"><code class="docutils literal notranslate"><span class="pre">bcastType()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.helloWorld"><code class="docutils literal notranslate"><span class="pre">helloWorld()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.loadBalance1D_shrinkingArrays"><code class="docutils literal notranslate"><span class="pre">loadBalance1D_shrinkingArrays()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.loadBalance3D_shrinkingArrays"><code class="docutils literal notranslate"><span class="pre">loadBalance3D_shrinkingArrays()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.ordered_print"><code class="docutils literal notranslate"><span class="pre">ordered_print()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.print"><code class="docutils literal notranslate"><span class="pre">print()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.MPI.rankPrint"><code class="docutils literal notranslate"><span class="pre">rankPrint()</span></code></a></li>
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">MPI wrapper functions</a><ul>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Bcast"><code class="docutils literal notranslate"><span class="pre">Bcast()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Bcast_1int"><code class="docutils literal notranslate"><span class="pre">Bcast_1int()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Bcast_list"><code class="docutils literal notranslate"><span class="pre">Bcast_list()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Irecv"><code class="docutils literal notranslate"><span class="pre">Irecv()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.IrecvFromLeft"><code class="docutils literal notranslate"><span class="pre">IrecvFromLeft()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.IrecvFromRight"><code class="docutils literal notranslate"><span class="pre">IrecvFromRight()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Irecv_1int"><code class="docutils literal notranslate"><span class="pre">Irecv_1int()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Isend"><code class="docutils literal notranslate"><span class="pre">Isend()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.IsendToLeft"><code class="docutils literal notranslate"><span class="pre">IsendToLeft()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.IsendToRight"><code class="docutils literal notranslate"><span class="pre">IsendToRight()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Isend_1int"><code class="docutils literal notranslate"><span class="pre">Isend_1int()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv"><code class="docutils literal notranslate"><span class="pre">Scatterv()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv_list"><code class="docutils literal notranslate"><span class="pre">Scatterv_list()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.Scatterv_numpy"><code class="docutils literal notranslate"><span class="pre">Scatterv_numpy()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.banner"><code class="docutils literal notranslate"><span class="pre">banner()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.bcastType"><code class="docutils literal notranslate"><span class="pre">bcastType()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.helloWorld"><code class="docutils literal notranslate"><span class="pre">helloWorld()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.loadBalance1D_shrinkingArrays"><code class="docutils literal notranslate"><span class="pre">loadBalance1D_shrinkingArrays()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.loadBalance3D_shrinkingArrays"><code class="docutils literal notranslate"><span class="pre">loadBalance3D_shrinkingArrays()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.ordered_print"><code class="docutils literal notranslate"><span class="pre">ordered_print()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.print"><code class="docutils literal notranslate"><span class="pre">print()</span></code></a></li>
+<li><a class="reference internal" href="#geobipy.src.base.MPI.rankPrint"><code class="docutils literal notranslate"><span class="pre">rankPrint()</span></code></a></li>
 </ul>
 </li>
 </ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../classes/classes.html">Classes used in GeoBIPy</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
-</ul>
-
+</div>
         </div>
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">GeoBIPy</a>
+          <a href="../../../index.html">geobipy</a>
       </nav>
 
       <div class="wy-nav-content">
@@ -108,8 +86,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
-          <li class="breadcrumb-item"><a href="base.html">Core routines needed for GeoBIPy</a></li>
       <li class="breadcrumb-item active">MPI wrapper functions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/content/api/base/MPI.rst.txt" rel="nofollow"> View page source</a>
@@ -549,15 +525,12 @@ Do not use this in production code!  The title is used in a banner</p>
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="HDF.html" class="btn btn-neutral float-left" title="Heirarchical Data Format (HDF)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../classes/classes.html" class="btn btn-neutral float-right" title="Classes used in GeoBIPy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright None.</p>
+    <p>&#169; Copyright 2024, Leon Foks, Burke Minsley.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
