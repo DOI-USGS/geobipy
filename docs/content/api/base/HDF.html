@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heirarchical Data Format (HDF) &mdash; GeoBIPy 2.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=67b02a41"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="MPI wrapper functions" href="MPI.html" />
+    <link rel="prev" title="Interpolation" href="interpolation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                2.3.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="base.html">Core routines needed for GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="utilities.html">utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plotting.html">plotting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileIO.html">fileIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="interpolation.html">Interpolation</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Heirarchical Data Format (HDF)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.find"><code class="docutils literal notranslate"><span class="pre">find()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFile"><code class="docutils literal notranslate"><span class="pre">readKeyFromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFiles"><code class="docutils literal notranslate"><span class="pre">readKeyFromFiles()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.read_all"><code class="docutils literal notranslate"><span class="pre">read_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.read_groups_with_tag"><code class="docutils literal notranslate"><span class="pre">read_groups_with_tag()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfRead.read_item"><code class="docutils literal notranslate"><span class="pre">read_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.HDF.hdfWrite.write_nd"><code class="docutils literal notranslate"><span class="pre">write_nd()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="MPI.html">MPI wrapper functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../classes/classes.html">Classes used in GeoBIPy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="base.html">Core routines needed for GeoBIPy</a></li>
+      <li class="breadcrumb-item active">Heirarchical Data Format (HDF)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/content/api/base/HDF.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-geobipy.src.base.HDF.hdfRead">
+<span id="heirarchical-data-format-hdf"></span><h1>Heirarchical Data Format (HDF)<a class="headerlink" href="#module-geobipy.src.base.HDF.hdfRead" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.HDF.hdfRead.find">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.HDF.hdfRead.</span></span><span class="sig-name descname"><span class="pre">find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.find" title="Link to this definition"></a></dt>
+<dd><p>Find the locations of all groups with ‘tag’ in their path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – HDF5 file name</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Sub string that appears in the group name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – List of paths into the HDF5 file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.HDF.hdfRead.readKeyFromFile">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.HDF.hdfRead.</span></span><span class="sig-name descname"><span class="pre">readKeyFromFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h5obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFile" title="Link to this definition"></a></dt>
+<dd><p>Reads in the keys from a file</p>
+<p>Iterates over group names and keys and reads them from a HDF5 file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h5obj</strong> (<em>h5py._hl.files.File</em><em> or </em><em>h5py._hl.group.Group</em>) – An opened hdf5 handle or a h5py group object</p></li>
+<li><p><strong>fName</strong> (<em>str</em>) – The path and/or file name to the file that was opened</p></li>
+<li><p><strong>groupName</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The group(s) path within the hdf5 file to read from. i.e. ‘/group1/group1a’</p></li>
+<li><p><strong>key</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The key(s) in the group to read</p></li>
+<li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
+<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Returns the read in entries as a list if there are multiple or as a single object if there is only one.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object or list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.HDF.hdfRead.readKeyFromFiles">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.HDF.hdfRead.</span></span><span class="sig-name descname"><span class="pre">readKeyFromFiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fNames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.readKeyFromFiles" title="Link to this definition"></a></dt>
+<dd><p>Reads in the keys from multiple files</p>
+<p>Iterates over filenames, group names, and keys and reads them from a HDF5 file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fNames</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The path(s) and/or file name(s)</p></li>
+<li><p><strong>groupName</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The group(s) path within the hdf5 file(s) to read from. i.e. ‘/group1/group1a’</p></li>
+<li><p><strong>key</strong> (<em>str</em><em> or </em><em>list</em><em> of </em><em>str</em>) – The key(s) in the group to read</p></li>
+<li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
+<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Returns the read in entries as a list if there are multiple or as a single object if there is only one.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object or list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.HDF.hdfRead.read_all">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.HDF.hdfRead.</span></span><span class="sig-name descname"><span class="pre">read_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fName</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_all" title="Link to this definition"></a></dt>
+<dd><p>Reads all the entries written to a HDF file</p>
+<p>Iterates through the highest set of keys in the hdf5 file, and reads each one to a list. If each entry has an attached .readHdf procedure, that will be used to read in an object (Those objects imported at the top of this file can be successfully read in using this attached procedure.) If an entry is a numpy array, that will be the return type.  This function will read in the entire file! Use this with caution if you are using large files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fName</strong> (<em>str</em>) – A path and/or file name.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – A list of the read in items from the hdf5 file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.HDF.hdfRead.read_groups_with_tag">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.HDF.hdfRead.</span></span><span class="sig-name descname"><span class="pre">read_groups_with_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_groups_with_tag" title="Link to this definition"></a></dt>
+<dd><p>Reads all groups with ‘tag’ in their path into memory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – HDF5 file name</p></li>
+<li><p><strong>tag</strong> (<em>str</em>) – Sub string that appears in the group name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – List of geobipy classes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.HDF.hdfRead.read_item">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.HDF.hdfRead.</span></span><span class="sig-name descname"><span class="pre">read_item</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">h5obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfRead.read_item" title="Link to this definition"></a></dt>
+<dd><p>Read an object from a HDF file</p>
+<p>This function provides a flexible way to read in either a numpy hdf5 entry, or an object in this package.  The objects in this package may have an attached .createHdf and writeHdf procedure.  If so, this function will read in those objects and return that object.  If the entry is instead a numpy array, a numpy array will be returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hObj</strong> (<em>h5py._hl.dataset.Dataset</em><em> or </em><em>h5py._hl.group.Group</em>) – A h5py object from which to read entries.</p></li>
+<li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
+<li><p><strong>necessary.</strong> (<em>Any other parameters in **kwargs are optional but may be necessary if an object's .fromHDF</em><em>(</em><em>) </em><em>procedure requires extra arguments. Refer to the object you wish to read in to determine whether extra arguments are</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – An object that has a .fromHdf() procedure or a numpy array of the returned variable.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object or numpy.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function" id="module-geobipy.src.base.HDF.hdfWrite">
+<dt class="sig sig-object py" id="geobipy.src.base.HDF.hdfWrite.write_nd">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.HDF.hdfWrite.</span></span><span class="sig-name descname"><span class="pre">write_nd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h5obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myName</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.HDF.hdfWrite.write_nd" title="Link to this definition"></a></dt>
+<dd><p>Writes a numpy array to a preallocated dataset in a h5py group object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>h5obj</strong> (<em>h5py._hl.files.File</em><em> or </em><em>h5py._hl.group.Group</em>) – A HDF file or group object to write the contents to. The dataset must have already been allocated in the file.</p></li>
+<li><p><strong>myName</strong> (<em>str</em>) – The name of the h5py dataset key inside the h5py object. e.g. ‘/group1/group1a/dataset’</p></li>
+<li><p><strong>index</strong> (<em>slice</em><em>, </em><em>optional</em>) – Specifies the index’th entry of the data to return. If the group was created using a createHDF procedure in parallel with the nRepeats option, index specifies the index’th entry from which to read the data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="interpolation.html" class="btn btn-neutral float-left" title="Interpolation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="MPI.html" class="btn btn-neutral float-right" title="MPI wrapper functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

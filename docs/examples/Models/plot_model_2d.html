@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2D Rectilinear Model &mdash; GeoBIPy 2.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=67b02a41"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3D Rectilinear Model" href="plot_model_3d.html" />
+    <link rel="prev" title="1D Model with an infinite halfspace" href="plot_model_1d.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                2.3.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#models">Models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_model_1d.html">1D Model with an infinite halfspace</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">2D Rectilinear Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_model_3d.html">3D Rectilinear Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+      <li class="breadcrumb-item active">2D Rectilinear Model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/Models/plot_model_2d.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-examples-models-plot-model-2d-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="d-rectilinear-model">
+<span id="sphx-glr-examples-models-plot-model-2d-py"></span><h1>2D Rectilinear Model<a class="headerlink" href="#d-rectilinear-model" title="Link to this heading"></a></h1>
+<p>This 2D rectilinear model defines a grid with straight cell boundaries.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">RectilinearMesh2D</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Specify some cell centres in x and y</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">11.0</span><span class="p">),</span> <span class="s1">&#39;Easting&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">11.0</span><span class="p">),</span> <span class="s1">&#39;Northing&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh2D</span><span class="p">(</span><span class="n">x_edges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y_edges</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+<span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">centres</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">centres</span><span class="p">)</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xx</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="n">yy</span> <span class="o">**</span> <span class="mf">2.0</span><span class="p">)),</span> <span class="s2">&quot;Values&quot;</span><span class="p">)</span>
+
+<span class="n">mod</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span> <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">mod</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+
+<span class="n">mod2</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">mod3</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">mod2</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">mod3</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># #%%</span>
+<span class="c1"># # We can plot the mesh in 3D!</span>
+<span class="c1"># pv = rm.pyvista_plotter()</span>
+<span class="c1"># pv.show()</span>
+
+<span class="c1"># rm.to_vtk(&#39;Model3D.vtk&#39;)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;Model2D.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">mod</span><span class="o">.</span><span class="n">toHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;Model2D.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">mod2</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">])</span>
+
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_plot_model_2d_001.png" srcset="../../_images/sphx_glr_plot_model_2d_001.png" alt="plot model 2d" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_model_2d_002.png" srcset="../../_images/sphx_glr_plot_model_2d_002.png" alt="plot model 2d" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.212 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-models-plot-model-2d-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/36c869e825ae3b16a184379512e44203/plot_model_2d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_model_2d.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/b65392b576618a906ad35b58f026489b/plot_model_2d.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_model_2d.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/1380a312ea4fdf4a772aca7bd6fd33ce/plot_model_2d.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_model_2d.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_model_1d.html" class="btn btn-neutral float-left" title="1D Model with an infinite halfspace" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_model_3d.html" class="btn btn-neutral float-right" title="3D Rectilinear Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

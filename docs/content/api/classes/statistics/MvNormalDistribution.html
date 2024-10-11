@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MvNormal &mdash; GeoBIPy 2.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=67b02a41"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Uniform distribution" href="UniformDistribution.html" />
+    <link rel="prev" title="Normal distribution" href="NormalDistribution.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                2.3.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="statistics.html">Statistics classes</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="Distribution.html">Distribution Wrapper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Histogram.html">Histogram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="baseDistribution.html">baseDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NormalDistribution.html">Normal distribution</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">MvNormal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="UniformDistribution.html">Uniform distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GammaDistribution.html">Gamma Distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="OrderStatistics.html">Order Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="statistics.html">Statistics classes</a></li>
+      <li class="breadcrumb-item active">MvNormal</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/content/api/classes/statistics/MvNormalDistribution.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mvnormal">
+<h1>MvNormal<a class="headerlink" href="#mvnormal" title="Link to this heading"></a></h1>
+digraph inheritanceea6c1a6edf {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;MvNormal&quot; [URL=&quot;#geobipy.src.classes.statistics.MvNormalDistribution.MvNormal&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class extension to geobipy.baseDistribution&quot;];
+  &quot;baseDistribution&quot; -&gt; &quot;MvNormal&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;baseDistribution&quot; [URL=&quot;baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Define an abstract base distribution class&quot;];
+  &quot;myObject&quot; -&gt; &quot;baseDistribution&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<p id="module-geobipy.src.classes.statistics.MvNormalDistribution">&#64;MvNormalDistribution
+Module defining a multivariate normal distribution with statistical procedures</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.MvNormalDistribution.MvNormal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.MvNormalDistribution.</span></span><span class="sig-name descname"><span class="pre">MvNormal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prng</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.MvNormalDistribution.MvNormal" title="Link to this definition"></a></dt>
+<dd><p>Class extension to geobipy.baseDistribution</p>
+<p>Handles a multivariate normal distribution.  Uses Scipy to evaluate probabilities,
+but Numpy to generate random samples since scipy is slow.</p>
+<p>MvNormal(mean, variance, ndim, prng)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Mean(s) for each dimension</p></li>
+<li><p><strong>variance</strong> (<em>scalar</em><em> or </em><em>array_like</em>) – Variance for each dimension</p></li>
+<li><p><strong>ndim</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of dimensions in the multivariate normal.
+Only used if mean and variance are scalars that are constant for all dimensions</p></li>
+<li><p><strong>prng</strong> (<em>numpy.random.RandomState</em><em>, </em><em>optional</em>) – A random state to generate random numbers. Required for parallel instantiation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Multivariate normal distribution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#geobipy.src.classes.statistics.MvNormalDistribution.MvNormal" title="geobipy.src.classes.statistics.MvNormalDistribution.MvNormal">MvNormal</a></p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.MvNormalDistribution.MvNormal.bins">
+<span class="sig-name descname"><span class="pre">bins</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nBins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nStd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.MvNormalDistribution.MvNormal.bins" title="Link to this definition"></a></dt>
+<dd><p>Discretizes a range given the mean and variance of the distribution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nBins</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bins to return.</p></li>
+<li><p><strong>nStd</strong> (<em>float</em><em>, </em><em>optional</em>) – The bin edges = mean +- nStd * variance.</p></li>
+<li><p><strong>dim</strong> (<em>int</em><em>, </em><em>optional</em>) – Get the bins of this dimension, if None, returns bins for all dimensions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>bins</strong> – The bin edges.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>geobipy.StatArray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.MvNormalDistribution.MvNormal.ndim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#geobipy.src.classes.statistics.MvNormalDistribution.MvNormal.ndim" title="Link to this definition"></a></dt>
+<dd><p>Place Holder for children</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.MvNormalDistribution.MvNormal.pad">
+<span class="sig-name descname"><span class="pre">pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.MvNormalDistribution.MvNormal.pad" title="Link to this definition"></a></dt>
+<dd><p>Pads the mean and variance to the given size
+N: Padded size</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.MvNormalDistribution.MvNormal.probability">
+<span class="sig-name descname"><span class="pre">probability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.MvNormalDistribution.MvNormal.probability" title="Link to this definition"></a></dt>
+<dd><p>For a realization x, compute the probability</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="NormalDistribution.html" class="btn btn-neutral float-left" title="Normal distribution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="UniformDistribution.html" class="btn btn-neutral float-right" title="Uniform distribution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

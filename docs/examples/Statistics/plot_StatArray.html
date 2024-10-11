@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StatArray Class &mdash; GeoBIPy 2.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=67b02a41"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="Histogram 3D" href="plot_histogram_3d.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                2.3.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#datapoints">Datapoints</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#statistics">Statistics</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_DataArray.html">DataArray Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_histogram_1d.html">Histogram 1D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_histogram_2d.html">Histogram 2D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_histogram_3d.html">Histogram 3D</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">StatArray Class</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#instantiating-a-new-statarray-class">Instantiating a new StatArray class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attaching-prior-and-proposal-distributions-to-a-statarray">Attaching Prior and Proposal Distributions to a StatArray</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attaching-a-histogram-to-capture-the-posterior-distribution">Attaching a Histogram to capture the posterior distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#attach-a-multivariate-normal-distribution-as-the-prior-and-proposal">Attach a multivariate normal distribution as the prior and proposal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#basic-manipulation">Basic manipulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plotting">Plotting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+      <li class="breadcrumb-item active">StatArray Class</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/Statistics/plot_StatArray.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-examples-statistics-plot-statarray-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="statarray-class">
+<span id="sphx-glr-examples-statistics-plot-statarray-py"></span><h1>StatArray Class<a class="headerlink" href="#statarray-class" title="Link to this heading"></a></h1>
+<p>Extends the numpy ndarray class to add extra attributes such as names, and
+units, and allows us to attach statistical descriptors of the array.
+The direct extension to numpy maintains speed and functionality of numpy arrays.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">,</span> <span class="n">Histogram</span><span class="p">,</span> <span class="n">Distribution</span><span class="p">,</span> <span class="n">RectilinearMesh1D</span>
+
+
+<span class="c1"># plt.style.use(&#39;seaborn-pastel&#39;)</span>
+</pre></div>
+</div>
+<section id="instantiating-a-new-statarray-class">
+<h2>Instantiating a new StatArray class<a class="headerlink" href="#instantiating-a-new-statarray-class" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Integer</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">1</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 0&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;10&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">10</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">test</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">),</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 1&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+<span class="c1"># tuple/Shape</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;(2, 10)&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span>  <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">test</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">),</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 2&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;(2, 10)&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">test</span> <span class="o">==</span>  <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">]),</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 2&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+<span class="c1"># float</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mf">45.454</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;45.454&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">1</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="mf">45.454</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 3&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="mf">45.454</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;45.454&#39;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">1</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="mf">45.454</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 4&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+<span class="c1"># array</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">1</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 5&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">10</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 6&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+
+<span class="n">test</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">test</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+<span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">StatArray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">test</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span>  <span class="mi">10</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;da 6&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+
+
+
+<span class="c1"># The StatArray can take any numpy function that returns an array as an input.</span>
+<span class="c1"># The name and units of the variable can be assigned to the StatArray.</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
+Name:   1
+Address:[&#39;0x154bfe950&#39;]
+Shape:  (1,)
+Values: [0.]
+Min:    0.0
+Max:    0.0
+has_posterior: False
+
+StatArray
+Name:   10
+Address:[&#39;0x17f089a50&#39;]
+Shape:  (10,)
+Values: [0. 0. 0. ... 0. 0. 0.]
+Min:    0.0
+Max:    0.0
+has_posterior: False
+
+StatArray
+Name:   (2, 10)
+Address:[&#39;0x17f08a7d0&#39;]
+Shape:  (2, 10)
+Values: [[0. 0. 0. ... 0. 0. 0.]
+ [0. 0. 0. ... 0. 0. 0.]]
+Min:    0.0
+Max:    0.0
+has_posterior: False
+
+StatArray
+Name:   (2, 10)
+Address:[&#39;0x17f6825d0&#39;]
+Shape:  (2,)
+Values: [ 2 10]
+Min:    2
+Max:    10
+has_posterior: False
+
+StatArray
+Name:   45.454
+Address:[&#39;0x17f08a7d0&#39;]
+Shape:  (1,)
+Values: [45.454]
+Min:    45.454
+Max:    45.454
+has_posterior: False
+
+StatArray
+Name:   45.454
+Address:[&#39;0x17f680a50&#39;]
+Shape:  (1,)
+Values: [45.454]
+Min:    45.454
+Max:    45.454
+has_posterior: False
+
+StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x17f08a7d0&#39;]
+Shape:  (1,)
+Values: [-0.70419088]
+Min:    -0.7041908829549965
+Max:    -0.7041908829549965
+has_posterior: False
+
+StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x17f6819d0&#39;]
+Shape:  (10,)
+Values: [0. 1. 2. ... 7. 8. 9.]
+Min:    0.0
+Max:    9.0
+has_posterior: False
+
+StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x17f680a50&#39;]
+Shape:  (10,)
+Values: [0. 1. 2. ... 7. 8. 9.]
+Min:    0.0
+Max:    9.0
+has_posterior: False
+</pre></div>
+</div>
+</section>
+<section id="attaching-prior-and-proposal-distributions-to-a-statarray">
+<h2>Attaching Prior and Proposal Distributions to a StatArray<a class="headerlink" href="#attaching-prior-and-proposal-distributions-to-a-statarray" title="Link to this heading"></a></h2>
+<p>The StatArray class has been built so that we may easily
+attach not only names and units, but statistical distributions too.
+We won’t go into too much detail about the different distribution</p>
+<p>Two types of distributions can be attached to the StatArray.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Prior Distribution</dt><dd><p>The prior represents how the user believes the variable should
+behave from a statistical standpoint.
+The values of the variable can be evaluated against the attached prior,
+to determine how likely they are to have occured <a class="reference external" href="https://en.wikipedia.org/wiki/Prior_probability">https://en.wikipedia.org/wiki/Prior_probability</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Proposal Distribution</dt><dd><p>The proposal describes a probability distribution from which to
+sample when we wish to perturb the variable
+<a class="reference external" href="https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm">https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm</a></p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Obtain an instantiation of a random number generator.</span>
+<span class="c1"># This is optional, but is an important consideration for parallel programming.</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">Generator</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">PCG64DXSM</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">PCG64DXSM</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">prng</span> <span class="o">=</span> <span class="n">Generator</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+
+<span class="n">Density</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+
+<span class="n">Density</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can also attach a proposal distribution</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">proposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Class type of the prior: &quot;</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">prior</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Class type of the proposal: &quot;</span><span class="p">,</span><span class="nb">type</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">proposal</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x154bfd7d0&#39; &#39;0x17f652360&#39; &#39;0x181310930&#39; ... &#39;0x17f652180&#39; &#39;0x181313b10&#39;
+ &#39;0x1813134b0&#39;]
+Shape:  (1,)
+Values: [10.]
+Min:    10.0
+Max:    10.0
+Prior:
+|   Uniform Distribution:
+|   Min: -2.0
+|   Max: 2.0
+Proposal:
+|   Normal
+|       Mean:0.0
+|   Variance:1.0
+has_posterior: False
+
+Class type of the prior:  &lt;class &#39;geobipy.src.classes.statistics.UniformDistribution.Uniform&#39;&gt;
+Class type of the proposal:  &lt;class &#39;geobipy.src.classes.statistics.NormalDistribution.Normal&#39;&gt;
+</pre></div>
+</div>
+<p>The values in the variable can be evaluated against the prior.
+In this case, we have 3 elements in the variable, and a univariate Normal for the prior.
+Therefore each element is evaluated to get 3 probabilities, one for each element.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.0
+</pre></div>
+</div>
+<p>The univariate proposal distribution can generate random samples from itself.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">propose</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1.1375024404290368
+</pre></div>
+</div>
+<p>From a sampling stand point we can either sample using only the proposal
+Or we can only generate samples that simultaneously satisfy the prior.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">propose</span><span class="p">(</span><span class="n">relative</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[10.53816627]
+</pre></div>
+</div>
+<p>We can perturb the variable by drawing from the attached proposal distribution.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>StatArray
+Name:   test ($\frac{g}{cc}$)
+Address:[&#39;0x154bfd7d0&#39; &#39;0x17f652360&#39; &#39;0x181310930&#39; ... &#39;0x17f652180&#39; &#39;0x181313b10&#39;
+ &#39;0x1813134b0&#39;]
+Shape:  (1,)
+Values: [0.38188467]
+Min:    0.38188466718060166
+Max:    0.38188466718060166
+Prior:
+|   Uniform Distribution:
+|   Min: -2.0
+|   Max: 2.0
+Proposal:
+|   Normal
+|       Mean:0.0
+|   Variance:1.0
+has_posterior: False
+</pre></div>
+</div>
+</section>
+<section id="attaching-a-histogram-to-capture-the-posterior-distribution">
+<h2>Attaching a Histogram to capture the posterior distribution<a class="headerlink" href="#attaching-a-histogram-to-capture-the-posterior-distribution" title="Link to this heading"></a></h2>
+<p>The StatArray can perturb itself, evaluate its current probability given its priors
+and a histogram can be attached to capture its posterior distribution.
+As an example, lets create a Histogram class with bins generated from the prior.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">bins</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">bins</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Attach the histogram</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">posterior</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">bins</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In an iterative sense, we can propose and evaluate new values, and update the posterior</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="n">Density</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">p</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span> <span class="c1"># This is a simple example!</span>
+        <span class="n">Density</span><span class="o">.</span><span class="n">update_posterior</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">summaryPlot</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_001.png" srcset="../../_images/sphx_glr_plot_StatArray_001.png" alt="Prior, Proposal, Posterior" class = "sphx-glr-single-img"/></section>
+<section id="attach-a-multivariate-normal-distribution-as-the-prior-and-proposal">
+<h2>Attach a multivariate normal distribution as the prior and proposal<a class="headerlink" href="#attach-a-multivariate-normal-distribution-as-the-prior-and-proposal" title="Link to this heading"></a></h2>
+<p>Attach the multivariate prior</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Since the prior is multivariate, the appropriate equations are used to
+evaluate the probability for all elements in the StatArray.
+This produces a single probability.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>0.16541198455442488
+</pre></div>
+</div>
+<p>Attach the multivariate proposal</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">proposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Perturb the variables using the multivariate proposal.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">summary</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;statarray.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">Density</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;statarray&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">Density</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;statarray&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;statarray.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">StatArray</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;statarray&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_posterior</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;statarray.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">StatArray</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;statarray&#39;</span><span class="p">,</span> <span class="n">skip_posterior</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="basic-manipulation">
+<h2>Basic manipulation<a class="headerlink" href="#basic-manipulation" title="Link to this heading"></a></h2>
+<p>The StatArray contains other functions to perform basic array manipulations</p>
+<p>These routines essentially wrap around numpy functions,
+but the result will have the same name and units,
+and if any prior or proposal are set, those will be carried through too.</p>
+<section id="d-example">
+<h3>1D example<a class="headerlink" href="#d-example" title="Link to this heading"></a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ -0.  -1.  -3. ... -28. -36. -45.]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mf">999.0</span><span class="p">,</span> <span class="mf">999.0</span><span class="p">]))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[999.  -0.  -1. ... -36. 999. -45.]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="mf">999.0</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[999.  -0.  -1. ... -28. -36. -45.]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">prepend</span><span class="p">([</span><span class="mf">998.0</span><span class="p">,</span> <span class="mf">999.0</span><span class="p">]))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[998. 999.  -0. ... -28. -36. -45.]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="mf">998.0</span><span class="p">,</span> <span class="mf">999.0</span><span class="p">]))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ -0.  -1.  -3. ... -45. 998. 999.]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">14</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-0. -1. -3. ... -1. -3. -6.]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">delete</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">]))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ -0.  -1.  -3. ... -21. -28. -45.]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">edges</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[  0.5  -0.5  -2.  ... -32.  -40.5 -49.5]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">internalEdges</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ -0.5  -2.   -4.5 ... -24.5 -32.  -40.5]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">firstNonZero</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>1
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lastNonZero</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>10
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">abs</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ 0.  1.  3. ... 28. 36. 45.]
+</pre></div>
+</div>
+</section>
+<section id="id1">
+<h3>2D example<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2  3]
+ [ 3  0 -1]
+ [ 1  2  0]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 4  4  4]
+ [ 0 -2  3]
+ [ 3  0 -1]
+ [ 1  2  0]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">values</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2  5  3  5]
+ [ 3  0  5 -1  5]
+ [ 1  2  5  0  5]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2 10  3]
+ [ 3  0 11 -1]
+ [ 1  2 12  0]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="mi">999</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[999 999 999]
+ [  0  -2   3]
+ [  3   0  -1]
+ [  1   2   0]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">prepend</span><span class="p">([</span><span class="mi">999</span><span class="p">,</span> <span class="mi">998</span><span class="p">,</span> <span class="mi">997</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[999 998 997   0  -2   3]
+ [999 998 997   3   0  -1]
+ [999 998 997   1   2   0]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="mi">999</span><span class="p">,</span> <span class="mi">998</span><span class="p">,</span> <span class="mi">997</span><span class="p">]]))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[  0  -2   3]
+ [  3   0  -1]
+ [  1   2   0]
+ [999 998 997]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">resize</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">]))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2  3  3  0]
+ [-1  1  2  0  0]
+ [-2  3  3  0 -1]
+ [ 1  2  0  0 -2]
+ [ 3  3  0 -1  1]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[ 0 -2  3 ...  1  2  0]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 0 -2  3]
+ [ 3  0 -1]]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">firstNonZero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1 0 0]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lastNonZero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[3 3 2]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">firstNonZero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[1 0 0]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">lastNonZero</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[3 3 2]
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">abs</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[0 2 3]
+ [3 0 1]
+ [1 2 0]]
+</pre></div>
+</div>
+</section>
+</section>
+<section id="plotting">
+<h2>Plotting<a class="headerlink" href="#plotting" title="Link to this heading"></a></h2>
+<p>We can easily plot the StatArray with its built in plotting functions.
+All plotting functions can take matplotlib keywords</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The simplest is to just plot the array</span>
+
+<span class="n">Density</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Density&quot;</span><span class="p">,</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">Time</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+<span class="n">Depth</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Depth&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_002.png" srcset="../../_images/sphx_glr_plot_StatArray_002.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can quickly plot a bar graph.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">bar</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_003.png" srcset="../../_images/sphx_glr_plot_StatArray_003.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can scatter the contents of the StatArray if it is 1D</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_004.png" srcset="../../_images/sphx_glr_plot_StatArray_004.png" alt="plot StatArray" class = "sphx-glr-single-img"/><section id="histogram-equalization">
+<h3>Histogram Equalization<a class="headerlink" href="#histogram-equalization" title="Link to this heading"></a></h3>
+<p>A neat trick with colourmaps is histogram equalization.
+This approach forces all colours in the images to have an equal weight.
+This distorts the colour bar, but can really highlight the lower and higher
+ends of whatever you are plotting. Just add the equalize keyword!</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_005.png" srcset="../../_images/sphx_glr_plot_StatArray_005.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Take the log base(x) of the data</p>
+<p>We can also take the data to a log, log10, log2, or a custom number!</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="s1">&#39;e&#39;</span><span class="p">)</span> <span class="c1"># could also use log=&#39;e&#39;, log=2, log=x) where x is the base you require</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_006.png" srcset="../../_images/sphx_glr_plot_StatArray_006.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>X and Y axes</p>
+<p>We can specify the x axis of the scatter plot.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_007.png" srcset="../../_images/sphx_glr_plot_StatArray_007.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Notice that I never specified the y axis, so the y axis defaulted to the values in the StatArray.
+In this case, any operations applied to the colours, are also applied to the y axis, e.g. log=10.
+When I take the values of Density to log base 10, because I do not specify the y plotting locations, those locations are similarly affected.</p>
+<p>I can however force the y co-ordinates by specifying it as input.
+In the second subplot I explicitly plot distance on the y axis.
+In the first subplot, the y axis is the same as the colourbar.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_008.png" srcset="../../_images/sphx_glr_plot_StatArray_008.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Point sizes</p>
+<p>Since the plotting functions take matplotlib keywords, I can also specify the size of each points.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">))))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">legend_size</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="c1">#Density.scatter(x=Time, y=Depth, s=s, alpha=0.7,edgecolor=&#39;k&#39;, sizeLegend=[1.0, 100, 200, 300])</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Density</span><span class="p">)</span><span class="o">+</span><span class="mf">1.0</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">legend_size</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">],</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_009.png" srcset="../../_images/sphx_glr_plot_StatArray_009.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Of course we can still take the log, or equalize the colour histogram</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Depth</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">s</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_010.png" srcset="../../_images/sphx_glr_plot_StatArray_010.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Typically pcolor only works with 2D arrays. The StatArray has a pcolor method that will pcolor a 1D array</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">221</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">222</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">Time</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">223</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">flip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">224</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">Time</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_011.png" srcset="../../_images/sphx_glr_plot_StatArray_011.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can add grid lines, and add opacity to each element in the pcolor image</p>
+<p>This is useful if the colour values need to be scaled by another variable e.g. variance.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">Density</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_012.png" srcset="../../_images/sphx_glr_plot_StatArray_012.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can plot a histogram of the StatArray</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_013.png" srcset="../../_images/sphx_glr_plot_StatArray_013.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can write the StatArray to a HDF5 file.  HDF5 files are binary files that can include compression.  They allow quick and easy access to parts of the file, and can also be written to and read from in parallel!</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;1Dtest.h5&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">Density</span><span class="o">.</span><span class="n">toHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="s1">&#39;test&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can then read the StatArray from the file
+Here x is a new variable, that is read in from the hdf5 file we just wrote.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="s1">&#39;1Dtest.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x has the same values as Density? &#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">Density</span><span class="p">))</span>
+<span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">5.0</span> <span class="c1"># Change one of the values in x</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;x has its own memory allocated (not a reference/pointer)? &#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">id</span><span class="p">(</span><span class="n">Density</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>x has the same values as Density?  True
+x has its own memory allocated (not a reference/pointer)?  True
+</pre></div>
+</div>
+<p>We can also define a 2D array</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span><span class="s2">&quot;Density&quot;</span><span class="p">,</span><span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{g}{cc}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">summary</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>&quot;StatArray\nName:   Density ($\\frac{g}{cc}$)\nAddress:[&#39;0x17f4e05d0&#39;]\nShape:  (50, 100)\nValues: [[ 0.14104158  0.47155933  1.95502179 ...  1.76214533  1.24396239\n   0.1215391 ]\n [-1.85725407 -1.83481902  1.04987135 ...  0.85985878 -0.34529634\n  -0.85558253]\n [ 0.76292177  1.13113089 -1.35816931 ...  1.31159774  0.46698778\n   1.68630769]\n ...\n [ 0.48384681  0.22774246 -0.51285518 ... -0.24617681  0.81498656\n   1.57095942]\n [-0.13056782  1.72508382 -1.33506224 ... -1.17319374  0.27482725\n   0.39378825]\n [ 1.36799972  0.26714623 -0.02588039 ... -0.28979426 -0.8747471\n  -0.98512505]]\nMin:    -3.2750329304041186\nMax:    3.445969826454679\nhas_posterior: False\n&quot;
+</pre></div>
+</div>
+<p>The StatArray Class’s functions work whether it is 1D or 2D</p>
+<p>We can still do a histogram</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_014.png" srcset="../../_images/sphx_glr_plot_StatArray_014.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>And we can use pcolor to plot the 2D array</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_015.png" srcset="../../_images/sphx_glr_plot_StatArray_015.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>The StatArray comes with extra plotting options</p>
+<p>Here we specify the x and y axes for the 2D array using two other 1D StatArrays</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">101</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x Axis&#39;</span><span class="p">,</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">51</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;y Axis&#39;</span><span class="p">,</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;elephants&#39;</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_016.png" srcset="../../_images/sphx_glr_plot_StatArray_016.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can plot using a log10 scale, in this case, we have values that are less
+than or equal to 0.0.  Plotting with the log option will by default mask any
+of those values, and will let you know that it has done so!</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span><span class="n">log</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_017.png" srcset="../../_images/sphx_glr_plot_StatArray_017.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>A neat trick with colourmaps is histogram equalization.
+This approach forces all colours in the image to have an equal amount.
+This distorts the colours, but can really highlight the lower and higher
+ends of whatever you are plotting</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_018.png" srcset="../../_images/sphx_glr_plot_StatArray_018.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can equalize the log10 plot too :)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_019.png" srcset="../../_images/sphx_glr_plot_StatArray_019.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>We can add opacity to each pixel in the image</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">Density</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="s1">&#39;Opacity from 0.0 to 1.0&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">131</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">132</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">a</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">133</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_020.png" srcset="../../_images/sphx_glr_plot_StatArray_020.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>If the array potentially has a lot of white space around the edges, we can trim the image</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Density</span><span class="p">[:</span><span class="mi">10</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">Density</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">Density</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">Density</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">10</span><span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">Density</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">trim</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_021.png" srcset="../../_images/sphx_glr_plot_StatArray_021.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p>Create a stacked area plot of a 2D StatArray</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span><span class="mi">100</span><span class="p">)),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Variable&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;x Axis&#39;</span><span class="p">,</span><span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;mm&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">A</span><span class="o">.</span><span class="n">stackedAreaPlot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">stackedAreaPlot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">s_</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span><span class="s1">&#39;b&#39;</span><span class="p">,</span><span class="s1">&#39;c&#39;</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_StatArray_022.png" srcset="../../_images/sphx_glr_plot_StatArray_022.png" alt="plot StatArray" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.767 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-statarray-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e43324a965564fecaa251424c676fc0e/plot_StatArray.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_StatArray.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/53dc65a717762d4693b891c0caabbde0/plot_StatArray.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_StatArray.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/6ea40b011244de987af10f1723709b1e/plot_StatArray.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_StatArray.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_histogram_3d.html" class="btn btn-neutral float-left" title="Histogram 3D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

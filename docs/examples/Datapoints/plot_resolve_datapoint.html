@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frequency domain datapoint &mdash; GeoBIPy 2.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=67b02a41"></script>
+        <script src="../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Skytem Datapoint Class" href="plot_skytem_datapoint.html" />
+    <link rel="prev" title="Tempest dataset" href="../Data/plot_tempest_dataset.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                2.3.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../content/getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../content/api/api.html">API</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#data">Data</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#datapoints">Datapoints</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Frequency domain datapoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_skytem_datapoint.html">Skytem Datapoint Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_tempest_datapoint.html">Tempest Datapoint Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#distributions">Distributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#hdf-5">HDF 5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#d-inference">1D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#id1">2D Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#meshes">Meshes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#models">Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#statistics">Statistics</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Examples</a></li>
+      <li class="breadcrumb-item active">Frequency domain datapoint</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples/Datapoints/plot_resolve_datapoint.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-examples-datapoints-plot-resolve-datapoint-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="frequency-domain-datapoint">
+<span id="sphx-glr-examples-datapoints-plot-resolve-datapoint-py"></span><h1>Frequency domain datapoint<a class="headerlink" href="#frequency-domain-datapoint" title="Link to this heading"></a></h1>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">CircularLoop</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemSystem</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemData</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemDataPoint</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">RectilinearMesh1D</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">StatArray</span>
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Distribution</span>
+
+<span class="c1"># Instantiating a frequency domain data point</span>
+<span class="c1"># +++++++++++++++++++++++++++++++++++++++++++</span>
+<span class="c1">#</span>
+<span class="c1"># To instantiate a frequency domain datapoint we need to define some</span>
+<span class="c1"># characteristics of the acquisition system.</span>
+<span class="c1">#</span>
+<span class="c1"># We need to define the frequencies in Hz of the transmitter,</span>
+<span class="c1"># and the geometery of the loops used for each frequency.</span>
+
+<span class="n">frequencies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">380.0</span><span class="p">,</span> <span class="mf">1776.0</span><span class="p">,</span> <span class="mf">3345.0</span><span class="p">,</span> <span class="mf">8171.0</span><span class="p">,</span> <span class="mf">41020.0</span><span class="p">,</span> <span class="mf">129550.0</span><span class="p">])</span>
+
+<span class="c1"># Transmitter positions are defined relative to the observation locations in the data</span>
+<span class="c1"># This is usually a constant offset for all data points.</span>
+<span class="n">transmitters</span> <span class="o">=</span> <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">],</span>
+                             <span class="n">moment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                             <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">yaw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Receiver positions are defined relative to the transmitter</span>
+<span class="n">receivers</span> <span class="o">=</span> <span class="n">CircularLoop</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">],</span>
+                             <span class="n">moment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                             <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">7.91</span><span class="p">,</span> <span class="mf">7.91</span><span class="p">,</span> <span class="mf">9.03</span><span class="p">,</span> <span class="mf">7.91</span><span class="p">,</span> <span class="mf">7.91</span><span class="p">,</span> <span class="mf">7.89</span><span class="p">],</span>
+                             <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">pitch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">yaw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span>
+                             <span class="n">radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="c1"># Now we can instantiate the system.</span>
+<span class="n">fds</span> <span class="o">=</span> <span class="n">FdemSystem</span><span class="p">(</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">transmitters</span><span class="p">,</span> <span class="n">receivers</span><span class="p">)</span>
+
+<span class="c1"># And use the system to instantiate a datapoint</span>
+<span class="c1">#</span>
+<span class="c1"># Note the extra arguments that can be used to create the data point.</span>
+<span class="c1"># data is for any observed data one might have, while std are the estimated standard</span>
+<span class="c1"># deviations of those observed data.</span>
+<span class="c1">#</span>
+<span class="c1"># Define some in-phase then quadrature data for each frequency.</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">145.3</span><span class="p">,</span> <span class="mf">435.8</span><span class="p">,</span> <span class="mf">260.6</span><span class="p">,</span> <span class="mf">875.1</span><span class="p">,</span> <span class="mf">1502.7</span><span class="p">,</span> <span class="mf">1516.9</span><span class="p">,</span>
+             <span class="mf">217.9</span><span class="p">,</span> <span class="mf">412.5</span><span class="p">,</span> <span class="mf">178.7</span><span class="p">,</span> <span class="mf">516.5</span><span class="p">,</span> <span class="mf">405.7</span><span class="p">,</span> <span class="mf">255.7</span><span class="p">]</span>
+
+<span class="n">fdp</span> <span class="o">=</span> <span class="n">FdemDataPoint</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predictedData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">system</span><span class="o">=</span><span class="n">fds</span><span class="p">,</span> <span class="n">lineNumber</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fiducial</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = fdp.plot()</span>
+
+<span class="c1"># Obtaining a datapoint from a dataset</span>
+<span class="c1"># ++++++++++++++++++++++++++++++++++++</span>
+<span class="c1">#</span>
+<span class="c1"># More often than not, our observed data is stored in a file on disk.</span>
+<span class="c1"># We can read in a dataset and pull datapoints from it.</span>
+<span class="c1">#</span>
+<span class="c1"># For more information about the frequency domain data set see :ref:`Frequency domain dataset`</span>
+
+<span class="c1"># Set some paths and file names</span>
+<span class="n">dataFolder</span> <span class="o">=</span> <span class="s2">&quot;..//..//supplementary//Data//&quot;</span>
+<span class="c1"># The data file name</span>
+<span class="n">dataFile</span> <span class="o">=</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;Resolve2.txt&#39;</span>
+<span class="c1"># The EM system file name</span>
+<span class="n">systemFile</span> <span class="o">=</span> <span class="n">dataFolder</span> <span class="o">+</span> <span class="s1">&#39;FdemSystem2.stm&#39;</span>
+</pre></div>
+</div>
+<p>Initialize and read an EM data set
+Prepare the dataset so that we can read a point at a time.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">FdemData</span><span class="o">.</span><span class="n">_initialize_sequential_reading</span><span class="p">(</span><span class="n">dataFile</span><span class="p">,</span> <span class="n">systemFile</span><span class="p">)</span>
+<span class="c1"># Get a datapoint from the file.</span>
+<span class="n">fdp</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">_read_record</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># # Initialize and read an EM data set</span>
+<span class="c1"># D = FdemData.read_csv(dataFile,systemFile)</span>
+
+<span class="c1"># # Get a data point from the dataset</span>
+<span class="c1"># fdp = D.datapoint(0)</span>
+<span class="c1"># plt.figure()</span>
+<span class="c1"># _ = fdp.plot()</span>
+
+<span class="c1"># Using a resolve datapoint</span>
+<span class="c1"># +++++++++++++++++++++++++</span>
+
+<span class="c1"># We can define a 1D layered earth model, and use it to predict some data</span>
+<span class="n">nCells</span> <span class="o">=</span> <span class="mi">19</span>
+<span class="n">par</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">nCells</span><span class="p">),</span> <span class="s2">&quot;Conductivity&quot;</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{S}{m}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">depth</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nCells</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10.0</span><span class="p">,</span> <span class="s2">&quot;Depth&quot;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
+<span class="n">depth</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+<span class="n">mod</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">mesh</span><span class="o">=</span><span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">depth</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="n">par</span><span class="p">)</span>
+
+<span class="c1"># Forward model the data</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">transpose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">plot_predicted</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+<span class="c1"># Compute the sensitivity matrix for a given model</span>
+<span class="n">J</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">J</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">equalize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Attaching statistical descriptors to the resolve datapoint</span>
+<span class="c1"># ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">Generator</span>
+<span class="kn">from</span> <span class="nn">numpy.random</span> <span class="kn">import</span> <span class="n">PCG64DXSM</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">PCG64DXSM</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">prng</span> <span class="o">=</span> <span class="n">Generator</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+
+<span class="c1"># Set values of relative and additive error for both systems.</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">relative_error</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">additive_error</span> <span class="o">=</span> <span class="mf">10.0</span>
+<span class="c1"># Define a multivariate log normal distribution as the prior on the predicted data.</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">predictedData</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvLogNormal&#39;</span><span class="p">,</span> <span class="n">fdp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">fdp</span><span class="o">.</span><span class="n">active</span><span class="p">],</span> <span class="n">fdp</span><span class="o">.</span><span class="n">std</span><span class="p">[</span><span class="n">fdp</span><span class="o">.</span><span class="n">active</span><span class="p">]</span><span class="o">**</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+
+<span class="c1"># This allows us to evaluate the likelihood of the predicted data</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fdp</span><span class="o">.</span><span class="n">likelihood</span><span class="p">(</span><span class="n">log</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="c1"># Or the misfit</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
+
+<span class="c1"># Plot the misfits for a range of half space conductivities</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">plot_halfspace_responses</span><span class="p">(</span><span class="o">-</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Halfspace responses&quot;</span><span class="p">);</span>
+
+<span class="c1"># We can perform a quick search for the best fitting half space</span>
+<span class="n">halfspace</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">find_best_halfspace</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Best half space conductivity is </span><span class="si">{}</span><span class="s1"> $S/m$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">halfspace</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">_</span> <span class="o">=</span> <span class="n">fdp</span><span class="o">.</span><span class="n">plot_predicted</span><span class="p">()</span>
+
+<span class="c1"># Compute the misfit between observed and predicted data</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
+
+<span class="c1"># We can attach priors to the height of the datapoint,</span>
+<span class="c1"># the relative error multiplier, and the additive error noise floor</span>
+
+
+<span class="c1"># Define the distributions used as priors.</span>
+<span class="n">zPrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">fdp</span><span class="o">.</span><span class="n">z</span> <span class="o">-</span> <span class="mf">2.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">fdp</span><span class="o">.</span><span class="n">z</span> <span class="o">+</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">relativePrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">additivePrior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Uniform&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">set_priors</span><span class="p">(</span><span class="n">z_prior</span><span class="o">=</span><span class="n">zPrior</span><span class="p">,</span> <span class="n">relative_error_prior</span><span class="o">=</span><span class="n">relativePrior</span><span class="p">,</span> <span class="n">additive_error_prior</span><span class="o">=</span><span class="n">additivePrior</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+
+
+<span class="c1"># In order to perturb our solvable parameters, we need to attach proposal distributions</span>
+<span class="n">z_proposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">fdp</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">variance</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">relativeProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">fdp</span><span class="o">.</span><span class="n">relative_error</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">2.5e-7</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">additiveProposal</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvLogNormal&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="n">fdp</span><span class="o">.</span><span class="n">additive_error</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">set_proposals</span><span class="p">(</span><span class="n">relativeProposal</span><span class="p">,</span> <span class="n">additiveProposal</span><span class="p">,</span> <span class="n">z_proposal</span><span class="o">=</span><span class="n">z_proposal</span><span class="p">)</span>
+
+<span class="c1"># With priors set we can auto generate the posteriors</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">set_posteriors</span><span class="p">()</span>
+
+<span class="n">nCells</span> <span class="o">=</span> <span class="mi">19</span>
+<span class="n">par</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">nCells</span><span class="p">),</span> <span class="s2">&quot;Conductivity&quot;</span><span class="p">,</span> <span class="s2">&quot;$</span><span class="se">\f</span><span class="s2">rac</span><span class="si">{S}{m}</span><span class="s2">$&quot;</span><span class="p">)</span>
+<span class="n">depth</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nCells</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">10.0</span><span class="p">,</span> <span class="s2">&quot;Depth&quot;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">)</span>
+<span class="n">depth</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+<span class="n">mod</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">mesh</span><span class="o">=</span><span class="n">RectilinearMesh1D</span><span class="p">(</span><span class="n">edges</span><span class="o">=</span><span class="n">depth</span><span class="p">),</span> <span class="n">values</span><span class="o">=</span><span class="n">par</span><span class="p">)</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
+
+<span class="c1"># Perturb the datapoint and record the perturbations</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">fdp</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
+    <span class="n">fdp</span><span class="o">.</span><span class="n">update_posteriors</span><span class="p">()</span>
+
+
+<span class="c1"># Plot the posterior distributions</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">fdp</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">overlay</span><span class="o">=</span><span class="n">fdp</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;fdp.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">fdp</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fdp&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fdp</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fdp&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;fdp.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">fdp1</span> <span class="o">=</span> <span class="n">FdemDataPoint</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;fdp&#39;</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">fdp1</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">overlay</span><span class="o">=</span><span class="n">fdp1</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;fdp.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">fdp</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fdp&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">10.0</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">fdp</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;fdp&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">FdemData</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;fdp.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">fdp1</span> <span class="o">=</span> <span class="n">FdemDataPoint</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;fdp&#39;</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">fdp2</span> <span class="o">=</span> <span class="n">FdemData</span><span class="o">.</span><span class="n">fromHdf</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;fdp&#39;</span><span class="p">])</span>
+
+<span class="n">fdp1</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">overlay</span><span class="o">=</span><span class="n">fdp1</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="c1"># %%</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_001.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_001.png" alt="Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_002.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_002.png" alt="plot resolve datapoint" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_003.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_003.png" alt="Halfspace responses" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_004.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_004.png" alt="Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_005.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_005.png" alt="Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_resolve_datapoint_006.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_006.png" alt="Frequency Domain EM Data, Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
+</ul>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-733.5454886696688
+1367.81945885548
+Best half space conductivity is [0.097701] $S/m$
+45286.828623928755
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 7.271 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-resolve-datapoint-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/521357f099bff44b6fc76f69b371108f/plot_resolve_datapoint.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_resolve_datapoint.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/950360871c2acdf8ad1b1627e54009da/plot_resolve_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_resolve_datapoint.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d879a27c2deb3b0230b4bdd74daa15f2/plot_resolve_datapoint.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_resolve_datapoint.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../Data/plot_tempest_dataset.html" class="btn btn-neutral float-left" title="Tempest dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_skytem_datapoint.html" class="btn btn-neutral float-right" title="Skytem Datapoint Class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

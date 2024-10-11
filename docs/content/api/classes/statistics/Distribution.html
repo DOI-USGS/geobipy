@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distribution Wrapper &mdash; GeoBIPy 2.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=67b02a41"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Histogram" href="Histogram.html" />
+    <link rel="prev" title="Statistics classes" href="statistics.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            GeoBIPy
+          </a>
+              <div class="version">
+                2.3.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../base/base.html">Core routines needed for GeoBIPy</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../classes.html">Classes used in GeoBIPy</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../core/core.html">Core classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../data/data.html">Data classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../mesh/mesh.html">Mesh classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../model/model.html">Model classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pointcloud/pointcloud.html">Pointcloud classes</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="statistics.html">Statistics classes</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Distribution Wrapper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Histogram.html">Histogram</a></li>
+<li class="toctree-l4"><a class="reference internal" href="baseDistribution.html">baseDistribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="NormalDistribution.html">Normal distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="MvNormalDistribution.html">MvNormal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="UniformDistribution.html">Uniform distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GammaDistribution.html">Gamma Distribution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="OrderStatistics.html">Order Statistics</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../system/system.html">System classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/index.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">GeoBIPy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="../classes.html">Classes used in GeoBIPy</a></li>
+          <li class="breadcrumb-item"><a href="statistics.html">Statistics classes</a></li>
+      <li class="breadcrumb-item active">Distribution Wrapper</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/content/api/classes/statistics/Distribution.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="distribution-wrapper">
+<h1>Distribution Wrapper<a class="headerlink" href="#distribution-wrapper" title="Link to this heading"></a></h1>
+<p id="module-geobipy.src.classes.statistics.Distribution">&#64;Distribution_Class
+Module describing statistical distributions</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.classes.statistics.Distribution.Distribution">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.statistics.Distribution.</span></span><span class="sig-name descname"><span class="pre">Distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distributionType</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.statistics.Distribution.Distribution" title="Link to this definition"></a></dt>
+<dd><p>Instantiate a statistical distribution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>distributionType</strong> (<em>str</em><em> or </em><em>subclass</em><em> of </em><a class="reference internal" href="baseDistribution.html#geobipy.src.classes.statistics.baseDistribution.baseDistribution" title="geobipy.src.classes.statistics.baseDistribution.baseDistribution"><em>baseDistribution</em></a>) – If distributionType is str, choose between {Normal, MvNormal, Uniform, Gamma, Order, Categorical}
+if distributionType is subclass of baseDistribution, a copy is made</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>out</strong> – Subclass of baseDistribution</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The distribution requested</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">geobipy</span> <span class="kn">import</span> <span class="n">Distribution</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">D</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">5.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">D</span><span class="o">.</span><span class="n">probability</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To create a Distribution using a specific pseudo random number generator</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">D</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;Normal&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="NormalDistribution.html#module-geobipy.src.classes.statistics.NormalDistribution" title="geobipy.src.classes.statistics.NormalDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.NormalDistribution</span></code></a>, <a class="reference internal" href="MvNormalDistribution.html#module-geobipy.src.classes.statistics.MvNormalDistribution" title="geobipy.src.classes.statistics.MvNormalDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.MvNormalDistribution</span></code></a>, <a class="reference internal" href="UniformDistribution.html#module-geobipy.src.classes.statistics.UniformDistribution" title="geobipy.src.classes.statistics.UniformDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.UniformDistribution</span></code></a>, <a class="reference internal" href="GammaDistribution.html#module-geobipy.src.classes.statistics.GammaDistribution" title="geobipy.src.classes.statistics.GammaDistribution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.GammaDistribution</span></code></a>, <a class="reference internal" href="OrderStatistics.html#module-geobipy.src.classes.statistics.OrderStatistics" title="geobipy.src.classes.statistics.OrderStatistics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.OrderStatistics</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">geobipy.src.classes.statistics.CategoricalDistribution</span></code></p>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="statistics.html" class="btn btn-neutral float-left" title="Statistics classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Histogram.html" class="btn btn-neutral float-right" title="Histogram" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright None.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
