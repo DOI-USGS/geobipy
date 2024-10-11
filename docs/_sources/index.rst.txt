@@ -12,12 +12,6 @@ and time domain electromagnetic data.
 The package comes with a frequency domain forward modeller, but it does not come with a time domain forward modeller.
 See the section :ref:`Installing_time_domain_forward_modeller` for more information.
 
-Using GeoBIPy on Yeti
-~~~~~~~~~~~~~~~~~~~~~
-
-There is no need to install GeoBIPy on Yeti.
-Simply type "module load python/geobipy" for the serial version of the code, mainly used for plotting results,
-or "module load python/pGeobipy" for a parallel enabled version.
 
 `Codebase is here! <https://github.com/usgs/geobipy/>`_
 
