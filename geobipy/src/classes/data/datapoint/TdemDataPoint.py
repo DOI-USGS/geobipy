@@ -1025,7 +1025,7 @@ class TdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        self._sensitivity_matrix = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
         return self.sensitivity_matrix
 
     def fm_dlogc(self, model):
@@ -1052,7 +1052,7 @@ class TdemDataPoint(EmDataPoint):
 
         #     self.predicted_primary_field[s] = hstack(primary)
 
-        self._sensitivity_matrix = DataArray(J, 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = DataArray(J, 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
 
     def _empymodForward(self, mod):
 

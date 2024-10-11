@@ -414,7 +414,7 @@ class Inference3D(myObject):
             if reciprocateParameter:
                 vals = divide(1.0, self.meanParameters)
                 vals.name = 'Resistivity'
-                vals.units = '$\\Omega m$'
+                vals.units = r'$\Omega m$'
                 return vals
             else:
                 return self.meanParameters
@@ -423,7 +423,7 @@ class Inference3D(myObject):
             if reciprocateParameter:
                 vals = 1.0 / self.meanParameters
                 vals.name = 'Resistivity'
-                vals.units = '$\\Omega m$'
+                vals.units = r'$\Omega m$'
                 return vals
             else:
                 return self.bestParameters

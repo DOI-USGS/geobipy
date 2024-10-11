@@ -89,7 +89,7 @@ class Tempest_datapoint(TdemDataPoint):
             assert size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
                                                                   "additive_error must have size {}").format(self.nChannels))
 
-        self._additive_error = StatArray(values, '$\\epsilon_{additive}$', self.units)
+        self._additive_error = StatArray(values, r'$epsilon_{additive}$', self.units)
 
     @property
     def additive_error_multiplier(self):
@@ -135,7 +135,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
-        self._relative_error = StatArray(values, '$\epsilon_{Relative}$', '%')
+        self._relative_error = StatArray(values, r'$\epsilon_{Relative}$', '%')
 
     @TdemDataPoint.std.getter
     def std(self):

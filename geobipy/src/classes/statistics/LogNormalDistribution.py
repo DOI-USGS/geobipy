@@ -106,7 +106,7 @@ class LogNormal(Normal):
 
 
         bins = self.bins()
-        t = r"$\\tilde{N}(\\mu="+str(self.mean)+", \\sigma^{2}="+str(self.variance)+")$"
+        t = r"$\tilde{N}(\mu="+str(self.mean)+r", \sigma^{2}="+str(self.variance)+")$"
 
         cP.plot(bins, self.probability(bins, log=log), label=t, **kwargs)
 

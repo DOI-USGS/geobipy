@@ -530,7 +530,7 @@ class FdemDataPoint(EmDataPoint):
     def sensitivity(self, mod, **kwargs):
         """ Compute the sensitivty matrix for the given model """
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        return DataArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        return DataArray(self._sensitivity1D(mod), 'Sensitivity', r'$\frac{ppm.m}{S}$')
 
     def fm_dlogc(self, mod):
         self.forward(mod)
@@ -549,7 +549,7 @@ class FdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
-        self._sensitivity_matrix = DataArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        self._sensitivity_matrix = DataArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', r'$\frac{ppm.m}{S}$')
 
         for j, s in enumerate(self.system):
             Jtmp = fdem1dsen(s, mod, self.z.item())
