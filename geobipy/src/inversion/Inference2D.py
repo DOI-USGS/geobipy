@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from numpy import float64, int32, s_, integer
 from numpy import arange, argmax, argsort, asarray, divide, empty, full, isnan, linspace, logspace
-from numpy import log10, minimum, mean, min,max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
+from numpy import log10, maximum, minimum, mean, min,max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
 from numpy import searchsorted, size, shape, sort, squeeze, unique, where, zeros
 from numpy import all as npall
 from numpy.random import Generator
@@ -1660,6 +1660,7 @@ class Inference2D(myObject):
 
         return percentile.pcolor(**kwargs)
 
+
     def marginal_probability(self, slic=None):
 
         assert 'probabilities' in self.hdf_file.keys(), Exception("Marginal probabilities need computing, use Inference_2D.computeMarginalProbability_X()")
@@ -2082,6 +2083,14 @@ class Inference2D(myObject):
 
         ax = fig.add_subplot(gs[3, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
         plt.title('5%')
+        # a = self.percentile(0.05)
+        # b = self.percentile(0.95)
+
+        # kwargs['vmin'] = minimum(nanmin(a.values), nanmin(b.values))
+        # kwargs['vmax'] = maximum(nanmax(a.values), nanmax(b.values))
+
+
+
         self.plot_percentile(percent=0.05, ax=ax, wrap_clabel=True, **kwargs)
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
@@ -2097,6 +2106,9 @@ class Inference2D(myObject):
         self.plot_percentile(percent=0.95, ax=ax, wrap_clabel=True, **kwargs)
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        # del kwargs['vmin']
+        # del kwargs['vmax']
 
         ################################################################################
         # Now we can start plotting some more interesting posterior properties.
