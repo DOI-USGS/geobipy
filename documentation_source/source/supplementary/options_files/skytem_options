@@ -80,6 +80,8 @@ maximum_depth = 550.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
 minimum_thickness = None
+# Number of bins in the depth posteriors.
+number_of_depth_bins = 133
 
 # Data prior details
 # ------------------
@@ -146,9 +148,8 @@ probability_of_perturb = 1.0/6.0
 # Probability of no change occuring to the layers of the model.
 probability_of_no_change = 0.5
 
-# -------------------------------------------------------
-# Typically Defaulted parameters
-# -------------------------------------------------------
+# Optional parameters
+# -------------------
 # Standard Deviation of log(rho): log(1 + factor)
 # Default is 10.0
 factor = None
@@ -167,9 +168,6 @@ ignore_likelihood = False
 # Impose bounds on the parameter value
 # None, or a length 2 list i.e. [a, b]
 parameter_limits = None
-
-# Display the resistivity?
-reciprocate_parameters = True
 
 verbose = False
 
