@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -125,8 +125,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Bar values</p></li>
-<li><p><strong>edges</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – edges of the bars</p></li>
+<li><p><strong>values</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – Bar values</p></li>
+<li><p><strong>edges</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – edges of the bars</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -206,8 +206,8 @@ Defaults to None.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa</p></li>
-<li><p><strong>y</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The ordinate, can be upto 2 dimensions.</p></li>
+<li><p><strong>x</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – The abcissa</p></li>
+<li><p><strong>y</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – The ordinate, can be upto 2 dimensions.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>
@@ -275,9 +275,9 @@ Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – A 2D array of colour values.</p></li>
-<li><p><strong>x</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Horizontal coordinates of the values edges.</p></li>
-<li><p><strong>y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</p></li>
+<li><p><strong>values</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – A 2D array of colour values.</p></li>
+<li><p><strong>x</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em><em>, </em><em>optional</em>) – Horizontal coordinates of the values edges.</p></li>
+<li><p><strong>y</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</p></li>
 <li><p><strong>alpha</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
 If array_like, each pixel is given an individual alpha value.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
@@ -325,9 +325,9 @@ Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – An array of colour values.</p></li>
-<li><p><strong>x</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Horizontal coordinates of the values edges.</p></li>
-<li><p><strong>y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</p></li>
+<li><p><strong>values</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – An array of colour values.</p></li>
+<li><p><strong>x</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em>) – Horizontal coordinates of the values edges.</p></li>
+<li><p><strong>y</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>equalize</strong> (<em>bool</em><em>, </em><em>optional</em>) – Equalize the histogram of the colourmap so that all colours have an equal amount.</p></li>
@@ -366,9 +366,9 @@ Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – A 2D array of colour values.</p></li>
-<li><p><strong>X</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Horizontal coordinates of the values edges.</p></li>
-<li><p><strong>Y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</p></li>
+<li><p><strong>values</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – A 2D array of colour values.</p></li>
+<li><p><strong>X</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em><em>, </em><em>optional</em>) – Horizontal coordinates of the values edges.</p></li>
+<li><p><strong>Y</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em><em>, </em><em>optional</em>) – Vertical coordinates of the values edges.</p></li>
 <li><p><strong>alpha</strong> (<em>scalar</em><em> or </em><em>array_like</em><em>, </em><em>optional</em>) – If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
 If array_like, each pixel is given an individual alpha value.</p></li>
 <li><p><strong>alphaColour</strong> (<em>'trans'</em><em> or </em><em>length 3 array</em>) – If ‘trans’, low alpha values are mapped to transparency
@@ -414,8 +414,8 @@ If classes is provided, alpha is ignored if provided.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa</p></li>
-<li><p><strong>y</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The ordinate, can be upto 2 dimensions.</p></li>
+<li><p><strong>x</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – The abcissa</p></li>
+<li><p><strong>y</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – The ordinate, can be upto 2 dimensions.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>
@@ -462,9 +462,9 @@ Can take any other matplotlib arguments and keyword arguments e.g. markersize et
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Horizontal locations of the points to plot</p></li>
-<li><p><strong>c</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – Colour values of the points</p></li>
-<li><p><strong>y</strong> (<em>1D array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>optional</em>) – Vertical locations of the points to plot, if y = None, then y = c.</p></li>
+<li><p><strong>x</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em>) – Horizontal locations of the points to plot</p></li>
+<li><p><strong>c</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em>) – Colour values of the points</p></li>
+<li><p><strong>y</strong> (<em>1D array_like</em><em> or </em><em>StatArray</em><em>, </em><em>optional</em>) – Vertical locations of the points to plot, if y = None, then y = c.</p></li>
 <li><p><strong>i</strong> (<em>sequence</em><em> of </em><em>ints</em><em> or </em><em>numpy.slice</em><em>, </em><em>optional</em>) – Plot a geobipy_kwargs of x, y, c, using the indices in i.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to base ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</p></li>
@@ -514,7 +514,7 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The array that was used as the size (s=) in a scatter function.</p></li>
+<li><p><strong>values</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – The array that was used as the size (s=) in a scatter function.</p></li>
 <li><p><strong>intervals</strong> (<em>array_like</em><em>, </em><em>optional</em>) – The legend will have items at each value in intervals.</p></li>
 <li><p><strong>**kwargs</strong> (<em>dict</em>) – kwargs are applied to plt.legend.</p></li>
 </ul>
@@ -529,8 +529,8 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa.</p></li>
-<li><p><strong>y</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a><em>, </em><em>2D</em>) – The cumulative sum along the columns is taken and stacked on top of each other.</p></li>
+<li><p><strong>x</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – The abcissa.</p></li>
+<li><p><strong>y</strong> (<em>array_like</em><em> or </em><em>StatArray</em><em>, </em><em>2D</em>) – The cumulative sum along the columns is taken and stacked on top of each other.</p></li>
 <li><p><strong>labels</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – The labels to assign to each column.</p></li>
 <li><p><strong>colors</strong> (<em>matplotlib.colors.LinearSegmentedColormap</em><em> or </em><em>list</em><em> of </em><em>colours</em>) – The colour used for each column.</p></li>
 <li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>
@@ -580,8 +580,8 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The abcissa</p></li>
-<li><p><strong>y</strong> (<em>array_like</em><em> or </em><a class="reference internal" href="../classes/core/StatArray.html#geobipy.src.classes.core.StatArray.StatArray" title="geobipy.src.classes.core.StatArray.StatArray"><em>StatArray</em></a>) – The ordinate, can be upto 2 dimensions.</p></li>
+<li><p><strong>x</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – The abcissa</p></li>
+<li><p><strong>y</strong> (<em>array_like</em><em> or </em><em>StatArray</em>) – The ordinate, can be upto 2 dimensions.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Take the log of the colour to a base. ‘e’ if log = ‘e’, and a number e.g. log = 10.
 Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>xscale</strong> (<em>str</em><em>, </em><em>optional</em>) – Scale the x axis? e.g. xscale = ‘linear’ or ‘log’.</p></li>

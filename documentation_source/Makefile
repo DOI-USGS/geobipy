@@ -32,6 +32,8 @@ clean:
 	find ./source/examples -name "sg_execution_times.rst" -type f -delete
 	find ./source/examples -name "*.png" -type f -delete
 	find ./source/examples -name "*.mp4" -type f -delete
+	find ./source/examples -name "*.zip" -type f -delete
+	find ./source/examples -name "*.codeobj.json" -type f -delete
 
 
 cleanGallery:

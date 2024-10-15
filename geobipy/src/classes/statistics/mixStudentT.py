@@ -1,6 +1,6 @@
 
 import numpy as np
-from ...classes.core import StatArray
+from ..core.DataArray import DataArray
 from scipy.stats import t
 from scipy.special import gamma
 import matplotlib.pyplot as plt
@@ -24,7 +24,7 @@ class mixStudentT(Mixture):
 
     @property
     def amplitudes(self):
-        return StatArray.StatArray(self._params[0::self.n_solvable_parameters], "Amplitude")
+        return DataArray(self._params[0::self.n_solvable_parameters], "Amplitude")
 
     @amplitudes.setter
     def amplitudes(self, values):
@@ -46,7 +46,7 @@ class mixStudentT(Mixture):
 
     @property
     def means(self):
-        return StatArray.StatArray(self._params[1::self.n_solvable_parameters], "means")
+        return DataArray(self._params[1::self.n_solvable_parameters], "means")
 
     @means.setter
     def means(self, values):
@@ -59,7 +59,7 @@ class mixStudentT(Mixture):
 
     @property
     def sigmas(self):
-        return StatArray.StatArray(self._params[2::self.n_solvable_parameters], "standard deviation")
+        return DataArray(self._params[2::self.n_solvable_parameters], "standard deviation")
 
     @sigmas.setter
     def sigmas(self, values):
@@ -68,11 +68,11 @@ class mixStudentT(Mixture):
 
     @property
     def variances(self):
-        return StatArray.StatArray(self.sigmas**2.0, "variance")
+        return DataArray(self.sigmas**2.0, "variance")
 
     # @property
     # def degrees(self):
-    #     return StatArray.StatArray(self._params[3::self.n_solvable_parameters], "degrees of freedom")
+    #     return DataArray(self._params[3::self.n_solvable_parameters], "degrees of freedom")
 
     # @degrees.setter
     # def degrees(self, values):
@@ -116,7 +116,7 @@ class mixStudentT(Mixture):
     def probability(self, x, log, component=None):
 
         if component is None:
-            out = StatArray.StatArray(np.empty([np.size(x), self.n_components]), "Probability Density")
+            out = DataArray(np.empty([np.size(x), self.n_components]), "Probability Density")
             for i in range(self.n_components):
                 out[:, i] = self.amplitudes[i] * self._probability(x, log, self.means[i], self.sigmas[i])
             return out
@@ -131,9 +131,9 @@ class mixStudentT(Mixture):
         p = (gamma(tmp) / (np.sqrt(sigma * np.pi) * gamma(0.5 * sigma))) * (1.0 + ((x - mean)**2.0/sigma))**-tmp
 
         if log:
-            return StatArray.StatArray(np.log(p), "Probability Density")
+            return DataArray(np.log(p), "Probability Density")
         else:
-            return StatArray.StatArray(p, "Probability Density")
+            return DataArray(p, "Probability Density")
 
 
     def sum(self, x):

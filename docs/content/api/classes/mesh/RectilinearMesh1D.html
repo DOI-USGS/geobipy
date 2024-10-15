@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -107,27 +107,35 @@
              
   <section id="rectilinearmesh1d">
 <h1>RectilinearMesh1D<a class="headerlink" href="#rectilinearmesh1d" title="Link to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-fbcbab5f4f1af2527248286e74b8ace6d4173b15.png" alt="Inheritance diagram of geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" usemap="#inheritancef15b3b6232" class="inheritance graphviz" /></div>
-<map id="inheritancef15b3b6232" name="inheritancef15b3b6232">
-<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
-<area shape="rect" id="node4" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" target="_top" title="Class defining a 1D rectilinear mesh with cell centres and edges." alt="" coords="371,5,503,32"/>
-</map><p id="module-geobipy.src.classes.mesh.RectilinearMesh1D">&#64;RectilinearMesh1D_Class
+digraph inheritancef15b3b6232 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Mesh&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Abstract Base Class&quot;];
+  &quot;myObject&quot; -&gt; &quot;Mesh&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;RectilinearMesh1D&quot; [URL=&quot;#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a 1D rectilinear mesh with cell centres and edges.&quot;];
+  &quot;Mesh&quot; -&gt; &quot;RectilinearMesh1D&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<p id="module-geobipy.src.classes.mesh.RectilinearMesh1D">&#64;RectilinearMesh1D_Class
 Module describing a 1D Rectilinear Mesh class</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh1D.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relativeTo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.mesh.RectilinearMesh1D.</span></span><span class="sig-name descname"><span class="pre">RectilinearMesh1D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centres</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative_to</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D" title="Link to this definition"></a></dt>
 <dd><p>Class defining a 1D rectilinear mesh with cell centres and edges.</p>
 <p>Contains a simple 1D mesh with cell edges, widths, and centre locations.</p>
 <p>RectilinearMesh1D(centres, edges, edgesMin, edgesMax)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>centres</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the centre of each cell. Only centres, edges, or widths can be given.</p></li>
-<li><p><strong>edges</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges. Only centres, edges, or widths can be given.</p></li>
-<li><p><strong>widths</strong> (<em>geobipy.StatArray</em><em>, </em><em>optional</em>) – The widths of the cells.</p></li>
+<li><p><strong>centres</strong> (<em>geobipy.DataArray</em><em>, </em><em>optional</em>) – The locations of the centre of each cell. Only centres, edges, or widths can be given.</p></li>
+<li><p><strong>edges</strong> (<em>geobipy.DataArray</em><em>, </em><em>optional</em>) – The locations of the edges of each cell, including the outermost edges. Only centres, edges, or widths can be given.</p></li>
+<li><p><strong>widths</strong> (<em>geobipy.DataArray</em><em>, </em><em>optional</em>) – The widths of the cells.</p></li>
 <li><p><strong>log</strong> (<em>'e'</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – Entries are given in linear space, but internally cells are logged.
 Plotting is in log space.</p></li>
-<li><p><strong>relativeTo</strong> (<em>float</em><em>, </em><em>optional</em>) – If a float is given, updates will be relative to this value.</p></li>
+<li><p><strong>relative_to</strong> (<em>float</em><em>, </em><em>optional</em>) – If a float is given, updates will be relative to this value.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -139,8 +147,8 @@ Plotting is in log space.</p></li>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>Exception</strong> – If both centres and edges are given.</p></li>
-<li><p><strong>TypeError</strong> – centres must be a geobipy.StatArray.</p></li>
-<li><p><strong>TypeError</strong> – edges must be a geobipy.StatArray.</p></li>
+<li><p><strong>TypeError</strong> – centres must be a geobipy.DataArray.</p></li>
+<li><p><strong>TypeError</strong> – edges must be a geobipy.DataArray.</p></li>
 </ul>
 </dd>
 </dl>
@@ -418,8 +426,8 @@ If 2D, axis must be given to specify which axis to interpolate against.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plotGrid">
-<span class="sig-name descname"><span class="pre">plotGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plotGrid" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plot_grid">
+<span class="sig-name descname"><span class="pre">plot_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.mesh.RectilinearMesh1D.RectilinearMesh1D.plot_grid" title="Link to this definition"></a></dt>
 <dd><p>Plot the grid lines of the mesh.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>

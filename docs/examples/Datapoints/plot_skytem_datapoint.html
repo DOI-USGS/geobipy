@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -156,6 +156,16 @@ Prepare the dataset so that we can read a point at a time.</p>
 <span class="n">Dataset</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
 </div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>self.n_components=1, self.nTimes=array([26, 19])
+self.n_components=1, self.nTimes=array([26, 19])
+self.n_components=1, self.nTimes=array([26, 19])
+self.n_components=1, self.nTimes=array([26, 19])
+self.n_components=1, self.nTimes=array([26, 19])
+self.n_components=1, self.nTimes=array([26, 19])
+self.n_components=1, self.nTimes=array([26, 19])
+self.n_components=1, self.nTimes=array([26, 19])
+</pre></div>
+</div>
 <section id="using-a-time-domain-datapoint">
 <h2>Using a time domain datapoint<a class="headerlink" href="#using-a-time-domain-datapoint" title="Link to this heading"></a></h2>
 <p>We can define a 1D layered earth model, and use it to predict some data</p>
@@ -176,7 +186,7 @@ Prepare the dataset so that we can read a point at a time.</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_skytem_datapoint_001.png" srcset="../../_images/sphx_glr_plot_skytem_datapoint_001.png" alt="Time Domain EM Data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:362: RuntimeWarning: divide by zero encountered in log
+<img src="../../_images/sphx_glr_plot_skytem_datapoint_001.png" srcset="../../_images/sphx_glr_plot_skytem_datapoint_001.png" alt="Time Domain EM Data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:363: RuntimeWarning: divide by zero encountered in log
   additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
 </pre></div>
 </div>
@@ -205,8 +215,10 @@ Prepare the dataset so that we can read a point at a time.</p>
 <span class="c1"># Set values of relative and additive error for both systems.</span>
 <span class="n">tdp</span><span class="o">.</span><span class="n">relative_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">]</span>
 <span class="n">tdp</span><span class="o">.</span><span class="n">additive_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mf">1e-14</span><span class="p">,</span> <span class="mf">1e-13</span><span class="p">]</span>
-<span class="c1"># Define a multivariate log normal distribution as the prior on the predicted data.</span>
-<span class="n">tdp</span><span class="o">.</span><span class="n">predictedData</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvLogNormal&#39;</span><span class="p">,</span> <span class="n">tdp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">tdp</span><span class="o">.</span><span class="n">active</span><span class="p">],</span> <span class="n">tdp</span><span class="o">.</span><span class="n">std</span><span class="p">[</span><span class="n">tdp</span><span class="o">.</span><span class="n">active</span><span class="p">]</span><span class="o">**</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+<span class="c1"># Define a multivariate normal distribution as the prior on the predicted data.</span>
+<span class="n">data_prior</span> <span class="o">=</span> <span class="n">Distribution</span><span class="p">(</span><span class="s1">&#39;MvNormal&#39;</span><span class="p">,</span> <span class="n">tdp</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">tdp</span><span class="o">.</span><span class="n">active</span><span class="p">],</span> <span class="n">tdp</span><span class="o">.</span><span class="n">std</span><span class="p">[</span><span class="n">tdp</span><span class="o">.</span><span class="n">active</span><span class="p">]</span><span class="o">**</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
+
+<span class="n">tdp</span><span class="o">.</span><span class="n">set_priors</span><span class="p">(</span><span class="n">data_prior</span><span class="o">=</span><span class="n">data_prior</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This allows us to evaluate the likelihood of the predicted data</p>
@@ -215,8 +227,8 @@ Prepare the dataset so that we can read a point at a time.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-320327.7331520334
-643134.8665683013
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-320327.7331520335
+643134.8665683016
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
@@ -244,7 +256,7 @@ Prepare the dataset so that we can read a point at a time.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>19656.31514467768
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>19656.315144677585
 </pre></div>
 </div>
 <p>We can attach priors to the height of the datapoint,
@@ -256,7 +268,7 @@ the relative error multiplier, and the additive error noise floor</p>
 <span class="n">tdp</span><span class="o">.</span><span class="n">set_priors</span><span class="p">(</span><span class="n">relative_error_prior</span><span class="o">=</span><span class="n">relativePrior</span><span class="p">,</span> <span class="n">additive_error_prior</span><span class="o">=</span><span class="n">additivePrior</span><span class="p">,</span> <span class="n">z_prior</span><span class="o">=</span><span class="n">z_prior</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:132: DeprecationWarning: Conversion of an array with ndim &gt; 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:135: DeprecationWarning: Conversion of an array with ndim &gt; 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
   z_prior = Distribution(&#39;Uniform&#39;, min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
 </pre></div>
 </div>
@@ -279,7 +291,8 @@ Note we are not using the priors to accept or reject perturbations.</p>
 </pre></div>
 </div>
 <p>Plot the posterior distributions</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">tdp</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">overlay</span><span class="o">=</span><span class="n">tdp</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">overlay</span><span class="o">=</span><span class="n">tdp</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -343,13 +356,16 @@ are the start and end times, and start and end amplitudes of the waveform. e.g.
 Measurement Time, Data Value, Estimated Standard Deviation</p>
 <p>Example data files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.960 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.415 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-skytem-datapoint-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e25fee0ca5adf0a7a06121d46c4bf8c5/plot_skytem_datapoint.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_skytem_datapoint.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/2dd62cc642303de6b0d2af1a789eccaa/plot_skytem_datapoint.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_skytem_datapoint.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/82b91681ed5787c4d84b792aeddadc44/plot_skytem_datapoint.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_skytem_datapoint.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

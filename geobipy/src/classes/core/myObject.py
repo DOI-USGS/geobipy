@@ -44,7 +44,7 @@ class myObject(ABC):
     def hdf_name(self):
         return type(self).__name__
 
-    def create_hdf_group(self, h5obj, name, hdf_name=None):
+    def create_hdf_group(self, h5obj, name, hdf_name=None, **kwargs):
         grp = h5obj.create_group(name)
         if hdf_name is None:
             hdf_name = self.hdf_name

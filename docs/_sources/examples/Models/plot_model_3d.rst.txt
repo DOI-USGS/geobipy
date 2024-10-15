@@ -120,7 +120,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x164fe9430>, <matplotlib.colorbar.Colorbar object at 0x164bc0ec0>)
+    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x140fcaea0>, <matplotlib.colorbar.Colorbar object at 0x140ffa210>)
 
 
 
@@ -203,7 +203,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x165332ae0>, <matplotlib.colorbar.Colorbar object at 0x16522cf80>)
+    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x15741b740>, <matplotlib.colorbar.Colorbar object at 0x157464a70>)
 
 
 
@@ -266,7 +266,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x171e6ec90>, <matplotlib.colorbar.Colorbar object at 0x164bff7d0>)
+    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x1593edc40>, <matplotlib.colorbar.Colorbar object at 0x15941b050>)
 
 
 
@@ -331,7 +331,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x17203b1d0>, <matplotlib.colorbar.Colorbar object at 0x17209e450>)
+    (<Axes: xlabel='y_re (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x1594800e0>, <matplotlib.colorbar.Colorbar object at 0x1594b0140>)
 
 
 
@@ -381,7 +381,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.140 seconds)
+   **Total running time of the script:** (0 minutes 2.234 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_3d.py:
@@ -397,6 +397,10 @@ We can plot the mesh in 3D!
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_model_3d.py <plot_model_3d.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_model_3d.zip <plot_model_3d.zip>`
 
 
 .. only:: html

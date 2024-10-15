@@ -14,7 +14,8 @@ from ...base.utilities import debug_print as dprint
 from ...base import plotting
 from ..core.myObject import myObject
 from ...base.HDF import hdfRead
-from ..core import StatArray
+from ..core.DataArray import DataArray
+from ..statistics.StatArray import StatArray
 from ..mesh.Mesh import Mesh
 from ..statistics.Distribution import Distribution
 from ..statistics.baseDistribution import baseDistribution
@@ -71,32 +72,20 @@ class Model(myObject):
 
     @property
     def gradient(self):
-        """Compute the gradient
+        r"""Compute the gradient
 
-        Parameter gradient :math:"\\nabla_{z}\\sigma" at the ith layer is computed via
+        Parameter gradient :math:"\nabla_{z}\sigma" at the ith layer is computed via
 
         """
         # if self._gradient is None:
-        #     self._gradient = StatArray.StatArray(self.mesh.nCells.item()-1, 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
+        #     self._gradient = DataArray(self.mesh.nCells.item()-1, 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
 
-        gradient = StatArray.StatArray(self.mesh.gradient(values=self.values), 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
+        gradient = StatArray(self.mesh.gradient(values=self.values), 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
         if self._gradient is not None:
             gradient.copyStats(self._gradient)
 
         self._gradient = gradient
         return self._gradient
-
-    # @gradient.setter
-    # def gradient(self, values):
-    #     if values is None:
-    #
-    #         return
-
-    #     self._gradient = StatArray.StatArray(values)
-
-    # @property
-    # def inverse_hessian(self):
-    #     return self._inverse_hessian
 
     @property
     def mesh(self):
@@ -142,11 +131,11 @@ class Model(myObject):
     @values.setter
     def values(self, values):
         if values is None:
-            self._values = StatArray.StatArray(self.shape)
+            self._values = StatArray(self.shape)
             return
 
         # assert all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
-        self._values = StatArray.StatArray(values)
+        self._values = StatArray(values)
 
     @property
     def x(self):
@@ -409,7 +398,7 @@ class Model(myObject):
         # dfk = (J'Wd'(f(remapped) - dObserved) + Wm'Wm(sigma - sigma_ref))
         dfk = remapped_model.local_gradient(observation=observation)
 
-        pk = -dot(H, dfk)
+        pk = -0.5 * dot(H, dfk)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
@@ -465,8 +454,8 @@ class Model(myObject):
         ### DO NOT CHANGE THIS TO PCOLOR
         return self.mesh.plot(values=self.values, **kwargs)
 
-    def plotGrid(self, **kwargs):
-        return self.mesh.plotGrid(**kwargs)
+    def plot_grid(self, **kwargs):
+        return self.mesh.plot_grid(**kwargs)
 
     def _init_posterior_plots(self, gs, sharex=None, sharey=None):
         """Initialize axes for posterior plots
@@ -586,21 +575,21 @@ class Model(myObject):
         return probability
 
     def proposal_probabilities(self, remapped_model, observation=None, structure_only=False, alpha=1.0):
-        """Return the forward and reverse proposal probabilities for the model
+        r"""Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
 
         .. math::
             :label: proposal numerator
 
-            q(k, \\boldsymbol{z} | \\boldsymbol{m}^{'})
+            q(k, \boldsymbol{z} | \boldsymbol{m}^{'})
 
         and
 
         .. math::
             :label: proposal denominator
 
-            q(k^{'}, \\boldsymbol{z}^{'} | \\boldsymbol{m})
+            q(k^{'}, \boldsymbol{z}^{'} | \boldsymbol{m})
 
         Each component is dependent on the event that was chosen during perturbation.
 
@@ -683,11 +672,12 @@ class Model(myObject):
 
         if values_posterior is None:
             relative_to = self.values.prior.mean[0]
-            bins = StatArray.StatArray(self.values.prior.bins(nBins=250, nStd=4.0, axis=0), self.values.name, self.values.units)
+            bins = DataArray(self.values.prior.bins(nBins=250, nStd=4.0, axis=0), self.values.name, self.values.units)
 
             x_log = None
             if 'log' in type(self.values.prior).__name__.lower():
                 x_log = 10
+
             mesh = RectilinearMesh2D(x_edges=bins, y_edges=self.mesh.edges.posterior.mesh.edges, x_relative_to=relative_to, x_log=x_log)
 
             # Set the posterior hitmap for conductivity vs depth
@@ -856,8 +846,8 @@ class Model(myObject):
 
         histogram.counts[i0, i1] += 1
 
-    def resample(self, dx, dy):
-        mesh, values = self.mesh.resample(dx, dy, self.values, kind='cubic')
+    def resample(self, dx, dy, method='cubic'):
+        mesh, values = self.mesh.resample(dx, dy, self.values, method=method)
         return type(self)(mesh, values)
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None, upcast=True):
@@ -871,6 +861,17 @@ class Model(myObject):
     def writeHdf(self, parent, name, withPosterior=True, index=None):
         self.mesh.writeHdf(parent, name+'/mesh', withPosterior=withPosterior, index=index)
         self.values.writeHdf(parent, name+'/values',  withPosterior=withPosterior, index=index)
+
+    @classmethod
+    def from_tif(cls, rio_dataset, **kwargs):
+
+        if 'comm' in kwargs:
+            print("DO STUFF IN PARALLEL")
+        else:
+            mesh = Mesh(x_centres = rio_dataset.x.values,
+                        y_centres = rio_dataset.y.values)
+            return cls(mesh, values=np.squeeze(rio_dataset.values))
+
 
     @classmethod
     def fromHdf(cls, grp, index=None, skip_posterior=False):
@@ -906,9 +907,9 @@ class Model(myObject):
                         'ice_over_salt_water' : np.r_[1e-4, 1e-2, 1] # Antarctica glacier ice over salt water
         }
 
-        conductivity = StatArray.StatArray(conductivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
+        conductivity = DataArray(conductivities[model_type], name="Conductivity", units=r'$\frac{S}{m}$')
 
-        x = RectilinearMesh1D(centres=StatArray.StatArray(np.arange(n_points, dtype=np.float64), name='x'))
+        x = RectilinearMesh1D(centres=DataArray(np.arange(n_points, dtype=np.float64), name='x'))
         mesh = RectilinearMesh2D_stitched(3, x=x)
         mesh.nCells[:] = 3
         mesh.y_edges[:, 1] = -zwedge

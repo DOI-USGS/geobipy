@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -192,47 +192,76 @@ to download the full example code.</p>
 <span class="n">inference3d</span><span class="o">.</span><span class="n">infer</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
-<ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_plot_inference_1d_resolve_001.png" srcset="../../_images/sphx_glr_plot_inference_1d_resolve_001.png" alt="plot inference 1d resolve" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_inference_1d_resolve_002.png" srcset="../../_images/sphx_glr_plot_inference_1d_resolve_002.png" alt="Fiducial [30], Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
-</ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Using user input file ..//..//supplementary////options_files//Resolve_options
+<img src="../../_images/sphx_glr_plot_inference_1d_resolve_001.png" srcset="../../_images/sphx_glr_plot_inference_1d_resolve_001.png" alt="Fiducial [30], Frequency Domain EM Data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Using user input file ..//..//supplementary////options_files//Resolve_options
 Output files will be produced at Resolve/glacial
 Creating HDF5 files, this may take a few minutes...
 Files are being created for data files ..//..//supplementary////data//Resolve_glacial.csv and system files ..//..//supplementary////data//..//data/FdemSystem2.stm
+RectilinearMesh1D
+Number of Cells:
+|   StatArray
+|   Name:   Number of cells
+|   Address:[&#39;0x13f2ddfd0&#39; &#39;0x14dd80fe0&#39; &#39;0x14c433990&#39; &#39;0x14c4324f0&#39;]
+|   Shape:  (1,)
+|   Values: [30]
+|   Min:    30
+|   Max:    30
+|   Prior:
+|   |   Uniform Distribution:
+|   |   Min: 1
+|   |   Max: 30
+|   has_posterior: True
+
+Cell Centres:
+|   StatArray
+|   Name:   Depth (m)
+|   Address:[&#39;0x14c277ad0&#39;]
+|   Shape:  (30,)
+|   Values: [0. 0. 0. ... 0. 0. 0.]
+|   Min:    0.0
+|   Max:    0.0
+|   has_posterior: False
+
+Cell Edges:
+|   StatArray
+|   Name:   Depth (m)
+|   Address:[&#39;0x14c274350&#39;]
+|   Shape:  (31,)
+|   Values: [0. 0. 0. ... 0. 0. 0.]
+|   Min:    0.0
+|   Max:    0.0
+|   has_posterior: True
+
+log:
+|   None
+relative_to:
+|   StatArray
+|   Name:
+|   Address:[&#39;0x13f2dced0&#39;]
+|   Shape:  (1,)
+|   Values: [0.]
+|   Min:    0.0
+|   Max:    0.0
+|   has_posterior: False
+
+
 Created hdf5 file for line 0.0 with 79 data points
 Created hdf5 files 79 total data points
-Created hdf5 files in 0:00:00.099843 h:m:s
-i=500, k=1, acc=*57.000, 0.005 s/Model, 2.320 s Elapsed, eta=--:--:-- h:m:s
+Created hdf5 files in 0:00:06.184965 h:m:s
+i=5000, k=1, acc=*49.200, 0.006 s/Model, 30.223 s Elapsed, eta=--:--:-- h:m:s
 
-i=1000, k=3, acc=*46.400, 0.006 s/Model, 5.429 s Elapsed, eta=--:--:-- h:m:s
-
-i=1500, k=2, acc=*57.200, 0.006 s/Model, 8.442 s Elapsed, eta=--:--:-- h:m:s
-
-i=2000, k=3, acc=*21.400, 0.007 s/Model, 11.734 s Elapsed, eta=--:--:-- h:m:s
-
-i=2500, k=2, acc=*13.200, 0.008 s/Model, 15.529 s Elapsed, eta=--:--:-- h:m:s
-
-i=3000, k=3, acc=*13.600, 0.008 s/Model, 19.454 s Elapsed, eta=--:--:-- h:m:s
-
-i=3500, k=2, acc=*12.800, 0.008 s/Model, 23.455 s Elapsed, eta=--:--:-- h:m:s
-
-i=4000, k=4, acc=*13.600, 0.007 s/Model, 26.993 s Elapsed, eta=--:--:-- h:m:s
-
-i=4500, k=3, acc=*11.800, 0.008 s/Model, 30.783 s Elapsed, eta=--:--:-- h:m:s
-
-i=5000, k=3, acc=*10.600, 0.008 s/Model, 34.653 s Elapsed, eta=--:--:-- h:m:s
-
-Remaining Points -30/1 || Elapsed Time: 0:00:35.770894 h:m:s || ETA 0:00:01.153900 h:m:s
+Remaining Points -30/1 || Elapsed Time: 0:00:31.353168 h:m:s || ETA 0:00:01.011393 h:m:s
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 36.274 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 37.843 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-inference-1d-plot-inference-1d-resolve-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/0a7e593d4f3c0d61cfffc73460926f3c/plot_inference_1d_resolve.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_inference_1d_resolve.ipynb</span></code></a></p>
 </div>
 <div class="sphx-glr-download sphx-glr-download-python docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/09f048ba9debdfb740a9a828a370954b/plot_inference_1d_resolve.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_inference_1d_resolve.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/427deb048b69f9c7dc66abcfe303e6d9/plot_inference_1d_resolve.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">plot_inference_1d_resolve.zip</span></code></a></p>
 </div>
 </div>
 <p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>

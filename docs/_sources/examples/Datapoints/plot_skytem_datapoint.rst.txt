@@ -91,6 +91,19 @@ Prepare the dataset so that we can read a point at a time.
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+
 
 
 
@@ -159,7 +172,7 @@ Forward model the data
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:362: RuntimeWarning: divide by zero encountered in log
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:363: RuntimeWarning: divide by zero encountered in log
       additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
 
 
@@ -220,7 +233,7 @@ Compute the sensitivity matrix for a given model
 Attaching statistical descriptors to the skytem datapoint
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 91-102
+.. GENERATED FROM PYTHON SOURCE LINES 91-105
 
 .. code-block:: Python
 
@@ -232,8 +245,10 @@ Attaching statistical descriptors to the skytem datapoint
     # Set values of relative and additive error for both systems.
     tdp.relative_error = np.r_[0.05, 0.05]
     tdp.additive_error = np.r_[1e-14, 1e-13]
-    # Define a multivariate log normal distribution as the prior on the predicted data.
-    tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
+    # Define a multivariate normal distribution as the prior on the predicted data.
+    data_prior = Distribution('MvNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
+
+    tdp.set_priors(data_prior=data_prior)
 
 
 
@@ -242,11 +257,12 @@ Attaching statistical descriptors to the skytem datapoint
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-104
+
+.. GENERATED FROM PYTHON SOURCE LINES 106-107
 
 This allows us to evaluate the likelihood of the predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-108
+.. GENERATED FROM PYTHON SOURCE LINES 107-111
 
 .. code-block:: Python
 
@@ -262,17 +278,17 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -320327.7331520334
-    643134.8665683013
+    -320327.7331520335
+    643134.8665683016
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 109-110
+.. GENERATED FROM PYTHON SOURCE LINES 112-113
 
 Plot the misfits for a range of half space conductivities
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-114
+.. GENERATED FROM PYTHON SOURCE LINES 113-117
 
 .. code-block:: Python
 
@@ -298,11 +314,11 @@ Plot the misfits for a range of half space conductivities
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 115-116
+.. GENERATED FROM PYTHON SOURCE LINES 118-119
 
 We can perform a quick search for the best fitting half space
 
-.. GENERATED FROM PYTHON SOURCE LINES 116-123
+.. GENERATED FROM PYTHON SOURCE LINES 119-126
 
 .. code-block:: Python
 
@@ -331,11 +347,11 @@ We can perform a quick search for the best fitting half space
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-125
+.. GENERATED FROM PYTHON SOURCE LINES 127-128
 
 Compute the misfit between observed and predicted data
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-127
+.. GENERATED FROM PYTHON SOURCE LINES 128-130
 
 .. code-block:: Python
 
@@ -349,17 +365,17 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    19656.31514467768
+    19656.315144677585
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 128-130
+.. GENERATED FROM PYTHON SOURCE LINES 131-133
 
 We can attach priors to the height of the datapoint,
 the relative error multiplier, and the additive error noise floor
 
-.. GENERATED FROM PYTHON SOURCE LINES 130-137
+.. GENERATED FROM PYTHON SOURCE LINES 133-140
 
 .. code-block:: Python
 
@@ -378,17 +394,17 @@ the relative error multiplier, and the additive error noise floor
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:132: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:135: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
       z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
 
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 138-139
+.. GENERATED FROM PYTHON SOURCE LINES 141-142
 
 In order to perturb our solvable parameters, we need to attach proposal distributions
 
-.. GENERATED FROM PYTHON SOURCE LINES 139-144
+.. GENERATED FROM PYTHON SOURCE LINES 142-147
 
 .. code-block:: Python
 
@@ -404,11 +420,11 @@ In order to perturb our solvable parameters, we need to attach proposal distribu
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 145-146
+.. GENERATED FROM PYTHON SOURCE LINES 148-149
 
 With priorss set we can auto generate the posteriors
 
-.. GENERATED FROM PYTHON SOURCE LINES 146-148
+.. GENERATED FROM PYTHON SOURCE LINES 149-151
 
 .. code-block:: Python
 
@@ -421,12 +437,12 @@ With priorss set we can auto generate the posteriors
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 149-151
+.. GENERATED FROM PYTHON SOURCE LINES 152-154
 
 Perturb the datapoint and record the perturbations
 Note we are not using the priors to accept or reject perturbations.
 
-.. GENERATED FROM PYTHON SOURCE LINES 151-156
+.. GENERATED FROM PYTHON SOURCE LINES 154-159
 
 .. code-block:: Python
 
@@ -442,14 +458,15 @@ Note we are not using the priors to accept or reject perturbations.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 157-158
+.. GENERATED FROM PYTHON SOURCE LINES 160-161
 
 Plot the posterior distributions
 
-.. GENERATED FROM PYTHON SOURCE LINES 158-162
+.. GENERATED FROM PYTHON SOURCE LINES 161-166
 
 .. code-block:: Python
 
+    plt.figure()
     tdp.plot_posteriors(overlay=tdp)
 
     plt.show()
@@ -466,7 +483,7 @@ Plot the posterior distributions
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 163-240
+.. GENERATED FROM PYTHON SOURCE LINES 167-244
 
 File Format for a time domain datapoint
 +++++++++++++++++++++++++++++++++++++++
@@ -550,7 +567,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.960 seconds)
+   **Total running time of the script:** (0 minutes 4.415 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_skytem_datapoint.py:
@@ -566,6 +583,10 @@ Example data files are contained in
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_skytem_datapoint.py <plot_skytem_datapoint.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_skytem_datapoint.zip <plot_skytem_datapoint.zip>`
 
 
 .. only:: html

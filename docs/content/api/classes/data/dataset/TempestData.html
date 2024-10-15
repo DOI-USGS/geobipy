@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -105,14 +105,23 @@
              
   <section id="tempestdata">
 <h1>TempestData<a class="headerlink" href="#tempestdata" title="Link to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../../_images/inheritance-286563f696f03256a99b8a899d9f39d17a4154ed.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.TempestData" usemap="#inheritance92a4e4a9a8" class="inheritance graphviz" /></div>
-<map id="inheritance92a4e4a9a8" name="inheritance92a4e4a9a8">
-<area shape="rect" id="node4" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
-<area shape="rect" id="node2" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="371,5,443,32"/>
-<area shape="rect" id="node5" href="TdemData.html#geobipy.src.classes.data.dataset.TdemData.TdemData" target="_top" title="Time domain electro magnetic data set" alt="" coords="491,5,573,32"/>
-<area shape="rect" id="node3" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="251,5,323,32"/>
-<area shape="rect" id="node6" href="#geobipy.src.classes.data.dataset.TempestData.TempestData" target="_top" title="Time domain electro magnetic data set" alt="" coords="621,5,720,32"/>
-</map><dl class="py class" id="module-geobipy.src.classes.data.dataset.TempestData">
+digraph inheritance92a4e4a9a8 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Data&quot; [URL=&quot;Data.html#geobipy.src.classes.data.dataset.Data.Data&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a set of Data.&quot;];
+  &quot;Point&quot; -&gt; &quot;Data&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Point&quot; [URL=&quot;../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;3D Point Cloud with x,y,z co-ordinates&quot;];
+  &quot;myObject&quot; -&gt; &quot;Point&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;TdemData&quot; [URL=&quot;TdemData.html#geobipy.src.classes.data.dataset.TdemData.TdemData&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Time domain electro magnetic data set&quot;];
+  &quot;Data&quot; -&gt; &quot;TdemData&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;TempestData&quot; [URL=&quot;#geobipy.src.classes.data.dataset.TempestData.TempestData&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Time domain electro magnetic data set&quot;];
+  &quot;TdemData&quot; -&gt; &quot;TempestData&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<dl class="py class" id="module-geobipy.src.classes.data.dataset.TempestData">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.TempestData.TempestData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.data.dataset.TempestData.</span></span><span class="sig-name descname"><span class="pre">TempestData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.data.dataset.TempestData.TempestData" title="Link to this definition"></a></dt>
 <dd><p>Time domain electro magnetic data set</p>

@@ -79,7 +79,7 @@ We can plot the grid lines of the mesh.
 
     p=0;
     plt.figure(p)
-    _  = rm.plotGrid(flipY=True, linewidth=0.5)
+    _  = rm.plot_grid(flipY=True, linewidth=0.5)
 
     # Intersecting multisegment lines with a mesh
     arr = np.zeros(rm.shape)
@@ -114,7 +114,7 @@ We can plot the grid lines of the mesh.
  .. code-block:: none
 
 
-    (<Axes: xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x164aa2b10>, <matplotlib.colorbar.Colorbar object at 0x164cef3b0>)
+    (<Axes: xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x1645ee600>, <matplotlib.colorbar.Colorbar object at 0x1645ec740>)
 
 
 
@@ -122,29 +122,20 @@ We can plot the grid lines of the mesh.
 
 We can pcolor the mesh by providing cell values.
 
-.. GENERATED FROM PYTHON SOURCE LINES 47-67
+.. GENERATED FROM PYTHON SOURCE LINES 47-58
 
 .. code-block:: Python
 
     xx, yy = np.meshgrid(rm.y.centres, rm.x.centres)
     arr = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "Values")
 
+    rm2, values2 = rm.resample(0.5, 0.5, arr, method='linear')
+
+
     p += 1; plt.figure(p)
     _ = rm.pcolor(arr, grid=True, flipY=True, linewidth=0.5)
 
-    # xG = rm.xGradientMatrix()
-    # zG = rm.yGradientMatrix()
 
-    # dax = StatArray((xG * arr.flatten()).reshape((arr.shape[0], arr.shape[1]-1)))
-    # rm2 = rm[:, :9]
-
-    # plt.figure()
-    # rm2.pcolor(dax, xAxis='r', grid=True, flipY=True, linewidth=0.5)
-
-    # dax = StatArray((zG * arr.flatten()).reshape((arr.shape[0]-1, arr.shape[1])))
-
-    # plt.figure()
-    # dax.pcolor(grid=True, flipY=True, linewidth=0.5)
 
 
 
@@ -155,14 +146,32 @@ We can pcolor the mesh by providing cell values.
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    [0. 1. 2. ... 7. 8. 9.] [ 0.  1.  2. ... 17. 18. 19.]
+    [-0.25  0.25  0.75 ...  8.25  8.75  9.25] [-0.25  0.25  0.75 ... 18.25 18.75 19.25]
+    (10, 20)
+    [[-0.25]
+     [ 0.25]
+     [ 0.75]
+     ...
+     [ 8.25]
+     [ 8.75]
+     [ 9.25]]
+    (20, 1)
+    [[-0.25  0.25  0.75 ... 18.25 18.75 19.25]]
+    (1, 40)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 68-69
+
+.. GENERATED FROM PYTHON SOURCE LINES 59-60
 
 Mask the x axis cells by a distance
 
-.. GENERATED FROM PYTHON SOURCE LINES 69-73
+.. GENERATED FROM PYTHON SOURCE LINES 60-64
 
 .. code-block:: Python
 
@@ -182,11 +191,11 @@ Mask the x axis cells by a distance
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 74-75
+.. GENERATED FROM PYTHON SOURCE LINES 65-66
 
 Mask the z axis cells by a distance
 
-.. GENERATED FROM PYTHON SOURCE LINES 75-79
+.. GENERATED FROM PYTHON SOURCE LINES 66-70
 
 .. code-block:: Python
 
@@ -206,11 +215,11 @@ Mask the z axis cells by a distance
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 80-81
+.. GENERATED FROM PYTHON SOURCE LINES 71-72
 
 Mask axes by a distance
 
-.. GENERATED FROM PYTHON SOURCE LINES 81-89
+.. GENERATED FROM PYTHON SOURCE LINES 72-80
 
 .. code-block:: Python
 
@@ -234,12 +243,12 @@ Mask axes by a distance
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 90-92
+.. GENERATED FROM PYTHON SOURCE LINES 81-83
 
 We can perform some interval statistics on the cell values of the mesh
 Generate some values
 
-.. GENERATED FROM PYTHON SOURCE LINES 92-94
+.. GENERATED FROM PYTHON SOURCE LINES 83-85
 
 .. code-block:: Python
 
@@ -252,11 +261,11 @@ Generate some values
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 95-96
+.. GENERATED FROM PYTHON SOURCE LINES 86-87
 
 Compute the mean over an interval for the mesh.
 
-.. GENERATED FROM PYTHON SOURCE LINES 96-98
+.. GENERATED FROM PYTHON SOURCE LINES 87-89
 
 .. code-block:: Python
 
@@ -271,15 +280,15 @@ Compute the mean over an interval for the mesh.
  .. code-block:: none
 
 
-    (array([[9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9., 9.]]), [6.8, 12.4])
+    (array([[9., 9., 9., ..., 9., 9., 9.]]), [6.8, 12.4])
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 99-100
+.. GENERATED FROM PYTHON SOURCE LINES 90-91
 
 Compute the mean over multiple intervals for the mesh.
 
-.. GENERATED FROM PYTHON SOURCE LINES 100-102
+.. GENERATED FROM PYTHON SOURCE LINES 91-93
 
 .. code-block:: Python
 
@@ -294,20 +303,17 @@ Compute the mean over multiple intervals for the mesh.
  .. code-block:: none
 
 
-    (array([[ 9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,  9.,
-             9.,  9.],
-           [nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan,
-            nan, nan],
-           [nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan, nan,
-            nan, nan]]), [6.8, 12.4, 20.0, 40.0])
+    (array([[ 9.,  9.,  9., ...,  9.,  9.,  9.],
+           [nan, nan, nan, ..., nan, nan, nan],
+           [nan, nan, nan, ..., nan, nan, nan]]), [6.8, 12.4, 20.0, 40.0])
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 103-104
+.. GENERATED FROM PYTHON SOURCE LINES 94-95
 
 We can specify either axis
 
-.. GENERATED FROM PYTHON SOURCE LINES 104-106
+.. GENERATED FROM PYTHON SOURCE LINES 95-97
 
 .. code-block:: Python
 
@@ -325,17 +331,14 @@ We can specify either axis
     (array([[ 1.],
            [ 2.],
            [ 3.],
-           [ 4.],
-           [ 5.],
-           [ 6.],
-           [ 7.],
+           ...,
            [ 8.],
            [ 9.],
            [10.]]), [2.8, 4.2])
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 107-109
+.. GENERATED FROM PYTHON SOURCE LINES 98-100
 
 .. code-block:: Python
 
@@ -353,21 +356,18 @@ We can specify either axis
     (array([[ 1., nan,  1.],
            [ 2., nan,  2.],
            [ 3., nan,  3.],
-           [ 4., nan,  4.],
-           [ 5., nan,  5.],
-           [ 6., nan,  6.],
-           [ 7., nan,  7.],
+           ...,
            [ 8., nan,  8.],
            [ 9., nan,  9.],
            [10., nan, 10.]]), [2.8, 4.2, 5.1, 8.4])
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-111
+.. GENERATED FROM PYTHON SOURCE LINES 101-102
 
 Slice the 2D mesh to retrieve either a 2D mesh or 1D mesh
 
-.. GENERATED FROM PYTHON SOURCE LINES 111-123
+.. GENERATED FROM PYTHON SOURCE LINES 102-114
 
 .. code-block:: Python
 
@@ -377,11 +377,11 @@ Slice the 2D mesh to retrieve either a 2D mesh or 1D mesh
 
     p += 1; plt.figure(p)
     plt.subplot(131)
-    rm2.plotGrid()
+    rm2.plot_grid()
     plt.subplot(132)
-    rm3.plotGrid()
+    rm3.plot_grid()
     plt.subplot(133)
-    rm4.plotGrid(transpose=True)
+    rm4.plot_grid(transpose=True)
 
 
 
@@ -395,11 +395,11 @@ Slice the 2D mesh to retrieve either a 2D mesh or 1D mesh
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 124-125
+.. GENERATED FROM PYTHON SOURCE LINES 115-116
 
 Resample a grid
 
-.. GENERATED FROM PYTHON SOURCE LINES 125-134
+.. GENERATED FROM PYTHON SOURCE LINES 116-125
 
 .. code-block:: Python
 
@@ -425,17 +425,30 @@ Resample a grid
 
  .. code-block:: none
 
+    [0. 1. 2. ... 7. 8. 9.] [  0.   1.   3. ...  78.  91. 105.]
+    [-0.25  0.25  0.75 ...  8.25  8.75  9.25] [ -0.25   0.25   0.75 ... 110.75 111.25 111.75]
+    (10, 15)
+    [[-0.25]
+     [ 0.25]
+     [ 0.75]
+     ...
+     [ 8.25]
+     [ 8.75]
+     [ 9.25]]
+    (20, 1)
+    [[ -0.25   0.25   0.75 ... 110.75 111.25 111.75]]
+    (1, 225)
 
-    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x165dc6f60>, <matplotlib.colorbar.Colorbar object at 0x164e378f0>)
+    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x165461490>, <matplotlib.colorbar.Colorbar object at 0x1648679b0>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 135-137
+.. GENERATED FROM PYTHON SOURCE LINES 126-128
 
 Axes in log space
 +++++++++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 137-145
+.. GENERATED FROM PYTHON SOURCE LINES 128-136
 
 .. code-block:: Python
 
@@ -445,7 +458,7 @@ Axes in log space
 
     # We can plot the grid lines of the mesh.
     p += 1; plt.figure(p)
-    _  = rm.plotGrid(linewidth=0.5)
+    _  = rm.plot_grid(linewidth=0.5)
 
 
 
@@ -459,7 +472,7 @@ Axes in log space
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 146-159
+.. GENERATED FROM PYTHON SOURCE LINES 137-150
 
 .. code-block:: Python
 
@@ -490,16 +503,16 @@ Axes in log space
  .. code-block:: none
 
 
-    (<Axes: xlabel='x', ylabel='y'>, <matplotlib.collections.QuadMesh object at 0x16613fd40>, <matplotlib.colorbar.Colorbar object at 0x165ff43e0>)
+    (<Axes: xlabel='x', ylabel='y'>, <matplotlib.collections.QuadMesh object at 0x164bb4ef0>, <matplotlib.colorbar.Colorbar object at 0x1642415e0>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 160-162
+.. GENERATED FROM PYTHON SOURCE LINES 151-153
 
-RelativeTo
+relative_to
 ++++++++++
 
-.. GENERATED FROM PYTHON SOURCE LINES 162-220
+.. GENERATED FROM PYTHON SOURCE LINES 153-211
 
 .. code-block:: Python
 
@@ -510,12 +523,12 @@ RelativeTo
 
     p += 1; plt.figure(p)
     plt.subplot(121)
-    _  = rm.plotGrid(linewidth=0.5, flipY=True)
+    _  = rm.plot_grid(linewidth=0.5, flipY=True)
     rm = RectilinearMesh2D(x_centres=x, x_relative_to=0.2*np.random.randn(y.size), y_centres=y, y_relative_to=0.2*np.random.randn(x.size))
     plt.subplot(122)
-    _  = rm.plotGrid(linewidth=0.5, flipY=True)
+    _  = rm.plot_grid(linewidth=0.5, flipY=True)
 
-    # RelativeTo single
+    # relative_to single
     with h5py.File('rm2d.h5', 'w') as f:
         rm.toHdf(f, 'test')
 
@@ -529,12 +542,12 @@ RelativeTo
     plt.subplot(212)
     rm2.pcolor(arr, flipY=True)
 
-    # RelativeTo expanded
+    # relative_to expanded
     with h5py.File('rm2d.h5', 'w') as f:
-        rm.createHdf(f, 'test', add_axis=RectilinearMesh1D(centres=StatArray(np.arange(3.0), name='Easting', units="m"), relativeTo = 0.2*np.random.randn(x.size, y.size)))
+        rm.createHdf(f, 'test', add_axis=RectilinearMesh1D(centres=StatArray(np.arange(3.0), name='Easting', units="m"), relative_to = 0.2*np.random.randn(x.size, y.size)))
         for i in range(3):
-            rm.x.relativeTo += 0.5
-            rm.y.relativeTo += 0.5
+            rm.x.relative_to += 0.5
+            rm.y.relative_to += 0.5
             rm.writeHdf(f, 'test', index=i)
 
     with h5py.File('rm2d.h5', 'r') as f:
@@ -602,7 +615,7 @@ RelativeTo
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.314 seconds)
+   **Total running time of the script:** (0 minutes 1.733 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:
@@ -618,6 +631,10 @@ RelativeTo
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_rectilinear_mesh_2d.py <plot_rectilinear_mesh_2d.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_rectilinear_mesh_2d.zip <plot_rectilinear_mesh_2d.zip>`
 
 
 .. only:: html

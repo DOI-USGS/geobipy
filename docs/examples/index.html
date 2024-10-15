@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -63,6 +63,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="Statistics/plot_DataArray.html">DataArray Class</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_1d.html">Histogram 1D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_2d.html">Histogram 2D</a></li>
 <li class="toctree-l3"><a class="reference internal" href="Statistics/plot_histogram_3d.html">Histogram 3D</a></li>
@@ -151,7 +152,10 @@
 </section>
 <section id="statistics">
 <h2>Statistics<a class="headerlink" href="#statistics" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5"><img alt="" src="../_images/sphx_glr_plot_histogram_1d_thumb.png" />
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us to attach statistical descriptors of the array. The direct extension to numpy maintains speed and functionality of numpy arrays."><img alt="" src="../_images/sphx_glr_plot_DataArray_thumb.png" />
+<p><a class="reference internal" href="Statistics/plot_DataArray.html#sphx-glr-examples-statistics-plot-dataarray-py"><span class="std std-ref">DataArray Class</span></a></p>
+  <div class="sphx-glr-thumbnail-title">DataArray Class</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This histogram class allows efficient updating of histograms, plotting and saving as HDF5"><img alt="" src="../_images/sphx_glr_plot_histogram_1d_thumb.png" />
 <p><a class="reference internal" href="Statistics/plot_histogram_1d.html#sphx-glr-examples-statistics-plot-histogram-1d-py"><span class="std std-ref">Histogram 1D</span></a></p>
   <div class="sphx-glr-thumbnail-title">Histogram 1D</div>
 </div><div class="sphx-glr-thumbcontainer" tooltip="This 2D histogram class allows efficient updating of histograms, plotting and saving as HDF5."><img alt="" src="../_images/sphx_glr_plot_histogram_2d_thumb.png" />
@@ -160,7 +164,7 @@
 </div><div class="sphx-glr-thumbcontainer" tooltip="This 3D histogram class allows efficient updating of histograms, plotting and saving as HDF5."><img alt="" src="../_images/sphx_glr_plot_histogram_3d_thumb.png" />
 <p><a class="reference internal" href="Statistics/plot_histogram_3d.html#sphx-glr-examples-statistics-plot-histogram-3d-py"><span class="std std-ref">Histogram 3D</span></a></p>
   <div class="sphx-glr-thumbnail-title">Histogram 3D</div>
-</div><div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us..."><img alt="" src="../_images/sphx_glr_plot_StatArray_thumb.png" />
+</div><div class="sphx-glr-thumbcontainer" tooltip="Extends the numpy ndarray class to add extra attributes such as names, and units, and allows us to attach statistical descriptors of the array. The direct extension to numpy maintains speed and functionality of numpy arrays."><img alt="" src="../_images/sphx_glr_plot_StatArray_thumb.png" />
 <p><a class="reference internal" href="Statistics/plot_StatArray.html#sphx-glr-examples-statistics-plot-statarray-py"><span class="std std-ref">StatArray Class</span></a></p>
   <div class="sphx-glr-thumbnail-title">StatArray Class</div>
 </div></div><div class="toctree-wrapper compound">
@@ -264,7 +268,7 @@ In both cases, you will need to write an options file (also shown in these examp
 </section>
 <section id="hdf-5">
 <h2>HDF 5<a class="headerlink" href="#hdf-5" title="Link to this heading"></a></h2>
-<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory syste..."><img alt="" src="../_images/sphx_glr_hdf5_thumb.png" />
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Inference for large scale datasets in GeoBIPy is handled using MPI and distributed memory systems. A common bottleneck with large parallel algorithms is the input output of information to disk. We use HDF5 to read and write data in order to leverage the parallel capabililties of the HDF5 API."><img alt="" src="../_images/sphx_glr_hdf5_thumb.png" />
 <p><a class="reference internal" href="HDF5/hdf5.html#sphx-glr-examples-hdf5-hdf5-py"><span class="std std-ref">Using HDF5 within GeoBIPy</span></a></p>
   <div class="sphx-glr-thumbnail-title">Using HDF5 within GeoBIPy</div>
 </div></div><div class="toctree-wrapper compound">

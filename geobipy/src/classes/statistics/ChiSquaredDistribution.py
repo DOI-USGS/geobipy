@@ -1,11 +1,12 @@
 """ @NormalDistribution
 Module defining a normal distribution with statistical procedures
 """
-from numpy import array, exp, linspace, log, size, squeeze
+from numpy import array, exp, linspace, log, size, squeeze, hstack
 from .baseDistribution import baseDistribution
 from scipy.stats import chi2
 from ...base import plotting as cP
-from ..core import StatArray
+from ..core.DataArray import DataArray
+
 
 class ChiSquared(baseDistribution):
     """Univariate normal distribution
@@ -26,6 +27,10 @@ class ChiSquared(baseDistribution):
         # assert size(variance) == 1, 'Univariate Normal variance must have size = 1'
         super().__init__(prng)
         self.df = df
+
+    @property
+    def address(self):
+        return hstack([hex(id(self)), hex(id(self.df))])
 
     @property
     def df(self):
@@ -53,7 +58,7 @@ class ChiSquared(baseDistribution):
 
     def cdf(self, x):
         """ For a realization x, compute the probability """
-        return StatArray.StatArray(chi2.cdf(x=x, df=self.df), "Cumulative Density")
+        return DataArray(chi2.cdf(x=x, df=self.df), "Cumulative Density")
 
 
     def __deepcopy__(self, memo={}):
@@ -109,12 +114,12 @@ class ChiSquared(baseDistribution):
         """ For a realization x, compute the probability """
 
         if self.log:
-            x= log(x)
+            x = log(x)
 
         if log:
-            return StatArray.StatArray(chi2.logpdf(df=self.df, x=x), "Probability Density")
+            return DataArray(chi2.logpdf(df=self.df, x=x), "Probability Density")
         else:
-            return StatArray.StatArray(chi2.pdf(df=self.df, x=x), "Probability Density")
+            return DataArray(chi2.pdf(df=self.df, x=x), "Probability Density")
 
     @property
     def summary(self):
@@ -161,4 +166,4 @@ class ChiSquared(baseDistribution):
 
     def bins(self, nBins = 99, nStd=4.0):
         """ Discretizes a range given the mean and variance of the distribution """
-        return StatArray.StatArray(linspace(0.5, nStd*self.df, nBins+1))
+        return DataArray(linspace(0.5, nStd*self.df, nBins+1))

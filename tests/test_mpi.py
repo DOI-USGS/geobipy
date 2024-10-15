@@ -194,7 +194,7 @@ assert np.all(pc1.x == xSave[i0:i1]) and np.all(pc1.y == ySave[i0:i1]) and np.al
 ##############################################################################
 if master:
     ncps = np.asarray([2,2])
-    data = Data(channels_per_system=ncps, x=xSave, y=ySave, z=zSave, data=dSave, std=sSave, predictedData=pSave, channelNames=['t1', 't2', 't3', 't4'])
+    data = Data(channels_per_system=ncps, x=xSave, y=ySave, z=zSave, data=dSave, std=sSave, predictedData=pSave, channel_names=['t1', 't2', 't3', 't4'])
 else:
     data = Data()
 

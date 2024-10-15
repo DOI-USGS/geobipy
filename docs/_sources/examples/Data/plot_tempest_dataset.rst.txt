@@ -67,6 +67,25 @@ Reading in the Data
 
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+
 
 
 
@@ -125,6 +144,37 @@ Plot all the data along the specified line
 
  .. code-block:: none
 
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
 
     Text(0.5, 1.0, 'Line 225401.0')
 
@@ -155,6 +205,19 @@ Or, plot specific channels in the data
 
  .. code-block:: none
 
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
 
     Text(0.5, 1.0, '3 channels of data')
 
@@ -181,6 +244,11 @@ Or, plot specific channels in the data
 
  .. code-block:: none
 
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
 
     Text(0.5, 1.0, 'Data as an array')
 
@@ -231,13 +299,64 @@ Or, plot specific channels in the data
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+    self.n_components=2, self.nTimes=array([15])
+
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.941 seconds)
+   **Total running time of the script:** (0 minutes 6.964 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_tempest_dataset.py:
@@ -253,6 +372,10 @@ Or, plot specific channels in the data
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_tempest_dataset.py <plot_tempest_dataset.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_tempest_dataset.zip <plot_tempest_dataset.zip>`
 
 
 .. only:: html

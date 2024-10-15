@@ -28,11 +28,11 @@ rm4 = rm[5, :, :]
 
 plt.figure()
 plt.subplot(231)
-rm2.plotGrid()
+rm2.plot_grid()
 plt.subplot(232)
-rm3.plotGrid()
+rm3.plot_grid()
 plt.subplot(233)
-rm4.plotGrid()
+rm4.plot_grid()
 
 #%%
 rm2 = rm[:, 5, 5]
@@ -40,11 +40,11 @@ rm3 = rm[5, :, 5]
 rm4 = rm[5, 5, :]
 
 plt.subplot(234)
-rm2.plotGrid()
+rm2.plot_grid()
 plt.subplot(235)
-rm3.plotGrid()
+rm3.plot_grid()
 plt.subplot(236)
-rm4.plotGrid()
+rm4.plot_grid()
 
 #%%
 with h5py.File('rm3d.h5', 'w') as f:
@@ -68,11 +68,11 @@ rm4 = rm[5, :, :]
 
 plt.figure()
 plt.subplot(231)
-rm2.plotGrid()
+rm2.plot_grid()
 plt.subplot(232)
-rm3.plotGrid()
+rm3.plot_grid()
 plt.subplot(233)
-rm4.plotGrid()
+rm4.plot_grid()
 
 #%%
 # We can plot the mesh in 3D!
@@ -81,7 +81,6 @@ pv = rm.pyvista_plotter()
 #%%
 # We can plot the mesh in 3D!
 mesh = rm.pyvista_mesh().save('rm3d_re1.vtk')
-
 
 x_re = StatArray(np.sin(np.repeat(rm.y.centres[:, None], rm.z.nCells, 1)), "x_re")
 
@@ -96,11 +95,11 @@ rm4 = rm[5, :, :]
 
 plt.figure()
 plt.subplot(231)
-rm2.plotGrid()
+rm2.plot_grid()
 plt.subplot(232)
-rm3.plotGrid()
+rm3.plot_grid()
 plt.subplot(233)
-rm4.plotGrid()
+rm4.plot_grid()
 
 #%%
 # We can plot the mesh in 3D!
@@ -128,11 +127,11 @@ rm4 = rm[5, :, :]
 
 plt.figure()
 plt.subplot(231)
-rm2.plotGrid()
+rm2.plot_grid()
 plt.subplot(232)
-rm3.plotGrid()
+rm3.plot_grid()
 plt.subplot(233)
-rm4.plotGrid()
+rm4.plot_grid()
 
 #%%
 # We can plot the mesh in 3D!

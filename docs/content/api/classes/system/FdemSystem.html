@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -106,11 +106,17 @@
              
   <section id="frequency-domain-system">
 <h1>Frequency domain system<a class="headerlink" href="#frequency-domain-system" title="Link to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-742646a7ad16739680219d0c00ff350fd1dd4bda.png" alt="Inheritance diagram of geobipy.src.classes.system.FdemSystem" usemap="#inheritance3626e3b5d4" class="inheritance graphviz" /></div>
-<map id="inheritance3626e3b5d4" name="inheritance3626e3b5d4">
-<area shape="rect" id="node3" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
-<area shape="rect" id="node2" href="#geobipy.src.classes.system.FdemSystem.FdemSystem" target="_top" title="Defines a Frequency Domain ElectroMagnetic acquisition system" alt="" coords="251,5,350,32"/>
-</map><p id="module-geobipy.src.classes.system.FdemSystem">&#64;FdemSystem_Class
+digraph inheritance3626e3b5d4 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;FdemSystem&quot; [URL=&quot;#geobipy.src.classes.system.FdemSystem.FdemSystem&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Defines a Frequency Domain ElectroMagnetic acquisition system&quot;];
+  &quot;myObject&quot; -&gt; &quot;FdemSystem&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<p id="module-geobipy.src.classes.system.FdemSystem">&#64;FdemSystem_Class
 Module describing a frequency domain EM acquisition system</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.FdemSystem.FdemSystem">

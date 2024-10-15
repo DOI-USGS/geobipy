@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -106,11 +106,21 @@
              
   <section id="time-domain-system">
 <h1>Time domain system<a class="headerlink" href="#time-domain-system" title="Link to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../_images/inheritance-a6367c56667395c54c10aa1c5186149952d16259.png" alt="Inheritance diagram of geobipy.src.classes.system.TdemSystem" usemap="#inheritance997b7fa283" class="inheritance graphviz" /></div>
-<map id="inheritance997b7fa283" name="inheritance997b7fa283">
-<area shape="rect" id="node5" href="../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="143,5,221,32"/>
-<area shape="rect" id="node3" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" target="_top" title="Initialize a Time domain system class" alt="" coords="489,31,588,57"/>
-</map><dl class="py class" id="module-geobipy.src.classes.system.TdemSystem">
+digraph inheritance997b7fa283 {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;TDAEMSystem&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;TDAEMSystem Class&quot;];
+  &quot;TdemSystem&quot; [URL=&quot;#geobipy.src.classes.system.TdemSystem.TdemSystem&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Initialize a Time domain system class&quot;];
+  &quot;TdemSystem_GAAEM&quot; -&gt; &quot;TdemSystem&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;TdemSystem_GAAEM&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Initialize a Time domain system class&quot;];
+  &quot;myObject&quot; -&gt; &quot;TdemSystem_GAAEM&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;TDAEMSystem&quot; -&gt; &quot;TdemSystem_GAAEM&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<dl class="py class" id="module-geobipy.src.classes.system.TdemSystem">
 <dt class="sig sig-object py" id="geobipy.src.classes.system.TdemSystem.TdemSystem">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geobipy.src.classes.system.TdemSystem.</span></span><span class="sig-name descname"><span class="pre">TdemSystem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offTimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transmitterLoop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">receiverLoop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loopOffset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offTimeFilters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['z']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">system_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.classes.system.TdemSystem.TdemSystem" title="Link to this definition"></a></dt>
 <dd><p>Initialize a Time domain system class</p>

@@ -38,9 +38,6 @@ def plot_2d_summary(folder, data_type, model_type):
          "cmap" : 'jet'
          }
 
-   import warnings
-   warnings.filterwarnings('error')
-
    fig = plt.figure(figsize=(16, 8))
    plt.suptitle("{} {}".format(data_type, model_type))
    gs0 = fig.add_gridspec(6, 2, hspace=1.0)
@@ -137,16 +134,17 @@ def plot_2d_summary(folder, data_type, model_type):
    results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
    results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
-   # plt.show()
-   plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
+
+   plt.show()
+   # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
 if __name__ == '__main__':
    models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
    for model in models:
-      # try:
+      try:
          plot_2d_summary("../../../Parallel_Inference/", "resolve", model)
-      # except Exception as e:
-      #    print(model)
-      #    print(e)
-      #    pass
+      except Exception as e:
+         print(model)
+         print(e)
+         pass

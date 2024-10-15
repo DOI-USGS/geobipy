@@ -8,7 +8,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=fd3f3429" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery.css?v=d2d258e8" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
@@ -105,13 +105,21 @@
              
   <section id="fdemdata">
 <h1>FdemData<a class="headerlink" href="#fdemdata" title="Link to this heading"></a></h1>
-<div class="graphviz"><img src="../../../../../_images/inheritance-a00fe3c8ecdaf2828c8f1f13d9c145ec86bf0fc3.png" alt="Inheritance diagram of geobipy.src.classes.data.dataset.FdemData" usemap="#inheritance66f423f7ef" class="inheritance graphviz" /></div>
-<map id="inheritance66f423f7ef" name="inheritance66f423f7ef">
-<area shape="rect" id="node5" href="../../core/myObject.html#geobipy.src.classes.core.myObject.myObject" target="_top" title="myObject" alt="" coords="125,5,203,32"/>
-<area shape="rect" id="node2" href="Data.html#geobipy.src.classes.data.dataset.Data.Data" target="_top" title="Class defining a set of Data." alt="" coords="371,5,443,32"/>
-<area shape="rect" id="node4" href="#geobipy.src.classes.data.dataset.FdemData.FdemData" target="_top" title="Class extension to geobipy.Data defining a Fourier domain electro magnetic data set" alt="" coords="491,5,573,32"/>
-<area shape="rect" id="node3" href="../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point" target="_top" title="3D Point Cloud with x,y,z co&#45;ordinates" alt="" coords="251,5,323,32"/>
-</map><p id="module-geobipy.src.classes.data.dataset.FdemData">&#64;FdemData_Class
+digraph inheritance66f423f7ef {
+bgcolor=transparent;
+rankdir=LR;
+size=&quot;8.0, 12.0&quot;;
+  &quot;ABC&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Helper class that provides a standard way to create an ABC using&quot;];
+  &quot;Data&quot; [URL=&quot;Data.html#geobipy.src.classes.data.dataset.Data.Data&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class defining a set of Data.&quot;];
+  &quot;Point&quot; -&gt; &quot;Data&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;FdemData&quot; [URL=&quot;#geobipy.src.classes.data.dataset.FdemData.FdemData&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;Class extension to geobipy.Data defining a Fourier domain electro magnetic data set&quot;];
+  &quot;Data&quot; -&gt; &quot;FdemData&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;Point&quot; [URL=&quot;../../pointcloud/Point.html#geobipy.src.classes.pointcloud.Point.Point&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;,tooltip=&quot;3D Point Cloud with x,y,z co-ordinates&quot;];
+  &quot;myObject&quot; -&gt; &quot;Point&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+  &quot;myObject&quot; [URL=&quot;../../core/myObject.html#geobipy.src.classes.core.myObject.myObject&quot;,fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,target=&quot;_top&quot;];
+  &quot;ABC&quot; -&gt; &quot;myObject&quot; [arrowsize=0.5,style=&quot;setlinewidth(0.5)&quot;];
+}
+<p id="module-geobipy.src.classes.data.dataset.FdemData">&#64;FdemData_Class
 Module describing an EMData Set where channels are associated with an xyz co-ordinate</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="geobipy.src.classes.data.dataset.FdemData.FdemData">

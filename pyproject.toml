@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geobipy"
+version = "2.3.1"
+description = "McMC inversion of airborne electromagnetic data"
+readme = { file = "README.rst", content-type = "text/x-rst" }
+requires-python = ">=3.10"
+authors = [{ name = "Leon Foks",     email = "nfoks@contractor.usgs.gov" },
+           { name = "Burke Minsley", email = "bminsley@usgs.gov" }]
+keywords = ["inversion", "bayesian"]
+dependencies = [
+            "numpy",
+            "scipy",
+            "h5py",
+            "numba",
+            "pandas",
+            "netcdf4",
+            "matplotlib",
+            "pyvista",
+            "progressbar2",
+            "cached-property",
+            "scikit-learn",
+            "pygmt",
+            "numba_kdtree",
+            "lmfit",]
+classifiers = [
+    'License :: OSI Approved',
+    'License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication',
+    'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
+    'License :: OSI Approved :: BSD License',
+    'Programming Language :: Python :: 3',
+    'Topic :: Scientific/Engineering'
+]
+
+[project.optional-dependencies]
+docs = ["sphinx_gallery", "sphinx_rtd_theme"]
+
+[project.scripts]
+geobipy = "geobipy:geobipy"
+
+[tool.setuptools.packages.find]
+where = ["."]

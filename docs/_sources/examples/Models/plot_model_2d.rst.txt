@@ -107,13 +107,60 @@ Specify some cell centres in x and y
          :class: sphx-glr-multi-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    [0.5 1.5 2.5 3.5 4.5 5.5 6.5 7.5 8.5 9.5] [0.5 1.5 2.5 3.5 4.5 5.5 6.5 7.5 8.5 9.5]
+    [0.25 0.75 1.25 1.75 2.25 2.75 3.25 3.75 4.25 4.75 5.25 5.75 6.25 6.75
+     7.25 7.75 8.25 8.75 9.25 9.75] [0.25 0.75 1.25 1.75 2.25 2.75 3.25 3.75 4.25 4.75 5.25 5.75 6.25 6.75
+     7.25 7.75 8.25 8.75 9.25 9.75]
+    (10, 10)
+    [[0.25]
+     [0.75]
+     [1.25]
+     [1.75]
+     [2.25]
+     [2.75]
+     [3.25]
+     [3.75]
+     [4.25]
+     [4.75]
+     [5.25]
+     [5.75]
+     [6.25]
+     [6.75]
+     [7.25]
+     [7.75]
+     [8.25]
+     [8.75]
+     [9.25]
+     [9.75]]
+    (20, 1)
+    [[0.25 0.75 1.25 1.75 2.25 2.75 3.25 3.75 4.25 4.75 5.25 5.75 6.25 6.75
+      7.25 7.75 8.25 8.75 9.25 9.75]]
+    (1, 20)
+    [0.5 1.5 2.5 3.5 4.5 5.5 6.5 7.5 8.5 9.5] [0.5 1.5 2.5 3.5 4.5 5.5 6.5 7.5 8.5 9.5]
+    [0.75 2.25 3.75 5.25 6.75 8.25 9.75] [0.75 2.25 3.75 5.25 6.75 8.25 9.75]
+    (10, 10)
+    [[0.75]
+     [2.25]
+     [3.75]
+     [5.25]
+     [6.75]
+     [8.25]
+     [9.75]]
+    (7, 1)
+    [[0.75 2.25 3.75 5.25 6.75 8.25 9.75]]
+    (1, 7)
+
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.237 seconds)
+   **Total running time of the script:** (0 minutes 3.010 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_2d.py:
@@ -129,6 +176,10 @@ Specify some cell centres in x and y
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_model_2d.py <plot_model_2d.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_model_2d.zip <plot_model_2d.zip>`
 
 
 .. only:: html

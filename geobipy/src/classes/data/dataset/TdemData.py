@@ -15,7 +15,8 @@ from ...system.CircularLoop import CircularLoop
 from ...pointcloud.Point import Point
 from .Data import Data
 from ..datapoint.TdemDataPoint import TdemDataPoint
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from ...system.Loop_pair import Loop_pair
 
 from ...system.TdemSystem import TdemSystem
@@ -78,10 +79,10 @@ class TdemData(Data):
         # Data Class containing xyz and channel values
         super().__init__(**kwargs)
 
-        self._secondary_field           = StatArray.StatArray((self.nPoints, self.nChannels), "Secondary field", self.units)
-        self._predicted_secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
-        self._primary_field             = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
-        self._predicted_primary_field   = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
+        self._secondary_field           = DataArray((self.nPoints, self.nChannels), "Secondary field", self.units)
+        self._predicted_secondary_field = DataArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
+        self._primary_field             = DataArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
+        self._predicted_primary_field   = DataArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
 
         self.primary_field = kwargs.get('primary_field')
         self.secondary_field = kwargs.get('secondary_field')
@@ -128,7 +129,7 @@ class TdemData(Data):
     @Data.data.getter
     def data(self):
         if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
-            self._data = StatArray.StatArray((self.nPoints, self.nChannels), "Data", self.units)
+            self._data = DataArray((self.nPoints, self.nChannels), "Data", self.units)
 
         for j in range(self.nSystems):
             for i in range(self.n_components):
@@ -149,17 +150,17 @@ class TdemData(Data):
     # @loopOffset.setter
     # def loopOffset(self, values):
     #     if (values is None):
-    #         self._loopOffset = StatArray.StatArray(
+    #         self._loopOffset = DataArray(
     #             (self.nPoints, 3), "Loop Offset")
     #     else:
     #         if self.nPoints == 0:
     #             self.nPoints = size(values)
     #         assert npall(shape(values) == (self.nPoints, 3)), ValueError(
     #             "loopOffset must have shape {}".format((self.nPoints, 3)))
-    #         if (isinstance(values, StatArray.StatArray)):
+    #         if (isinstance(values, DataArray)):
     #             self._loopOffset = deepcopy(values)
     #         else:
-    #             self._loopOffset = StatArray.StatArray(values, "Loop Offset")
+    #             self._loopOffset = DataArray(values, "Loop Offset")
 
     @Point.nPoints.setter
     def nPoints(self, value):
@@ -176,7 +177,7 @@ class TdemData(Data):
     def predicted_primary_field(self):
         """The data. """
         if size(self._predicted_primary_field, 0) == 0:
-            self._predicted_primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
+            self._predicted_primary_field = DataArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
         return self._predicted_primary_field
 
     @predicted_primary_field.setter
@@ -186,7 +187,7 @@ class TdemData(Data):
 
             shp = (self.nPoints, self.n_components * self.nSystems)
             if not allclose(self._predicted_primary_field.shape, shp):
-                self._predicted_primary_field = StatArray.StatArray(values, "Predicted primary field", self.units)
+                self._predicted_primary_field = DataArray(values, "Predicted primary field", self.units)
                 return
 
             self._predicted_primary_field[:, :] = values
@@ -195,7 +196,7 @@ class TdemData(Data):
     def predicted_secondary_field(self):
         """The data. """
         if size(self._predicted_secondary_field, 0) == 0:
-            self._predicted_secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
+            self._predicted_secondary_field = DataArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
         return self._predicted_secondary_field
 
     @predicted_secondary_field.setter
@@ -205,7 +206,7 @@ class TdemData(Data):
 
             shp = (self.nPoints, self.nChannels)
             if not allclose(self._predicted_secondary_field.shape, shp):
-                self._predicted_secondary_field = StatArray.StatArray(values, "Predicted secondary field", self.units)
+                self._predicted_secondary_field = DataArray(values, "Predicted secondary field", self.units)
                 return
 
             self._predicted_secondary_field[:, :] = values
@@ -214,7 +215,7 @@ class TdemData(Data):
     def primary_field(self):
         """The data. """
         if size(self._primary_field, 0) == 0:
-            self._primary_field = StatArray.StatArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
+            self._primary_field = DataArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
         return self._primary_field
 
     @primary_field.setter
@@ -224,7 +225,7 @@ class TdemData(Data):
 
             shp = (self.nPoints, self.n_components * self.nSystems)
             if not allclose(self._primary_field.shape, shp):
-                self._primary_field = StatArray.StatArray(values, "Primary field", self.units)
+                self._primary_field = DataArray(values, "Primary field", self.units)
                 return
 
             self._primary_field[:, :] = values
@@ -249,7 +250,7 @@ class TdemData(Data):
     def secondary_field(self):
         """The data. """
         if size(self._secondary_field, 0) == 0:
-            self._secondary_field = StatArray.StatArray((self.nPoints, self.nChannels), "Secondary field", self.units)
+            self._secondary_field = DataArray((self.nPoints, self.nChannels), "Secondary field", self.units)
         return self._secondary_field
 
     @secondary_field.setter
@@ -259,7 +260,7 @@ class TdemData(Data):
 
             shp = (self.nPoints, self.nChannels)
             if not allclose(self._secondary_field.shape, shp):
-                self._secondary_field = StatArray.StatArray(values, "Secondary field", self.units)
+                self._secondary_field = DataArray(values, "Secondary field", self.units)
                 return
 
             self._secondary_field[:, :] = values
@@ -267,7 +268,7 @@ class TdemData(Data):
     @Data.std.getter
     def std(self):
         if (size(self._std, 0) == 0) or (self._std.shape[0] != self.nPoints):
-            self._std = StatArray.StatArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+            self._std = DataArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
             for i in range(self.nSystems):
@@ -1038,10 +1039,10 @@ class TdemData(Data):
 
         self = super(TdemData, cls).fromHdf(grp, system=systems)
 
-        self.primary_field = None#StatArray.StatArray.fromHdf(grp['primary_field'])
-        self.secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'])
-        self.predicted_primary_field = None#StatArray.StatArray.fromHdf(grp['predicted_primary_field'])
-        self.predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'])
+        self.primary_field = None#DataArray.fromHdf(grp['primary_field'])
+        self.secondary_field = DataArray.fromHdf(grp['secondary_field'])
+        self.predicted_primary_field = None#DataArray.fromHdf(grp['predicted_primary_field'])
+        self.predicted_secondary_field = DataArray.fromHdf(grp['predicted_secondary_field'])
         self.loop_pair = Loop_pair.fromHdf(grp['loop_pair'])
 
         return self

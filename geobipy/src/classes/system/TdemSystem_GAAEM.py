@@ -1,8 +1,8 @@
 from numpy import float64
-from numpy import asarray, diff, min
+from numpy import asarray, diff, min, size
 from ...classes.core.myObject import myObject
 from ...base import fileIO as fIO
-from ...classes.core import StatArray
+from ..statistics import StatArray
 
 try:
     from gatdaem1d import TDAEMSystem
@@ -33,12 +33,21 @@ try:
 
             self.off_time = self.windows.centre
             self.read_components(system_filename)
+
             self.filename = system_filename
             with open(system_filename, 'r') as f:
                 self.string = f.readlines()
 
         def __deepcopy__(self, memo={}):
             return None
+
+        @property
+        def components(self):
+            return self._components
+
+        @property
+        def n_components(self):
+            return size(self.components)
 
         @property
         def isGA(self):
@@ -52,7 +61,7 @@ try:
                 "Receiver window times must monotonically increase for system "+system_filename)
 
             self.read_components(system_filename)
-            self.readCurrentWaveform(system_filename)
+            self.read_current_waveform(system_filename)
             return self
 
         def read_components(self, system_filename):
@@ -72,7 +81,7 @@ try:
                         if value != 0.0:
                             self._components.append('z')
 
-        def readCurrentWaveform(self, systemFname):
+        def read_current_waveform(self, systemFname):
             get = False
             time = []
             current = []
@@ -127,6 +136,3 @@ except Exception as e:
                  "Please see the package's README for instructions on how to install it \n"
                  "Check that you have loaded the compiler that was used to compile the forward modeller\n")
             print(Warning(h))
-
-    print(e)
-    raise Exception(e)

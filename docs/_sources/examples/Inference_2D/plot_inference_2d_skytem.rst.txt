@@ -77,6 +77,26 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 
  .. code-block:: none
 
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
     Model:
     mesh:
     |   RectilinearMesh2D: 
@@ -86,29 +106,35 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   79
     |   Cell Centres:
-    |   |   Name: Easting (m) 0x16d1776d0
-    |   |   Shape: (79,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x14edfaf50']
+    |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
-    |   |   Min: 0.0
-    |   |   Max: 78.0
+    |   |   Min:    0.0
+    |   |   Max:    78.0
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: Easting (m) 0x16d174650
-    |   |   Shape: (80,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x14edfb150']
+    |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
-    |   |   Min: -0.5
-    |   |   Max: 78.5
+    |   |   Min:    -0.5
+    |   |   Max:    78.5
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name:  0x16d336350
-    |   |   Shape: (1,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   
+    |   |   Address:['0x145744450']
+    |   |   Shape:  (1,)
     |   |   Values: [0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   y
@@ -116,46 +142,79 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   132
     |   Cell Centres:
-    |   |   Name: elevation (m) 0x16d1774d0
-    |   |   Shape: (132,)
-    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
-    |   |   Min: -601.6125
-    |   |   Max: -2.2875
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x14edfb2d0']
+    |   |   Shape:  (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min:    -602.5125
+    |   |   Max:    -3.1875
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: elevation (m) 0x16d176850
-    |   |   Shape: (133,)
-    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
-    |   |   Min: -603.9
-    |   |   Max: 0.0
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x14edfb350']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min:    -604.8
+    |   |   Max:    -0.9
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name: Elevation (m) 0x16d176bd0
-    |   |   Shape: (79,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   Elevation (m)
+    |   |   Address:['0x14edfa750']
+    |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     values:
-    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16d176ad0
-    |   Shape: (79, 132)
-    |   Values: [[0.01033856 0.01033856 0.01032608 ... 0.01558398 0.01558398 0.01558398]
-    |    [0.01000897 0.01000897 0.00993591 ... 0.01545486 0.01545486 0.01545486]
-    |    [0.00955219 0.00955219 0.0095664  ... 0.01290829 0.01290829 0.01290829]
+    |   StatArray
+    |   Name:   Mean Conductivity ($\frac{S}{m}$)
+    |   Address:['0x14edfb050']
+    |   Shape:  (79, 132)
+    |   Values: [[0.01120778 0.01120778 0.01089737 ... 0.01842322 0.01842322 0.01842322]
+    |    [0.01004315 0.01004315 0.01001518 ... 0.01627435 0.01627435 0.01627435]
+    |    [0.0098209  0.0098209  0.00983342 ... 0.01667789 0.01667789 0.01667789]
     |    ...
-    |    [0.06767155 0.06767155 0.08087337 ... 0.09781396 0.09781396 0.09781396]
-    |    [0.08127294 0.08127294 0.09146854 ... 0.09884747 0.09884747 0.09884747]
-    |    [0.09182078 0.09182078 0.09720053 ... 0.09911276 0.09911276 0.09911276]]
-    |   Min: 0.008142645729506102
-    |   Max: 0.18736281207027317
+    |    [0.06755182 0.06755182 0.11932536 ... 0.0915802  0.0915802  0.0915802 ]
+    |    [0.08104576 0.08104576 0.09688295 ... 0.09217019 0.09217019 0.09217019]
+    |    [0.09121028 0.09121028 0.09943253 ... 0.11213815 0.11213815 0.11213815]]
+    |   Min:    0.007485002271267226
+    |   Max:    0.21717666705189165
     |   has_posterior: False
 
 
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
     Model:
     mesh:
     |   RectilinearMesh2D: 
@@ -165,29 +224,35 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   79
     |   Cell Centres:
-    |   |   Name: Easting (m) 0x16ba249d0
-    |   |   Shape: (79,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x1541c89d0']
+    |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
-    |   |   Min: 0.0
-    |   |   Max: 78.0
+    |   |   Min:    0.0
+    |   |   Max:    78.0
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: Easting (m) 0x16ba24ed0
-    |   |   Shape: (80,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x1541c8a50']
+    |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
-    |   |   Min: -0.5
-    |   |   Max: 78.5
+    |   |   Min:    -0.5
+    |   |   Max:    78.5
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name:  0x16a2943d0
-    |   |   Shape: (1,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   
+    |   |   Address:['0x153f32f50']
+    |   |   Shape:  (1,)
     |   |   Values: [0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   y
@@ -195,46 +260,79 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   132
     |   Cell Centres:
-    |   |   Name: elevation (m) 0x16ba272d0
-    |   |   Shape: (132,)
-    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
-    |   |   Min: -601.6125
-    |   |   Max: -2.2875
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x1541c8bd0']
+    |   |   Shape:  (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min:    -602.5125
+    |   |   Max:    -3.1875
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: elevation (m) 0x16ba274d0
-    |   |   Shape: (133,)
-    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
-    |   |   Min: -603.9
-    |   |   Max: 0.0
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x1541c8c50']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min:    -604.8
+    |   |   Max:    -0.9
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name: Elevation (m) 0x16ba27350
-    |   |   Shape: (79,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   Elevation (m)
+    |   |   Address:['0x153f322d0']
+    |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     values:
-    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16ba27650
-    |   Shape: (79, 132)
-    |   Values: [[0.01004342 0.01004342 0.01004776 ... 0.01059402 0.01059402 0.01059402]
-    |    [0.01216306 0.01216306 0.01200007 ... 0.01053094 0.01053094 0.01053094]
-    |    [0.0096322  0.0096322  0.00961509 ... 0.01266093 0.01266093 0.01266093]
+    |   StatArray
+    |   Name:   Mean Conductivity ($\frac{S}{m}$)
+    |   Address:['0x153fae450']
+    |   Shape:  (79, 132)
+    |   Values: [[0.01022279 0.01022279 0.01016321 ... 0.0112021  0.0112021  0.0112021 ]
+    |    [0.01121804 0.01121804 0.01062572 ... 0.0110357  0.0110357  0.0110357 ]
+    |    [0.01049917 0.01049917 0.01007536 ... 0.01354095 0.01354095 0.01354095]
     |    ...
-    |    [0.06790468 0.06790468 0.08216413 ... 0.09468115 0.09468115 0.09468115]
-    |    [0.08066093 0.08066093 0.09027033 ... 0.09565939 0.09565939 0.09565939]
-    |    [0.0918785  0.0918785  0.09698753 ... 0.10118202 0.10118202 0.10118202]]
-    |   Min: 0.005722230815170164
-    |   Max: 0.7350287210217844
+    |    [0.06896877 0.06896877 0.082946   ... 0.07112381 0.07112381 0.07112381]
+    |    [0.08055856 0.08055856 0.0985627  ... 0.07903887 0.07903887 0.07903887]
+    |    [0.09166633 0.09166633 0.09878492 ... 0.11154601 0.11154601 0.11154601]]
+    |   Min:    0.006775009348709323
+    |   Max:    0.8077378262817626
     |   has_posterior: False
 
 
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
     Model:
     mesh:
     |   RectilinearMesh2D: 
@@ -244,29 +342,35 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   79
     |   Cell Centres:
-    |   |   Name: Easting (m) 0x16b9002d0
-    |   |   Shape: (79,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x1563f58d0']
+    |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
-    |   |   Min: 0.0
-    |   |   Max: 78.0
+    |   |   Min:    0.0
+    |   |   Max:    78.0
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: Easting (m) 0x16b9ab550
-    |   |   Shape: (80,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x1563f5dd0']
+    |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
-    |   |   Min: -0.5
-    |   |   Max: 78.5
+    |   |   Min:    -0.5
+    |   |   Max:    78.5
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name:  0x169562550
-    |   |   Shape: (1,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   
+    |   |   Address:['0x1541c9650']
+    |   |   Shape:  (1,)
     |   |   Values: [0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   y
@@ -274,46 +378,79 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   132
     |   Cell Centres:
-    |   |   Name: elevation (m) 0x16b9a9250
-    |   |   Shape: (132,)
-    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
-    |   |   Min: -601.6125
-    |   |   Max: -2.2875
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x1563f5fd0']
+    |   |   Shape:  (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min:    -602.5125
+    |   |   Max:    -3.1875
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: elevation (m) 0x16b9ab350
-    |   |   Shape: (133,)
-    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
-    |   |   Min: -603.9
-    |   |   Max: 0.0
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x153f323d0']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min:    -604.8
+    |   |   Max:    -0.9
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name: Elevation (m) 0x16b9ab250
-    |   |   Shape: (79,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   Elevation (m)
+    |   |   Address:['0x153f32cd0']
+    |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     values:
-    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16b900dd0
-    |   Shape: (79, 132)
-    |   Values: [[0.02108286 0.02108286 0.02105478 ... 0.01970014 0.01970014 0.01970014]
-    |    [0.02020133 0.02020133 0.02021404 ... 0.01697529 0.01697529 0.01697529]
-    |    [0.01980096 0.01980096 0.01984157 ... 0.01531969 0.01531969 0.01531969]
+    |   StatArray
+    |   Name:   Mean Conductivity ($\frac{S}{m}$)
+    |   Address:['0x153f32c50']
+    |   Shape:  (79, 132)
+    |   Values: [[0.02104953 0.02104953 0.02099504 ... 0.01952426 0.01952426 0.01952426]
+    |    [0.02008789 0.02008789 0.01997577 ... 0.02017019 0.02017019 0.02017019]
+    |    [0.0198301  0.0198301  0.01986773 ... 0.0145253  0.0145253  0.0145253 ]
     |    ...
-    |    [0.00553428 0.00553428 0.00546494 ... 0.0027545  0.0027545  0.0027545 ]
-    |    [0.00378312 0.00378312 0.00377909 ... 0.00262642 0.00262642 0.00262642]
-    |    [0.00296382 0.00296382 0.0029272  ... 0.00213216 0.00213216 0.00213216]]
-    |   Min: 0.0008988345212684541
-    |   Max: 0.0391244257801508
+    |    [0.00511314 0.00511314 0.0029654  ... 0.01258484 0.01258484 0.01258484]
+    |    [0.00392961 0.00392961 0.00385047 ... 0.00870505 0.00870505 0.00870505]
+    |    [0.00279718 0.00279718 0.00269725 ... 0.00924302 0.00924302 0.00924302]]
+    |   Min:    0.0008600086897131668
+    |   Max:    9.774547726888374
     |   has_posterior: False
 
 
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
     Model:
     mesh:
     |   RectilinearMesh2D: 
@@ -323,29 +460,35 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   79
     |   Cell Centres:
-    |   |   Name: Easting (m) 0x16d979bd0
-    |   |   Shape: (79,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x15717d950']
+    |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
-    |   |   Min: 0.0
-    |   |   Max: 78.0
+    |   |   Min:    0.0
+    |   |   Max:    78.0
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: Easting (m) 0x16d979850
-    |   |   Shape: (80,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x15717d3d0']
+    |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
-    |   |   Min: -0.5
-    |   |   Max: 78.5
+    |   |   Min:    -0.5
+    |   |   Max:    78.5
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name:  0x16b7868d0
-    |   |   Shape: (1,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   
+    |   |   Address:['0x156e03cd0']
+    |   |   Shape:  (1,)
     |   |   Values: [0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   y
@@ -353,46 +496,79 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   132
     |   Cell Centres:
-    |   |   Name: elevation (m) 0x16d979a50
-    |   |   Shape: (132,)
-    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
-    |   |   Min: -601.6125
-    |   |   Max: -2.2875
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x15717d150']
+    |   |   Shape:  (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min:    -602.5125
+    |   |   Max:    -3.1875
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: elevation (m) 0x16d97a0d0
-    |   |   Shape: (133,)
-    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
-    |   |   Min: -603.9
-    |   |   Max: 0.0
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x15717d650']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min:    -604.8
+    |   |   Max:    -0.9
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name: Elevation (m) 0x16d979f50
-    |   |   Shape: (79,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   Elevation (m)
+    |   |   Address:['0x15713f1d0']
+    |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     values:
-    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16d953cd0
-    |   Shape: (79, 132)
-    |   Values: [[0.01104549 0.01104549 0.01088691 ... 0.01524806 0.01524806 0.01524806]
-    |    [0.01093171 0.01093171 0.01060605 ... 0.01539332 0.01539332 0.01539332]
-    |    [0.01055781 0.01055781 0.01051885 ... 0.01532385 0.01532385 0.01532385]
+    |   StatArray
+    |   Name:   Mean Conductivity ($\frac{S}{m}$)
+    |   Address:['0x15713cc50']
+    |   Shape:  (79, 132)
+    |   Values: [[0.01147797 0.01147797 0.01033699 ... 0.00131732 0.00131732 0.00131732]
+    |    [0.00999299 0.00999299 0.01000167 ... 0.00120333 0.00120333 0.00120333]
+    |    [0.01007022 0.01007022 0.01005285 ... 0.00844038 0.00844038 0.00844038]
     |    ...
-    |    [0.06858216 0.06858216 0.07381497 ... 0.09939759 0.09939759 0.09939759]
-    |    [0.0811231  0.0811231  0.09235    ... 0.09950496 0.09950496 0.09950496]
-    |    [0.09142048 0.09142048 0.09655967 ... 0.09905984 0.09905984 0.09905984]]
-    |   Min: 0.00249077338478267
-    |   Max: 0.21372916933340144
+    |    [0.06763163 0.06763163 0.11942951 ... 0.09924038 0.09924038 0.09924038]
+    |    [0.08122468 0.08122468 0.09651811 ... 0.09608009 0.09608009 0.09608009]
+    |    [0.09162505 0.09162505 0.09883382 ... 0.11272764 0.11272764 0.11272764]]
+    |   Min:    0.0007661982574834428
+    |   Max:    0.21045876958147633
     |   has_posterior: False
 
 
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
     Model:
     mesh:
     |   RectilinearMesh2D: 
@@ -402,29 +578,35 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   79
     |   Cell Centres:
-    |   |   Name: Easting (m) 0x16d5f7650
-    |   |   Shape: (79,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x157bc5bd0']
+    |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
-    |   |   Min: 0.0
-    |   |   Max: 78.0
+    |   |   Min:    0.0
+    |   |   Max:    78.0
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: Easting (m) 0x16d950150
-    |   |   Shape: (80,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x157b1bb50']
+    |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
-    |   |   Min: -0.5
-    |   |   Max: 78.5
+    |   |   Min:    -0.5
+    |   |   Max:    78.5
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name:  0x1695aa3d0
-    |   |   Shape: (1,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   
+    |   |   Address:['0x156e00150']
+    |   |   Shape:  (1,)
     |   |   Values: [0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   y
@@ -432,46 +614,79 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   132
     |   Cell Centres:
-    |   |   Name: elevation (m) 0x16d951550
-    |   |   Shape: (132,)
-    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
-    |   |   Min: -601.6125
-    |   |   Max: -2.2875
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x1573c7ad0']
+    |   |   Shape:  (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min:    -602.5125
+    |   |   Max:    -3.1875
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: elevation (m) 0x16d951f50
-    |   |   Shape: (133,)
-    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
-    |   |   Min: -603.9
-    |   |   Max: 0.0
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x15713f2d0']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min:    -604.8
+    |   |   Max:    -0.9
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name: Elevation (m) 0x16d9506d0
-    |   |   Shape: (79,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   Elevation (m)
+    |   |   Address:['0x15713fe50']
+    |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     values:
-    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16d5f70d0
-    |   Shape: (79, 132)
-    |   Values: [[1.02245403 1.02245403 1.02307401 ... 0.92933622 0.92933622 0.92933622]
-    |    [1.02230576 1.02230576 1.02472151 ... 0.7725808  0.7725808  0.7725808 ]
-    |    [1.02240853 1.02240853 1.02261644 ... 0.92778441 0.92778441 0.92778441]
+    |   StatArray
+    |   Name:   Mean Conductivity ($\frac{S}{m}$)
+    |   Address:['0x157bc5b50']
+    |   Shape:  (79, 132)
+    |   Values: [[1.02310541 1.02310541 1.02438661 ... 1.05490484 1.05490484 1.05490484]
+    |    [1.02229478 1.02229478 1.02483553 ... 0.83077926 0.83077926 0.83077926]
+    |    [1.02256309 1.02256309 1.02298923 ... 1.16206135 1.16206135 1.16206135]
     |    ...
-    |    [0.17953964 0.17953964 0.17953964 ... 0.04600592 0.04600592 0.04600592]
-    |    [0.14131043 0.14131043 0.14131043 ... 0.03121664 0.03121664 0.03121664]
-    |    [0.0826337  0.0826337  0.0826337  ... 0.02682797 0.02682797 0.02682797]]
-    |   Min: 0.005438953651048253
-    |   Max: 4.1999468303264145
+    |    [0.18317234 0.18317234 0.18317234 ... 0.04611609 0.04611609 0.04611609]
+    |    [0.13296225 0.13296225 0.13296225 ... 0.02326468 0.02326468 0.02326468]
+    |    [0.08897776 0.08897776 0.08897776 ... 0.02807133 0.02807133 0.02807133]]
+    |   Min:    0.005922638381206899
+    |   Max:    15.778868401978407
     |   has_posterior: False
 
 
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
     Model:
     mesh:
     |   RectilinearMesh2D: 
@@ -481,29 +696,35 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   79
     |   Cell Centres:
-    |   |   Name: Easting (m) 0x16cd233d0
-    |   |   Shape: (79,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x158aaaa50']
+    |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
-    |   |   Min: 0.0
-    |   |   Max: 78.0
+    |   |   Min:    0.0
+    |   |   Max:    78.0
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: Easting (m) 0x16d470350
-    |   |   Shape: (80,)
+    |   |   StatArray
+    |   |   Name:   Easting (m)
+    |   |   Address:['0x158aaa250']
+    |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
-    |   |   Min: -0.5
-    |   |   Max: 78.5
+    |   |   Min:    -0.5
+    |   |   Max:    78.5
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name:  0x16b9015d0
-    |   |   Shape: (1,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   
+    |   |   Address:['0x158613550']
+    |   |   Shape:  (1,)
     |   |   Values: [0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   y
@@ -511,46 +732,59 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Number of Cells:
     |   |   132
     |   Cell Centres:
-    |   |   Name: elevation (m) 0x16d470050
-    |   |   Shape: (132,)
-    |   |   Values: [  -2.2875   -6.8625  -11.4375 ... -592.4625 -597.0375 -601.6125]
-    |   |   Min: -601.6125
-    |   |   Max: -2.2875
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x158aaaad0']
+    |   |   Shape:  (132,)
+    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
+    |   |   Min:    -602.5125
+    |   |   Max:    -3.1875
     |   |   has_posterior: False
     |   
     |   Cell Edges:
-    |   |   Name: elevation (m) 0x16d470c50
-    |   |   Shape: (133,)
-    |   |   Values: [   0.      -4.575   -9.15  ... -594.75  -599.325 -603.9  ]
-    |   |   Min: -603.9
-    |   |   Max: 0.0
+    |   |   StatArray
+    |   |   Name:   elevation (m)
+    |   |   Address:['0x158aaac50']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
+    |   |   Min:    -604.8
+    |   |   Max:    -0.9
     |   |   has_posterior: False
     |   
     |   log:
     |   |   None
-    |   relativeTo:
-    |   |   Name: Elevation (m) 0x16d4708d0
-    |   |   Shape: (79,)
+    |   relative_to:
+    |   |   StatArray
+    |   |   Name:   Elevation (m)
+    |   |   Address:['0x158a35450']
+    |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   |   Min: 0.0
-    |   |   Max: 0.0
+    |   |   Min:    0.0
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     values:
-    |   Name: Mean Conductivity ($\frac{S}{m}$) 0x16cd22e50
-    |   Shape: (79, 132)
-    |   Values: [[0.00045657 0.00045657 0.0004565  ... 0.00054201 0.00054201 0.00054201]
-    |    [0.0004992  0.0004992  0.00049929 ... 0.0006536  0.0006536  0.0006536 ]
-    |    [0.00061429 0.00061429 0.00061429 ... 0.00094599 0.00094599 0.00094599]
+    |   StatArray
+    |   Name:   Mean Conductivity ($\frac{S}{m}$)
+    |   Address:['0x158a35dd0']
+    |   Shape:  (79, 132)
+    |   Values: [[0.00056777 0.00056777 0.00056795 ... 0.00059446 0.00059446 0.00059446]
+    |    [0.00052266 0.00052266 0.00052266 ... 0.00071041 0.00071041 0.00071041]
+    |    [0.00080071 0.00080071 0.00080071 ... 0.00104502 0.00104502 0.00104502]
     |    ...
-    |    [0.00828275 0.00828275 0.00829302 ... 0.00850303 0.00850303 0.00850303]
-    |    [0.00901768 0.00901768 0.00902754 ... 0.00835599 0.00835599 0.00835599]
-    |    [0.00925272 0.00925272 0.00930022 ... 0.00957266 0.00957266 0.00957266]]
-    |   Min: 0.00039894971238615474
-    |   Max: 1.1039260435132408
+    |    [0.00854703 0.00854703 0.00857136 ... 0.00167267 0.00167267 0.00167267]
+    |    [0.00894549 0.00894549 0.00908742 ... 0.00255047 0.00255047 0.00255047]
+    |    [0.00925526 0.00925526 0.00948505 ... 0.00507188 0.00507188 0.00507188]]
+    |   Min:    0.0004901610032814771
+    |   Max:    0.7309893437585234
     |   has_posterior: False
 
 
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
+    self.n_components=1, self.nTimes=array([26, 19])
 
 
 
@@ -709,7 +943,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 32.201 seconds)
+   **Total running time of the script:** (0 minutes 25.774 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_2D_plot_inference_2d_skytem.py:
@@ -725,6 +959,10 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     .. container:: sphx-glr-download sphx-glr-download-python
 
       :download:`Download Python source code: plot_inference_2d_skytem.py <plot_inference_2d_skytem.py>`
+
+    .. container:: sphx-glr-download sphx-glr-download-zip
+
+      :download:`Download zipped: plot_inference_2d_skytem.zip <plot_inference_2d_skytem.zip>`
 
 
 .. only:: html

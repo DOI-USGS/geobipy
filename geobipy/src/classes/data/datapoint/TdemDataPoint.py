@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
 
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from ...model.Model import Model
 from .EmDataPoint import EmDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
@@ -119,7 +120,7 @@ class TdemDataPoint(EmDataPoint):
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
             #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
 
-        self._additive_error = StatArray.StatArray(values, r'$\epsilon_{Additive}$', self.units)
+        self._additive_error = StatArray(values, r'$\epsilon_{Additive}$', self.units)
 
     @property
     def addressof(self):
@@ -154,7 +155,7 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def channels(self):
-        out = StatArray.StatArray(hstack([self.off_time(i) for i in range(self.nSystems)]), name='time', units='s')
+        out = DataArray(hstack([self.off_time(i) for i in range(self.nSystems)]), name='time', units='s')
         return out
 
     @property
@@ -191,7 +192,7 @@ class TdemDataPoint(EmDataPoint):
         else:
             assert size(values) == self.n_components, ValueError("predicted primary field must have size {}".format(self.n_components))
 
-        self._predicted_primary_field = StatArray.StatArray(values, "Predicted primary field", self.units)
+        self._predicted_primary_field = StatArray(values, "Predicted primary field", self.units)
 
     @property
     def predicted_secondary_field(self):
@@ -204,7 +205,7 @@ class TdemDataPoint(EmDataPoint):
         else:
             assert size(values) == self.nChannels, ValueError("predicted secondary field must have size {}".format(self.nChannels))
 
-        self._predicted_secondary_field = StatArray.StatArray(values, "Predicted secondary field", self.units)
+        self._predicted_secondary_field = StatArray(values, "Predicted secondary field", self.units)
 
     @property
     def primary_field(self):
@@ -218,7 +219,7 @@ class TdemDataPoint(EmDataPoint):
         else:
             assert size(values) == self.n_components * self.nSystems, ValueError("primary field must have size {}".format(self.n_components*self.nSystems))
 
-        self._primary_field = StatArray.StatArray(values, "Primary field", self.units)
+        self._primary_field = DataArray(values, "Primary field", self.units)
 
     @property
     def receiver(self):
@@ -243,7 +244,7 @@ class TdemDataPoint(EmDataPoint):
         else:
             assert size(values) == self.nChannels, ValueError("Secondary field must have size {}".format(self.nChannels))
 
-        self._secondary_field = StatArray.StatArray(values, "Secondary field", self.units)
+        self._secondary_field = DataArray(values, "Secondary field", self.units)
 
     @EmDataPoint.system.setter
     def system(self, value):
@@ -654,10 +655,10 @@ class TdemDataPoint(EmDataPoint):
 
         self.loop_pair = Loop_pair.fromHdf(grp['loop_pair'], **kwargs)
 
-        self._primary_field = StatArray.StatArray.fromHdf(grp['primary_field'], **kwargs)
-        self._secondary_field = StatArray.StatArray.fromHdf(grp['secondary_field'], **kwargs)
-        self._predicted_primary_field = StatArray.StatArray.fromHdf(grp['predicted_primary_field'], **kwargs)
-        self._predicted_secondary_field = StatArray.StatArray.fromHdf(grp['predicted_secondary_field'], **kwargs)
+        self._primary_field = StatArray.fromHdf(grp['primary_field'], **kwargs)
+        self._secondary_field = StatArray.fromHdf(grp['secondary_field'], **kwargs)
+        self._predicted_primary_field = StatArray.fromHdf(grp['predicted_primary_field'], **kwargs)
+        self._predicted_secondary_field = StatArray.fromHdf(grp['predicted_secondary_field'], **kwargs)
 
         return self
 
@@ -983,24 +984,6 @@ class TdemDataPoint(EmDataPoint):
 
         self.additive_error.proposal = proposal
 
-    # def set_predicted_data_posterior(self):
-    #     if self.predictedData.hasPrior:
-    #         times = log10(self.channels)
-    #         t0 = times.min()
-    #         t1 = times.max()
-    #         data = log10(self.data[self.active])
-    #         a = data.min()
-    #         b = data.max()
-
-    #         xbuf = 0.05*(t1 - t0)
-    #         xbins = StatArray.StatArray(logspace(t0-xbuf, t1+xbuf, 200), times.name, times.units)
-    #         buf = 0.5*(b - a)
-    #         ybins = StatArray.StatArray(logspace(a-buf, b+buf, 200), data.name, data.units)
-    #         # rto = 0.5 * (ybins[0] + ybins[-1])
-    #         # ybins -= rto
-
-    #         mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
-    #         self.predictedData.posterior = Histogram(mesh=mesh)
 
     @property
     def summary(self):
@@ -1010,18 +993,6 @@ class TdemDataPoint(EmDataPoint):
     def update_posteriors(self):
         super().update_posteriors()
         self.loop_pair.update_posteriors()
-
-    # def update_posteriors(self):
-    #     super().update_posteriors()
-
-        # if self.predictedData.hasPosterior:
-        #     active = self.active
-        #     for i in range(self.nSystems):
-        #         x = self.off_time(i)
-        #         for j in range(self.n_components):
-        #             i_comp = self._component_indices(j, i)
-        #             a = active[i_comp]
-        #             self.predictedData.posterior.update_with_line(x[a], self.predictedData[i_comp][a])
 
     def forward(self, model):
         """ Forward model the data from the given model """
@@ -1054,7 +1025,7 @@ class TdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        self._sensitivity_matrix = StatArray.StatArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
         return self.sensitivity_matrix
 
     def fm_dlogc(self, model):
@@ -1081,7 +1052,7 @@ class TdemDataPoint(EmDataPoint):
 
         #     self.predicted_primary_field[s] = hstack(primary)
 
-        self._sensitivity_matrix = StatArray.StatArray(J, 'Sensitivity', '$\\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = DataArray(J, 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
 
     def _empymodForward(self, mod):
 
@@ -1173,9 +1144,9 @@ class TdemDataPoint(EmDataPoint):
 
         out._loop_pair = Loop_pair.Irecv(source, world)
 
-        out._primary_field = StatArray.StatArray.Irecv(source, world)
-        out._secondary_field = StatArray.StatArray.Irecv(source, world)
-        out._predicted_primary_field = StatArray.StatArray.Irecv(source, world)
-        out._predicted_secondary_field = StatArray.StatArray.Irecv(source, world)
+        out._primary_field = DataArray.Irecv(source, world)
+        out._secondary_field = DataArray.Irecv(source, world)
+        out._predicted_primary_field = StatArray.Irecv(source, world)
+        out._predicted_secondary_field = StatArray.Irecv(source, world)
 
         return out

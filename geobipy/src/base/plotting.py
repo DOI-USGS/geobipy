@@ -1,5 +1,4 @@
-# import matplotlib as mpl
-#mpl.use('TkAgg')
+import matplotlib as mpl
 
 from numpy import abs, arange, arctan, arctan2, asarray, atleast_2d, concatenate, cos, diff
 from numpy import float32, float64, gradient, hstack, isnan, linspace, log10, meshgrid, nanmax
@@ -601,6 +600,7 @@ def _pcolormesh(X, Y, values, **kwargs):
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
     kwargs['cmap'] = color_kwargs['cmap']
+    kwargs['shading'] = geobipy_kwargs['shading']
 
     ax = geobipy_kwargs['ax']
 
@@ -1460,6 +1460,7 @@ def pause(interval):
     from matplotlib import backends
 
     backend = plt.rcParams['backend']
+
     if backend in backends.backend_registry.list_builtin(backends.BackendFilter.INTERACTIVE):
         figManager = Gcf.get_active()
         if figManager is not None:

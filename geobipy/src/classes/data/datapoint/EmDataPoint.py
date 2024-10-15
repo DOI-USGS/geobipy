@@ -4,7 +4,8 @@ from numpy import r_, size, sum, zeros
 from numpy import all as npall
 
 from .DataPoint import DataPoint
-from ....classes.core import StatArray
+from ...core.DataArray import DataArray
+from ...statistics.StatArray import StatArray
 from ...mesh.RectilinearMesh1D import RectilinearMesh1D
 from ...statistics.Histogram import Histogram
 from ...model.Model import Model
@@ -98,7 +99,7 @@ class EmDataPoint(DataPoint):
         else:
             assert size(values) == self.nChannels, ValueError("data must have size {} not {}".format(self.nChannels, size(values)))
 
-        self._data = StatArray.StatArray(values, "Data", self.units)
+        self._data = DataArray(values, "Data", self.units)
 
     @property
     def n_components(self):
@@ -121,7 +122,7 @@ class EmDataPoint(DataPoint):
                 assert len(values) == self.nSystems, ValueError("predictedData as a list must have {} elements".format(self.nSystems))
                 values = hstack(values)
             assert size(values) == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
-        self._predictedData = StatArray.StatArray(values, "Predicted Data", self.units)
+        self._predictedData = StatArray(values, "Predicted Data", self.units)
 
     @property
     def system(self):
@@ -133,10 +134,10 @@ class EmDataPoint(DataPoint):
 
     @property
     def new_model(self):
-        mesh = RectilinearMesh1D(edges=StatArray.StatArray(asarray([0.0, inf]), 'Depth', 'm'))
-        conductivity = StatArray.StatArray(mesh.nCells.item(), 'Conductivity', r'$\frac{S}{m}$')
-        magnetic_susceptibility = StatArray.StatArray(mesh.nCells.item(), "Magnetic Susceptibility", r"$\kappa$")
-        magnetic_permeability = StatArray.StatArray(mesh.nCells.item(), "Magnetic Permeability", "$\frac{H}{m}$")
+        mesh = RectilinearMesh1D(edges=DataArray(asarray([0.0, inf]), 'Depth', 'm'))
+        conductivity = DataArray(mesh.nCells.item(), 'Conductivity', r'$\frac{S}{m}$')
+        magnetic_susceptibility = DataArray(mesh.nCells.item(), "Magnetic Susceptibility", r"$\kappa$")
+        magnetic_permeability = DataArray(mesh.nCells.item(), "Magnetic Permeability", "$\frac{H}{m}$")
 
         out = Model(mesh=mesh, values=conductivity)
         # out.setattr('magnetic_susceptibility', magnetic_susceptibility)
@@ -207,8 +208,8 @@ class EmDataPoint(DataPoint):
         """
 
         # tmp = deepcopy(self)
-        c = StatArray.StatArray(logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
-        PhiD = StatArray.StatArray(size(c), 'Normalized Data Misfit', '')
+        c = DataArray(logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
+        PhiD = DataArray(size(c), 'Normalized Data Misfit', '')
 
         model = self.new_model
 

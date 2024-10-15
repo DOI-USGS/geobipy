@@ -7,10 +7,8 @@ from numpy.linalg import norm
 from numpy import abs, arange, asarray, cumsum, empty, float32, float64, full
 from numpy import int32, int64, prod, reshape, unravel_index, s_, size, zeros
 from numpy import ndim as npndim
-from numpy.random import Generator, PCG64DXSM
-from randomgen import Xoshiro256
 import numpy as np
-from ..classes.core import StatArray
+from ..classes.statistics import StatArray
 
 class world3D(object):
 
