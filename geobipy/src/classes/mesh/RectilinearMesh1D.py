@@ -1435,7 +1435,7 @@ class RectilinearMesh1D(Mesh):
         self.nCells.reset_posteriors()
         self.edges.reset_posteriors()
 
-    def set_posteriors(self, nCells_posterior=None, edges_posterior=None):
+    def set_posteriors(self, nCells_posterior=None, edges_posterior=None, **kwargs):
 
         # Initialize the posterior histogram for the number of layers
         if nCells_posterior is None:
@@ -1447,10 +1447,11 @@ class RectilinearMesh1D(Mesh):
             assert not self.max_cells is None, ValueError(
                 "No priors are set, user self.set_priors().")
 
-            # Discretize the parameter values
-            grid = DataArray(arange(0.0, 1.1 * self.max_edge, 0.5*self.min_width), self.edges.name, self.edges.units)
-            mesh = RectilinearMesh1D(edges=grid)
+            number_of_edge_bins = kwargs.get('number_of_edge_bins', 0.5 * self.min_width)
 
+            # Discretize the parameter values
+            edges = DataArray(linspace(0.0, 1.01 * self.max_edge, number_of_edge_bins+1), self.edges.name, self.edges.units)
+            mesh = RectilinearMesh1D(edges=edges)
             # Initialize the interface Depth Histogram
             self.edges.posterior = Histogram.Histogram(mesh=mesh)
 
