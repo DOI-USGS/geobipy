@@ -108,24 +108,18 @@ class Inference3D(myObject):
 
         h5_files = Inference3D._get_h5Files(directory)
 
-        if world is None:
-            lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in h5_files]
-
-        else:
-            if global_access:
-                lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in h5_files]
-            else:
-                start, chunk = loadBalance1D_shrinkingArrays(len(h5_files), world.size)
-                my_files = h5_files[start[world.rank]:start[world.rank]+chunk[world.rank]]
-                lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in my_files]
+        # if world is None:
+        #     lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in h5_files]
+        # else:
+        lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in h5_files]
 
         data = deepcopy(lines[0].data)
 
-        for line in lines[1:]:
-            t = line.data
-            data = data.append(line.data)
+        # for line in lines[1:]:
+        #     t = line.data
+        #     data = data.append(line.data)
 
-        self = cls(data, world=world, prng=prng, global_access=global_access)
+        self = cls(None, world=world, prng=prng, global_access=global_access)
         self.mode = kwargs.get('mode', 'r')
         self._lines = lines
         return self
@@ -171,7 +165,7 @@ class Inference3D(myObject):
 
     @data.setter
     def data(self, value):
-        assert isinstance(value, Data), TypeError("data must have type geobipy.Data")
+        # assert isinstance(value, Data), TypeError("data must have type geobipy.Data")
         self._data = value
 
     @property
@@ -384,11 +378,10 @@ class Inference3D(myObject):
     @property
     def lines(self):
         if self.parallel_access:
-            if self.global_access:
-                start, chunk = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
-                return self._lines[start[self.rank] : start[self.rank]+chunk[self.rank]]
-            else:
-                return self._lines
+            start, chunk = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+            return self._lines[start[self.rank] : start[self.rank]+chunk[self.rank]]
+            # else:
+            #     return self._lines
         else:
             return self._lines
 
@@ -402,7 +395,7 @@ class Inference3D(myObject):
 
     @property
     def nLines(self):
-        return self.data.nLines
+        return size(self._lines)
 
     def _get(self, variable, reciprocateParameter=False, **kwargs):
 
@@ -1857,11 +1850,14 @@ class Inference3D(myObject):
         output = kwargs.pop('output_directory', '.')
 
         for this in bar:
-            fig = this.plot_summary(**kwargs)
-            fig.savefig(f"{output}//{this.line_number}.png")
-            plt.close(fig)
-            this.close()
-            del this
+            try:
+                fig = this.plot_summary(**kwargs)
+                fig.savefig(f"{output}//{this.line_number}.png")
+                plt.close(fig)
+            except:
+                pass
+            # this.close()
+            # del this
 
 
     def scatter_z_slice_animate(self, variable, filename, **kwargs):
