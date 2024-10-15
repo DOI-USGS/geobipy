@@ -17,6 +17,7 @@ from ..classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
 
 import numpy as np
 from ..base.utilities import isInt
+from pprint import pprint
 
 
 global_dict = {'FdemData': FdemData,
@@ -37,12 +38,10 @@ class user_parameters(dict):
             raise ValueError("Missing {} from the user parameter file".format(missing))
 
         kwargs.pop('join', None)
-        kwargs['gradient_standard_deviation'] = 1.5 if kwargs.get('gradient_standard_deviation') is None else kwargs.get('gradient_standard_deviation')
-        kwargs['multiplier'] = float64(1.0) if kwargs.get('multiplier') is None else kwargs.get('multiplier')
+
+        kwargs =self.optional_arguments(**kwargs)
+
         kwargs['stochastic_newton'] = not kwargs.get('ignore_likelihood', False)
-        kwargs['factor'] = float64(10.0) if kwargs.get('factor') is None else kwargs.get('factor')
-        kwargs['covariance_scaling'] = float64(1.0) if kwargs.get('covariance_scaling') is None else kwargs.get('covariance_scaling')
-        # kwargs['parameter_limits'] = np.r_[1e-10, 1e10] if kwargs.get('parameter_limits') is None else kwargs.get('parameter_limits')
 
         kwargs['data_filename'] = join(kwargs['data_directory'], kwargs['data_filename'])
         if isinstance(kwargs['system_filename'], list):
@@ -57,6 +56,17 @@ class user_parameters(dict):
 
     def __deepcopy__(self, memo={}):
         return deepcopy(self)
+
+    def optional_arguments(self, **kwargs):
+        kwargs = self.assign_default('gradient_standard_deviation', float64(1.5), **kwargs)
+        kwargs = self.assign_default('multiplier', float64(1.0), **kwargs)
+        kwargs = self.assign_default('factor', float64(10.0), **kwargs)
+        kwargs = self.assign_default('covariance_scaling', float64(0.5), **kwargs)
+        return kwargs
+
+    def assign_default(self, key, value, **kwargs):
+        kwargs[key] = value if kwargs.get(key) is None else kwargs.get(key)
+        return kwargs
 
     @property
     def required_keys(self):
