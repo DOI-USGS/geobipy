@@ -451,20 +451,21 @@ class Histogram(Model):
         self.mesh.plot_line(value, **kwargs)
 
 
-    def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
+    def plotCredibleIntervals(self, percent=[95.0], axis=0, **kwargs):
 
-        med, low, high = self.credible_intervals(percent=percent, axis=axis)
+        for p in percent:
+            med, low, high = self.credible_intervals(percent=p, axis=axis)
 
-        kwargs['color'] = '#5046C8'
-        kwargs['linestyle'] = 'dashed'
-        kwargs['linewidth'] = 1
-        kwargs['alpha'] = 0.6
+            kwargs['color'] = '#5046C8'
+            kwargs['linestyle'] = 'dashed'
+            kwargs['linewidth'] = 1
+            kwargs['alpha'] = 0.6
 
-        p = 0.5 * minimum(percent, 100.0-percent)
-        kwargs['label'] = '{}%'.format(p)
-        self.mesh.plot_line(low, axis=axis, **kwargs)
-        kwargs['label'] = '{}%'.format(100.0 - p)
-        self.mesh.plot_line(high, axis=axis, **kwargs)
+            p = 0.5 * minimum(p, 100.0-p)
+            kwargs['label'] = '{}%'.format(p)
+            self.mesh.plot_line(low, axis=axis, **kwargs)
+            kwargs['label'] = '{}%'.format(100.0 - p)
+            self.mesh.plot_line(high, axis=axis, **kwargs)
 
     def plotMean(self, log=None, axis=0, **kwargs):
 
