@@ -5,7 +5,7 @@ from copy import deepcopy
 
 from numpy import arange, argwhere, array, asarray, atleast_1d
 from numpy import cumsum, diag, diff, dot, exp,expand_dims, float64, full, hstack, inf, int_
-from numpy import int32, int64, integer, interp, isclose, isinf, isnan, logical_not, kron
+from numpy import int32, int64, integer, interp, isclose, isinf, isnan, linspace, logical_not, kron
 from numpy import maximum, mean, min, minimum, nan, ndim, ones, r_, repeat, s_, shape, sign
 from numpy import size, sqrt, squeeze, where, zeros
 from numpy import log as nplog
@@ -261,8 +261,10 @@ class RectilinearMesh1D(Mesh):
     @property
     def edge_to_edge(self):
 
-        b = self.edges[-2] if self.open_right else self.edges[-1]
-        a = self.edges[1] if self.open_left else self.edges[0]
+        large = 1e6
+
+        a = self.edges[1]-large if self.open_left else self.edges[0]
+        b = self.edges[-2]+large if self.open_right else self.edges[-1]
 
         return b - a
 
@@ -720,7 +722,6 @@ class RectilinearMesh1D(Mesh):
 
         x = self.widths.copy()
         e2e = self.edge_to_edge
-        e2e = 10000.0
 
         # Sort out infinity here
         if self.open_left:
@@ -753,7 +754,6 @@ class RectilinearMesh1D(Mesh):
         x = self.widths.copy()
 
         e2e = self.edge_to_edge
-        # e2e = 10000.0
 
         # Sort out infinity here
         if self.open_left:

@@ -398,7 +398,7 @@ class Model(myObject):
         # dfk = (J'Wd'(f(remapped) - dObserved) + Wm'Wm(sigma - sigma_ref))
         dfk = remapped_model.local_gradient(observation=observation)
 
-        pk = -dot(H, dfk)
+        pk = -0.5 * dot(H, dfk)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
