@@ -7,7 +7,7 @@ from datetime import timedelta
 
 from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
-from numpy import max, min, log, array, full, longdouble, exp, maximum, sqrt
+from numpy import max, min, log, log10, array, full, longdouble, exp, maximum, sqrt
 
 from numpy.random import Generator
 from numpy.linalg import norm
@@ -76,7 +76,7 @@ class Inference1D(myObject):
     """
 
     def __init__(self,
-                 covariance_scaling:float = 0.75,
+                 covariance_scaling:float = 1.0,
                  high_variance:float = inf,
                  ignore_likelihood:bool = False,
                  interactive_plot:bool = True,
@@ -375,6 +375,11 @@ class Inference1D(myObject):
         # Compute the data misfit
         self.data_misfit = datapoint.data_misfit()
 
+        self.data_misfit_v = DataArray(2 * self.n_markov_chains, name='Data Misfit')
+        self.data_misfit_v[0] = self.data_misfit
+        self._n_target_hits = 0
+        self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
+
         # # Calibrate the response if it is being solved for
         # if (self.kwargs.solveCalibration):
         #     self.datapoint.calibrate()
@@ -404,18 +409,9 @@ class Inference1D(myObject):
 
         # Initialize the vectors to save results
         # StatArray of the data misfit
-
-        self.data_misfit_v = DataArray(2 * self.n_markov_chains, name='Data Misfit')
-        self.data_misfit_v[0] = self.data_misfit
-
-        target = sum(self.datapoint.active)
-        self._n_target_hits = 0
-
-        self.data_misfit_v.prior = Distribution('chi2', df=target, prng=self.prng)
-
         self.relative_chi_squared_fit = 100.0
 
-        edges = DataArray(linspace(1, 2*target))
+        edges = DataArray(linspace(1, 2*sum(self.datapoint.active)))
         self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
 
         # Initialize a stopwatch to keep track of time
@@ -487,7 +483,7 @@ class Inference1D(myObject):
         halfspace = self.datapoint.find_best_halfspace()
 
         # dprint('halfspace', halfspace.values)
-        self.halfspace = DataArray(halfspace.values, 'halfspace')
+        self.halfspace = halfspace.values
 
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
@@ -532,7 +528,7 @@ class Inference1D(myObject):
                          kwargs['probability_of_no_change']]
         self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, prng=self.prng)
 
-        self.model.set_posteriors()
+        self.model.set_posteriors(number_of_edge_bins=kwargs['number_of_depth_bins'])
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
@@ -683,7 +679,7 @@ class Inference1D(myObject):
 
         if self.save_png:
             self.plot_posteriors(axes = self.posterior_ax, fig=self.posterior_fig)
-            self.toPNG('.', self.datapoint.fiducial)
+            self.toPNG(f'.//{self.datapoint.fiducial.item()}.png')
 
         return failed
 
@@ -966,11 +962,10 @@ class Inference1D(myObject):
         with h5py.File(join(outdir, str(fiducial)+'.h5'), 'w') as f:
             self.toHdf(f, str(fiducial))
 
-    def toPNG(self, directory, fiducial, dpi=300):
+    def toPNG(self, filename, dpi=300):
        """ save a png of the results """
        self.posterior_fig.set_size_inches(19, 11)
-       figName = join(directory, '{}.png'.format(fiducial))
-       self.posterior_fig.savefig(figName, dpi=dpi)
+       self.posterior_fig.savefig(filename, dpi=dpi)
 
     def read(self, fileName, system_file_path, fiducial=None, index=None):
         """ Reads a data point's results from HDF5 file """
