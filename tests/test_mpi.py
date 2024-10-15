@@ -1,7 +1,6 @@
 import numpy as np
 from mpi4py import MPI
 from geobipy import StatArray
-from geobipy import PointCloud3D
 from geobipy import Point
 from geobipy import Data
 from geobipy import DataPoint
@@ -174,21 +173,21 @@ sSave = np.full([N, 4], 5.0)
 pSave = np.ones([N, 4])
 
 ##############################################################################
-# Test the Pointcloud3D
+# Test the Point
 ##############################################################################
 if master:
-    pc = PointCloud3D(xSave, ySave, zSave)
+    pc = Point(xSave, ySave, zSave)
 else:
-    pc = PointCloud3D()
+    pc = Point()
 
 # Bcast
 pc1 = pc.Bcast(world)
-assert np.all(pc1.x == xSave) and np.all(pc1.y == ySave) and np.all(pc1.z == zSave), Exception("Could not use PointCloud3D.Bcast. Rank {}".format(rank))
+assert np.all(pc1.x == xSave) and np.all(pc1.y == ySave) and np.all(pc1.z == zSave), Exception("Could not use Point.Bcast. Rank {}".format(rank))
 
 # Scatterv
 pc1 = pc.Scatterv(starts, chunks, world)
 
-assert np.all(pc1.x == xSave[i0:i1]) and np.all(pc1.y == ySave[i0:i1]) and np.all(pc1.z == zSave[i0:i1]), Exception("Could not use PointCloud3D.Scatterv. Rank {}".format(rank))
+assert np.all(pc1.x == xSave[i0:i1]) and np.all(pc1.y == ySave[i0:i1]) and np.all(pc1.z == zSave[i0:i1]), Exception("Could not use Point.Scatterv. Rank {}".format(rank))
 
 ##############################################################################
 # Test the Data class
@@ -393,6 +392,3 @@ assert np.allclose(tdp.secondary_field, tdSave.secondary_field[rank, :], equal_n
 assert np.allclose(tdp.data, tdSave.data[rank, :], equal_nan=True), Exception("Could not use TdemData.Isend/Irecv. Rank {}".format(rank))
 
 print("All tests passed. Rank {}".format(rank), flush=True)
-
-
-
