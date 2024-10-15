@@ -114,7 +114,7 @@ class ChiSquared(baseDistribution):
         """ For a realization x, compute the probability """
 
         if self.log:
-            x= log(x)
+            x = log(x)
 
         if log:
             return DataArray(chi2.logpdf(df=self.df, x=x), "Probability Density")
