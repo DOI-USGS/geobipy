@@ -672,7 +672,6 @@ class TdemData(Data):
 
     @property
     def channels_per_system(self):
-        print(f'{self.n_components=}, {self.nTimes=}')
         return self.n_components * self.nTimes
 
     def _read_record(self, record=None, mpi_enabled=False):
