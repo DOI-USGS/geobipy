@@ -62,6 +62,8 @@ class user_parameters(dict):
         kwargs = self.assign_default('multiplier', float64(1.0), **kwargs)
         kwargs = self.assign_default('factor', float64(10.0), **kwargs)
         kwargs = self.assign_default('covariance_scaling', float64(0.5), **kwargs)
+        if "number_of_depth_bins" in kwargs:
+            kwargs["number_of_edge_bins"] = kwargs.pop("number_of_depth_bins")
         return kwargs
 
     def assign_default(self, key, value, **kwargs):

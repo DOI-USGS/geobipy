@@ -528,7 +528,7 @@ class Inference1D(myObject):
                          kwargs['probability_of_no_change']]
         self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, prng=self.prng)
 
-        self.model.set_posteriors(number_of_edge_bins=kwargs['number_of_depth_bins'])
+        self.model.set_posteriors(**kwargs)
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """

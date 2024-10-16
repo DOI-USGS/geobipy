@@ -1447,10 +1447,11 @@ class RectilinearMesh1D(Mesh):
             assert not self.max_cells is None, ValueError(
                 "No priors are set, user self.set_priors().")
 
-            number_of_edge_bins = kwargs.get('number_of_edge_bins', 0.5 * self.min_width)
+            number_of_edge_bins = kwargs.get('number_of_edge_bins', int(self.max_edge / (0.5 * self.min_width)))
 
             # Discretize the parameter values
             edges = DataArray(linspace(0.0, 1.01 * self.max_edge, number_of_edge_bins+1), self.edges.name, self.edges.units)
+
             mesh = RectilinearMesh1D(edges=edges)
             # Initialize the interface Depth Histogram
             self.edges.posterior = Histogram.Histogram(mesh=mesh)

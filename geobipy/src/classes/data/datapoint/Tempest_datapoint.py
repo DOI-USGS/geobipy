@@ -537,7 +537,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         """
         if self.additive_error_multiplier.hasPrior:
-            bins = DataArray(atleast_2d(self.additive_error_multiplier.prior.bins()), name=self.additive_error_multiplier.name)
+            bins = DataArray(atleast_2d(self.additive_error_multiplier.prior.bins(nBins=200)), name=self.additive_error_multiplier.name)
 
             posterior = []
             for i in range(self.n_components):

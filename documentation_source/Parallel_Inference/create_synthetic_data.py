@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-from geobipy import RectilinearMesh2D_stitched
-from geobipy import RectilinearMesh1D
 from geobipy import Model
-from geobipy import CircularLoops
-from geobipy import Distribution
 from geobipy import get_prng
 
 import numpy as np
@@ -51,7 +47,7 @@ def create_resolve(model):
     make_figure(ds, model, title)
 
 def create_skytem(model):
-    from geobipy import TdemData, CircularLoops
+    from geobipy import TdemData
 
     title = 'skytem_' + model
 

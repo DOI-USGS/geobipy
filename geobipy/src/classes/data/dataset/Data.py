@@ -927,7 +927,7 @@ class Data(Point):
         if size(rTmp) == 1:
             rTmp = (rTmp)
 
-        ax = super().plot(x=x, values=self.data[:, rTmp], label=[self.channel_names[r] for r in rTmp], **kwargs)
+        ax = super().plot(x=x, values=self.data[:, rTmp], **kwargs)
 
         if legend:
             # Put a legend to the right of the current axis
