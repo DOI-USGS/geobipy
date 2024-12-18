@@ -567,7 +567,7 @@ class RectilinearMesh1D(Mesh):
         """
 
         edges = self.edges
-        values = values.copy()
+        values = atleast_1d(values)
 
         # Remove values that are out of bounds
         if trim:
@@ -1774,9 +1774,11 @@ class RectilinearMesh1D(Mesh):
 
         # If relative_to is present, the edges/centres should be 1 dimensional
         relative_to = None
-        if 'relative_to' in grp:
-            i = index if grp['relative_to/data'].size > 1 else None
-            relative_to = DataArray.fromHdf(grp['relative_to'], index=i, skip_posterior=skip_posterior)
+        key = 'relative_to' if 'relative_to' in grp else 'relativeTo'
+
+        if key in grp:
+            i = index if grp[f'{key}/data'].size > 1 else None
+            relative_to = DataArray.fromHdf(grp[key], index=i, skip_posterior=skip_posterior)
 
             s = index if nCells is None else s_[:nCells.item() + 1]
             pi = None #if nCells is None else s_[:]
@@ -1820,8 +1822,9 @@ class RectilinearMesh1D(Mesh):
 
         # If relative_to is present, the edges/centres should be 1 dimensional
         relative_to = None
-        if 'relative_to' in grp:
-            relative_to = StatArray.fromHdf(grp['relative_to'], index=index, skip_posterior=skip_posterior)
+        key = 'relative_to' if 'relative_to' in grp else 'relativeTo'
+        if key in grp:
+            relative_to = StatArray.fromHdf(grp[key], index=index, skip_posterior=skip_posterior)
         #     edges = StatArray.fromHdf(grp['edges'], skip_posterior=skip_posterior)
         # else:
 
@@ -1863,8 +1866,9 @@ class RectilinearMesh1D(Mesh):
 
         # If relative_to is present, the edges/centres should be 1 dimensional
         relative_to = None
-        if 'relative_to' in grp:
-            relative_to = DataArray.fromHdf(grp['relative_to'], index=index, skip_posterior=skip_posterior)
+        key = 'relative_to' if 'relative_to' in grp else 'relativeTo'
+        if key in grp:
+            relative_to = DataArray.fromHdf(grp[key], index=index, skip_posterior=skip_posterior)
             if relative_to == 0.0:
                 relative_to = None
 
@@ -1887,7 +1891,8 @@ class RectilinearMesh1D(Mesh):
         s = s_[:self.nCells.item()]
         if index is not None:
             s = (index, s)
-        return StatArray.fromHdf(grp, key, index=s, skip_posterior=skip_posterior)
+
+        return StatArray.fromHdf(grp[key], index=s, skip_posterior=skip_posterior)
 
     @property
     def summary(self):
