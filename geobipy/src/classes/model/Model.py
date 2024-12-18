@@ -72,6 +72,9 @@ class Model(myObject):
 
     @property
     def gradient(self):
+        return self._gradient
+
+    def compute_gradient(self):
         r"""Compute the gradient
 
         Parameter gradient :math:"\nabla_{z}\sigma" at the ith layer is computed via
@@ -229,8 +232,10 @@ class Model(myObject):
 
         if self.nCells.item() == 1:
             tmp = self.insert_edge(nplog(self.mesh.min_edge) + (0.5 * (self.mesh.max_edge - self.mesh.min_edge)))
+            tmp.compute_gradient()
             return tmp.gradient.probability(log=log)
         else:
+            self.compute_gradient()
             return self.gradient.probability(log=log)
 
     def insert_edge(self, edge, value=None):
@@ -743,6 +748,7 @@ class Model(myObject):
                                             prng=kwargs.get('prng'))
 
         self.set_values_prior(values_prior)
+        self.compute_gradient()
         self.set_gradient_prior(gradient_prior)
 
     def set_values_prior(self, prior):
