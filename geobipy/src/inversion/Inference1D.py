@@ -860,6 +860,7 @@ class Inference1D(myObject):
 
         overlay = self.best_datapoint if self.burned_in else self.datapoint
 
+        # if self.datapoint.hasPosterior:
         self.datapoint.plot_posteriors(
             axes=self.posterior_ax[3],
             # height_kwargs={
@@ -1115,7 +1116,7 @@ class Inference1D(myObject):
                 update_plot_every = array(hdfFile.get('update_plot_every', 5000)),
                 dont_initialize = True,
                 prng=prng)
-        self._datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
+        self.datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
 
         s = s_[index, :]
 
@@ -1143,6 +1144,7 @@ class Inference1D(myObject):
         self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
 
         self.model = hdfRead.readKeyFromFile(hdfFile, '', '/', 'model', index=index)
+
         self.best_model = self.model
 
         self.halfspace = hdfRead.readKeyFromFile(hdfFile, '', '/', 'halfspace', index=index)
