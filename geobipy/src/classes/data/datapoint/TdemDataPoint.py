@@ -2,6 +2,8 @@ from os.path import split as psplt
 from os.path import join
 from copy import deepcopy
 
+from itertools import cycle
+
 from numpy import append, argwhere, asarray, cumsum, diag_indices, empty, exp, float64
 from numpy import hstack, int32, log, nan, ravel_multi_index, repeat, s_, size, sqrt, squeeze
 from numpy import all as npall
@@ -836,8 +838,8 @@ class TdemDataPoint(EmDataPoint):
         ax = kwargs.pop('ax', None)
         ax = plt.gca() if ax is None else ax
 
-        markers = kwargs.pop('marker', ['o', 'x', 'v'])
-        kwargs['markersize'] = kwargs.pop('markersize', 1)
+        markers = tuple(kwargs.pop('marker', ('o', 'x', 'v')))
+        kwargs['markersize'] = kwargs.pop('markersize', 3)
         c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
@@ -854,12 +856,15 @@ class TdemDataPoint(EmDataPoint):
         kwargs.pop('logX', None)
         kwargs.pop('logY', None)
 
+        marker = cycle(markers)
+
         for j in range(self.nSystems):
             system_times = self.off_time(j)
 
             for k in range(self.n_components):
 
-                kwargs['marker'] = markers[self._components[k]]
+                # kwargs['marker'] = markers[self._components[k]]
+                kwargs['marker'] = next(marker)
 
                 icomp = self._component_indices(k, j)
                 d = self.data[icomp]
