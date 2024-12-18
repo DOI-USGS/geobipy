@@ -34,7 +34,6 @@ try:
 except:
     gmt = False
 
-
 class Point(myObject):
     """3D Point Cloud with x,y,z co-ordinates
 
@@ -64,7 +63,7 @@ class Point(myObject):
     def __init__(self, x=None, y=None, z=None, elevation=None, **kwargs):
         """ Initialize the class """
 
-        # # Number of points in the cloud
+        # Number of points in the cloud
         self._nPoints = 0
         self._x = StatArray(self._nPoints, "Easting", "m")
         self._y = StatArray(self._nPoints, "Northing", "m")
