@@ -782,7 +782,8 @@ class TdemDataPoint(EmDataPoint):
 
 
         axes[0].clear()
-        self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
+        if self.predictedData.hasPosterior:
+            self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
         self.plot(ax=axes[0], **data_kwargs)
 
         c = cp.wellSeparated[0] if overlay is None else cp.wellSeparated[3]
