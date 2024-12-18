@@ -359,7 +359,7 @@ class FdemData(Data):
         if not isinstance(i, slice):
             i = unique(i)
 
-        return FdemData(self.system,
+        return type(self)(self.system,
                        x=self.x[i],
                        y=self.y[i],
                        z=self.z[i],

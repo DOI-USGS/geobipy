@@ -72,7 +72,7 @@ class Data(Point):
                  '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
                  '_system', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_channels')
 
-    def __init__(self, components=None, channels_per_system=1, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channel_names=None, **kwargs):
+    def __init__(self, components=None, channels_per_system=0, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channel_names=None, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
@@ -207,9 +207,9 @@ class Data(Point):
         assert npall(channel < self.channels_per_system[system]), ValueError("channel must be < {} for system {}".format(self.channels_per_system[system], system))
         return self.systemOffset[system] + channel
 
-    # @property
-    # def channels_per_system(self):
-    #     return self._channels_per_system
+    @property
+    def channels_per_system(self):
+        return self._channels_per_system
 
     # @channels_per_system.setter
     # def channels_per_system(self, values):
@@ -241,7 +241,7 @@ class Data(Point):
     @property
     def data(self):
         """The data. """
-        if size(self._data, 0) == 0:
+        if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
             self._data = DataArray((self.nPoints, self.nChannels), "Data", self.units)
         return self._data
 
@@ -316,7 +316,7 @@ class Data(Point):
     @nChannels.setter
     def nChannels(self, value):
         if (sum(self.channels_per_system) == 0) and (value > 0):
-            self.channels_per_system = int32(value)
+            self._channels_per_system = int32(value)
 
     @property
     def n_components(self):
@@ -374,12 +374,12 @@ class Data(Point):
 
     @property
     def std(self):
-        """The data. """
-        if size(self._std, 0) == 0:
-            self._std = DataArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+        shp = (self.nPoints, self.nChannels)
+        if not allclose(self._std.shape, shp):
+            self._std = DataArray(shp, "Standard deviation", self.units)
 
-        relative_error = self.relative_error[:, None] * self.data
-        self._std[:, :] = sqrt((relative_error**2.0) + (self.additive_error[:, None]**2.0))
+        relative_error = self.relative_error * self.data
+        self._std[:, :] = sqrt((relative_error**2.0) + (self.additive_error**2.0))
 
         return self._std
 
@@ -557,7 +557,7 @@ class Data(Point):
         self.lineNumber = df[channels[0]].values
         self.fiducial = df[channels[1]].values
 
-    def _systemIndices(self, system=0):
+    def _systemIndices(self, system=None):
         """The slice indices for the requested system.
 
         Parameters
@@ -571,6 +571,9 @@ class Data(Point):
             The slice pertaining to the requested system.
 
         """
+
+        if system is None:
+            return [s_[self.systemOffset[x]:self.systemOffset[x+1]] for x in range(self.nSystems)]
 
         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
         return s_[self.systemOffset[system]:self.systemOffset[system+1]]
@@ -626,7 +629,7 @@ class Data(Point):
         if not isinstance(i, slice):
             i = unique(i)
 
-        return type(self)(nChannelsPerSystem=self.nChannelsPerSystem,
+        return type(self)(channels_per_system=self.channels_per_system,
                    x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
                    data=self.data[i, :], std=self.std[i, :],
                    predictedData=self.predictedData[i, :],

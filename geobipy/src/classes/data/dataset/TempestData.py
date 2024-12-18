@@ -66,7 +66,6 @@ class TempestData(TdemData):
 
     @property
     def additive_error(self):
-        """The data. """
         if size(self._additive_error, 0) == 0:
             self._additive_error = DataArray((self.nPoints, self.nChannels), "Additive error", "%")
         return self._additive_error

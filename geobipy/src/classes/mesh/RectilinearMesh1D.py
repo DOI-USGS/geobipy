@@ -349,15 +349,13 @@ class RectilinearMesh1D(Mesh):
 
     @property
     def min_width(self):
-        if self._min_width is None:
-            return 1.0
         return self._min_width
 
     @min_width.setter
     def min_width(self, value):
         self._min_width = value
         if value is None:
-            self._min_width = 1.0#(self.max_edge - self.min_edge) / (2.0 * self.max_cells)
+            self._min_width = (self.max_edge - self.min_edge) / (2.0 * self.max_cells)
         if self._min_width > self.min_edge:
             self._min_edge = self._min_width
 
