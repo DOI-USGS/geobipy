@@ -92,6 +92,7 @@ class Inference1D(myObject):
                  solve_gradient:bool = True,
                  solve_parameter:bool = False,
                  update_plot_every:int = 5000,
+                 minimum_burn_in:int = 5000,
                  world = None,
                  **kwargs):
         """ Initialize the results of the inversion """
@@ -116,6 +117,7 @@ class Inference1D(myObject):
         self.low_variance = low_variance
         self.high_variance = high_variance
         self.covariance_scaling = covariance_scaling
+        self.minimum_burn_in = minimum_burn_in
 
         assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
 
@@ -517,6 +519,8 @@ class Inference1D(myObject):
         else:
             observation.sensitivity(self.model)
 
+        self.model.set_proposal_weights(**kwargs)
+
         local_variance = self.model.local_variance(observation)
 
         # Instantiate the proposal for the parameters.
@@ -526,7 +530,8 @@ class Inference1D(myObject):
                          kwargs['probability_of_death'],
                          kwargs['probability_of_perturb'],
                          kwargs['probability_of_no_change']]
-        self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, prng=self.prng)
+
+        self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, **kwargs)
 
         self.model.set_posteriors(**kwargs)
 
@@ -719,7 +724,7 @@ class Inference1D(myObject):
             # converged = (((self.iteration > 10000) and (self.relative_chi_squared_fit < 1.0)) or
             #              ((self.iteration > 10000) and (self._n_target_hits > 1000)))
 
-            converged = (self.iteration > 5000) and (self.data_misfit < target_misfit)
+            converged = (self.iteration > self.minimum_burn_in) and (self.data_misfit < target_misfit)
 
             if converged:
                 self.burned_in = True  # Let the results know they are burned in

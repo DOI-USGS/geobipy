@@ -398,7 +398,7 @@ class Model(myObject):
         # dfk = (J'Wd'(f(remapped) - dObserved) + Wm'Wm(sigma - sigma_ref))
         dfk = remapped_model.local_gradient(observation=observation)
 
-        pk = -0.5 * dot(H, dfk)
+        pk = -dot(H, dfk)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
@@ -420,12 +420,12 @@ class Model(myObject):
 
     def prior_derivative(self, order):
         # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ws)(m - mref)
-        operator = self.values.priorDerivative(order=2)
+        operator = self.value_weight * self.values.priorDerivative(order=2)
         # operator *= self.mesh.cell_weights
 
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
-            operator += dot(Wz.T, dot(self.gradient.priorDerivative(order=2), Wz))
+            operator += self.gradient_weight * dot(Wz.T, dot(self.gradient.priorDerivative(order=2), Wz))
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
@@ -728,7 +728,7 @@ class Model(myObject):
             if kwargs.get('solve_value', False):
                 assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
                 # Assign the initial prior to the parameters
-                variance = nplog(1.0 + kwargs.get('factor', 10.0))**2.0 #self.mesh.cell_weights /
+                variance = nplog(kwargs.get('parameter_standard_deviation', 11.0))**2.0
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
                                                 variance=variance,
                                                 ndim=self.mesh.nCells,
@@ -787,15 +787,24 @@ class Model(myObject):
 
         self.values.proposal = proposal
 
-        self.value_weight = Distribution("Normal",
-                                         mean=0.0,
-                                         variance=0.01,
-                                         prng=kwargs.get('prng', None))
-        self.gradient_weight = Distribution("Normal",
-                                         mean=0.0,
-                                         variance=0.01,
-                                         prng=kwargs.get('prng', None))
+        self.set_proposal_weights(**kwargs)
 
+        # self.value_weight = Distribution("Normal",
+        #                                  mean=0.0,
+        #                                  variance=0.01,
+        #                                  prng=kwargs.get('prng', None))
+        # self.gradient_weight = Distribution("Normal",
+        #                                  mean=0.0,
+        #                                  variance=0.01,
+        #                                  prng=kwargs.get('prng', None))
+
+    def set_proposal_weights(self, **kwargs):
+        value_weight = kwargs.get('parameter_weight', 1.0)
+        gradient_weight = kwargs.get('gradient_weight', 1.0)
+
+        mx = maximum(value_weight, gradient_weight)
+        self.value_weight = value_weight / mx
+        self.gradient_weight = gradient_weight / mx
 
     def take_along_axis(self, i, axis):
         s = [s_[:] for j in range(self.ndim)]
