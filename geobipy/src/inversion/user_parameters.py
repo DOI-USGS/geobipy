@@ -64,7 +64,7 @@ class user_parameters(dict):
         kwargs = self.assign_default('factor', float64(10.0), **kwargs)
         kwargs = self.assign_default('covariance_scaling', float64(1.0), **kwargs)
         kwargs = self.assign_default('parameter_weight', float64(1.0), **kwargs)
-        kwargs = self.assign_default('gradient_weight', float64(1.0), **kwargs)
+        kwargs = self.assign_default('gradient_weight', float64(0.0), **kwargs)
         kwargs = self.assign_default('minimum_burn_in', float64(5000.0), **kwargs)
 
         if "number_of_depth_bins" in kwargs:
