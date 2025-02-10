@@ -2,7 +2,7 @@
 """
 from copy import deepcopy
 
-from numpy import allclose, any, asarray, cumsum, empty, float64, full
+from numpy import allclose, any, asarray, atleast_2d, cumsum, empty, float64, full
 from numpy import hstack, int32, int64, isnan, nan, nanmax, nanmean, nanmedian, nanmin, nanstd
 from numpy import ravel_multi_index, repeat, s_, shape, size, sqrt, squeeze, unique, vstack, zeros
 from numpy import printoptions
@@ -202,6 +202,7 @@ class TdemData(Data):
     @predicted_secondary_field.setter
     def predicted_secondary_field(self, values):
         if values is not None:
+            values = atleast_2d(values)
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
             shp = (self.nPoints, self.nChannels)
@@ -256,6 +257,7 @@ class TdemData(Data):
     @secondary_field.setter
     def secondary_field(self, values):
         if values is not None:
+            values = atleast_2d(values)
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
             shp = (self.nPoints, self.nChannels)

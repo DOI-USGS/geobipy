@@ -5,7 +5,7 @@ from os.path import join
 from copy import deepcopy
 import matplotlib.pyplot as plt
 
-from numpy import allclose, arange, asarray, atleast_1d, float64, full, hstack, int32
+from numpy import allclose, arange, asarray, atleast_1d, atleast_2d, float64, full, hstack, int32
 from numpy import nan, ones, r_, repeat
 from numpy import s_, shape, size, vstack, zeros
 from pandas import read_csv
@@ -73,6 +73,8 @@ class TempestData(TdemData):
     @additive_error.setter
     def additive_error(self, values):
         if values is not None:
+            values = atleast_2d(values)
+
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
             shp = (self.nPoints, self.nChannels)
             if not allclose(self._additive_error.shape, shp):
