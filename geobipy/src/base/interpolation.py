@@ -1,21 +1,7 @@
 import subprocess
 
-from numpy import argwhere, ceil, column_stack, diff, floor, hstack, inf, int32, linspace, meshgrid
-from numpy import minimum, maximum, nan, nanmax, nanmin, tile, zeros
-
-from .fileIO import deleteFile
-from ..classes.statistics import StatArray
-from . import utilities as cf
-from scipy import interpolate
-from scipy.interpolate import CloughTocher2DInterpolator
-from scipy.interpolate.interpnd import _ndim_coords_from_arrays
-#from scipy.interpolate import Rbf
-from scipy.spatial import cKDTree
-try:
-    from netCDF4 import Dataset
-except:
-    Warning('For minimum curvature plotting, the netcdf4 package must be installed')
-    pass
+from numpy import ceil, hstack, inf, int32
+from numpy import minimum, maximum, nan, zeros
 
 from numba_kdtree import KDTree
 from numba import jit
