@@ -74,6 +74,7 @@ class TempestData(TdemData):
     @additive_error.setter
     def additive_error(self, values):
         if values is not None:
+            values = atleast_2d(values)
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
             shp = (self.nPoints, self.nChannels)
             if not allclose(self._additive_error.shape, shp):

@@ -3,7 +3,7 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 """
 from copy import copy, deepcopy
 
-from numpy import allclose, any, arange, asarray, atleast_1d, cumsum, diff, float64, full
+from numpy import allclose, any, arange, asarray, atleast_1d, atleast_2d, cumsum, diff, float64, full
 from numpy import hstack, int32, isnan, nan, ndim
 from numpy import ones, r_, s_, shape, size, sqrt, sum, unique
 from numpy import vstack, where, zeros
@@ -248,6 +248,7 @@ class Data(Point):
     @data.setter
     def data(self, values):
         if values is not None:
+            values = atleast_2d(values)
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
             shp = (self.nPoints, self.nChannels)
@@ -345,6 +346,7 @@ class Data(Point):
     def predictedData(self, values):
 
         if values is not None:
+            values = atleast_2d(values)
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
             shp = (self.nPoints, self.nChannels)
@@ -386,6 +388,7 @@ class Data(Point):
     @std.setter
     def std(self, values):
         if values is not None:
+            values = atleast_2d(values)
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
             shp = (self.nPoints, self.nChannels)
