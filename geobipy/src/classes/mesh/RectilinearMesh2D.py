@@ -824,8 +824,7 @@ class RectilinearMesh2D(Mesh):
                 kwargs['xscale'] = 'log'
             if self.y.log is not None:
                 kwargs['yscale'] = 'log'
-
-            if npall(values.shape != xm.shape) and npall(values.shape != (r_[*xm.shape]-1)):
+            if npall(values.shape != xm.shape) and npall(values.shape != (asarray(xm.shape)-1)):
                 values = values.T
 
             ax, pm, cb = cP.pcolormesh(xm, ym, values, **kwargs)
