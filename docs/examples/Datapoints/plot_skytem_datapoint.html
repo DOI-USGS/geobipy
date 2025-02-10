@@ -186,7 +186,7 @@ self.n_components=1, self.nTimes=array([26, 19])
 <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_skytem_datapoint_001.png" srcset="../../_images/sphx_glr_plot_skytem_datapoint_001.png" alt="Time Domain EM Data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy_docs/geobipy/src/classes/data/datapoint/TdemDataPoint.py:363: RuntimeWarning: divide by zero encountered in log
+<img src="../../_images/sphx_glr_plot_skytem_datapoint_001.png" srcset="../../_images/sphx_glr_plot_skytem_datapoint_001.png" alt="Time Domain EM Data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:363: RuntimeWarning: divide by zero encountered in log
   additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
 </pre></div>
 </div>
@@ -227,8 +227,8 @@ self.n_components=1, self.nTimes=array([26, 19])
 <span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-320327.7331520327
-643134.8665682999
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-320327.7331520333
+643134.8665683012
 </pre></div>
 </div>
 <p>Plot the misfits for a range of half space conductivities</p>
@@ -256,7 +256,7 @@ self.n_components=1, self.nTimes=array([26, 19])
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">tdp</span><span class="o">.</span><span class="n">data_misfit</span><span class="p">())</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>19656.31514467744
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>19656.31514467752
 </pre></div>
 </div>
 <p>We can attach priors to the height of the datapoint,
@@ -268,7 +268,7 @@ the relative error multiplier, and the additive error noise floor</p>
 <span class="n">tdp</span><span class="o">.</span><span class="n">set_priors</span><span class="p">(</span><span class="n">relative_error_prior</span><span class="o">=</span><span class="n">relativePrior</span><span class="p">,</span> <span class="n">additive_error_prior</span><span class="o">=</span><span class="n">additivePrior</span><span class="p">,</span> <span class="n">z_prior</span><span class="o">=</span><span class="n">z_prior</span><span class="p">,</span> <span class="n">prng</span><span class="o">=</span><span class="n">prng</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy_docs/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:135: DeprecationWarning: Conversion of an array with ndim &gt; 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:135: DeprecationWarning: Conversion of an array with ndim &gt; 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
   z_prior = Distribution(&#39;Uniform&#39;, min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
 </pre></div>
 </div>
@@ -356,7 +356,7 @@ are the start and end times, and start and end amplitudes of the waveform. e.g.
 Measurement Time, Data Value, Estimated Standard Deviation</p>
 <p>Example data files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.306 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.445 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-skytem-datapoint-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/e25fee0ca5adf0a7a06121d46c4bf8c5/plot_skytem_datapoint.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_skytem_datapoint.ipynb</span></code></a></p>

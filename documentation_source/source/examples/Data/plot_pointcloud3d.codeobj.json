@@ -1,0 +1,1981 @@
+{
+ "Other_PC": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point"
+  }
+ ],
+ "PC3D": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point"
+  }
+ ],
+ "PC3D.append": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.append"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.append"
+  }
+ ],
+ "PC3D.block_median": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.block_median"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.block_median"
+  }
+ ],
+ "PC3D.createHdf": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.createHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.createHdf"
+  }
+ ],
+ "PC3D.interpolate": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.interpolate"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.interpolate"
+  }
+ ],
+ "PC3D.map": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.map"
+  }
+ ],
+ "PC3D.nearest": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.nearest"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.nearest"
+  }
+ ],
+ "PC3D.read_csv": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.read_csv"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.read_csv"
+  }
+ ],
+ "PC3D.scatter2D": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.scatter2D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.scatter2D"
+  }
+ ],
+ "PC3D.set_kdtree": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.set_kdtree"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.set_kdtree"
+  }
+ ],
+ "PC3D.summary": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.summary"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.summary"
+  }
+ ],
+ "PC3D.to_vtk": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.to_vtk"
+  }
+ ],
+ "PC3D.writeHdf": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.writeHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.writeHdf"
+  }
+ ],
+ "PC3D.z": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.z"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.z"
+  }
+ ],
+ "PC3D1": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point"
+  }
+ ],
+ "PCsub": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point"
+  }
+ ],
+ "PCsub.map": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.map"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.map"
+  }
+ ],
+ "Point": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point"
+  }
+ ],
+ "Point.fromHdf": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.fromHdf"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.Point",
+   "module_short": "geobipy.Point",
+   "name": "fromHdf"
+  }
+ ],
+ "ax": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "tuple"
+  }
+ ],
+ "dataFolder": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "dum": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "dict"
+  }
+ ],
+ "f": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "h5py._hl.files",
+   "module_short": "h5py._hl.files",
+   "name": "File"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "h5py._hl",
+   "module_short": "h5py._hl",
+   "name": "File"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "h5py",
+   "module_short": "h5py",
+   "name": "File"
+  }
+ ],
+ "h5py.File": [
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl.files",
+   "module_short": "h5py._hl.files",
+   "name": "File"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl",
+   "module_short": "h5py._hl",
+   "name": "File"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py",
+   "module_short": "h5py",
+   "name": "File"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl.group",
+   "module_short": "h5py._hl.group",
+   "name": "Group"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl",
+   "module_short": "h5py._hl",
+   "name": "Group"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py",
+   "module_short": "h5py",
+   "name": "Group"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl.base",
+   "module_short": "h5py._hl.base",
+   "name": "HLObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl",
+   "module_short": "h5py._hl",
+   "name": "HLObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py",
+   "module_short": "h5py",
+   "name": "HLObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl.base",
+   "module_short": "h5py._hl.base",
+   "name": "MutableMappingHDF5"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl",
+   "module_short": "h5py._hl",
+   "name": "MutableMappingHDF5"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py",
+   "module_short": "h5py",
+   "name": "MutableMappingHDF5"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl.base",
+   "module_short": "h5py._hl.base",
+   "name": "CommonStateObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl",
+   "module_short": "h5py._hl",
+   "name": "CommonStateObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py",
+   "module_short": "h5py",
+   "name": "CommonStateObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl.base",
+   "module_short": "h5py._hl.base",
+   "name": "MappingHDF5"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py._hl",
+   "module_short": "h5py._hl",
+   "name": "MappingHDF5"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "h5py",
+   "module_short": "h5py",
+   "name": "MappingHDF5"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections.abc",
+   "module_short": "collections.abc",
+   "name": "MutableMapping"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections",
+   "module_short": "collections",
+   "name": "MutableMapping"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections.abc",
+   "module_short": "collections.abc",
+   "name": "Mapping"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections",
+   "module_short": "collections",
+   "name": "Mapping"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections.abc",
+   "module_short": "collections.abc",
+   "name": "Collection"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections",
+   "module_short": "collections",
+   "name": "Collection"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections.abc",
+   "module_short": "collections.abc",
+   "name": "Sized"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections",
+   "module_short": "collections",
+   "name": "Sized"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections.abc",
+   "module_short": "collections.abc",
+   "name": "Iterable"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections",
+   "module_short": "collections",
+   "name": "Iterable"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections.abc",
+   "module_short": "collections.abc",
+   "name": "Container"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "collections",
+   "module_short": "collections",
+   "name": "Container"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "h5py",
+   "module_short": "h5py",
+   "name": "File"
+  }
+ ],
+ "mesh": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.model.Model",
+   "module_short": "geobipy.src.classes.model.Model",
+   "name": "Model"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.model",
+   "module_short": "geobipy.src.classes.model",
+   "name": "Model"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Model"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Model"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Model"
+  }
+ ],
+ "mesh.to_vtk": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.model.Model",
+   "module_short": "geobipy.src.classes.model.Model",
+   "name": "Model.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.model",
+   "module_short": "geobipy.src.classes.model",
+   "name": "Model.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Model.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Model.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Model.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.to_vtk"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.to_vtk"
+  }
+ ],
+ "nPoints": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "int"
+  }
+ ],
+ "np.abs": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ufunc"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "abs"
+  }
+ ],
+ "np.cos": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ufunc"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "cos"
+  }
+ ],
+ "np.pi": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "float"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "pi"
+  }
+ ],
+ "np.random.rand": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "module.rand"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy.random",
+   "module_short": "numpy.random",
+   "name": "rand"
+  }
+ ],
+ "np.sin": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ufunc"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "sin"
+  }
+ ],
+ "p": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "tuple"
+  }
+ ],
+ "plt.figure": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "matplotlib.pyplot",
+   "module_short": "matplotlib.pyplot",
+   "name": "figure"
+  }
+ ],
+ "plt.show": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "matplotlib.pyplot",
+   "module_short": "matplotlib.pyplot",
+   "name": "show"
+  }
+ ],
+ "plt.subplot": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "matplotlib.pyplot",
+   "module_short": "matplotlib.pyplot",
+   "name": "subplot"
+  }
+ ],
+ "point": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud.Point",
+   "module_short": "geobipy.src.classes.pointcloud.Point",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.pointcloud",
+   "module_short": "geobipy.src.classes.pointcloud",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Point"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Point"
+  }
+ ],
+ "x": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ndarray"
+  }
+ ],
+ "y": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ndarray"
+  }
+ ],
+ "z": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "ndarray"
+  }
+ ]
+}

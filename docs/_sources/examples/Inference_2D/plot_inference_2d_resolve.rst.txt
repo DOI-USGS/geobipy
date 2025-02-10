@@ -225,7 +225,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 21.524 seconds)
+   **Total running time of the script:** (0 minutes 22.172 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_2D_plot_inference_2d_resolve.py:

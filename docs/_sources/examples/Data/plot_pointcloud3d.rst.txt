@@ -87,7 +87,7 @@ Append pointclouds together
  .. code-block:: none
 
 
-    <geobipy.src.classes.pointcloud.Point.Point object at 0x10efdda80>
+    <geobipy.src.classes.pointcloud.Point.Point object at 0x15d8bd710>
 
 
 
@@ -114,40 +114,40 @@ Write a summary of the contents of the point cloud
     x:
     |   StatArray
     |   Name:   Easting (m)
-    |   Address:['0x1462b7250']
+    |   Address:['0x15e618d50']
     |   Shape:  (400,)
-    |   Values: [-0.75575613 -0.37227056 -0.5082486  ...  0.91062364  0.56073342
-    |     0.52761544]
-    |   Min:    -0.9805553827696698
-    |   Max:    0.9916814356778278
+    |   Values: [-0.71137954 -0.3793497  -0.30956525 ...  0.14065745  0.05106131
+    |     0.88015259]
+    |   Min:    -0.9976593326444143
+    |   Max:    0.9920098541714664
     |   has_posterior: False
 
     y:
     |   StatArray
     |   Name:   Northing (m)
-    |   Address:['0x1462b72d0']
+    |   Address:['0x15e61a750']
     |   Shape:  (400,)
-    |   Values: [-0.15201495 -0.55717559 -0.53823673 ...  0.30290861  0.17254113
-    |     0.23398822]
-    |   Min:    -0.9899649834962019
-    |   Max:    0.9979698382486921
+    |   Values: [-0.37888241 -0.21170869 -0.82494396 ...  0.71680437  0.78865183
+    |     0.60356845]
+    |   Min:    -0.9966527811460972
+    |   Max:    0.9990626592727034
     |   has_posterior: False
 
     z:
     |   StatArray
     |   Name:   Height (m)
-    |   Address:['0x1462b7350']
+    |   Address:['0x15e61b8d0']
     |   Shape:  (400,)
-    |   Values: [-0.43897973  0.19632561 -0.01971922 ... -0.06368326 -0.02409831
-    |    -0.01448342]
-    |   Min:    -1.9063110648103332
-    |   Max:    0.22889687797869024
+    |   Values: [-0.6966743   0.11948867  0.11933325 ...  0.08488321  0.02947636
+    |    -0.09294835]
+    |   Min:    -1.9925193760132849
+    |   Max:    0.22842565578586502
     |   has_posterior: False
 
     elevation:
     |   StatArray
     |   Name:   Elevation (m)
-    |   Address:['0x1462b73d0']
+    |   Address:['0x15e61bad0']
     |   Shape:  (400,)
     |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   Min:    0.0
@@ -204,7 +204,7 @@ Plot the locations with Height as colour
  .. code-block:: none
 
 
-    (<Axes: xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x143a91b20>, <matplotlib.colorbar.Colorbar object at 0x144cb0c50>)
+    (<Axes: xlabel='Easting (m)', ylabel='Northing (m)'>, <matplotlib.collections.PathCollection object at 0x15e37bb60>, <matplotlib.colorbar.Colorbar object at 0x15e378050>)
 
 
 
@@ -290,16 +290,16 @@ Grid the points using a triangulated CloughTocher, or minimum curvature interpol
 
  .. code-block:: none
 
-    surface [WARNING]: 5 unusable points were supplied; these will be ignored.
+    surface [WARNING]: 2 unusable points were supplied; these will be ignored.
     surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
-    surface [WARNING]: 5 unusable points were supplied; these will be ignored.
+    surface [WARNING]: 2 unusable points were supplied; these will be ignored.
     surface [WARNING]: You should have pre-processed the data with block-mean, -median, or -mode.
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x17eb0c470>, <matplotlib.colorbar.Colorbar object at 0x17eca7650>)
+    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x15e482c00>, <matplotlib.colorbar.Colorbar object at 0x15e898d40>)
 
 
 
@@ -338,7 +338,7 @@ For lots of points, these surfaces can look noisy. Using a block filter will hel
     surface [WARNING]: Check that previous processing steps write results with enough decimals.
     surface [WARNING]: Possibly some data were half-way between nodes and subject to IEEE 754 rounding.
 
-    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x17ec7aea0>, <matplotlib.colorbar.Colorbar object at 0x17eeb34d0>)
+    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x15d6e0c20>, <matplotlib.colorbar.Colorbar object at 0x15daf4a70>)
 
 
 
@@ -412,7 +412,7 @@ Read in the xyz co-ordinates in columns 2,3,4 from a file. Skip 1 header line.
  .. code-block:: none
 
 
-    <geobipy.src.classes.pointcloud.Point.Point object at 0x17ed3c0e0>
+    <geobipy.src.classes.pointcloud.Point.Point object at 0x15e61e4d0>
 
 
 
@@ -449,7 +449,7 @@ Read in the xyz co-ordinates in columns 2,3,4 from a file. Skip 1 header line.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 19.063 seconds)
+   **Total running time of the script:** (0 minutes 2.708 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_pointcloud3d.py:

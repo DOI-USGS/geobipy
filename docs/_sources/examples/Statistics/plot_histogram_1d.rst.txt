@@ -147,7 +147,7 @@ Get the median, and 95% confidence values
 
  .. code-block:: none
 
-    (np.float64(-0.030000000000000027), np.float64(-1.83), np.float64(1.8299999999999996))
+    (np.float64(0.09000000000000008), np.float64(-1.95), np.float64(2.13))
 
 
 
@@ -441,7 +441,7 @@ We can update the histogram with some new values
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   bins (m)
-    |   |   Address:['0x17f6bebd0']
+    |   |   Address:['0x10e4489d0']
     |   |   Shape:  (100,)
     |   |   Values: [-2.97 -2.91 -2.85 ...  2.85  2.91  2.97]
     |   |   Min:    -2.9699999999999998
@@ -451,7 +451,7 @@ We can update the histogram with some new values
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   bins (m)
-    |   |   Address:['0x17f6bfad0']
+    |   |   Address:['0x1483f40d0']
     |   |   Shape:  (101,)
     |   |   Values: [-3.   -2.94 -2.88 ...  2.88  2.94  3.  ]
     |   |   Min:    -3.0
@@ -463,7 +463,7 @@ We can update the histogram with some new values
     |   relative_to:
     |   |   StatArray
     |   |   Name:   
-    |   |   Address:['0x17f088dd0']
+    |   |   Address:['0x153122bd0']
     |   |   Shape:  (1,)
     |   |   Values: [0.]
     |   |   Min:    0.0
@@ -473,9 +473,9 @@ We can update the histogram with some new values
     values:
     |   DataArray
     |   Name:   Frequency
-    |   Address:['0x17f08a550']
+    |   Address:['0x153121c50']
     |   Shape:  (100,)
-    |   Values: [2 0 0 ... 0 2 1]
+    |   Values: [1 1 2 ... 1 1 0]
     |   Min:    0
     |   Max:    88
 
@@ -487,7 +487,7 @@ We can update the histogram with some new values
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.972 seconds)
+   **Total running time of the script:** (0 minutes 1.229 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_histogram_1d.py:

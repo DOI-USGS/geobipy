@@ -114,7 +114,7 @@ We can plot the grid lines of the mesh.
  .. code-block:: none
 
 
-    (<Axes: xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x180d19bb0>, <matplotlib.colorbar.Colorbar object at 0x1824970b0>)
+    (<Axes: xlabel='Easting (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x15e1d42c0>, <matplotlib.colorbar.Colorbar object at 0x15e1d5e80>)
 
 
 
@@ -145,6 +145,24 @@ We can pcolor the mesh by providing cell values.
    :srcset: /examples/Meshes/images/sphx_glr_plot_rectilinear_mesh_2d_003.png
    :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    [0. 1. 2. ... 7. 8. 9.] [ 0.  1.  2. ... 17. 18. 19.]
+    [-0.25  0.25  0.75 ...  8.25  8.75  9.25] [-0.25  0.25  0.75 ... 18.25 18.75 19.25]
+    (10, 20)
+    [[-0.25]
+     [ 0.25]
+     [ 0.75]
+     ...
+     [ 8.25]
+     [ 8.75]
+     [ 9.25]]
+    (20, 1)
+    [[-0.25  0.25  0.75 ... 18.25 18.75 19.25]]
+    (1, 40)
 
 
 
@@ -407,8 +425,21 @@ Resample a grid
 
  .. code-block:: none
 
+    [0. 1. 2. ... 7. 8. 9.] [  0.   1.   3. ...  78.  91. 105.]
+    [-0.25  0.25  0.75 ...  8.25  8.75  9.25] [ -0.25   0.25   0.75 ... 110.75 111.25 111.75]
+    (10, 15)
+    [[-0.25]
+     [ 0.25]
+     [ 0.75]
+     ...
+     [ 8.25]
+     [ 8.75]
+     [ 9.25]]
+    (20, 1)
+    [[ -0.25   0.25   0.75 ... 110.75 111.25 111.75]]
+    (1, 225)
 
-    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x17faebb00>, <matplotlib.colorbar.Colorbar object at 0x17f487b60>)
+    (<Axes: >, <matplotlib.collections.QuadMesh object at 0x1483ecb60>, <matplotlib.colorbar.Colorbar object at 0x15d7cd340>)
 
 
 
@@ -472,7 +503,7 @@ Axes in log space
  .. code-block:: none
 
 
-    (<Axes: xlabel='x', ylabel='y'>, <matplotlib.collections.QuadMesh object at 0x182aca390>, <matplotlib.colorbar.Colorbar object at 0x17f6df0b0>)
+    (<Axes: xlabel='x', ylabel='y'>, <matplotlib.collections.QuadMesh object at 0x15df4ec90>, <matplotlib.colorbar.Colorbar object at 0x15dfe52e0>)
 
 
 
@@ -584,7 +615,7 @@ relative_to
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.747 seconds)
+   **Total running time of the script:** (0 minutes 2.321 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_2d.py:

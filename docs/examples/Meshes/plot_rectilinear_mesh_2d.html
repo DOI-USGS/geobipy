@@ -148,7 +148,7 @@ do not follow a line that is parallel to either the “x” or “y” axis.</p>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_001.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_002.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Depth (m)&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x180d19bb0&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x1824970b0&gt;)
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;Easting (m)&#39;, ylabel=&#39;Depth (m)&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x15e1d42c0&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x15e1d5e80&gt;)
 </pre></div>
 </div>
 <p>We can pcolor the mesh by providing cell values.</p>
@@ -162,7 +162,22 @@ do not follow a line that is parallel to either the “x” or “y” axis.</p>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><p>Mask the x axis cells by a distance</p>
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_003.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0. 1. 2. ... 7. 8. 9.] [ 0.  1.  2. ... 17. 18. 19.]
+[-0.25  0.25  0.75 ...  8.25  8.75  9.25] [-0.25  0.25  0.75 ... 18.25 18.75 19.25]
+(10, 20)
+[[-0.25]
+ [ 0.25]
+ [ 0.75]
+ ...
+ [ 8.25]
+ [ 8.75]
+ [ 9.25]]
+(20, 1)
+[[-0.25  0.25  0.75 ... 18.25 18.75 19.25]]
+(1, 40)
+</pre></div>
+</div>
+<p>Mask the x axis cells by a distance</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">rm_masked</span><span class="p">,</span> <span class="n">x_indices</span><span class="p">,</span> <span class="n">z_indices</span><span class="p">,</span> <span class="n">arr2</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">mask_cells</span><span class="p">(</span><span class="n">x_distance</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
 <span class="n">p</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">rm_masked</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">StatArray</span><span class="p">(</span><span class="n">arr2</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">flipY</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -255,7 +270,21 @@ Generate some values</p>
 <span class="n">rm2</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">values2</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: &gt;, &lt;matplotlib.collections.QuadMesh object at 0x17faebb00&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x17f487b60&gt;)
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_008.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[0. 1. 2. ... 7. 8. 9.] [  0.   1.   3. ...  78.  91. 105.]
+[-0.25  0.25  0.75 ...  8.25  8.75  9.25] [ -0.25   0.25   0.75 ... 110.75 111.25 111.75]
+(10, 15)
+[[-0.25]
+ [ 0.25]
+ [ 0.75]
+ ...
+ [ 8.25]
+ [ 8.75]
+ [ 9.25]]
+(20, 1)
+[[ -0.25   0.25   0.75 ... 110.75 111.25 111.75]]
+(1, 225)
+
+(&lt;Axes: &gt;, &lt;matplotlib.collections.QuadMesh object at 0x1483ecb60&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x15d7cd340&gt;)
 </pre></div>
 </div>
 <section id="axes-in-log-space">
@@ -283,7 +312,7 @@ Generate some values</p>
 <span class="n">rm2</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;x&#39;, ylabel=&#39;y&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x182aca390&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x17f6df0b0&gt;)
+<img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_010.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>(&lt;Axes: xlabel=&#39;x&#39;, ylabel=&#39;y&#39;&gt;, &lt;matplotlib.collections.QuadMesh object at 0x15df4ec90&gt;, &lt;matplotlib.colorbar.Colorbar object at 0x15dfe52e0&gt;)
 </pre></div>
 </div>
 </section>
@@ -355,7 +384,7 @@ Generate some values</p>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_013.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_013.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_2d_014.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_2d_014.png" alt="plot rectilinear mesh 2d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.747 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 2.321 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-2d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/6dec5e41149e94d435270c1dffe803e1/plot_rectilinear_mesh_2d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rectilinear_mesh_2d.ipynb</span></code></a></p>

@@ -107,13 +107,44 @@ Specify some cell centres in x and y
          :class: sphx-glr-multi-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ .. code-block:: none
+
+    [0.5 1.5 2.5 ... 7.5 8.5 9.5] [0.5 1.5 2.5 ... 7.5 8.5 9.5]
+    [0.25 0.75 1.25 ... 8.75 9.25 9.75] [0.25 0.75 1.25 ... 8.75 9.25 9.75]
+    (10, 10)
+    [[0.25]
+     [0.75]
+     [1.25]
+     ...
+     [8.75]
+     [9.25]
+     [9.75]]
+    (20, 1)
+    [[0.25 0.75 1.25 ... 8.75 9.25 9.75]]
+    (1, 20)
+    [0.5 1.5 2.5 ... 7.5 8.5 9.5] [0.5 1.5 2.5 ... 7.5 8.5 9.5]
+    [0.75 2.25 3.75 ... 6.75 8.25 9.75] [0.75 2.25 3.75 ... 6.75 8.25 9.75]
+    (10, 10)
+    [[0.75]
+     [2.25]
+     [3.75]
+     ...
+     [6.75]
+     [8.25]
+     [9.75]]
+    (7, 1)
+    [[0.75 2.25 3.75 ... 6.75 8.25 9.75]]
+    (1, 7)
+
 
 
 
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.212 seconds)
+   **Total running time of the script:** (0 minutes 0.226 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_2d.py:

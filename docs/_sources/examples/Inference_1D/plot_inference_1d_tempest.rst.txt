@@ -215,7 +215,7 @@ The directory where HDF files will be stored
     self.n_components=2, self.nTimes=array([15])
     self.n_components=2, self.nTimes=array([15])
     self.n_components=2, self.nTimes=array([15])
-    Created hdf5 files in 0:00:00.544066 h:m:s
+    Created hdf5 files in 0:00:00.343917 h:m:s
     self.n_components=2, self.nTimes=array([15])
     self.n_components=2, self.nTimes=array([15])
     self.n_components=2, self.nTimes=array([15])
@@ -227,9 +227,9 @@ The directory where HDF files will be stored
     self.n_components=2, self.nTimes=array([15])
     self.n_components=2, self.nTimes=array([15])
     self.n_components=2, self.nTimes=array([15])
-    i=5000, k=5, acc=*24.800, 0.023 s/Model, 113.655 s Elapsed, eta=--:--:-- h:m:s
+    i=5000, k=5, acc=*24.800, 0.013 s/Model, 67.241 s Elapsed, eta=--:--:-- h:m:s
 
-    Remaining Points -2/1 || Elapsed Time: 0:01:55.563057 h:m:s || ETA 0:00:38.521019 h:m:s
+    Remaining Points -2/1 || Elapsed Time: 0:01:08.886762 h:m:s || ETA 0:00:22.962254 h:m:s
 
 
 
@@ -237,7 +237,7 @@ The directory where HDF files will be stored
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (1 minutes 56.531 seconds)
+   **Total running time of the script:** (1 minutes 12.870 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_1D_plot_inference_1d_tempest.py:

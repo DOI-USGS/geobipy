@@ -172,7 +172,7 @@ Forward model the data
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy_docs/geobipy/src/classes/data/datapoint/TdemDataPoint.py:363: RuntimeWarning: divide by zero encountered in log
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:363: RuntimeWarning: divide by zero encountered in log
       additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
 
 
@@ -278,8 +278,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -320327.7331520327
-    643134.8665682999
+    -320327.7331520333
+    643134.8665683012
 
 
 
@@ -365,7 +365,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    19656.31514467744
+    19656.31514467752
 
 
 
@@ -394,7 +394,7 @@ the relative error multiplier, and the additive error noise floor
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy_docs/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:135: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+    /Users/nfoks/codes/repositories/geobipy/documentation_source/source/examples/Datapoints/plot_skytem_datapoint.py:135: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
       z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
 
 
@@ -567,7 +567,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.306 seconds)
+   **Total running time of the script:** (0 minutes 2.445 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_skytem_datapoint.py:

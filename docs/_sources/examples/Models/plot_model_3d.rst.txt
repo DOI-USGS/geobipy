@@ -120,7 +120,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x1828e1340>, <matplotlib.colorbar.Colorbar object at 0x182d6cb30>)
+    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x15d99d2e0>, <matplotlib.colorbar.Colorbar object at 0x155dbc5f0>)
 
 
 
@@ -203,7 +203,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x17f18acc0>, <matplotlib.colorbar.Colorbar object at 0x182510410>)
+    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x15e1831d0>, <matplotlib.colorbar.Colorbar object at 0x15d956120>)
 
 
 
@@ -266,7 +266,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x17ee3a0f0>, <matplotlib.colorbar.Colorbar object at 0x154bb9a30>)
+    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x155dd1880>, <matplotlib.colorbar.Colorbar object at 0x15e0c1a60>)
 
 
 
@@ -331,7 +331,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<Axes: xlabel='y_re (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x17faea990>, <matplotlib.colorbar.Colorbar object at 0x15e95dc10>)
+    (<Axes: xlabel='y_re (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x153d111f0>, <matplotlib.colorbar.Colorbar object at 0x15e378e90>)
 
 
 
@@ -381,7 +381,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.788 seconds)
+   **Total running time of the script:** (0 minutes 0.959 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_3d.py:

@@ -4,7 +4,6 @@ Statistics classes
 .. toctree::
    :maxdepth: 1
 
-   StatArray
    Distribution
    Histogram
    baseDistribution

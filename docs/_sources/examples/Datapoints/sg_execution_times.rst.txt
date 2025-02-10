@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:11.231** total execution time for 3 files **from examples/Datapoints**:
+**00:11.961** total execution time for 3 files **from examples/Datapoints**:
 
 .. container::
 
@@ -33,11 +33,11 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_Datapoints_plot_resolve_datapoint.py` (``plot_resolve_datapoint.py``)
-     - 00:07.271
+     - 00:07.857
      - 0.0
    * - :ref:`sphx_glr_examples_Datapoints_plot_skytem_datapoint.py` (``plot_skytem_datapoint.py``)
-     - 00:02.306
+     - 00:02.445
      - 0.0
    * - :ref:`sphx_glr_examples_Datapoints_plot_tempest_datapoint.py` (``plot_tempest_datapoint.py``)
-     - 00:01.653
+     - 00:01.659
      - 0.0

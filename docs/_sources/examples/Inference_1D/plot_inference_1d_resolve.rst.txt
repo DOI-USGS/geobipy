@@ -151,10 +151,10 @@ The directory where HDF files will be stored
     Files are being created for data files ..//..//supplementary////data//Resolve_glacial.csv and system files ..//..//supplementary////data//..//data/FdemSystem2.stm
     Created hdf5 file for line 0.0 with 79 data points
     Created hdf5 files 79 total data points
-    Created hdf5 files in 0:00:00.164874 h:m:s
-    i=5000, k=1, acc=*49.200, 0.006 s/Model, 28.026 s Elapsed, eta=--:--:-- h:m:s
+    Created hdf5 files in 0:00:06.134384 h:m:s
+    i=5000, k=1, acc=*49.200, 0.005 s/Model, 26.703 s Elapsed, eta=--:--:-- h:m:s
 
-    Remaining Points -30/1 || Elapsed Time: 0:00:28.993323 h:m:s || ETA 0:00:00.935268 h:m:s
+    Remaining Points -30/1 || Elapsed Time: 0:00:27.784203 h:m:s || ETA 0:00:00.896265 h:m:s
 
 
 
@@ -162,7 +162,7 @@ The directory where HDF files will be stored
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 29.449 seconds)
+   **Total running time of the script:** (0 minutes 34.257 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_1D_plot_inference_1d_resolve.py:

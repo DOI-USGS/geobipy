@@ -459,7 +459,7 @@ A summary will now show the properties of the line.
     x:
     |   StatArray
     |   Name:   Easting (m)
-    |   Address:['0x156368350']
+    |   Address:['0x153838ed0']
     |   Shape:  (6710,)
     |   Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
     |   Min:    586122.82
@@ -469,7 +469,7 @@ A summary will now show the properties of the line.
     y:
     |   StatArray
     |   Name:   Northing (m)
-    |   Address:['0x156369ed0']
+    |   Address:['0x15383a2d0']
     |   Shape:  (6710,)
     |   Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
     |   Min:    4639119.38
@@ -479,7 +479,7 @@ A summary will now show the properties of the line.
     z:
     |   StatArray
     |   Name:   Height (m)
-    |   Address:['0x1563681d0']
+    |   Address:['0x153838950']
     |   Shape:  (6710,)
     |   Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
     |   Min:    23.830000000000002
@@ -489,7 +489,7 @@ A summary will now show the properties of the line.
     elevation:
     |   StatArray
     |   Name:   Elevation (m)
-    |   Address:['0x15468a450']
+    |   Address:['0x15383a150']
     |   Shape:  (6710,)
     |   Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
     |   Min:    1213.18
@@ -503,7 +503,7 @@ A summary will now show the properties of the line.
     data:
     |   DataArray
     |   Name:   Data (ppm)
-    |   Address:['0x17eb61950']
+    |   Address:['0x15dc73050']
     |   Shape:  (80520,)
     |   Values: [145.3 435.8 260.6 ... 749.2 976.5 928.3]
     |   Min:    37.7
@@ -512,7 +512,7 @@ A summary will now show the properties of the line.
     predicted data:
     |   DataArray
     |   Name:   Predicted Data (ppm)
-    |   Address:['0x17eb61950']
+    |   Address:['0x15dc73050']
     |   Shape:  (80520,)
     |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   Min:    0.0
@@ -521,7 +521,7 @@ A summary will now show the properties of the line.
     std:
     |   DataArray
     |   Name:   std (ppm)
-    |   Address:['0x17eb604d0']
+    |   Address:['0x155d986d0']
     |   Shape:  (80520,)
     |   Values: [1.453 4.358 2.606 ... 7.492 9.765 9.283]
     |   Min:    0.37700000000000006
@@ -530,7 +530,7 @@ A summary will now show the properties of the line.
     line number:
     |   DataArray
     |   Name:   Line number
-    |   Address:['0x17ec01150']
+    |   Address:['0x15e1a14d0']
     |   Shape:  (6710,)
     |   Values: [30010. 30010. 30010. ... 30010. 30010. 30010.]
     |   Min:    30010.0
@@ -539,7 +539,7 @@ A summary will now show the properties of the line.
     fiducial:
     |   DataArray
     |   Name:   Fiducial
-    |   Address:['0x156368250']
+    |   Address:['0x1530f8650']
     |   Shape:  (6710,)
     |   Values: [30000 30000 30000 ... 30670 30670 30670]
     |   Min:    30000
@@ -548,7 +548,7 @@ A summary will now show the properties of the line.
     relative error:
     |   DataArray
     |   Name:   Relative error (%)
-    |   Address:['0x15468ad50']
+    |   Address:['0x15383a750']
     |   Shape:  (6710, 1)
     |   Values: [[0.01]
     |    [0.01]
@@ -563,7 +563,7 @@ A summary will now show the properties of the line.
     additive error:
     |   DataArray
     |   Name:   Additive error (ppm)
-    |   Address:['0x15468ac50']
+    |   Address:['0x153839f50']
     |   Shape:  (6710, 1)
     |   Values: [[0.]
     |    [0.]
@@ -729,7 +729,7 @@ See the Resolve.stm files.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 3.257 seconds)
+   **Total running time of the script:** (0 minutes 2.933 seconds)
 
 
 .. _sphx_glr_download_examples_Data_plot_frequency_dataset.py:

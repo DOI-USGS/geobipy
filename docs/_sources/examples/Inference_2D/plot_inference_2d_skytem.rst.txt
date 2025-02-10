@@ -100,7 +100,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     Model:
     mesh:
     |   RectilinearMesh2D: 
-    |   Shape: : (79, 132) 
+    |   Shape: : (79, 133) 
     |   x
     |   RectilinearMesh1D
     |   Number of Cells:
@@ -108,7 +108,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x17f00d0d0']
+    |   |   Address:['0x1544463d0']
     |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
     |   |   Min:    0.0
@@ -118,7 +118,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x17f00ebd0']
+    |   |   Address:['0x154445d50']
     |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
     |   |   Min:    -0.5
@@ -130,7 +130,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   
-    |   |   Address:['0x182cba8d0']
+    |   |   Address:['0x150930a50']
     |   |   Shape:  (1,)
     |   |   Values: [0.]
     |   |   Min:    0.0
@@ -140,25 +140,27 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   y
     |   RectilinearMesh1D
     |   Number of Cells:
-    |   |   132
+    |   |   133
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x17f00fa50']
-    |   |   Shape:  (132,)
-    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
-    |   |   Min:    -602.5125
-    |   |   Max:    -3.1875
+    |   |   Address:['0x1544457d0']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -2.08834586   -6.26503759  -10.44172932 ... -545.05827068 -549.23496241
+    |   |    -553.41165414]
+    |   |   Min:    -553.4116541353383
+    |   |   Max:    -2.088345864661654
     |   |   has_posterior: False
     |   
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x17f00e9d0']
-    |   |   Shape:  (133,)
-    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
-    |   |   Min:    -604.8
-    |   |   Max:    -0.9
+    |   |   Address:['0x1544451d0']
+    |   |   Shape:  (134,)
+    |   |   Values: [   0.           -4.17669173   -8.35338346 ... -547.14661654 -551.32330827
+    |   |    -555.5       ]
+    |   |   Min:    -555.5
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   log:
@@ -166,7 +168,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   Elevation (m)
-    |   |   Address:['0x17ec00950']
+    |   |   Address:['0x1509319d0']
     |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   |   Min:    0.0
@@ -176,17 +178,17 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     values:
     |   StatArray
     |   Name:   Mean Conductivity ($\frac{S}{m}$)
-    |   Address:['0x17f00d650']
-    |   Shape:  (79, 132)
-    |   Values: [[0.01120778 0.01120778 0.01089737 ... 0.01842322 0.01842322 0.01842322]
-    |    [0.01004315 0.01004315 0.01001518 ... 0.01627435 0.01627435 0.01627435]
-    |    [0.0098209  0.0098209  0.00983342 ... 0.01667789 0.01667789 0.01667789]
+    |   Address:['0x154445ed0']
+    |   Shape:  (79, 133)
+    |   Values: [[0.0098107  0.0098107  0.00977812 ... 0.01979067 0.01975604 0.01975604]
+    |    [0.00961295 0.00961295 0.00952388 ... 0.01824047 0.01795631 0.01787678]
+    |    [0.01039665 0.01039665 0.01020258 ... 0.01897964 0.01913258 0.01914486]
     |    ...
-    |    [0.06755182 0.06755182 0.11932536 ... 0.0915802  0.0915802  0.0915802 ]
-    |    [0.08104576 0.08104576 0.09688295 ... 0.09217019 0.09217019 0.09217019]
-    |    [0.09121028 0.09121028 0.09943253 ... 0.11213815 0.11213815 0.11213815]]
-    |   Min:    0.007485002271267226
-    |   Max:    0.21717666705189165
+    |    [0.07238788 0.07238788 0.08586626 ... 0.0927832  0.09265059 0.09264398]
+    |    [0.07901261 0.07901261 0.08784271 ... 0.08837423 0.08822111 0.08819736]
+    |    [0.08834698 0.08834698 0.09181098 ... 0.09051302 0.09045352 0.09052142]]
+    |   Min:    0.004079735854704791
+    |   Max:    0.13671941182403904
     |   has_posterior: False
 
 
@@ -218,7 +220,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     Model:
     mesh:
     |   RectilinearMesh2D: 
-    |   Shape: : (79, 132) 
+    |   Shape: : (79, 133) 
     |   x
     |   RectilinearMesh1D
     |   Number of Cells:
@@ -226,7 +228,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x182cb9c50']
+    |   |   Address:['0x1544c18d0']
     |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
     |   |   Min:    0.0
@@ -236,7 +238,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x17f114d50']
+    |   |   Address:['0x1544c2550']
     |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
     |   |   Min:    -0.5
@@ -248,7 +250,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   
-    |   |   Address:['0x182c2d4d0']
+    |   |   Address:['0x14dcef3d0']
     |   |   Shape:  (1,)
     |   |   Values: [0.]
     |   |   Min:    0.0
@@ -258,25 +260,27 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   y
     |   RectilinearMesh1D
     |   Number of Cells:
-    |   |   132
+    |   |   133
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x17f115b50']
-    |   |   Shape:  (132,)
-    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
-    |   |   Min:    -602.5125
-    |   |   Max:    -3.1875
+    |   |   Address:['0x1544c20d0']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -2.08834586   -6.26503759  -10.44172932 ... -545.05827068 -549.23496241
+    |   |    -553.41165414]
+    |   |   Min:    -553.4116541353383
+    |   |   Max:    -2.088345864661654
     |   |   has_posterior: False
     |   
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x17ec01c50']
-    |   |   Shape:  (133,)
-    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
-    |   |   Min:    -604.8
-    |   |   Max:    -0.9
+    |   |   Address:['0x1544c14d0']
+    |   |   Shape:  (134,)
+    |   |   Values: [   0.           -4.17669173   -8.35338346 ... -547.14661654 -551.32330827
+    |   |    -555.5       ]
+    |   |   Min:    -555.5
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   log:
@@ -284,7 +288,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   Elevation (m)
-    |   |   Address:['0x17ec036d0']
+    |   |   Address:['0x1544c32d0']
     |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   |   Min:    0.0
@@ -294,17 +298,17 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     values:
     |   StatArray
     |   Name:   Mean Conductivity ($\frac{S}{m}$)
-    |   Address:['0x17ec006d0']
-    |   Shape:  (79, 132)
-    |   Values: [[0.01022279 0.01022279 0.01016321 ... 0.0112021  0.0112021  0.0112021 ]
-    |    [0.01121804 0.01121804 0.01062572 ... 0.0110357  0.0110357  0.0110357 ]
-    |    [0.01049917 0.01049917 0.01007536 ... 0.01354095 0.01354095 0.01354095]
+    |   Address:['0x1544c3950']
+    |   Shape:  (79, 133)
+    |   Values: [[0.01047203 0.01047203 0.01005625 ... 0.05296168 0.05254504 0.05254504]
+    |    [0.00987222 0.00987222 0.00962163 ... 0.05487486 0.05487486 0.05483357]
+    |    [0.01060059 0.01060059 0.01051259 ... 0.03503385 0.03484541 0.03459899]
     |    ...
-    |    [0.06896877 0.06896877 0.082946   ... 0.07112381 0.07112381 0.07112381]
-    |    [0.08055856 0.08055856 0.0985627  ... 0.07903887 0.07903887 0.07903887]
-    |    [0.09166633 0.09166633 0.09878492 ... 0.11154601 0.11154601 0.11154601]]
-    |   Min:    0.006775009348709323
-    |   Max:    0.8077378262817626
+    |    [0.07284539 0.07284539 0.08961911 ... 0.08926087 0.08945951 0.08945951]
+    |    [0.07937758 0.07937758 0.0862112  ... 0.08566146 0.08588471 0.08589202]
+    |    [0.08799997 0.08799997 0.09166232 ... 0.08897954 0.08890017 0.08888421]]
+    |   Min:    0.005778639158922619
+    |   Max:    1.6155899738665087
     |   has_posterior: False
 
 
@@ -336,7 +340,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     Model:
     mesh:
     |   RectilinearMesh2D: 
-    |   Shape: : (79, 132) 
+    |   Shape: : (79, 133) 
     |   x
     |   RectilinearMesh1D
     |   Number of Cells:
@@ -344,7 +348,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x18229f350']
+    |   |   Address:['0x1507bcb50']
     |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
     |   |   Min:    0.0
@@ -354,7 +358,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x17f21de50']
+    |   |   Address:['0x1507be050']
     |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
     |   |   Min:    -0.5
@@ -366,7 +370,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   
-    |   |   Address:['0x182600c50']
+    |   |   Address:['0x1506b1350']
     |   |   Shape:  (1,)
     |   |   Values: [0.]
     |   |   Min:    0.0
@@ -376,25 +380,27 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   y
     |   RectilinearMesh1D
     |   Number of Cells:
-    |   |   132
+    |   |   133
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x18229d5d0']
-    |   |   Shape:  (132,)
-    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
-    |   |   Min:    -602.5125
-    |   |   Max:    -3.1875
+    |   |   Address:['0x1507bec50']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -2.08834586   -6.26503759  -10.44172932 ... -545.05827068 -549.23496241
+    |   |    -553.41165414]
+    |   |   Min:    -553.4116541353383
+    |   |   Max:    -2.088345864661654
     |   |   has_posterior: False
     |   
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x18229dbd0']
-    |   |   Shape:  (133,)
-    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
-    |   |   Min:    -604.8
-    |   |   Max:    -0.9
+    |   |   Address:['0x1507bf750']
+    |   |   Shape:  (134,)
+    |   |   Values: [   0.           -4.17669173   -8.35338346 ... -547.14661654 -551.32330827
+    |   |    -555.5       ]
+    |   |   Min:    -555.5
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   log:
@@ -402,7 +408,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   Elevation (m)
-    |   |   Address:['0x18229e6d0']
+    |   |   Address:['0x1507bead0']
     |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   |   Min:    0.0
@@ -412,17 +418,17 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     values:
     |   StatArray
     |   Name:   Mean Conductivity ($\frac{S}{m}$)
-    |   Address:['0x18229cb50']
-    |   Shape:  (79, 132)
-    |   Values: [[0.02104953 0.02104953 0.02099504 ... 0.01952426 0.01952426 0.01952426]
-    |    [0.02008789 0.02008789 0.01997577 ... 0.02017019 0.02017019 0.02017019]
-    |    [0.0198301  0.0198301  0.01986773 ... 0.0145253  0.0145253  0.0145253 ]
+    |   Address:['0x1507be0d0']
+    |   Shape:  (79, 133)
+    |   Values: [[0.01825279 0.01825279 0.01931186 ... 0.02170999 0.02174101 0.0217422 ]
+    |    [0.01614506 0.01614506 0.01636665 ... 0.02128181 0.02121515 0.02126434]
+    |    [0.01976905 0.01976905 0.01985069 ... 0.01473055 0.01467527 0.01467527]
     |    ...
-    |    [0.00511314 0.00511314 0.0029654  ... 0.01258484 0.01258484 0.01258484]
-    |    [0.00392961 0.00392961 0.00385047 ... 0.00870505 0.00870505 0.00870505]
-    |    [0.00279718 0.00279718 0.00269725 ... 0.00924302 0.00924302 0.00924302]]
-    |   Min:    0.0008600086897131668
-    |   Max:    9.774547726888374
+    |    [0.00501021 0.00501021 0.00458535 ... 0.01233692 0.01252973 0.01252973]
+    |    [0.00474996 0.00474996 0.00348994 ... 0.02102289 0.02105033 0.02106124]
+    |    [0.00280581 0.00280581 0.00272761 ... 0.01825986 0.01839879 0.01841848]]
+    |   Min:    0.0007035096174085572
+    |   Max:    16.631343141838055
     |   has_posterior: False
 
 
@@ -454,7 +460,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     Model:
     mesh:
     |   RectilinearMesh2D: 
-    |   Shape: : (79, 132) 
+    |   Shape: : (79, 133) 
     |   x
     |   RectilinearMesh1D
     |   Number of Cells:
@@ -462,7 +468,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x17eab3d50']
+    |   |   Address:['0x1503967d0']
     |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
     |   |   Min:    0.0
@@ -472,7 +478,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x17eab07d0']
+    |   |   Address:['0x150396350']
     |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
     |   |   Min:    -0.5
@@ -484,7 +490,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   
-    |   |   Address:['0x17f2d60d0']
+    |   |   Address:['0x107e39c50']
     |   |   Shape:  (1,)
     |   |   Values: [0.]
     |   |   Min:    0.0
@@ -494,25 +500,27 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   y
     |   RectilinearMesh1D
     |   Number of Cells:
-    |   |   132
+    |   |   133
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x17eab31d0']
-    |   |   Shape:  (132,)
-    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
-    |   |   Min:    -602.5125
-    |   |   Max:    -3.1875
+    |   |   Address:['0x150396150']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -2.08834586   -6.26503759  -10.44172932 ... -545.05827068 -549.23496241
+    |   |    -553.41165414]
+    |   |   Min:    -553.4116541353383
+    |   |   Max:    -2.088345864661654
     |   |   has_posterior: False
     |   
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x17eab0bd0']
-    |   |   Shape:  (133,)
-    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
-    |   |   Min:    -604.8
-    |   |   Max:    -0.9
+    |   |   Address:['0x150394850']
+    |   |   Shape:  (134,)
+    |   |   Values: [   0.           -4.17669173   -8.35338346 ... -547.14661654 -551.32330827
+    |   |    -555.5       ]
+    |   |   Min:    -555.5
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   log:
@@ -520,7 +528,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   Elevation (m)
-    |   |   Address:['0x182fd6bd0']
+    |   |   Address:['0x150ffadd0']
     |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   |   Min:    0.0
@@ -530,17 +538,17 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     values:
     |   StatArray
     |   Name:   Mean Conductivity ($\frac{S}{m}$)
-    |   Address:['0x182fd5650']
-    |   Shape:  (79, 132)
-    |   Values: [[0.01147797 0.01147797 0.01033699 ... 0.00131732 0.00131732 0.00131732]
-    |    [0.00999299 0.00999299 0.01000167 ... 0.00120333 0.00120333 0.00120333]
-    |    [0.01007022 0.01007022 0.01005285 ... 0.00844038 0.00844038 0.00844038]
+    |   Address:['0x1505ecfd0']
+    |   Shape:  (79, 133)
+    |   Values: [[0.00966926 0.00966926 0.00972027 ... 0.04839993 0.04878023 0.04907535]
+    |    [0.00914014 0.00914014 0.00947082 ... 0.06116167 0.06078523 0.06051578]
+    |    [0.01018308 0.01018308 0.00990115 ... 0.00281497 0.00282243 0.00282743]
     |    ...
-    |    [0.06763163 0.06763163 0.11942951 ... 0.09924038 0.09924038 0.09924038]
-    |    [0.08122468 0.08122468 0.09651811 ... 0.09608009 0.09608009 0.09608009]
-    |    [0.09162505 0.09162505 0.09883382 ... 0.11272764 0.11272764 0.11272764]]
-    |   Min:    0.0007661982574834428
-    |   Max:    0.21045876958147633
+    |    [0.0720962  0.0720962  0.089987   ... 0.08922937 0.08914909 0.08906875]
+    |    [0.07927976 0.07927976 0.08631817 ... 0.08918084 0.08928333 0.08936188]
+    |    [0.08792242 0.08792242 0.09117578 ... 0.09172198 0.09165289 0.09162828]]
+    |   Min:    0.0015129161039354549
+    |   Max:    0.2000862444557275
     |   has_posterior: False
 
 
@@ -572,7 +580,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     Model:
     mesh:
     |   RectilinearMesh2D: 
-    |   Shape: : (79, 132) 
+    |   Shape: : (79, 133) 
     |   x
     |   RectilinearMesh1D
     |   Number of Cells:
@@ -580,7 +588,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x181fa95d0']
+    |   |   Address:['0x152b93b50']
     |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
     |   |   Min:    0.0
@@ -590,7 +598,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x181fa88d0']
+    |   |   Address:['0x151eb81d0']
     |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
     |   |   Min:    -0.5
@@ -602,7 +610,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   
-    |   |   Address:['0x181f49a50']
+    |   |   Address:['0x152b92d50']
     |   |   Shape:  (1,)
     |   |   Values: [0.]
     |   |   Min:    0.0
@@ -612,25 +620,27 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   y
     |   RectilinearMesh1D
     |   Number of Cells:
-    |   |   132
+    |   |   133
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x181fa8450']
-    |   |   Shape:  (132,)
-    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
-    |   |   Min:    -602.5125
-    |   |   Max:    -3.1875
+    |   |   Address:['0x151eb8350']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -2.08834586   -6.26503759  -10.44172932 ... -545.05827068 -549.23496241
+    |   |    -553.41165414]
+    |   |   Min:    -553.4116541353383
+    |   |   Max:    -2.088345864661654
     |   |   has_posterior: False
     |   
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x181fa8150']
-    |   |   Shape:  (133,)
-    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
-    |   |   Min:    -604.8
-    |   |   Max:    -0.9
+    |   |   Address:['0x15158ff50']
+    |   |   Shape:  (134,)
+    |   |   Values: [   0.           -4.17669173   -8.35338346 ... -547.14661654 -551.32330827
+    |   |    -555.5       ]
+    |   |   Min:    -555.5
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   log:
@@ -638,7 +648,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   Elevation (m)
-    |   |   Address:['0x181fa9150']
+    |   |   Address:['0x15158f850']
     |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   |   Min:    0.0
@@ -648,17 +658,17 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     values:
     |   StatArray
     |   Name:   Mean Conductivity ($\frac{S}{m}$)
-    |   Address:['0x181fa87d0']
-    |   Shape:  (79, 132)
-    |   Values: [[1.02310541 1.02310541 1.02438661 ... 1.05490484 1.05490484 1.05490484]
-    |    [1.02229478 1.02229478 1.02483553 ... 0.83077926 0.83077926 0.83077926]
-    |    [1.02256309 1.02256309 1.02298923 ... 1.16206135 1.16206135 1.16206135]
+    |   Address:['0x152b92050']
+    |   Shape:  (79, 133)
+    |   Values: [[1.01806612 1.01806612 1.01805441 ... 0.19009366 0.19046086 0.19046393]
+    |    [1.03657351 1.03657351 1.03570294 ... 1.18683168 1.18750212 1.18750212]
+    |    [1.01638097 1.01638097 1.01754131 ... 0.22821797 0.22743062 0.22761428]
     |    ...
-    |    [0.18317234 0.18317234 0.18317234 ... 0.04611609 0.04611609 0.04611609]
-    |    [0.13296225 0.13296225 0.13296225 ... 0.02326468 0.02326468 0.02326468]
-    |    [0.08897776 0.08897776 0.08897776 ... 0.02807133 0.02807133 0.02807133]]
-    |   Min:    0.005922638381206899
-    |   Max:    15.778868401978407
+    |    [0.27726717 0.27726717 0.00326359 ... 0.2523025  0.25214303 0.25214303]
+    |    [0.16168686 0.16168686 0.16168686 ... 0.23802845 0.23802845 0.23802845]
+    |    [0.14520979 0.14520979 0.00139856 ... 0.00921546 0.00919979 0.00919979]]
+    |   Min:    0.0006038338330283952
+    |   Max:    1728.9602499111581
     |   has_posterior: False
 
 
@@ -690,7 +700,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     Model:
     mesh:
     |   RectilinearMesh2D: 
-    |   Shape: : (79, 132) 
+    |   Shape: : (79, 133) 
     |   x
     |   RectilinearMesh1D
     |   Number of Cells:
@@ -698,7 +708,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x180d2a5d0']
+    |   |   Address:['0x151db5ed0']
     |   |   Shape:  (79,)
     |   |   Values: [ 0.  1.  2. ... 76. 77. 78.]
     |   |   Min:    0.0
@@ -708,7 +718,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   Easting (m)
-    |   |   Address:['0x180d2aad0']
+    |   |   Address:['0x151db4850']
     |   |   Shape:  (80,)
     |   |   Values: [-0.5  0.5  1.5 ... 76.5 77.5 78.5]
     |   |   Min:    -0.5
@@ -720,7 +730,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   
-    |   |   Address:['0x17f866cd0']
+    |   |   Address:['0x150e8ee50']
     |   |   Shape:  (1,)
     |   |   Values: [0.]
     |   |   Min:    0.0
@@ -730,25 +740,27 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   y
     |   RectilinearMesh1D
     |   Number of Cells:
-    |   |   132
+    |   |   133
     |   Cell Centres:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x180d2a750']
-    |   |   Shape:  (132,)
-    |   |   Values: [  -3.1875   -7.7625  -12.3375 ... -593.3625 -597.9375 -602.5125]
-    |   |   Min:    -602.5125
-    |   |   Max:    -3.1875
+    |   |   Address:['0x151db4050']
+    |   |   Shape:  (133,)
+    |   |   Values: [  -2.08834586   -6.26503759  -10.44172932 ... -545.05827068 -549.23496241
+    |   |    -553.41165414]
+    |   |   Min:    -553.4116541353383
+    |   |   Max:    -2.088345864661654
     |   |   has_posterior: False
     |   
     |   Cell Edges:
     |   |   StatArray
     |   |   Name:   elevation (m)
-    |   |   Address:['0x180d2ac50']
-    |   |   Shape:  (133,)
-    |   |   Values: [  -0.9     -5.475  -10.05  ... -595.65  -600.225 -604.8  ]
-    |   |   Min:    -604.8
-    |   |   Max:    -0.9
+    |   |   Address:['0x152f22350']
+    |   |   Shape:  (134,)
+    |   |   Values: [   0.           -4.17669173   -8.35338346 ... -547.14661654 -551.32330827
+    |   |    -555.5       ]
+    |   |   Min:    -555.5
+    |   |   Max:    0.0
     |   |   has_posterior: False
     |   
     |   log:
@@ -756,7 +768,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     |   relative_to:
     |   |   StatArray
     |   |   Name:   Elevation (m)
-    |   |   Address:['0x180d216d0']
+    |   |   Address:['0x152b93750']
     |   |   Shape:  (79,)
     |   |   Values: [0. 0. 0. ... 0. 0. 0.]
     |   |   Min:    0.0
@@ -766,17 +778,17 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
     values:
     |   StatArray
     |   Name:   Mean Conductivity ($\frac{S}{m}$)
-    |   Address:['0x180d21350']
-    |   Shape:  (79, 132)
-    |   Values: [[0.00056777 0.00056777 0.00056795 ... 0.00059446 0.00059446 0.00059446]
-    |    [0.00052266 0.00052266 0.00052266 ... 0.00071041 0.00071041 0.00071041]
-    |    [0.00080071 0.00080071 0.00080071 ... 0.00104502 0.00104502 0.00104502]
+    |   Address:['0x151db6350']
+    |   Shape:  (79, 133)
+    |   Values: [[0.00057072 0.00057072 0.00056877 ... 0.00217761 0.00215943 0.00211521]
+    |    [0.00082354 0.00082354 0.0008294  ... 0.00298401 0.00293347 0.00293347]
+    |    [0.00054038 0.00054038 0.0005437  ... 0.00501624 0.00501549 0.00501855]
     |    ...
-    |    [0.00854703 0.00854703 0.00857136 ... 0.00167267 0.00167267 0.00167267]
-    |    [0.00894549 0.00894549 0.00908742 ... 0.00255047 0.00255047 0.00255047]
-    |    [0.00925526 0.00925526 0.00948505 ... 0.00507188 0.00507188 0.00507188]]
-    |   Min:    0.0004901610032814771
-    |   Max:    0.7309893437585234
+    |    [0.0083681  0.0083681  0.00871023 ... 0.1658159  0.16567791 0.16567791]
+    |    [0.00946963 0.00946963 0.00949168 ... 0.01082899 0.01148046 0.01150977]
+    |    [0.00850773 0.00850773 0.00858401 ... 0.00817936 0.00837781 0.00837708]]
+    |   Min:    0.00035436638709702436
+    |   Max:    15.596752715337677
     |   has_posterior: False
 
 
@@ -943,7 +955,7 @@ All plotting in GeoBIPy can be carried out using the 3D inference class
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 18.965 seconds)
+   **Total running time of the script:** (0 minutes 21.139 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_2D_plot_inference_2d_skytem.py:

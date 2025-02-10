@@ -626,7 +626,7 @@ Expanded
     Number of Cells:
     |   StatArray
     |   Name:   Number of cells
-    |   Address:['0x154b0fd50' '0x182c1a750' '0x180970e10' '0x1809733f0']
+    |   Address:['0x15dfbb9d0' '0x15d9b10a0' '0x15e28ec10' '0x15e28dc50']
     |   Shape:  (1,)
     |   Values: [15]
     |   Min:    15
@@ -640,7 +640,7 @@ Expanded
     Cell Centres:
     |   StatArray
     |   Name:   test
-    |   Address:['0x17f3b4850']
+    |   Address:['0x15dc850d0']
     |   Shape:  (15,)
     |   Values: [  1.22331766   3.28906551   6.36608642 ...  66.85590133 108.99206549
     |    148.449825  ]
@@ -651,8 +651,8 @@ Expanded
     Cell Edges:
     |   StatArray
     |   Name:   test
-    |   Address:['0x1834e3950' '0x17ebbc1a0' '0x182174450' '0x17f387aa0' '0x1808cd750'
-    |    '0x1808ced70']
+    |   Address:['0x155de5e50' '0x15d8381a0' '0x15e28f7b0' '0x153d89c10' '0x15d811b50'
+    |    '0x15d810af0']
     |   Shape:  (16,)
     |   Values: [  0.           2.44663532   4.13149571 ...  70.19008745 147.79404353
     |    149.10560647]
@@ -672,7 +672,7 @@ Expanded
     relative_to:
     |   StatArray
     |   Name:   
-    |   Address:['0x17ef83e50']
+    |   Address:['0x15e0e7ed0']
     |   Shape:  (1,)
     |   Values: [5.]
     |   Min:    5.0
@@ -687,7 +687,7 @@ Expanded
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.585 seconds)
+   **Total running time of the script:** (0 minutes 4.760 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_1d.py:
