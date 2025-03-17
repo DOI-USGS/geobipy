@@ -9,7 +9,7 @@ from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, unique, vsta
 from numpy import log as nplog
 from numpy.linalg import inv
 from matplotlib.pyplot import gcf
-from ...base.utilities import reslice, expReal
+from ...base.utilities import reslice, expReal, nodata_value
 from ...base.utilities import debug_print as dprint
 from ...base import plotting
 from ..core.myObject import myObject
@@ -249,8 +249,11 @@ class Model(myObject):
 
         return out
 
-    def interpolate_centres_to_nodes(self, kind='cubic', **kwargs):
-        return self.mesh.interpolate_centres_to_nodes(self.values, kind=kind, **kwargs)
+    def interpolate_centres_to_nodes(self, method='cubic', **kwargs):
+        return self.mesh.interpolate_centres_to_nodes(self.values, method=method, **kwargs)
+
+    def fill_nans_with_extrapolation(self, **kwargs):
+        return self.mesh.fill_nans_with_extrapolation(self.values, **kwargs)
 
     def local_precision(self, observation=None):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
@@ -880,12 +883,34 @@ class Model(myObject):
     @classmethod
     def from_tif(cls, rio_dataset, **kwargs):
 
+        from ..mesh.RectilinearMesh2D import RectilinearMesh2D
+
         if 'comm' in kwargs:
             print("DO STUFF IN PARALLEL")
         else:
-            mesh = Mesh(x_centres = rio_dataset.x.values,
-                        y_centres = rio_dataset.y.values)
-            return cls(mesh, values=np.squeeze(rio_dataset.values))
+            x = rio_dataset.x.values
+            y = rio_dataset.y.values
+
+            x_flipped = False
+            if not np.all(x[:-1] <= x[1:]):
+                x = x[::-1]
+                x_flipped = True
+            y_flipped = False
+            if not np.all(y[:-1] <= y[1:]):
+                y = y[::-1]
+                y_flipped = True
+
+            mesh = RectilinearMesh2D(x_centres = x,
+                                     y_centres = y)
+            v = np.squeeze(rio_dataset.values)
+            if x_flipped:
+                v = v[:, ::-1]
+            if y_flipped:
+                v = v[::-1, :]
+
+            v[v == nodata_value(v.dtype)] = np.nan
+
+            return cls(mesh, values=v)
 
 
     @classmethod
@@ -933,3 +958,9 @@ class Model(myObject):
         mesh.y_edges.name, mesh.y_edges.units = 'Height', 'm'
 
         return cls(mesh=mesh, values=np.repeat(conductivity[None, :], n_points, 0))
+
+    @classmethod
+    def generate_from_rasters(cls, geometry_rasters:list, variable_rasters:list=None):
+        from ..mesh.RectilinearMesh3D import RectilinearMesh3D
+        return cls(*RectilinearMesh3D.generate_from_rasters(geometry_rasters))
+

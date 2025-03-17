@@ -3,7 +3,7 @@ from copy import deepcopy
 from textwrap import wrap
 
 from numpy import abs, arange, arctan2, argsort, argwhere, asarray, atleast_1d, ceil, complex128, cos, diag, diff, divide, dot, empty
-from numpy import exp, flip, floor, full, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
+from numpy import exp, flip, floor, full, longdouble, finfo, float64, histogram, iinfo, inf, int32, integer, interp, imag, isfinite, isnan, issubdtype
 from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
 from numpy import real, s_, shape, sign, sin, size, squeeze, where, zeros
 from numpy import all as npall
@@ -261,6 +261,13 @@ def flood_fill(values, x, y, new_value):
 
 world_rank = 0
 print_rank = 0
+
+def nodata_value(dtype):
+    """
+    Returns a nodata value for a given numpy dtype.
+    """
+    info = iinfo(dtype) if issubdtype(dtype, integer) else finfo(dtype)
+    return info.min
 
 def init_debug_print(world=None, print_from=0):
     global world_rank

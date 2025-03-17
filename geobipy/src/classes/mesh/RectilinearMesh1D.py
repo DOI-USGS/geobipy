@@ -197,7 +197,11 @@ class RectilinearMesh1D(Mesh):
 
     @centres.setter
     def centres(self, values):
+
         values = StatArray(values)
+
+        assert values.sorted, ValueError("centres must be monotonically increasing")
+
         values, _ = utilities._log(values, log=self.log)
 
         if self.relative_to.size == 1:
@@ -245,6 +249,8 @@ class RectilinearMesh1D(Mesh):
     @edges.setter
     def edges(self, values):
         values = StatArray(values)
+
+        assert values.sorted, ValueError("edges must be monotonically increasing")
 
         values, _ = utilities._log(values, log=self.log)
 

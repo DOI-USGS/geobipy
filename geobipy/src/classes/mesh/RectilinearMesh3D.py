@@ -304,7 +304,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     @property
     def z_edges(self):
+        return self._z_edges
 
+    def get_generic_z_edges(self):
         re_tmp = None
         if self.z._relative_to is not None:
             nd = ndim(self.z.relative_to)
@@ -851,7 +853,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def summary(self):
         """ Display a summary of the 3D Point Cloud """
         msg = ("3D Rectilinear Mesh: \n"
-              "Shape: : {} \nx\n{}y\n{}z\n{}").format(self.shape, self.x.summary, self.y.summary, self.z.summary)
+              "Shape: : {} \nx\n{}y\n{}z\n{}").format(self.shape, self.x_edges.summary, self.y_edges.summary, self.z_edges.summary)
         # if not self.relative_to is None:
         #     msg += self.relative_to.summary
         return msg
@@ -1030,3 +1032,48 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #             vtk.cell_data.append(Scalars(cellData.reshape(self.nCells), cellData.getNameUnits()))
 
     #     vtk.tofile(fileName, format)
+
+    @classmethod
+    def generate_from_rasters(cls, rasters:list, edges=True, absolute=True, **kwargs):
+
+        import numpy as np
+        import rioxarray as rio
+        from ..model.Model import Model
+        from ...base.utilities import nodata_value
+
+        n_layers = len(rasters) - 1
+
+        ds = rio.open_rasterio(rasters[0], from_disk=True)
+        mod = Model.from_tif(ds)
+        ds.close()
+
+        # Replace finite null values with nan
+        mod.values[mod.values == nodata_value(mod.values.dtype)] = np.nan
+
+        mod = mod.fill_nans_with_extrapolation()
+
+        self = cls(x=mod.mesh.x, y=mod.mesh.y, z_edges=np.arange(len(rasters), dtype=np.float64))
+
+        self._z_edges = StatArray(np.zeros(np.asarray(self.shape)+1, dtype=np.float64))
+        thickness = StatArray(np.zeros(np.asarray(self.shape), dtype=np.float64), name='thickness', units='m')
+
+        d = mod.interpolate_centres_to_nodes()
+        self._z_edges[:, :, -1] = d
+
+        # Loop over layer thickness files
+        for i, tif in enumerate(rasters[1:]):
+            ds = rio.open_rasterio(tif, from_disk=True)
+            mod = Model.from_tif(ds)
+            ds.close()
+
+            if np.all(mod.values.shape[::-1] == self.shape[:-1]):
+                thickness[:, :, i] = mod.values.T
+            else:
+                thickness[:, :, i] = mod.values
+
+            mod = mod.fill_nans_with_extrapolation()
+
+            self._z_edges[:, :, i+1] = self._z_edges[:, :, i] - mod.interpolate_centres_to_nodes()
+
+
+        return self, thickness

@@ -4,7 +4,7 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 
 from numpy import abs, arange, asarray
-from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float32, float64, full, int_, int32, integer, interp
+from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float32, float64, full, int_, int32, integer, interp, isnan
 from numpy import max, maximum, meshgrid, min, minimum, nan, ndim, outer, r_, ravel_multi_index
 from numpy import repeat, s_, searchsorted, shape, size, sqrt, squeeze, tile, unravel_index
 from numpy import where, zeros
@@ -500,9 +500,37 @@ class RectilinearMesh2D(Mesh):
     def interpolate_centres_to_nodes(self, values, method='cubic'):
         if self.x.nCells <= 3 or self.y.nCells <= 3:
             method = 'linear'
+
         f = interpolate.RegularGridInterpolator((self.x.centres, self.y.centres), values, method=method, bounds_error=False)
         xx, yy = meshgrid(self.x.edges, self.y.edges, indexing='ij', sparse=True)
-        return f((xx, yy))
+
+        out = f((xx, yy))
+
+        out[0, 1:-1] = out[1, 1:-1] - (abs(out[2, 1:-1] - out[1, 1:-1]))
+        out[-1, 1:-1] = out[-2, 1:-1] - (abs(out[-3, 1:-1] - out[-2, 1:-1]))
+        out[:, 0] = out[:, 1] - (abs(out[:, 2] - out[:, 1]))
+        out[:, -1] = out[:, -2] - (abs(out[:, -3] - out[:, 2]))
+
+        return out
+
+    def fill_nans_with_extrapolation(self, values, **kwargs):
+
+        from ..pointcloud.Point import Point
+
+        if npall(values.shape[::-1] == self.shape):
+            values = values.T
+        assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
+
+        i = ~isnan(values)
+        x = self.x_centres[i]
+        y = self.y_centres[i]
+        v = values[i]
+
+        p2d = Point(x, y, z=v)
+
+        out, _ = p2d.interpolate(values=v, mesh=self, method='sibson', **kwargs)
+        return out
+
 
     def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
         """Compute a statistic of the array between the intervals given along dimension dim.
@@ -805,6 +833,8 @@ class RectilinearMesh2D(Mesh):
 
         """
         # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
+        if npall(values.shape[::-1] == self.shape):
+            values = values.T
         assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
 
         x_mask = kwargs.pop('x_mask', None)
