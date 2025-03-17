@@ -435,6 +435,10 @@ class StatArray(DataArray):
         return out
 
     @property
+    def sorted(self):
+        return all(self[:-1] <= self[1:])
+
+    @property
     def summary(self):
         """Write a summary of the StatArray
 
