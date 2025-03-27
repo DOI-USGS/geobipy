@@ -2,7 +2,8 @@
 Module defining a normal distribution with statistical procedures
 """
 #from copy import deepcopy
-from numpy import array, exp, linspace, log, size, squeeze, sqrt
+from numpy import array, exp, linspace, size, squeeze, sqrt
+from numpy import log as nplog
 from .NormalDistribution import Normal
 from scipy.stats import norm
 from ...base import plotting as cP
@@ -25,7 +26,7 @@ class LogNormal(Normal):
         """Instantiate a Normal distribution """
 
         if linearSpace:
-            mean = log(mean)
+            mean = nplog(mean)
         super().__init__(mean, variance, prng=prng)
         self.linearSpace = linearSpace
 
@@ -35,7 +36,7 @@ class LogNormal(Normal):
 
     @mean.setter
     def mean(self, value):
-        self._mean = log(value) if self.linearSpace else value
+        self._mean = nplog(value) if self.linearSpace else value
 
     @property
     def ndim(self):
@@ -53,7 +54,7 @@ class LogNormal(Normal):
     def cdf(self, x):
         """ For a realization x, compute the probability """
         if self.linearSpace:
-            x = log(x)
+            x = nplog(x)
         return DataArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
 
 
@@ -73,7 +74,7 @@ class LogNormal(Normal):
         assert 0 <= moment <= 1, ValueError("Must have 0 <= moment < 2")
 
         if self.linearSpace:
-            x = log(x)
+            x = nplog(x)
 
         if moment == 0:
             return ((x - self._mean) / self.variance)
@@ -115,7 +116,7 @@ class LogNormal(Normal):
         """ For a realization x, compute the probability """
 
         if self.linearSpace:
-            x= log(x)
+            x = nplog(x)
 
         if log:
             return DataArray(norm.logpdf(x, loc = self._mean, scale = self.variance), "Probability Density")

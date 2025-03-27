@@ -4,8 +4,9 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 from numpy import dot, empty, expand_dims, int32, integer
 from numpy import max,  min, ndim, outer, prod, ravel_multi_index
-from numpy import repeat, s_, size, squeeze, swapaxes, take, unravel_index
+from numpy import repeat, s_, size, squeeze, sum, swapaxes, take, unravel_index
 from numpy import where, zeros
+from numpy import all as npall
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from ..core.DataArray import DataArray
@@ -71,6 +72,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def __init__(self, x=None, y=None, z=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
+        self._x_edges = None
+        self._y_edges = None
+        self._z_edges = None
         self.x = kwargs if x is None else x
         self.y = kwargs if y is None else y
         self.z = kwargs if z is None else z
@@ -91,106 +95,122 @@ class RectilinearMesh3D(RectilinearMesh2D):
             if isinstance(x, (integer, int)):
                 axis.append(i)
 
-        assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
+        assert not len(axis) == 3, ValueError("slice cannot be a single cell")
 
-        if len(axis) == 0: # Returning a 3D mesh
-            x = self.x[slic[0]]
-            y = self.y[slic[1]]
-            z = self.z[slic[2]]
-            if x._relative_to is not None:
-                nd = ndim(x.relative_to)
-                slc = s_[:]
-                if nd == 2:
-                    slc = slic[1:]
-                elif nd == 1:
-                    s = x.relative_to.size
-                    if s == self.shape[1]:
-                        slc = slic[1]
-                    elif s == self.shape[2]:
-                        slc = slic[2]
+        match len(axis):
+            case 0: # Returning a 3D mesh
+                return self.__slice_3d(slic)
+            case 1: # Returning a 2D mesh
+                return self.__slice_2d(slic, axis)
+            case 2: # Returning a 1D mesh
+                return self.__slice_1d(slic, axis)
+            case _:
+                raise ValueError(f"invalid slice {slic}")
 
-                x.relative_to = x.relative_to[slc]
 
-            if y._relative_to is not None:
-                nd = ndim(y.relative_to)
-                slc = s_[:]
-                if nd == 2:
-                    slc = slic[::2]
-                elif nd == 1:
-                    s = y.relative_to.size
-                    if s == self.shape[0]:
-                        slc = slic[0]
-                    elif s == self.shape[2]:
-                        slc = slic[2]
+    def __slice_3d(self, slic):
+        x = self.x[slic[0]]
+        y = self.y[slic[1]]
+        z = self.z[slic[2]]
+        if x._relative_to is not None:
+            nd = ndim(x.relative_to)
+            slc = s_[:]
+            if nd == 2:
+                slc = slic[1:]
+            elif nd == 1:
+                s = x.relative_to.size
+                if s == self.shape[1]:
+                    slc = slic[1]
+                elif s == self.shape[2]:
+                    slc = slic[2]
 
-                y.relative_to = y.relative_to[slc]
+            x.relative_to = x.relative_to[slc]
 
-            if z._relative_to is not None:
-                nd = ndim(z.relative_to)
-                slc = s_[:]
-                if nd == 2:
-                    slc = slic[:2]
-                elif nd == 1:
-                    s = z.relative_to.size
-                    if s == self.shape[0]:
-                        slc = slic[0]
-                    elif s == self.shape[1]:
-                        slc = slic[1]
+        if y._relative_to is not None:
+            nd = ndim(y.relative_to)
+            slc = s_[:]
+            if nd == 2:
+                slc = slic[::2]
+            elif nd == 1:
+                s = y.relative_to.size
+                if s == self.shape[0]:
+                    slc = slic[0]
+                elif s == self.shape[2]:
+                    slc = slic[2]
 
-                z.relative_to = z.relative_to[slc]
+            y.relative_to = y.relative_to[slc]
 
-            out = type(self)(x=x, y=y, z=z)
-            return out
+        if z._relative_to is not None:
+            nd = ndim(z.relative_to)
+            slc = s_[:]
+            if nd == 2:
+                slc = slic[:2]
+            elif nd == 1:
+                s = z.relative_to.size
+                if s == self.shape[0]:
+                    slc = slic[0]
+                elif s == self.shape[1]:
+                    slc = slic[1]
 
-        if len(axis) == 1: # Returning a 2D mesh
-            a = [x for x in (0, 1, 2) if not x in axis]
-            b = [x for x in (0, 1, 2) if x in axis]
+            z.relative_to = z.relative_to[slc]
 
-            x = deepcopy(self.axis(a[0]))
-            if x._relative_to is not None:
-                if x._relative_to.size > 1:
-                    if a[0] == 0:
-                        if b[0] == 1:
-                            axis = 0
-                        if b[0] == 2:
-                            axis = 1
-                    elif a[0] == 1:
-                        if b[0] == 0:
-                            axis = 0
-                        if b[0] == 2:
-                            axis = 'OOPS'
-                    x.relative_to = take(x.relative_to, slic[b[0]], axis)
+        out = type(self)(x=x, y=y, z=z)
+        return out
 
-            y = deepcopy(self.axis(a[1]))
-            if y._relative_to is not None:
-                if y._relative_to.size > 1:
-                    if a[1] == 1:
-                        if b[0] == 0:
-                            axis = 0
-                        elif b[0] == 2:
-                            axis = 1
-                    elif a[1] == 2:
-                        if b[0] == 0:
-                            axis = 0
-                        elif b[0] == 1:
-                            axis = 1
+    def __slice_2d(self, slic, axis):
 
-                    y.relative_to = take(y.relative_to, slic[b[0]], axis)
+        a = [x for x in (0, 1, 2) if not x in axis]
+        b = [x for x in (0, 1, 2) if x in axis]
 
-            x = x[slic[a[0]]]
-            x.dimension = 0
-            y = y[slic[a[1]]]
-            y.dimension = 1
+        x = deepcopy(self.axis(a[0]))
+        if x._relative_to is not None :
+            if (x._relative_to.size > 1) and (npall(x._relative_to > 0.0)):
+                if a[0] == 0:
+                    if b[0] == 1:
+                        axis = 0
+                    if b[0] == 2:
+                        axis = 1
+                elif a[0] == 1:
+                    if b[0] == 0:
+                        axis = 0
+                    if b[0] == 2:
+                        axis = 'OOPS'
+                x.relative_to = take(x.relative_to, slic[b[0]], axis)
+            else:
+                x.relative_to = None
 
-            out = RectilinearMesh2D(x=x, y=y)
+        y = deepcopy(self.axis(a[1]))
+        if y._relative_to is not None:
+            if (y._relative_to.size > 1) and (npall(y._relative_to > 0.0)):
+                if a[1] == 1:
+                    if b[0] == 0:
+                        axis = 0
+                    elif b[0] == 2:
+                        axis = 1
+                elif a[1] == 2:
+                    if b[0] == 0:
+                        axis = 0
+                    elif b[0] == 1:
+                        axis = 1
 
-        else: # Returning a 1D mesh
-            a = [x for x in (0, 1, 2) if not x in axis]
-            b = [x for x in (0, 1, 2) if x in axis]
+                y.relative_to = take(y.relative_to, slic[b[0]], axis)
+            else:
+                y.relative_to = None
 
-            out = self.axis(a[0])[slic[a[0]]]
-            if out._relative_to is not None:
-                out.relative_to = out.relative_to[slic[b[0]], slic[b[1]]]
+        x = x[slic[a[0]]]
+        x.dimension = 0
+        y = y[slic[a[1]]]
+        y.dimension = 1
+
+        return RectilinearMesh2D(x=x, y=y)
+
+    def __slice_1d(self, slic, axis):
+        a = [x for x in (0, 1, 2) if not x in axis]
+        b = [x for x in (0, 1, 2) if x in axis]
+
+        out = self.axis(a[0])[slic[a[0]]]
+        if out._relative_to is not None:
+            out.relative_to = out.relative_to[slic[b[0]], slic[b[1]]]
 
         return out
 
@@ -304,6 +324,10 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     @property
     def z_edges(self):
+
+        if self._z_edges is None:
+            self._z_edges = self.get_generic_z_edges()
+
         return self._z_edges
 
     def get_generic_z_edges(self):
@@ -385,6 +409,14 @@ class RectilinearMesh3D(RectilinearMesh2D):
         elif axis == 2:
             return self.z
 
+    def set_axis(self, axis, value):
+        if axis == 0:
+            self.x = value
+        elif axis == 1:
+            self.y = value
+        elif axis == 2:
+            self.z = value
+
     def other_axis_indices(self, axis):
         if axis == 0:
             return 1, 2
@@ -459,7 +491,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         def animate(i):
             plt.title('{:.2f}'.format(self.axis(axis).centres[i]))
             slic[axis] = i
-            tmp, _ = utilities._log(values[tuple(slic)].T.flatten(), kwargs.get('log', None))
+            tmp, _ = utilities._log(values[tuple(slic)].flatten(), kwargs.get('log', None))
             pc.set_array(tmp)
 
         anim = FuncAnimation(fig, animate, interval=300, frames=self.axis(axis).nCells.item())
@@ -495,7 +527,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
             j.insert(axis, s_[:])
             j = tuple(j)
             p = distribution.probability(centres[j], log_probability)
-            probability[j] = dot(p, pdf[j])
+
+            probability[j] = dot(p.T, pdf[j])
+
         probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
         return DataArray(probability, name='marginal_probability')
@@ -649,7 +683,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         assert (size(x) == size(y) == size(z)), ValueError("x, y, z must have the same size")
         if trim:
-            flag = self.x.inBounds(x) & self.y.inBounds(y) & self.z.inBounds(z)
+            flag = self.x.in_bounds(x) & self.y.in_bounds(y) & self.z.in_bounds(z)
             i = where(flag)[0]
             out = empty([3, i.size], dtype=int32)
             out[0, :] = self.x.cellIndex(x[i])

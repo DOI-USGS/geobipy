@@ -320,8 +320,12 @@ class RectilinearMesh2D(Mesh):
         b = [x for x in (0, 1) if x == axis]
 
         shp = list(self.shape)
-        shp[axis] = distribution.ndim
 
+        n = distribution.ndim
+
+        if distribution.multivariate:
+            n = 1
+        shp[axis] = n
         probability = zeros(shp)
 
         track = kwargs.pop('track', True)
@@ -331,17 +335,25 @@ class RectilinearMesh2D(Mesh):
             Bar = progressbar.ProgressBar()
             r = Bar(r)
 
-        mesh_1d = self.remove_axis(axis)
-
+        # Loop over the axis and compute the probability of each dimension in the
+        # distribution with the pdf of the histogram
         for i in r:
-            j = [i]
-            j.insert(axis, s_[:])
-            j = tuple(j)
+            j = [i]; j.insert(axis, s_[:]); j = tuple(j)
             p = distribution.probability(centres[j], log_probability)
             probability[j] = dot(p, pdf[j])
-        probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
-        return DataArray(probability, name='marginal_probability')
+        # Normalize probabilities along the dims of the distribution
+        if n > 1:
+            probability = probability / expand_dims(sum(probability, axis), axis=axis)
+
+        mesh = deepcopy(self)
+        if n > 1:
+            mesh.set_axis(axis, RectilinearMesh1D(centres=DataArray(r_[0.0, 1.0, 2.0], name='component')))
+        else:
+            mesh = mesh.remove_axis(axis)
+
+        from ..model.Model import Model
+        return Model(mesh=mesh, values=DataArray(probability.T, name='marginal_probability'))
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -375,6 +387,12 @@ class RectilinearMesh2D(Mesh):
             return self.x
         elif axis == 1:
             return self.y
+
+    def set_axis(self, axis, value):
+        if axis == 0:
+            self.x = value
+        elif axis == 1:
+            self.y = value
 
     @property
     def centres_bounds(self):

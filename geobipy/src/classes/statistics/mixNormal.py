@@ -10,20 +10,19 @@ from copy import deepcopy
 
 class mixNormal(Mixture):
 
-    def __init__(self, means=None, sigmas=None, amplitudes=1.0):
+    def __init__(self, means=None, sigmas=None, amplitudes=None):
 
         if np.all([means, sigmas] is None):
             return
 
         self.params = np.zeros(self.n_solvable_parameters * np.size(means))
 
+        if amplitudes is None:
+            amplitudes = np.ones(np.size(means))
+
         self.amplitudes = amplitudes
         self.means = means
         self.sigmas = sigmas
-
-    def __deepcopy__(self, memo={}):
-        out = type(self)()
-        out._params = deepcopy(self._params, memo=memo)
 
     @property
     def amplitudes(self):
@@ -33,10 +32,6 @@ class mixNormal(Mixture):
     def amplitudes(self, values):
         assert np.size(values) == self.n_components, ValueError("Must provide {} amplitudes".format(self.n_components))
         self._params[0::self.n_solvable_parameters] = values
-
-    # @property
-    # def lmfit_model(self):
-    #     return Pearson7Model
 
     @property
     def means(self):
@@ -82,7 +77,7 @@ class mixNormal(Mixture):
 
 
     def fit_to_curve(self, *args, **kwargs):
-        fit = super().fit_to_curve(*args, **kwargs)
+        fit, pars = super().fit_to_curve(*args, **kwargs)
         self.params = np.asarray(list(fit.best_values.values()))
         return self
 

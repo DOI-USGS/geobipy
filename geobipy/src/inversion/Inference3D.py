@@ -849,7 +849,7 @@ class Inference3D(myObject):
             hdf_file.close()
 
         else:
-            return StatArray(vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
+            return StatArray(vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, save=True, **kwargs) for line in self.lines]))
 
     def cluster_fits_gmm(self, n_clusters, plot=False):
 

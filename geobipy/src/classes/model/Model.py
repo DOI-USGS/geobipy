@@ -165,6 +165,27 @@ class Model(myObject):
     def animate(self, axis, filename, slic=None, **kwargs):
         return self.mesh._animate(self.values, axis, filename, slic, **kwargs)
 
+    def apply_along_axis(self, method, axis=0):
+        """Get the marginal histogram along an axis
+
+        Parameters
+        ----------
+        intervals : array_like
+            Array of size 2 containing lower and upper limits between which to count.
+        log : 'e' or float, optional
+            Entries are given in linear space, but internally bins and values are logged.
+            Plotting is in log space.
+        axis : int
+            Axis along which to get the marginal histogram.
+
+        Returns
+        -------
+        out : geobipy.Histogram1D
+
+        """
+        assert 0 <= axis <= self.mesh.ndim, ValueError("0 <= axis <= {}".format(self.mesh.ndim))
+        return Model(mesh=self.mesh.remove_axis(axis), values=method(self.values, axis=axis))
+
     def axis(self, *args, **kwargs):
         return self.mesh.axis(*args, **kwargs)
 
@@ -454,9 +475,6 @@ class Model(myObject):
             remapped_model.gradient_weight = deepcopy(self.gradient_weight)
 
         return remapped_model
-
-    def pcolor(self, **kwargs):
-        return self.mesh.pcolor(values=self.values, **kwargs)
 
     def plot(self, **kwargs):
         ### DO NOT CHANGE THIS TO PCOLOR

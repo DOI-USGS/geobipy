@@ -9,12 +9,15 @@ from lmfit.models import StudentsTModel
 
 class mixStudentT(Mixture):
 
-    def __init__(self, means=None, sigmas=None, amplitudes=1.0, labels=None):
+    def __init__(self, means=None, sigmas=None, amplitudes=None):
 
         if np.all([means, sigmas] is None):
             return
 
         self.params = np.zeros(self.n_solvable_parameters * np.size(means))
+
+        if amplitudes is None:
+            amplitudes = np.ones(np.size(means))
 
         self.amplitudes = amplitudes
         self.means = means
@@ -31,14 +34,6 @@ class mixStudentT(Mixture):
         assert np.size(values) == self.n_components, ValueError("Must provide {} amplitudes".format(self.n_components))
         self._params[0::self.n_solvable_parameters] = values
 
-    @property
-    def labels(self):
-        return self._labels
-
-    @labels.setter
-    def labels(self, values):
-        assert np.size(values) == self.n_components, ValueError("Labels must have size {}".format(self.n_components))
-        self._labels[:] = values
 
     @property
     def lmfit_model(self):
@@ -70,15 +65,6 @@ class mixStudentT(Mixture):
     def variances(self):
         return DataArray(self.sigmas**2.0, "variance")
 
-    # @property
-    # def degrees(self):
-    #     return DataArray(self._params[3::self.n_solvable_parameters], "degrees of freedom")
-
-    # @degrees.setter
-    # def degrees(self, values):
-    #     assert np.size(values) == self.n_components, ValueError("Must provide {} degrees".format(self.n_components))
-    #     self._params[3::self.n_solvable_parameters] = values
-
     @property
     def model(self):
         return StudentsTModel
@@ -98,20 +84,9 @@ class mixStudentT(Mixture):
 
 
     def fit_to_curve(self, *args, **kwargs):
-        fit = super().fit_to_curve(*args, **kwargs)
+        fit, mix = super().fit_to_curve(*args, **kwargs)
         self.params = np.asarray(list(fit.best_values.values()))
         return self
-
-
-    def plot_components(self, x, log, ax=None, **kwargs):
-
-        if not ax is None:
-            plt.sca(ax)
-
-        probability = np.squeeze(self.amplitudes * self.probability(x, log))
-
-        return probability.plot(x=x, c=self.labels, **kwargs)
-
 
     def probability(self, x, log, component=None):
 
@@ -122,7 +97,6 @@ class mixStudentT(Mixture):
             return out
         else:
             return self.amplitudes[component] * self._probability(x, log, self.means[component], self.sigmas[component])
-
 
     def _probability(self, x, log, mean, sigma):
         """ For a realization x, compute the probability """
@@ -164,4 +138,4 @@ class mixStudentT(Mixture):
         return msg
 
     def _assign_from_mixture(self, mixture):
-        self.__init__(np.squeeze(mixture.means), np.squeeze(mixture.covariances), np.squeeze(mixture.degrees), amplitudes=np.squeeze(mixture.weights))
+        self.__init__(np.squeeze(mixture.means), np.squeeze(mixture.covariances), amplitudes=np.squeeze(mixture.weights))
