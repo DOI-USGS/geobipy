@@ -52,22 +52,24 @@ class Normal(baseDistribution):
     def ndim(self):
         return 1
 
-
     @property
     def multivariate(self):
         return False
-
 
     @property
     def variance(self):
         return self._variance
 
 
-    def cdf(self, x):
+    def cdf(self, x, log=False):
         """ For a realization x, compute the probability """
         if self.log:
             x = log(x)
-        return DataArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
+
+        if log:
+            return DataArray(norm.logcdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
+        else:
+            return DataArray(norm.cdf(x, loc = self._mean, scale = self.variance), "Cumulative Density")
 
 
     def __deepcopy__(self, memo={}):
@@ -112,8 +114,6 @@ class Normal(baseDistribution):
         return exp(values) if self.log else values
 
     def plot_pdf(self, log=False, **kwargs):
-
-
         bins = self.bins()
         t = r"$\tilde{N}(\mu="+str(self.mean)+r", \sigma^{2}="+str(self.variance)+")$"
 

@@ -587,7 +587,7 @@ class Inference2D(myObject):
     def _get(self, variable, reciprocateParameter=False, slic=None, **kwargs):
 
         variable = variable.lower()
-        assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highestmarginal', 'marginal_probability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highestMarginal', 'marginal_probability']")
+        assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highest_marginal', 'marginal_probability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highest_marginal', 'marginal_probability']")
 
         if variable == 'mean':
 
@@ -614,8 +614,8 @@ class Inference2D(myObject):
         if variable == 'opacity':
             return self.opacity(slic)
 
-        if variable == 'highestmarginal':
-            return self.highestMarginal(slic)
+        if variable == 'highest_marginal':
+            return self.highest_marginal(slic)
 
         if variable == 'marginal_probability':
             assert "index" in kwargs, ValueError('Please specify keyword "index" when requesting marginal_probability')
@@ -1022,9 +1022,17 @@ class Inference2D(myObject):
 
         return opacity
 
-    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
-        return self.parameter_posterior().compute_probability(distribution, log, log_probability, axis, **kwargs)
+    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, save=False, **kwargs):
 
+        p = self.parameter_posterior().compute_probability(distribution, log, log_probability, axis, **kwargs)
+
+        if save and self.mode == 'r+':
+            if 'probabilities' in self.hdf_file.keys():
+                p.writeHdf(self.hdf_file, 'probabilities')
+            else:
+                p.toHdf(self.hdf_file, 'probabilities')
+
+        return p
 
     # def percentageParameter(self, value, depth=None, depth2=None, progress=False):
 
@@ -1077,8 +1085,7 @@ class Inference2D(myObject):
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
 
-        out.mesh.z.relative_to = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
-
+        out.mesh.z.relative_to = self.data.elevation
         out.mesh.y.relative_to = self.halfspace
 
         return out
@@ -1529,46 +1536,35 @@ class Inference2D(myObject):
 
     #     return mesh.pcolor(values = values, **kwargs)
 
-    def plotHighestMarginal(self, useVariance=True, **kwargs):
+    def plot_highest_marginal(self, **kwargs):
 
-        values = self.highestMarginal
-        return self.plot_cross_section(values = values, **kwargs)
+        model = self.highest_marginal()
+
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
+
+        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
+
+        return model.pcolor(**kwargs)
 
     def plot_marginal_probabilities(self, **kwargs):
 
-        nClusters = self.marginal_probability.shape[-1]
+        mp = self.marginal_probability()
+        n_classes = mp.shape[1]
+        gs = kwargs.get('gs', None)
 
-        gs1 = gridspec.GridSpec(nrows=nClusters+1, ncols=1, left=0.15, right=0.91, bottom=0.06, top=0.95, wspace=0.06, hspace=0.175)
+        if gs is None:
+            gs = gridspec.GridSpec(nrows=n_classes, ncols=1, left=0.15, right=0.91, bottom=0.06, top=0.95, wspace=0.06, hspace=0.175)
 
         ax = None
         axes = []
-        for i in range(nClusters):
-            if ax is None:
-                ax = plt.subplot(gs1[i, 0])
-            else:
-                axTmp = plt.subplot(gs1[i, 0], sharex=ax, sharey=ax)
+        for i in range(n_classes):
+            ax = plt.subplot(gs[i, 0])
+            H = mp[:, i, :].pcolor(transpose=True, vmin=mp.values.min(), vmax=mp.values.max(), ax=ax, **kwargs)
+            self.plot_elevation(alpha=0.3, ax=ax, **kwargs)
+            self.plot_data_elevation(ax=ax, **kwargs)
+            axes.append(ax)
 
-            ax1, pm1, cb1 = self.plot_cross_section(self.marginal_probability[:, :, i].T, vmin=0.0, vmax=1.0, **kwargs)
-            # self.plotElevation(alpha=0.3, **kwargs)
-            # self.plotDataElevation(**kwargs)
-            axes.append(ax1)
-            axes[-1].xaxis.set_tick_params(which='both', labelbottom=False)
-            axes[-1].set_xlabel('')
-
-        cbar_a = axes[-1].get_position().bounds[1] - 0.01
-        cbar_b = cbar_a + 0.01
-
-        plt.subplot(gs1[nClusters, 0])
-        kwargs['cmap'] = 'jet'
-        ax, pm, cb = self.plot_cross_section(self.highestMarginal.T, vmin=0, vmax=nClusters-1, **kwargs)
-        axes.append(ax)
-        # self.plotElevation(**kwargs)
-        # self.plotDataElevation(**kwargs)
-
-        cbar_a = axes[-1].get_position().bounds[1] - 0.01
-        cbar_b = cbar_a + 0.01
-        gs2 = gridspec.GridSpec(nrows=1, ncols=1, left=0.92, right=0.93, bottom=cbar_b, top=0.95, wspace=0.01)
-        gs3 = gridspec.GridSpec(nrows=1, ncols=1, left=0.92, right=0.93, bottom=0.06, top=cbar_a, wspace=0.01)
+        return axes
 
     def mask(self, model, **kwargs):
 
@@ -1676,10 +1672,10 @@ class Inference2D(myObject):
 
     def marginal_probability(self, slic=None):
 
-        assert 'probabilities' in self.hdf_file.keys(), Exception("Marginal probabilities need computing, use Inference_2D.computeMarginalProbability_X()")
+        assert 'probabilities' in self.hdf_file.keys(), Exception("Marginal probabilities need computing, use Inference_2D.compute_probabilities()")
 
         if 'probabilities' in self.hdf_file.keys():
-            marginal_probability = StatArray.fromHdf(self.hdf_file['probabilities'], index=slic)
+            marginal_probability = Model.fromHdf(self.hdf_file['probabilities'], index=slic)
 
         return marginal_probability
 
@@ -1841,8 +1837,8 @@ class Inference2D(myObject):
     #     # self.marginal_probability.toHdf('line_{}_marginal_probability.h5'.format(self.line), 'marginal_probability')
 
 
-    def highestMarginal(self, slic=None):
-        return StatArray(argmax(self.marginal_probability(slic), axis=-1), name='Highest marginal')
+    def highest_marginal(self, slic=None):
+        return self.marginal_probability(slic).apply_along_axis(argmax, axis=1)
 
     def plot_inference_1d(self, fiducial, **kwargs):
         """ Plot the geobipy results for the given data point """

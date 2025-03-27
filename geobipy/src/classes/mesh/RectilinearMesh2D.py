@@ -4,7 +4,7 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 
 from numpy import abs, arange, asarray
-from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float32, float64, full, int_, int32, integer, interp
+from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float32, float64, full, int_, int32, integer, interp, isnan
 from numpy import max, maximum, meshgrid, min, minimum, nan, ndim, outer, r_, ravel_multi_index
 from numpy import repeat, s_, searchsorted, shape, size, sqrt, squeeze, tile, unravel_index
 from numpy import where, zeros
@@ -321,8 +321,12 @@ class RectilinearMesh2D(Mesh):
         b = [x for x in (0, 1) if x == axis]
 
         shp = list(self.shape)
-        shp[axis] = distribution.ndim
 
+        n = distribution.ndim
+
+        if distribution.multivariate:
+            n = 1
+        shp[axis] = n
         probability = zeros(shp)
 
         track = kwargs.pop('track', True)
@@ -332,17 +336,25 @@ class RectilinearMesh2D(Mesh):
             Bar = progressbar.ProgressBar()
             r = Bar(r)
 
-        mesh_1d = self.remove_axis(axis)
-
+        # Loop over the axis and compute the probability of each dimension in the
+        # distribution with the pdf of the histogram
         for i in r:
-            j = [i]
-            j.insert(axis, s_[:])
-            j = tuple(j)
+            j = [i]; j.insert(axis, s_[:]); j = tuple(j)
             p = distribution.probability(centres[j], log_probability)
             probability[j] = dot(p, pdf[j])
-        probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
-        return DataArray(probability, name='marginal_probability')
+        # Normalize probabilities along the dims of the distribution
+        if n > 1:
+            probability = probability / expand_dims(sum(probability, axis), axis=axis)
+
+        mesh = deepcopy(self)
+        if n > 1:
+            mesh.set_axis(axis, RectilinearMesh1D(centres=DataArray(r_[0.0, 1.0, 2.0], name='component')))
+        else:
+            mesh = mesh.remove_axis(axis)
+
+        from ..model.Model import Model
+        return Model(mesh=mesh, values=DataArray(probability.T, name='marginal_probability'))
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -376,6 +388,12 @@ class RectilinearMesh2D(Mesh):
             return self.x
         elif axis == 1:
             return self.y
+
+    def set_axis(self, axis, value):
+        if axis == 0:
+            self.x = value
+        elif axis == 1:
+            self.y = value
 
     @property
     def centres_bounds(self):
@@ -491,9 +509,37 @@ class RectilinearMesh2D(Mesh):
     def interpolate_centres_to_nodes(self, values, method='cubic'):
         if self.x.nCells <= 3 or self.y.nCells <= 3:
             method = 'linear'
+
         f = interpolate.RegularGridInterpolator((self.x.centres, self.y.centres), values, method=method, bounds_error=False)
         xx, yy = meshgrid(self.x.edges, self.y.edges, indexing='ij', sparse=True)
-        return f((xx, yy))
+
+        out = f((xx, yy))
+
+        out[0, 1:-1] = out[1, 1:-1] - (abs(out[2, 1:-1] - out[1, 1:-1]))
+        out[-1, 1:-1] = out[-2, 1:-1] - (abs(out[-3, 1:-1] - out[-2, 1:-1]))
+        out[:, 0] = out[:, 1] - (abs(out[:, 2] - out[:, 1]))
+        out[:, -1] = out[:, -2] - (abs(out[:, -3] - out[:, 2]))
+
+        return out
+
+    def fill_nans_with_extrapolation(self, values, **kwargs):
+
+        from ..pointcloud.Point import Point
+
+        if npall(values.shape[::-1] == self.shape):
+            values = values.T
+        assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
+
+        i = ~isnan(values)
+        x = self.x_centres[i]
+        y = self.y_centres[i]
+        v = values[i]
+
+        p2d = Point(x, y, z=v)
+
+        out, _ = p2d.interpolate(values=v, mesh=self, method='sibson', **kwargs)
+        return out
+
 
     def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
         """Compute a statistic of the array between the intervals given along dimension dim.
@@ -796,6 +842,8 @@ class RectilinearMesh2D(Mesh):
 
         """
         # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
+        if npall(values.shape[::-1] == self.shape):
+            values = values.T
         assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
 
         x_mask = kwargs.pop('x_mask', None)
@@ -816,7 +864,7 @@ class RectilinearMesh2D(Mesh):
             if self.y.log is not None:
                 kwargs['yscale'] = 'log'
 
-            if npall(values.shape != xm.shape) and npall(values.shape != (r_[xm.shape]-1)):
+            if npall(values.shape != xm.shape) and npall(values.shape != (asarray(xm.shape)-1)):
                 values = values.T
 
             ax, pm, cb = cP.pcolormesh(xm, ym, values, **kwargs)

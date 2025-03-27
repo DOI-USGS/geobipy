@@ -197,7 +197,11 @@ class RectilinearMesh1D(Mesh):
 
     @centres.setter
     def centres(self, values):
+
         values = StatArray(values)
+
+        # assert values.sorted, ValueError("centres must be monotonically increasing")
+
         values, _ = utilities._log(values, log=self.log)
 
         if self.relative_to.size == 1:
@@ -245,6 +249,8 @@ class RectilinearMesh1D(Mesh):
     @edges.setter
     def edges(self, values):
         values = StatArray(values)
+
+        # assert values.sorted, ValueError("edges must be monotonically increasing")
 
         values, _ = utilities._log(values, log=self.log)
 
@@ -630,7 +636,9 @@ class RectilinearMesh1D(Mesh):
 
         probability = zeros(self.shape)
         p = distribution.probability(centres, log_probability)
-        probability = dot(p, pdf)
+
+        probability = p.T * pdf
+
         probability = probability / expand_dims(sum(probability, 0), axis=0)
 
         return DataArray(probability, name='marginal_probability')

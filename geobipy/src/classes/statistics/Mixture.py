@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 import h5py
 from ...classes.core.myObject import myObject
@@ -44,6 +45,15 @@ class Mixture(myObject):
     #         raise ValueError("mixture must be one of [gaussian, lorentzian, splitlorentzian, voigt, moffat, pearson, studentst]")
 
     #     # self.model = lmfit_model
+
+    def __deepcopy__(self, memo={}):
+        out = type(self)()
+        out._params = deepcopy(self._params, memo=memo)
+        return out
+
+    @property
+    def ndim(self):
+        return self.n_components
 
     @property
     def params(self):
@@ -447,3 +457,12 @@ class Mixture(myObject):
 
         self.params = DataArray.fromHdf(grp['params'], index=index)
         return self.squeeze()
+
+    def plot_components(self, x, log, ax=None, **kwargs):
+
+        if not ax is None:
+            plt.sca(ax)
+
+        probability = np.squeeze(self.amplitudes * self.probability(x, log))
+
+        return probability.plot(x=x, **kwargs)

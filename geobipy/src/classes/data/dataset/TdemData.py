@@ -832,21 +832,26 @@ class TdemData(Data):
         if not isinstance(i, slice):
             i = unique(i)
 
-        return type(self)(self.system,
-                        x=self.x[i],
-                        y=self.y[i],
-                        z=self.z[i],
-                        elevation=self.elevation[i],
-                        lineNumber=self.lineNumber[i],
-                        fiducial=self.fiducial[i],
-                        transmitter=self.transmitter[i],
-                        receiver=self.receiver[i],
-                        secondary_field=self.secondary_field[i, :],
-                        primary_field=self.primary_field[i, :],
-                        std=self.std[i, :],
-                        predicted_secondary_field=self.predicted_secondary_field[i, :],
-                        predicted_primary_field=self.predicted_primary_field[i, :],
-                        channel_names=self.channel_names)
+        if size(i) == 1:
+            cls = TdemData.single
+        else:
+            cls = type(self)
+
+        return cls(system=self.system,
+                    x=self.x[i],
+                    y=self.y[i],
+                    z=self.z[i],
+                    elevation=self.elevation[i],
+                    lineNumber=self.lineNumber[i],
+                    fiducial=self.fiducial[i],
+                    transmitter=self.transmitter[i],
+                    receiver=self.receiver[i],
+                    secondary_field=self.secondary_field[i, :],
+                    primary_field=self.primary_field[i, :],
+                    std=self.std[i, :],
+                    predicted_secondary_field=self.predicted_secondary_field[i, :],
+                    predicted_primary_field=self.predicted_primary_field[i, :],
+                    channel_names=self.channel_names)
 
     @staticmethod
     def fileInformation():

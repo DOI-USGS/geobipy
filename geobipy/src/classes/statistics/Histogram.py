@@ -1,5 +1,5 @@
 from copy import deepcopy
-from numpy import cumsum, hstack, int32, int64, interp, isnan, minimum
+from numpy import arange, cumsum, hstack, int32, int64, interp, isnan, minimum
 from numpy import nanmin, nanmax, ndim, s_, size, sqrt, sum, unique, var
 from numpy import all as npall
 from numpy.random import rand
@@ -84,7 +84,11 @@ class Histogram(Model):
         return Model(self.mesh, DataArray(cdf, name='Cumulative Density Function'))
 
     def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
-        return self.mesh._compute_probability(distribution, self.pdf.values, log, log_probability, axis, **kwargs)
+        from ..mesh.RectilinearMesh1D import RectilinearMesh1D
+        mesh = deepcopy(self.mesh)
+        mesh.set_axis(axis, RectilinearMesh1D(centres = DataArray(arange(distribution.ndim), name='class')))
+
+        return Model(mesh, self.mesh._compute_probability(distribution, self.pdf.values, log, log_probability, axis, **kwargs))
 
     def credible_intervals(self, percent=90.0, axis=0):
         """Gets the median and the credible intervals for the specified axis.
@@ -124,7 +128,8 @@ class Histogram(Model):
             Axis along which to get the marginal histogram.
 
         """
-        return self.mesh._credible_range(self.counts, percent=percent, log=log, axis=axis)
+        return Model(mesh=self.mesh.remove_axis(axis), values=self.mesh._credible_range(self.counts, percent=percent, log=log, axis=axis))
+
 
     def entropy(self, log=2, axis=None):
 
@@ -350,7 +355,7 @@ class Histogram(Model):
         """
         out = self.transparency(percent=percent, log=log, axis=axis)
         out.values = 1.0 - out.values
-        out.name = 'Opacity'
+        out.values.name = 'Opacity'
         return out
 
     def opacity_level(self, percent=95.0, log=None, axis=0):
@@ -529,21 +534,23 @@ class Histogram(Model):
 
         """
 
-        out = DataArray(self.credible_range(percent=percent, log=log, axis=axis, **kwargs), 'Transparency')
-        mn = nanmin(out)
-        mx = nanmax(out)
+        out = self.credible_range(percent=percent, log=log, axis=axis, **kwargs)
+        mn = nanmin(out.values)
+        mx = nanmax(out.values)
         t = mx - mn
         if t > 0.0:
-            out = (out - mn) / t
+            out.values = (out.values - mn) / t
         else:
-            out -= mn
+            out.values -= mn
 
-        out[isnan(out)] = 1.0
+        out.values[isnan(out.values)] = 1.0
 
-        return Model(self.mesh.remove_axis(axis), values=out)
+        out.values.name = 'Transparency'
 
-    def update(self, *args, **kwargs):
-        iBin = self.mesh.cellIndices(*args, clip=True, **kwargs)
+        return out
+
+    def update(self, *args, clip=False, trim=True, **kwargs):
+        iBin = self.mesh.cellIndices(*args, clip=clip, trim=trim, **kwargs)
 
         axis = None if iBin.size == 1 else ndim(iBin)-1
 

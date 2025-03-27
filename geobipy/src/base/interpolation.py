@@ -22,7 +22,6 @@ from numba import jit
 _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': False}
 
 def sibson(x, y, values, grid_x, grid_y, z=None, grid_z = None, max_distance=inf):
-
     if grid_z is None:
         return __sibson_2d(x, y, values, grid_x, grid_y, max_distance)
     else:
