@@ -12,6 +12,7 @@ from numpy import all as npall
 
 from .Mesh import Mesh
 from ..core.DataArray import DataArray
+from ..statistics.StatArray import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
@@ -481,19 +482,9 @@ class RectilinearMesh2D(Mesh):
         if self.y._relative_to is not None:
             mesh.y.relative_to = self.x.resample(dy, self.y.relative_to)
 
-        print(self.x.centres, self.y.centres)
-        print(mesh.x.centres, mesh.y.centres)
-
-        print(values.shape)
-
         f = interpolate.RegularGridInterpolator((self.x.centres, self.y.centres), values, method=method, bounds_error=False)
 
         xx, yy = meshgrid(mesh.x.centres, mesh.y.centres, indexing='ij', sparse=True)
-
-        print(xx)
-        print(xx.shape)
-        print(yy)
-        print(yy.shape)
 
         return mesh, f((xx, yy))
 
@@ -825,7 +816,7 @@ class RectilinearMesh2D(Mesh):
             if self.y.log is not None:
                 kwargs['yscale'] = 'log'
 
-            if npall(values.shape != xm.shape) and npall(values.shape != (r_[*xm.shape]-1)):
+            if npall(values.shape != xm.shape) and npall(values.shape != (r_[xm.shape]-1)):
                 values = values.T
 
             ax, pm, cb = cP.pcolormesh(xm, ym, values, **kwargs)
@@ -1094,7 +1085,7 @@ class RectilinearMesh2D(Mesh):
                 return cls(x=x, y=y)
 
     def fromHdf_cell_values(self, grp, key, index=None, skip_posterior=False):
-        return DataArray.fromHdf(grp, key, index=index, skip_posterior=skip_posterior)
+        return StatArray.fromHdf(grp[key], index=index, skip_posterior=skip_posterior)
 
 
     def range(self, axis):

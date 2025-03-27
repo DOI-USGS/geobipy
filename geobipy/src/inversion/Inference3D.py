@@ -113,12 +113,6 @@ class Inference3D(myObject):
         # else:
         lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in h5_files]
 
-        data = deepcopy(lines[0].data)
-
-        # for line in lines[1:]:
-        #     t = line.data
-        #     data = data.append(line.data)
-
         self = cls(None, world=world, prng=prng, global_access=global_access)
         self.mode = kwargs.get('mode', 'r')
         self._lines = lines
@@ -373,7 +367,7 @@ class Inference3D(myObject):
             The inversion results for the line.
 
         """
-        index = self.lineIndex(lineNumber=line_number)
+        index = self.line_index(line_number=line_number)
         return self.lines[index]
 
     @property
@@ -386,13 +380,9 @@ class Inference3D(myObject):
         else:
             return self._lines
 
-    @property
-    def lineNumber(self):
-        return sort(unique(self.data.lineNumber))
-
-    # @lineNumber.setter
-    # def lineNumber(self, values):
-    #     self._lineNumber = unique(values)
+    @cached_property
+    def line_number(self):
+        return unique(hstack([line.data.lineNumber for line in self.lines]))
 
     @property
     def nLines(self):
@@ -972,7 +962,7 @@ class Inference3D(myObject):
         geobipy.Hitmap : Parameter posterior.
 
         """
-        iLine, index = self.lineIndex(fiducial=fiducial, index=index)
+        iLine, index = self.line_index(fiducial=fiducial, index=index)
         return self.lines[iLine].parameter_posterior(index=index)
 
 
@@ -1234,22 +1224,22 @@ class Inference3D(myObject):
             The inversion results for the data point.
 
         """
-        lineIndex, fidIndex = self.lineIndex(fiducial=fiducial, index=index)
+        line_index, fidIndex = self.line_index(fiducial=fiducial, index=index)
         if size(fidIndex) > 1:
-            assert line_index is not None, ValueError("Multiple fiducials found, please specify which line_index out of {}".format(lineIndex))
-            lineIndex = line_index
-        return self.lines[lineIndex].inference_1d(fidIndex)
+            assert line_index is not None, ValueError("Multiple fiducials found, please specify which line_index out of {}".format(line_index))
+            line_index = line_index
+        return self.lines[line_index].inference_1d(fidIndex)
 
-    def lineIndex(self, lineNumber=None, fiducial=None, index=None):
+    def line_index(self, line_number=None, fiducial=None, index=None):
         """Get the line index """
-        tmp = sum([not x is None for x in [lineNumber, fiducial, index]])
+        tmp = sum([not x is None for x in [line_number, fiducial, index]])
         assert tmp == 1, Exception("Please specify one argument, lineNumber, fiducial, or index")
 
         index = atleast_1d(index)
 
-        if lineNumber is not None:
-            assert lineNumber in self.lineNumber, ValueError("line {} not found in data set".format(lineNumber))
-            return squeeze(where(self.lineNumber == lineNumber)[0])
+        if line_number is not None:
+            assert line_number in self.line_number, ValueError("line {} not found in data set".format(lineNumber))
+            return squeeze(where(self.line_number == line_number)[0])
 
         if fiducial is not None:
             return squeeze(self.fiducialIndex(fiducial))
@@ -1295,7 +1285,7 @@ class Inference3D(myObject):
 
     def fiducial(self, index):
         """ Get the fiducial of the given data point """
-        iLine, index = self.lineIndex(index=index)
+        iLine, index = self.line_index(index=index)
         iLine = atleast_1d(iLine)
         index = atleast_1d(index)
 
@@ -1316,27 +1306,34 @@ class Inference3D(myObject):
 
         Returns
         -------
-        lineIndex : ints
-            lineIndex for each fiducial
+        line_index : ints
+            line_index for each fiducial
         index : ints
             Index of each fiducial in their respective line
 
         """
 
-        lineIndex = []
+        line_index = []
         index = []
 
         for i, line in enumerate(self.lines):
             ids = line.fiducialIndex(fiducial)
             nIds = size(ids)
             if nIds > 0:
-                lineIndex.append(full(nIds, fill_value=i))
+                line_index.append(full(nIds, fill_value=i))
                 index.append(ids)
 
         if size(index) > 0:
-            return squeeze(hstack(lineIndex)), squeeze(hstack(index))
+            return squeeze(hstack(line_index)), squeeze(hstack(index))
 
         assert False, ValueError("fiducial not present in this data set")
+
+    def fit_mixture_to_pdf(self, intervals=None, **kwargs):
+
+        if self.parallel_access:
+            return self.fit_mixture_to_pdf_mpi(intervals, **kwargs)
+        else:
+            return self.fit_mixture_to_pdf_serial(intervals, **kwargs)
 
     def fit_mixture_to_pdf_mpi(self, intervals=None, **kwargs):
 
@@ -1444,15 +1441,6 @@ class Inference3D(myObject):
                 else:
                     Go = False
 
-
-    def fit_mixture_to_pdf(self, intervals=None, **kwargs):
-
-        if self.parallel_access:
-            return self.fit_mixture_to_pdf_mpi(intervals, **kwargs)
-        else:
-            return self.fit_mixture_to_pdf_serial(intervals, **kwargs)
-
-
     def fit_mixture_to_pdf_serial(self, intervals, **kwargs):
         """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
 
@@ -1533,7 +1521,7 @@ class Inference3D(myObject):
     #     i0 = starts[self.rank]
     #     i1 = i0 + chunk
 
-    #     iLine, index = self.lineIndex(index=arange(i0, i1))
+    #     iLine, index = self.line_index(index=arange(i0, i1))
 
     #     tBase = MPI.Wtime()
     #     t0 = tBase
@@ -1851,6 +1839,7 @@ class Inference3D(myObject):
         output = kwargs.pop('output_directory', '.')
 
         for this in bar:
+            plt.close('all')
             try:
                 fig = this.plot_summary(**kwargs)
                 fig.savefig(f"{output}//{this.line_number}.png")

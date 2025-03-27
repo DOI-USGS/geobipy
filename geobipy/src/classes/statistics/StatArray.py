@@ -8,8 +8,6 @@ from numpy import shape as npshape
 from numpy import set_printoptions
 from matplotlib.axes import SubplotBase
 import h5py
-# import scipy.stats as st
-
 
 from ...base import utilities as cf
 from ...base import plotting as cP
