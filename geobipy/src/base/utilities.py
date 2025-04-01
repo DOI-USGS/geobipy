@@ -1108,7 +1108,7 @@ def histogramEqualize(values, nBins=256):
     # Scaling to the needed amplitude
     equalized = (equalized * (b2 - b1)) + b1
 
-    res = StatArray.StatArray(equalized.reshape(values.shape), getName(values), getUnits(values))
+    res = equalized.reshape(values.shape)
 
     return res, cdf
 

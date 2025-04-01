@@ -2,8 +2,8 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import deepcopy
-from numpy import dot, empty, expand_dims, int32, integer
-from numpy import max,  min, ndim, outer, prod, ravel_multi_index
+from numpy import asarray, dot, empty, expand_dims, full, int32, integer, insert
+from numpy import max,  min, nan, ndim, outer, prod, ravel_multi_index
 from numpy import repeat, s_, size, squeeze, sum, swapaxes, take, unravel_index
 from numpy import where, zeros
 from numpy import all as npall
@@ -175,7 +175,8 @@ class RectilinearMesh3D(RectilinearMesh2D):
                         axis = 0
                     if b[0] == 2:
                         axis = 'OOPS'
-                x.relative_to = take(x.relative_to, slic[b[0]], axis)
+                if x.relative_to.ndim == 2:
+                    x.relative_to = take(x.relative_to, slic[b[0]], axis)
             else:
                 x.relative_to = None
 
@@ -193,7 +194,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
                     elif b[0] == 1:
                         axis = 1
 
-                y.relative_to = take(y.relative_to, slic[b[0]], axis)
+                if y.relative_to.ndim == 2:
+                    y.relative_to = take(y.relative_to, slic[b[0]], axis)
+
             else:
                 y.relative_to = None
 
@@ -333,6 +336,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def get_generic_z_edges(self):
         re_tmp = None
         if self.z._relative_to is not None:
+
             nd = ndim(self.z.relative_to)
             if nd == 2:
                 re_tmp = deepcopy(self.z.relative_to)
@@ -532,7 +536,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
-        return DataArray(probability, name='marginal_probability')
+        return DataArray(probability, name='Marginal Probability')
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -800,65 +804,35 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         return unravel_index(index, self.shape, order=order)
 
+    def pcolor(self, axis, index=None, **kwargs):
 
-    # def pcolor(self, values, x='x', **kwargs):
-    #     """Create a pseudocolour plot.
+        values = kwargs['values']
+        kwargs['axis'] = axis
 
-    #     Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
+        if index is not None:
+            s = [s_[:] for i in range(self.ndim)]
+            s[axis] = index
 
-    #     Parameters
-    #     ----------
-    #     values : array_like
-    #         2D array of colour values
-    #     location : float
-    #         location of axis aligned slice to pcolor
-    #     xAxis : str
-    #         If xAxis is 'x', the horizontal axis uses self.x
-    #         If xAxis is 'y', the horizontal axis uses self.y
-    #         If xAxis is 'r', the horizontal axis uses cumulative distance along the line
+            tmp = self[s]
 
-    #     Other Parameters
-    #     ----------------
-    #     alpha : scalar or array_like, optional
-    #         If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
-    #         If array_like, each pixel is given an individual alpha value.
-    #     log : 'e' or float, optional
-    #         Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
-    #         Values in c that are <= 0 are masked.
-    #     equalize : bool, optional
-    #         Equalize the histogram of the colourmap so that all colours have an equal amount.
-    #     nbins : int, optional
-    #         Number of bins to use for histogram equalization.
-    #     xscale : str, optional
-    #         Scale the x axis? e.g. xscale = 'linear' or 'log'
-    #     yscale : str, optional
-    #         Scale the y axis? e.g. yscale = 'linear' or 'log'.
-    #     flipX : bool, optional
-    #         Flip the X axis
-    #     flipY : bool, optional
-    #         Flip the Y axis
-    #     grid : bool, optional
-    #         Plot the grid
-    #     noColorbar : bool, optional
-    #         Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
-    #     trim : bool, optional
-    #         Set the x and y limits to the first and last non zero values along each axis.
+            return tmp.pcolor(**kwargs)
 
-    #     See Also
-    #     --------
-    #     geobipy.plotting.pcolor : For non matplotlib keywords.
-    #     matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
+        mesh = self.remove_axis(axis)
 
-    #     """
+        x_mask = kwargs.get('x_mask', None); y_mask = kwargs.get('y_mask', None)
+        mask = (x_mask is not None) or (y_mask is not None)
 
-    #     assert all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+        masked = mesh
+        if mask:
+            masked, x_indices, y_indices, _ = mesh.mask_cells(x_mask, y_mask, None)
 
-    #     xtmp = self.axis(x)
+            kwargs['values'] = values.expand(x_indices, y_indices, masked.shape, axis=axis)
+            if 'classes' in kwargs:
+                if 'id' in kwargs['classes']:
+                    kwargs['classes']['id'] = kwargs['classes']['id'].expand(x_indices, y_indices, masked.shape)
 
-    #     ax, pm, cb = cP.pcolor(values, x = xtmp, y = self.z.edges, **kwargs)
 
-    #     return ax, pm, cb
-
+        return masked.pcolor(**kwargs)
 
     def pyvista_mesh(self, **kwargs):
         """Creates a pyvista plotting object linked to VTK.
@@ -881,7 +855,6 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
     def _reorder_for_pyvista(self, values):
         return utilities.reorder_3d_for_pyvista(values)
-
 
     @property
     def summary(self):

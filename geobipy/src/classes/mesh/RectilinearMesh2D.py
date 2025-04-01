@@ -353,7 +353,7 @@ class RectilinearMesh2D(Mesh):
             mesh = mesh.remove_axis(axis)
 
         from ..model.Model import Model
-        return Model(mesh=mesh, values=DataArray(probability.T, name='marginal_probability'))
+        return Model(mesh=mesh, values=DataArray(probability.T, name='Marginal Probability'))
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -604,7 +604,7 @@ class RectilinearMesh2D(Mesh):
         return res, intervals
 
 
-    def mask_cells(self, axis=None, x_distance=None, y_distance=None, values=None):
+    def mask_cells(self, x_distance=None, y_distance=None, values=None):
         """Mask cells by a distance.
 
         If the edges of the cell are further than distance away, extra cells are inserted such that
@@ -640,7 +640,7 @@ class RectilinearMesh2D(Mesh):
         if not values is None:
             out_values = values
 
-        x_indices = None
+        x_indices = s_[:]
         x = deepcopy(self.x)
         if not x_distance is None:
             x, x_indices = self.x.mask_cells(x_distance)
@@ -649,7 +649,7 @@ class RectilinearMesh2D(Mesh):
                 for i in range(self.x.nCells.item()):
                     out_values[x_indices[i], :] = values[i, :]
 
-        y_indices = None
+        y_indices = s_[:]
         y = deepcopy(self.y)
         if not y_distance is None:
             y, y_indices = self.y.mask_cells(y_distance)
@@ -798,7 +798,7 @@ class RectilinearMesh2D(Mesh):
 
         return unravel_index(indices, self.shape, order=order)
 
-    def pcolor(self, values, axis=None, yAxis='absolute', **kwargs):
+    def pcolor(self, values, yAxis='absolute', **kwargs):
         """Create a pseudocolour plot of a 2D array using the mesh.
 
         Parameters
@@ -850,59 +850,56 @@ class RectilinearMesh2D(Mesh):
         matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
         """
-        # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
-        if npall(values.shape[::-1] == self.shape):
-            values = values.T
-        assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
+        if self.x.log is not None:
+            kwargs['xscale'] = 'log'
+        if self.y.log is not None:
+            kwargs['yscale'] = 'log'
 
-        x_mask = kwargs.pop('x_mask', None)
-        y_mask = kwargs.pop('y_mask', None)
+        x_mask = kwargs.pop('x_mask', None); y_mask = kwargs.pop('y_mask', None)
+        mask = (x_mask is not None) & (y_mask is not None)
+
+        masked = self
+        if mask:
+            masked, x_indices, z_indices, values = self.mask_cells(x_mask, y_mask, values)
+            if 'alpha' in kwargs:
+                kwargs['alpha'] = kwargs['alpha'].expand(x_indices, z_indices, masked.shape)
+                # _, _, _, kwargs['alpha'] = self.mask_cells(x_mask, y_mask, kwargs['alpha'])
+
+        # if npall(values.shape[::-1] == self.shape):
+        #     values = values.T
+        # assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
 
         if (self.x._relative_to is None) and (self.y._relative_to is None):
 
-            masked = self
-            if sum([x is None for x in [x_mask, y_mask]]) < 2:
-                masked, x_indices, z_indices, values = self.mask_cells(axis, x_mask, y_mask, values)
-                xAxis='x'
+            xm = masked.x_edges; ym = masked.y_edges
 
-            xm = masked.x_edges
-            ym = masked.y_edges
+            # if npall(values.shape != xm.shape) and npall(values.shape != (asarray(xm.shape)-1)):
+            #     values = values.T
 
-            if self.x.log is not None:
-                kwargs['xscale'] = 'log'
-            if self.y.log is not None:
-                kwargs['yscale'] = 'log'
-            if npall(values.shape != xm.shape) and npall(values.shape != (asarray(xm.shape)-1)):
-                values = values.T
+
+            print('HERE')
 
             ax, pm, cb = cP.pcolormesh(xm, ym, values, **kwargs)
-            ax.set_xlabel(xm.label)
-            ax.set_ylabel(ym.label)
+            ax.set_xlabel(xm.label); ax.set_ylabel(ym.label)
         else:
             # Need to expand the yaxis edges since they could be draped.
-            if (x_mask is not None) or (y_mask is not None):
-                masked, x_indices, z_indices, values = self.mask_cells(axis, x_mask, y_mask, values)
-                if 'alpha' in kwargs:
-                    _, _, _, kwargs['alpha'] = self.mask_cells(axis, x_mask, y_mask, kwargs['alpha'])
+            if mask:
                 ax, pm, cb = masked.pcolor(values, **kwargs)
             else:
-                x = self.x_edges
-                y = self.y_edges
+                x = self.x_edges; y = self.y_edges
 
-                if self.x.log is not None:
-                    kwargs['xscale'] = 'log'
-                if self.y.log is not None:
-                    kwargs['yscale'] = 'log'
+                # if y.shape[0] != x.shape[0]:
+                #     x = x.T
 
-                if y.shape[0] != x.shape[0]:
-                    x = x.T
+                # if npall(values.shape == asarray(x.shape[::-1]) - 1):
+                #     values = values.T
 
-                if npall(values.shape == asarray(x.shape[::-1]) - 1):
-                    values = values.T
+                print(kwargs['alpha'])
 
                 ax, pm, cb = cP.pcolor(x=x, y=y, values=values, **kwargs)
 
         return ax, pm, cb
+
 
     def plot(self, *args, **kwargs):
         return self.pcolor(*args, **kwargs)

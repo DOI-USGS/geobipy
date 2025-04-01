@@ -105,35 +105,8 @@ class MvLogNormal(MvNormal):
             The bin edges.
 
         """
-        # if not self.linearSpace:
-        #     return super().bins(nBins, nStd, axis)
-
-        nStd = float64(nStd)
-        nD = self.ndim
-        if (nD > 1):
-            if axis is None:
-                bins = DataArray(empty([nD, nBins+1]), name=utilities.getName(self.mean), units=utilities.getUnits(self.mean))
-                for i in range(nD):
-                    tmp = squeeze(nStd * self.std[i, i])
-                    t = linspace(-tmp, tmp, nBins+1)
-                    if not relative:
-                        t += self._mean[i]
-                    bins[i, :] = t
-            else:
-                bins = empty(nBins+1)
-                tmp = squeeze(nStd * self.std[axis, axis])
-                t = linspace(-tmp, tmp, nBins+1)
-                if not relative:
-                    t += self._mean[axis]
-                bins[:] = t
-
-        else:
-            tmp = nStd * self.std
-            bins = squeeze(linspace(-tmp, tmp, nBins+1))
-            if not relative:
-                bins += self._mean
-
-        return (exp(bins)) if self.linearSpace else DataArray(bins)
+        bins = super().bins(nBins, nStd, axis, relative)
+        return exp(bins) if self.linearSpace else bins
 
     @property
     def summary(self):

@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 from numpy import float64, int32, s_, integer
-from numpy import arange, argmax, argsort, asarray, divide, empty, full, isnan, linspace, logspace
-from numpy import log10, maximum, minimum, mean, min,max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
+from numpy import arange, argmax, argsort, argwhere, asarray, divide, empty, full, isnan, linspace, logspace
+from numpy import log10, maximum, minimum, mean, min, max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
 from numpy import searchsorted, size, shape, sort, squeeze, unique, where, zeros
 from numpy import all as npall
 from numpy.random import Generator
@@ -1299,28 +1299,19 @@ class Inference2D(myObject):
         """ Plot the opacity """
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
 
-        opacity = self.opacity()
-        opacity.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(opacity, **kwargs); kwargs['alpha'] = mask
-
-        ax, pm, cb = opacity.pcolor(ticks=[0.0, 0.5, 1.0], **kwargs)
+        ax, pm, cb = self.plot_x_section(self.opacity(), ticks=[0.0, 0.5, 1.0], **kwargs)
 
         if cb is not None:
             labels = ['Less', '', 'More']
             cb.ax.set_yticklabels(labels)
             cb.set_label("Confidence")
 
+        return ax, pm, cb
+
 
     def plot_entropy(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'hot')
-
-        entropy = self.entropy
-        entropy.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(entropy, **kwargs); kwargs['alpha'] = mask
-
-        entropy.pcolor(**kwargs)
+        return self.plot_x_section(self.entropy, **kwargs)
 
     # def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
     #     """ For a given index, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
@@ -1337,16 +1328,8 @@ class Inference2D(myObject):
 
     def plot_interfaces(self, cut=0.0, **kwargs):
         """ Plot a cross section of the layer depth histograms. Truncation is optional. """
-
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
-
-        interfaces = self.interface_probability()
-        interfaces.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(interfaces, **kwargs); kwargs['alpha'] = mask
-
-        interfaces.pcolor(**kwargs)
-
+        return self.plot_x_section(self.interface_probability(), **kwargs)
 
     def plot_relative_error_posterior(self, system=0, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
@@ -1492,92 +1475,48 @@ class Inference2D(myObject):
         # for i in Bar(range(self.nPoints)):
         for i in range(self.nPoints):
             p = RectilinearMesh1D(edges=parameters.edges[i, :])
-
             pj = out.cellIndex(p.centres, clip=True)
-
             cTmp = counts[i, :, :]
-
             out.counts[pj] += sum(cTmp, axis=0)
 
         return out
 
     def plot_best_model(self, **kwargs):
-        self.model.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
         kwargs['mask_by_confidence'] = False
         kwargs['mask_by_doi'] = False
+        return self.plot_x_section(self.model, **kwargs)
 
-        mask, kwargs = self.mask(self.model, **kwargs); kwargs['alpha'] = mask
-
-        return self.model.pcolor(**kwargs);
-
-    # def plot_cross_section(self, values, **kwargs):
-    #     """ Plot a cross-section of the parameters """
-    #     mesh = self.mesh
-    #     if 'x_axis' in kwargs:
-    #         mesh = self.change_mesh_axis(kwargs.pop('x_axis'))
-
-    #     if kwargs.pop('useVariance', False):
-    #         opacity = deepcopy(self.opacity())
-    #         # opacity = deepcopy(self.entropy)
-    #         # opacity = 1.0 - opacity.normalize()
-    #         kwargs['alpha'] = opacity
-
-    #     if kwargs.pop('mask_below_doi', False):
-    #         opacity = kwargs.get('alpha')
-    #         if kwargs.get('alpha') is None:
-    #             opacity = ones(mesh.shape)
-
-    #         indices = mesh.y.cellIndex(self.doi + mesh.y.relative_to)
-
-    #         for i in range(self.nPoints):
-    #             opacity[i, indices[i]:] = 0.0
-    #         kwargs['alpha'] = opacity
-
-    #     return mesh.pcolor(values = values, **kwargs)
 
     def plot_highest_marginal(self, **kwargs):
+        return self.plot_x_section(self.highest_marginal(), **kwargs)
 
-        model = self.highest_marginal()
-
-        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
-
-        return model.pcolor(**kwargs)
 
     def plot_marginal_probabilities(self, **kwargs):
 
         mp = self.marginal_probability()
-        n_classes = mp.shape[1]
-        gs = kwargs.get('gs', None)
 
-        if gs is None:
-            gs = gridspec.GridSpec(nrows=n_classes, ncols=1, left=0.15, right=0.91, bottom=0.06, top=0.95, wspace=0.06, hspace=0.175)
+        classes = kwargs.pop("classes", {})
+        classes['id'] = self.highest_marginal().values
 
-        ax = None
-        axes = []
-        for i in range(n_classes):
-            ax = plt.subplot(gs[i, 0])
-            H = mp[:, i, :].pcolor(transpose=True, vmin=mp.values.min(), vmax=mp.values.max(), ax=ax, **kwargs)
-            self.plot_elevation(alpha=0.3, ax=ax, **kwargs)
-            self.plot_data_elevation(ax=ax, **kwargs)
-            axes.append(ax)
+        kwargs['vmin'] = kwargs.get('vmin', 1.0 / mp.shape[1])
 
-        return axes
+        return self.plot_x_section(mp, axis=1, classes = classes, **kwargs)
+
 
     def mask(self, model, **kwargs):
 
         from pprint import pprint
         mask = None
         if kwargs.pop('mask_by_confidence', False):
+            print('here')
             mask = self.opacity().values
+            print(f"{mask=}")
 
         if kwargs.pop('mask_by_burned_in', True):
             if mask is not None:
-                mask *= self.burned_in_mask(model)
+                mask *= self.burned_in_mask
             else:
-                mask = self.burned_in_mask(model)
+                mask = self.burned_in_mask
 
         if kwargs.pop('mask_by_doi', False):
             if mask is not None:
@@ -1585,76 +1524,69 @@ class Inference2D(myObject):
             else:
                 mask = self.doi_mask(model)
 
+        if kwargs.pop('mask_by_probability', False):
+            if mask is not None:
+                mask *= self.probability_mask()
+            else:
+                mask = self.probability_mask()
+
         return mask, kwargs
+
+    def plot_x_section(self, model, **kwargs):
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
+        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
+        return model.pcolor(**kwargs)
 
 
     def plot_mean_model(self, **kwargs):
-
-        model = self.mean_parameters()
-
-        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
-
-        return model.pcolor(**kwargs)
+        return self.plot_x_section(self.mean_parameters(), **kwargs)
 
     def plot_median_model(self, **kwargs):
-
-        model = self.compute_median_parameter()
-
-        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
-
-        return model.pcolor(**kwargs)
+        return self.plot_x_section(self.compute_median_parameter(), **kwargs)
 
     def plot_mode_model(self, **kwargs):
+        return self.plot_x_section(self.compute_mode_parameter(), **kwargs)
 
-        model = self.compute_mode_parameter()
+    @property
+    def doi_mask(self):
 
-        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
-
-        return model.pcolor(**kwargs)
-
-    def doi_mask(self, model):
-
-        mask = ones(model.shape)
-        indices = model.mesh.y.cellIndex(self.doi + model.mesh.y.relative_to)
+        mask = ones(self.mesh.shape)
+        indices = self.mesh.y.cellIndex(self.doi + self.mesh.y.relative_to)
 
         for i in range(self.nPoints):
             mask[i, indices[i]:] = 0.0
 
         return mask
 
-    def burned_in_mask(self, model):
-        mask = ones(model.shape)
+    @property
+    def burned_in_mask(self):
+        mask = ones(self.mesh.shape)
         mask[~self.burned_in, :] = 0.0
 
         return mask
 
+    @property
+    def probability_mask(self):
+        p = self.marginal_probability()
+        hm = self.highest_marginal()
 
-    # def plotModeModel(self, **kwargs):
+        mask = p.apply_along_axis(nanmax, axis=1).values
 
-    #     values = self.modeParameter()
-    #     if (kwargs.pop('reciprocateParameter', False)):
-    #         values = 1.0 / values
-    #         values.name = 'Resistivity'
-    #         values.units = '$Omega m$'
+        n_classes = p.shape[1]
 
-    #     return self.plot_cross_section(values = values.T, **kwargs)
+        # for i in range(n_classes):
+        #     j = argwhere(hm.values == i)
+        #     subset = p.values[:, i, :]
+        #     vmin, vmax = nanmin(subset), nanmax(subset)
+        #     mask[j[:, 0], j[:, 1]] = (mask[j[:, 0], j[:, 1]] - vmin) / (vmax - vmin)
+
+        mask[isnan(mask)] = 0.0
+
+        return mask
+
 
     def plot_percentile(self, percent, **kwargs):
-        posterior = self.parameter_posterior()
-
-        posterior.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        percentile = posterior.percentile(percent, axis=1)
-
-        mask, kwargs = self.mask(percentile, **kwargs); kwargs['alpha'] = mask
-
-        return percentile.pcolor(**kwargs)
+        return self.plot_x_section(self.parameter_posterior().percentile(percent, axis=1), **kwargs)
 
 
     def marginal_probability(self, slic=None):
@@ -1825,7 +1757,9 @@ class Inference2D(myObject):
 
 
     def highest_marginal(self, slic=None):
-        return self.marginal_probability(slic).apply_along_axis(argmax, axis=1)
+        out = self.marginal_probability(slic).apply_along_axis(argmax, axis=1)
+        out.values.name = 'Highest marginal'
+        return out
 
     def plot_inference_1d(self, fiducial, **kwargs):
         """ Plot the geobipy results for the given data point """

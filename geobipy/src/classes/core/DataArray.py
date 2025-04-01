@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from numpy import abs, allclose, arange, argmax, array, asarray, atleast_1d, concatenate, delete
-from numpy import diff, divide, expand_dims, flip, float32, float64, histogram, inf, insert, int32, int64, isnan
+from numpy import diff, divide, expand_dims, flip, float32, float64, full, histogram, inf, insert, int32, int64, isnan
 from numpy import mean, nan, nanmax, nanmin, ndarray, ndim, ones, r_, resize, s_, size, squeeze, sum, unique, where, zeros
 from numpy import shape as npshape
 
@@ -385,6 +385,22 @@ class DataArray(ndarray, myObject):
         edges = concatenate([e0, e1, e2], axis=axis)
 
         return type(self)(edges, self.name, self.units)
+
+    def expand(self, xi, yi, shp, axis=None):
+
+        if self.ndim == 2:
+            tmp = type(self)(full(shp, fill_value=nan), self.name, self.units)
+            tmp[xi, yi] = self
+
+        else:
+            assert axis is not None, ValueError("axis must be defined for ndim > 2")
+            shp =  insert(asarray(shp), axis, self.shape[axis])
+            tmp = type(self)(full(shp, fill_value=nan), self.name, self.units)
+            for k in range(self.shape[axis]):
+                i = [xi, yi]; i.insert(axis, k); i = tuple(i)
+                j = [s_[:], s_[:]]; j.insert(axis, k); j = tuple(j)
+                tmp[i] = self[j]
+        return tmp
 
     def firstNonZero(self, axis=0, invalid_val=-1):
         """Find the indices of the first non zero values along the axis.

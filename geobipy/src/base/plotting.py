@@ -15,84 +15,8 @@ from matplotlib.colors import ListedColormap, Colormap
 import matplotlib.gridspec as gridspec
 
 from ..base import utilities
+from .colormaps import wellSeparated, tatarize, white_to_colour
 from copy import copy
-
-def make_colourmap(seq, cname):
-    """Generate a Linear Segmented colourmap
-
-    Generates a colourmap from the sequence given and registers the colourmap with matplotlib.
-
-    Parameters
-    ----------
-    seq : array of hex colours.
-        e.g. ['#000000','#00fcfd',...]
-    cname : str
-        Name of the colourmap.
-
-    Returns
-    -------
-    out
-        matplotlib.colors.LinearSegmentedColormap.
-
-    """
-    if cname in colormaps:
-        return
-
-    nl = len(seq)
-    dl = 1.0 / (len(seq))
-    l = []
-    for i, item in enumerate(seq):
-        l.append(mcolors.hex2color(item))
-        if (i < nl - 1):
-            l.append((i + 1) * dl)
-    l = [(0.0,) * 3, 0.0] + list(l) + [1.0, (1.0,) * 3]
-    cdict = {'red': [], 'green': [], 'blue': []}
-    for i, item in enumerate(l):
-        if isinstance(item, float):
-            r1, g1, b1 = l[i - 1]
-            r2, g2, b2 = l[i + 1]
-            cdict['red'].append([item, r1, r2])
-            cdict['green'].append([item, g1, g2])
-            cdict['blue'].append([item, b1, b2])
-    myMap = mcolors.LinearSegmentedColormap(cname, cdict, 256)
-    colormaps.register(name=cname, cmap=myMap)
-    return myMap
-
-def white_to_colour(rgba, N=256):
-    rgba = mcolors.to_rgba(rgba)
-    vals = ones((N, 4))
-    vals[:, 0] = linspace(1, rgba[0], N)
-    vals[:, 1] = linspace(1, rgba[1], N)
-    vals[:, 2] = linspace(1, rgba[2], N)
-    return ListedColormap(vals)
-
-# Define our own colour maps in hex. Gets better range and nicer visuals.
-wellSeparated = [
-"#3F5D7D",'#881d67','#2e8bac','#ffcf4d','#1d3915',
-'#1a8bff','#00fcfd','#0f061f','#fa249d','#00198f','#c7fe1c']
-
-make_colourmap(wellSeparated, 'wellseparated')
-
-tatarize = [
-"#000000", "#FFFF00", "#1CE6FF", "#FF34FF", "#FF4A46", "#008941", "#006FA6", "#A30059",
-"#FFDBE5", "#7A4900", "#0000A6", "#63FFAC", "#B79762", "#004D43", "#8FB0FF", "#997D87",
-"#5A0007", "#809693", "#FEFFE6", "#1B4400", "#4FC601", "#3B5DFF", "#4A3B53", "#FF2F80",
-"#61615A", "#BA0900", "#6B7900", "#00C2A0", "#FFAA92", "#FF90C9", "#B903AA", "#D16100",
-"#DDEFFF", "#000035", "#7B4F4B", "#A1C299", "#300018", "#0AA6D8", "#013349", "#00846F",
-"#372101", "#FFB500", "#C2FFED", "#A079BF", "#CC0744", "#C0B9B2", "#C2FF99", "#001E09",
-"#00489C", "#6F0062", "#0CBD66", "#EEC3FF", "#456D75", "#B77B68", "#7A87A1", "#788D66",
-"#885578", "#FAD09F", "#FF8A9A", "#D157A0", "#BEC459", "#456648", "#0086ED", "#886F4C",
-"#34362D", "#B4A8BD", "#00A6AA", "#452C2C", "#636375", "#A3C8C9", "#FF913F", "#938A81",
-"#575329", "#00FECF", "#B05B6F", "#8CD0FF", "#3B9700", "#04F757", "#C8A1A1", "#1E6E00",
-"#7900D7", "#A77500", "#6367A9", "#A05837", "#6B002C", "#772600", "#D790FF", "#9B9700",
-"#549E79", "#FFF69F", "#201625", "#72418F", "#BC23FF", "#99ADC0", "#3A2465", "#922329",
-"#5B4534", "#FDE8DC", "#404E55", "#0089A3", "#CB7E98", "#A4E804", "#324E72", "#6A3A4C"]
-make_colourmap(tatarize, 'tatarize')
-
-armytage = [
-"#02a53f","#b97d87","#c1d4be","#c0bcd6","#bb8477","#8e3b06","#4ae36f","#e19585",
-"#e3bbb5","#b9e6af","#e0917b","#6ad33f","#3811c6","#93d58d","#c6dec7","#ead3c6",
-"#f0b98d","#08ef97","#c00fcf","#9cded6","#ead5e7","#e1ebf3","#e1c4f6","#9cd4f7"]
 
 def pretty(ax):
     """Make a plot with nice axes.
@@ -106,14 +30,46 @@ def pretty(ax):
 
     """
     # Remove the plot frame lines.
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
+    ax = visible_border(ax, 'sw')
+    ax = visible_ticks(ax, 'sw')
+    # ax.spines["top"].set_visible(False)
+    # ax.spines["right"].set_visible(False)
 
-    # Ensure that the axis ticks only show up on the bottom and left of the plot.
-    ax.get_xaxis().tick_bottom()
-    ax.get_yaxis().tick_left()
+    # # Ensure that the axis ticks only show up on the bottom and left of the plot.
+    # ax.get_xaxis().tick_bottom()
+    # ax.get_yaxis().tick_left()
 
     return ax
+
+def visible_ticks(ax, sides='ws'):
+    """Set the ticks to be visible on the specified sides of the plot.
+
+    Parameters
+    ----------
+    sides : str
+        'ws' for west and south, 'en' for east and north, 'all' for all sides.
+
+    """
+    if 'n' in sides:
+        ax.get_xaxis().tick_top()
+    if 's' in sides:
+        ax.get_xaxis().tick_bottom()
+    if 'e' in sides:
+        ax.get_yaxis().tick_right()
+    if 'w' in sides:
+        ax.get_yaxis().tick_left()
+
+    return ax
+
+def visible_border(ax, sides='ws'):
+
+    ax.spines["top"].set_visible('n' in sides)
+    ax.spines["bottom"].set_visible('s' in sides)
+    ax.spines["right"].set_visible('e' in sides)
+    ax.spines["left"].set_visible('w' in sides)
+
+    return ax
+
 
 def filter_color_kwargs(kwargs):
     defaults = {'alpha' : 1.0,
@@ -121,8 +77,9 @@ def filter_color_kwargs(kwargs):
                 'cax' : None,
                 'clabel' : None,
                 'clim_scaling' : None,
-                'cmap' : 'cividis',
+                'cmap' : None,
                 'cmapIntervals' : None,
+                'cbar_title' : None,
                 'colorbar' : True,
                 'equalize' : False,
                 'nBins' : 256,
@@ -131,12 +88,15 @@ def filter_color_kwargs(kwargs):
                 'wrap_clabel' : False}
 
     out, kwargs = _filter_kwargs(kwargs, defaults)
-    out['cmap'] = copy(colormaps.get_cmap(out['cmap']))#, out['cmapIntervals']))
-    out['cmap'].set_bad(color='white')
+
+    if out['cmap'] is None:
+        out['cmap'] = 'cividis'
+    out['cmap'] = copy(colormaps.get_cmap(out['cmap']))
+    # out['cmap'].set_bad(color='white')
     return out, kwargs
 
 def filter_plotting_kwargs(kwargs):
-    defaults = {'ax' : plt.gca(),
+    defaults = {'ax' : None,
                 'flip' : False,
                 'flipX' : False,
                 'flipY' : False,
@@ -165,6 +125,8 @@ def filter_plotting_kwargs(kwargs):
     out, kwargs = _filter_kwargs(kwargs, defaults)
     if out['grid']:
         out['color'] = 'k'
+    if out['ax'] is None:
+        out['ax'] = plt.gca()
 
     return out, kwargs
 
@@ -428,7 +390,7 @@ def pcolor(values, x=None, y=None, **kwargs):
     geobipy_kwargs, _ = filter_plotting_kwargs(kwargs)
 
     if (x is None):
-        mx = arange(size(values,1)+1)
+        mx = arange(size(values,-1)+1)
     else:
         mx = asarray(x)
         if ndim(x) < 2:
@@ -471,8 +433,13 @@ def pcolor(values, x=None, y=None, **kwargs):
 
     ax, pm, cb = pcolormesh(X=mx, Y=my, values=values, **kwargs)
 
-    xlabel(ax, geobipy_kwargs['xlabel'], wrap=geobipy_kwargs['wrap_xlabel'])
-    ylabel(ax, geobipy_kwargs['ylabel'], wrap=geobipy_kwargs['wrap_ylabel'])
+    if isinstance(ax, list):
+        for a in ax:
+            xlabel(a, geobipy_kwargs['xlabel'], wrap=geobipy_kwargs['wrap_xlabel'])
+            ylabel(a, geobipy_kwargs['ylabel'], wrap=geobipy_kwargs['wrap_ylabel'])
+    else:
+        xlabel(ax, geobipy_kwargs['xlabel'], wrap=geobipy_kwargs['wrap_xlabel'])
+        ylabel(ax, geobipy_kwargs['ylabel'], wrap=geobipy_kwargs['wrap_ylabel'])
 
     return ax, pm, cb
 
@@ -482,25 +449,40 @@ def pcolormesh(X, Y, values, **kwargs):
     classes = kwargs.pop('classes', None)
 
     if classes is None:
+        kwargs.pop('axis', None)
         ax, pm, cb = _pcolormesh(X, Y, values, **kwargs)
 
     else:
-        originalAlpha = kwargs.pop('alpha', None)
         originalAlphaColour = kwargs.pop('alpha_colour', [1, 1, 1])
-        kwargs['alpha_colour'] = 'transparent'
         kwargs.pop('cmap', None)
+
+        n_classes = values.shape[kwargs['axis']]
+
+        classes['cmaps'] = classes.get('cmaps', ['r','g','b'])
+        classes['labels'] = classes.get('labels', [str(i) for i in range(n_classes)])
+
+        assert len(classes['cmaps']) == n_classes, Exception("Number of colour maps must be {}".format(n_classes))
+        assert len(classes['labels']) == n_classes, Exception("Number of labels must be {}".format(n_classes))
+
+        split = classes.pop("split_plot", False)
+
+        if split:
+            ax, pm, cb = _pcolormesh_3d_cbar_split(X, Y, values, classes, **kwargs)
+        else:
+            ax, pm, cb = _pcolormesh_3d_cbar_single(X, Y, values, classes, **kwargs)
+
+
+
+    def _pcolormesh_3d_cbar_split(X, Y, values, classes, **kwargs):
+
+        originalAlpha = kwargs.pop('alpha', None)
 
         classId = classes['id']
         cmaps = classes['cmaps']
         labels = classes['labels']
-        classNumber = unique(classId)
-        nClasses = classNumber.size
-
-        assert len(cmaps) == nClasses, Exception("Number of colour maps must be {}".format(nClasses))
-        assert len(labels) == nClasses, Exception("Number of labels must be {}".format(nClasses))
+        axis = classes['axis']
 
         # Set up the grid for plotting
-
         gs1 = gridspec.GridSpec(nrows=1, ncols=1, left=0.1, right=0.70, wspace=0.05)
         gs2 = gridspec.GridSpec(nrows=1, ncols=2*nClasses, left=0.71, right=0.95, wspace=1.0)
 
@@ -518,19 +500,67 @@ def pcolormesh(X, Y, values, **kwargs):
                 cmaptmp = white_to_colour(cmap)
             label = labels[i]
 
+            s = [s_[:] for i in range(values.shape[axis])]; s[axis] = i; s = tuple(s)
             # Set max transparency for pixels not belonging to the current class.
-            alpha = ones_like(values)
+            alpha = ones_like(values[s])
             alpha[classId != cn] = 0.0
 
             if not originalAlpha is None:
                 alpha *= originalAlpha
 
-            a, p, c = _pcolormesh(X, Y, values, alpha=alpha, cmap=cmaptmp, cax=cbAx[i], **kwargs)
+            a, p, c = _pcolormesh(X, Y, values[s], alpha=alpha, cmap=cmaptmp, cax=cbAx[i], **kwargs)
 
             c.ax.set_ylabel(label)
             ax.append(a); pm.append(p); cb.append(c)
 
     return ax, pm, cb
+
+def _pcolormesh_3d_cbar_single(X, Y, values, classes, **kwargs):
+
+        import numpy as np
+
+        class_id = classes['id']
+        assert class_id is not None, ValueError(f"must provide class id of shape {X.shape-1}")
+        cmaps = classes['cmaps']
+        labels = classes['labels']
+        axis = kwargs.pop('axis')
+
+        n_classes = len(cmaps)
+
+        width_ratios = [6]
+        width_ratios.extend([0.3 for i in range(n_classes)])
+
+        # Set up the grid for plotting
+        gs = gridspec.GridSpec(nrows=1, ncols=n_classes+1, width_ratios=width_ratios, wspace=0.3)
+
+        cbAx = []
+        for i in range(n_classes):
+            ax = plt.subplot(gs[0, i+1])
+            ax = visible_border(ax)
+            ax = visible_ticks(ax)
+            cbAx.append(pretty(ax))
+        ax = plt.subplot(gs[0, 0])
+        kwargs['ax'] = pretty(ax)
+
+        unique_ids = unique(class_id)
+        for i in range(n_classes):
+            cn = unique_ids[i]
+            cmap = cmaps[i]
+            if not isinstance(cmap, Colormap):
+                cmap = white_to_colour(cmap)
+            label = labels[i]
+
+            s = [s_[:] for i in range(values.shape[axis])]; s[axis] = i; s = tuple(s)
+
+            subset = np.ma.masked_where(class_id != cn, values[s])
+
+            a, p, c = _pcolormesh(X, Y, subset, cmap=cmap, cax=cbAx[i], clabel=(i==n_classes-1), **kwargs)
+
+            c.ax.set_title(label)
+
+        p = None
+
+        return kwargs['ax'], p, cbAx
 
 
 def _pcolormesh(X, Y, values, **kwargs):
@@ -624,12 +654,16 @@ def _pcolormesh(X, Y, values, **kwargs):
         Y = Y[bounds[0, 0]:bounds[0, 1]+2, bounds[1, 0]:bounds[1, 1]+2]
         values = values[bounds[0, 0]:bounds[0, 1]+1, bounds[1, 0]:bounds[1, 1]+1]
 
-    # if (geobipy_kwargs['log']):
     values, logLabel = utilities._log(values, geobipy_kwargs['log'])
+
+    if color_kwargs['clabel'] != False:
+        color_kwargs['clabel'] = utilities.getNameUnits(values)
+        if (geobipy_kwargs['log']):
+            color_kwargs['clabel'] = logLabel + color_kwargs['clabel']
 
     if color_kwargs['equalize']:
         assert color_kwargs['nBins'] > 0, ValueError('nBins must be greater than zero')
-        values, dummy = utilities.histogramEqualize(values, nBins=color_kwargs['nBins'])
+        values, _ = utilities.histogramEqualize(values, nBins=color_kwargs['nBins'])
 
     if color_kwargs['clim_scaling'] is not None:
         values = utilities.trim_by_percentile(values, color_kwargs['clim_scaling'])
@@ -638,7 +672,12 @@ def _pcolormesh(X, Y, values, **kwargs):
         kw = geobipy_kwargs['hillshade'] if isinstance(geobipy_kwargs['hillshade'], dict) else {}
         values = hillshade(values, azimuth=kw.pop('azimuth', 30), altitude=kw.pop('altitude', 30))
 
-    Zm = masked_invalid(values, copy=False)
+    if npall(values.shape == X.shape) or (npall(values.shape == asarray(X.shape)-1)):
+        if npall(X.shape == Y.shape[::-1]):
+            Y = Y.T
+    else:
+        X = X.T
+
     pm = ax.pcolormesh(X, Y, values, alpha = color_kwargs['alpha'], **kwargs)
 
     ax.set_xscale(geobipy_kwargs['xscale'])
@@ -662,11 +701,6 @@ def _pcolormesh(X, Y, values, **kwargs):
             cbar = plt.colorbar(pm, extend='both', cax=color_kwargs['cax'], orientation=color_kwargs['orientation'])
         else:
             cbar = plt.colorbar(pm, cax=color_kwargs['cax'], orientation=color_kwargs['orientation'], ticks=color_kwargs['ticks'])
-
-        if color_kwargs['clabel'] != False:
-            color_kwargs['clabel'] = utilities.getNameUnits(values)
-            if (geobipy_kwargs['log']):
-                color_kwargs['clabel'] = logLabel + color_kwargs['clabel']
 
         clabel(cbar, color_kwargs['clabel'], wrap=color_kwargs['wrap_clabel'])
 
@@ -757,7 +791,7 @@ def pcolor_as_bar(X, Y, values, **kwargs):
     cax = kwargs.pop('cax', None)
     cmap = kwargs.pop('cmap', 'viridis')
     cmapIntervals = kwargs.pop('cmapIntervals', None)
-    kwargs['cmap'] = copy(get_cmap(cmap, cmapIntervals))
+    kwargs['cmap'] = copy(colormaps.get_cmap(cmap, cmapIntervals))
     kwargs['cmap'].set_bad(color='white')
     orientation = kwargs.pop('orientation', 'vertical')
     cl = kwargs.pop('clabel', None)

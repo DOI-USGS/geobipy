@@ -139,7 +139,7 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         xscale = kwargs.pop('xscale', 'linear' if self.x.log is None else 'log')
         yscale = kwargs.pop('yscale', 'linear' if self.y_log is None else 'log')
 
-        color_kwargs['cmap'].set_bad(color='white')
+        # color_kwargs['cmap'].set_bad(color='white')
 
         if 'edgecolor' in kwargs:
             geobipy_kwargs['grid'] = True

@@ -1189,7 +1189,7 @@ class RectilinearMesh1D(Mesh):
 
         """
         reciprocateX = kwargs.pop("reciprocateX", False)
-        # kwargs['transpose'] = kwargs.get('transpose', True)
+        kwargs['transpose'] = kwargs.get('transpose', True)
 
         # Repeat the last entry since we are plotting against edges
         par = values.append(values[-1])

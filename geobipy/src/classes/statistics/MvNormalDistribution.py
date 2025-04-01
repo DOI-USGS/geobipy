@@ -3,11 +3,13 @@ Module defining a multivariate normal distribution with statistical procedures
 """
 from copy import deepcopy
 from numpy import all, atleast_1d, diag, diag_indices, dot, empty, exp, float64, full, hstack
-from numpy import int32, linspace, maximum, pi, prod, repeat, size, squeeze, sqrt, zeros
+from numpy import int32, linspace, maximum, newaxis, pi, prod, r_, repeat, size, squeeze, sqrt, zeros
 from numpy import ndim as npndim
 from numpy import log as nplog
 from numpy.linalg import inv, slogdet
+from scipy.stats import multivariate_normal
 from ...base import utilities as cf
+from ...base import plotting as cP
 from .baseDistribution import baseDistribution
 from .NormalDistribution import Normal
 from ..core.DataArray import DataArray
@@ -180,6 +182,16 @@ class MvNormal(baseDistribution):
         """  """
         return atleast_1d(squeeze(self.prng.multivariate_normal(self._mean, self.variance, size=size)))
 
+    def plot_pdf(self, log=False, **kwargs):
+        bins = self.bins()
+        t = r"$\tilde{N}(\mu="+str(self.mean)+r", \sigma^{2}="+str(self.variance)+")$"
+
+        print(bins)
+
+        p = self.probability(bins, log=log)
+
+        cP.plot(bins, p, label=t, **kwargs)
+
     def probability(self, x, log, axis=None, **kwargs):
         """ For a realization x, compute the probability """
 
@@ -270,20 +282,21 @@ class MvNormal(baseDistribution):
             The bin edges.
 
         """
+        import numpy as np
         nStd = float64(nStd)
         nD = self.ndim
         if (nD > 1):
+            std = diag(self.std)
             if axis is None:
-                bins = empty([nD, nBins+1])
-                for i in range(nD):
-                    tmp = squeeze(nStd * self.std[axis, axis])
-                    t = linspace(-tmp, tmp, nBins+1)
-                    if not relative:
-                        t += self._mean[i]
-                    bins[i, :] = t
+                tmp = np.outer(r_[-1.0, 1.0], (nStd*std))
+                if not relative:
+                    tmp += self._mean
+                tmp = np.r_[np.min(tmp), np.max(tmp)]
+                bins = linspace(*tmp, nBins+1)
+
             else:
                 bins = empty(nBins+1)
-                tmp = squeeze(nStd * self.std[axis, axis])
+                tmp = squeeze(nStd * std[axis])
                 t = linspace(-tmp, tmp, nBins+1)
                 if not relative:
                     t += self._mean[axis]
