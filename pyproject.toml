@@ -25,7 +25,8 @@ dependencies = [
             "scikit-learn",
             "pygmt",
             "numba_kdtree",
-            "lmfit",]
+            "lmfit",
+            "mpi4py_utilities"]
 classifiers = [
     'License :: OSI Approved',
     'License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication',

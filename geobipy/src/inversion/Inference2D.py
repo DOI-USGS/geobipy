@@ -70,7 +70,7 @@ class Inference2D(myObject):
 
     @cached_property
     def acceptance(self):
-        return StatArray.fromHdf(self.hdf_file['rate'])
+        return StatArray.fromHdf(self.hdf_file['acceptance_rate'])
 
     @cached_property
     def additiveError(self):
@@ -1587,6 +1587,19 @@ class Inference2D(myObject):
 
     def plot_percentile(self, percent, **kwargs):
         return self.plot_x_section(self.parameter_posterior().percentile(percent, axis=1), **kwargs)
+
+    def plot_percentiles(self, ax, **kwargs):
+
+        assert len(ax) == 3, ValueError("Must provide 3 axes")
+        posterior = self.parameter_posterior()
+
+        posterior.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
+
+        percentile = posterior.percentile(np.r_[0.05, 0.5, 0.95], axis=1)
+
+        mask, kwargs = self.mask(percentile, **kwargs); kwargs['alpha'] = mask
+
+        return percentile.pcolor(**kwargs)
 
 
     def marginal_probability(self, slic=None):

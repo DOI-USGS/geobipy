@@ -12,6 +12,7 @@ from numpy import all as npall
 
 from .Mesh import Mesh
 from ..core.DataArray import DataArray
+from ..statistics.StatArray import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
@@ -499,19 +500,9 @@ class RectilinearMesh2D(Mesh):
         if self.y._relative_to is not None:
             mesh.y.relative_to = self.x.resample(dy, self.y.relative_to)
 
-        print(self.x.centres, self.y.centres)
-        print(mesh.x.centres, mesh.y.centres)
-
-        print(values.shape)
-
         f = interpolate.RegularGridInterpolator((self.x.centres, self.y.centres), values, method=method, bounds_error=False)
 
         xx, yy = meshgrid(mesh.x.centres, mesh.y.centres, indexing='ij', sparse=True)
-
-        print(xx)
-        print(xx.shape)
-        print(yy)
-        print(yy.shape)
 
         return mesh, f((xx, yy))
 
@@ -865,19 +856,9 @@ class RectilinearMesh2D(Mesh):
                 kwargs['alpha'] = kwargs['alpha'].expand(x_indices, z_indices, masked.shape)
                 # _, _, _, kwargs['alpha'] = self.mask_cells(x_mask, y_mask, kwargs['alpha'])
 
-        # if npall(values.shape[::-1] == self.shape):
-        #     values = values.T
-        # assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
-
         if (self.x._relative_to is None) and (self.y._relative_to is None):
 
             xm = masked.x_edges; ym = masked.y_edges
-
-            # if npall(values.shape != xm.shape) and npall(values.shape != (asarray(xm.shape)-1)):
-            #     values = values.T
-
-
-            print('HERE')
 
             ax, pm, cb = cP.pcolormesh(xm, ym, values, **kwargs)
             ax.set_xlabel(xm.label); ax.set_ylabel(ym.label)
@@ -887,14 +868,6 @@ class RectilinearMesh2D(Mesh):
                 ax, pm, cb = masked.pcolor(values, **kwargs)
             else:
                 x = self.x_edges; y = self.y_edges
-
-                # if y.shape[0] != x.shape[0]:
-                #     x = x.T
-
-                # if npall(values.shape == asarray(x.shape[::-1]) - 1):
-                #     values = values.T
-
-                print(kwargs['alpha'])
 
                 ax, pm, cb = cP.pcolor(x=x, y=y, values=values, **kwargs)
 
@@ -1138,7 +1111,7 @@ class RectilinearMesh2D(Mesh):
                 return cls(x=x, y=y)
 
     def fromHdf_cell_values(self, grp, key, index=None, skip_posterior=False):
-        return DataArray.fromHdf(grp, key, index=index, skip_posterior=skip_posterior)
+        return StatArray.fromHdf(grp[key], index=index, skip_posterior=skip_posterior)
 
 
     def range(self, axis):
