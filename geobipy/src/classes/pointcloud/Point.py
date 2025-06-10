@@ -21,7 +21,7 @@ from ..statistics.Histogram import Histogram
 from ..statistics.Distribution import Distribution
 from scipy.spatial import cKDTree
 from scipy.interpolate import CloughTocher2DInterpolator
-from scipy.interpolate.interpnd import _ndim_coords_from_arrays
+from scipy.interpolate._interpnd import _ndim_coords_from_arrays
 
 try:
     from pyvtk import VtkData, Scalars, PolyData, PointData, UnstructuredGrid
