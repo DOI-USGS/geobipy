@@ -60,9 +60,9 @@ class TempestData(TdemData):
         super().__init__(*args, **kwargs)
 
         self._additive_error = DataArray((self.nPoints, self.nChannels), "Additive error", "%")
-        self._relative_error = DataArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
+        self._relative_error = DataArray((self.nPoints, self.nSystems), "Relative error", "%")
 
-        self._additive_error_multiplier = DataArray(ones((self.nPoints, self.n_components * self.nSystems)), "multiplier")
+        self._additive_error_multiplier = DataArray(ones((self.nPoints, self.nSystems)), "multiplier")
 
     @property
     def additive_error(self):
@@ -87,14 +87,14 @@ class TempestData(TdemData):
     def additive_error_multiplier(self):
         """ """
         if size(self._additive_error_multiplier, 0) == 0:
-            self._additive_error_multiplier = DataArray((self.nPoints, self.nSystems * self.n_components), "multiplier")
+            self._additive_error_multiplier = DataArray((self.nPoints, self.nSystems), "multiplier")
         return self._additive_error_multiplier
 
     @additive_error_multiplier.setter
     def additive_error_multiplier(self, values):
         if values is not None:
             self.nPoints = size(values, 0)
-            shp = (self.nPoints, self.nSystems * self.n_components)
+            shp = (self.nPoints, self.nSystems)
             if not allclose(self._additive_error_multiplier.shape, shp):
                 self._additive_error_multiplier = DataArray(values, "multiplier")
                 return
@@ -105,19 +105,18 @@ class TempestData(TdemData):
     def file(self):
         return self._file
 
-
     @property
     def relative_error(self):
         """The data. """
         if size(self._relative_error, 0) == 0:
-            self._relative_error = DataArray((self.nPoints, self.n_components * self.nSystems), "Relative error", "%")
+            self._relative_error = DataArray((self.nPoints, self.nSystems), "Relative error", "%")
         return self._relative_error
 
     @relative_error.setter
     def relative_error(self, values):
         if values is not None:
             self.nPoints = size(values, 0)
-            shp = (self.nPoints, self.n_components * self.nSystems)
+            shp = (self.nPoints, self.nSystems)
             if not allclose(self._relative_error.shape, shp):
                 self._relative_error = DataArray(values, "Relative error", "%")
                 return
@@ -238,7 +237,7 @@ class TempestData(TdemData):
         df = df.replace('NaN', nan)
 
         # Assign columns to variables
-        self.lineNumber = df[iC[0]].values
+        self.line_number = df[iC[0]].values
         self.fiducial = df[iC[1]].values
         self.x = df[iC[2]].values
         self.y = df[iC[3]].values
@@ -334,12 +333,12 @@ class TempestData(TdemData):
 
         if channels is None:
             i = self._systemIndices(system)
-            ax = cP.plot(x, self.predictedData[:, i],
+            ax = cP.plot(x, self.predicted_data[:, i],
                          label=self.channel_names[i], **kwargs)
         else:
             channels = atleast_1d(channels)
             for j, i in enumerate(channels):
-                ax = cP.plot(x, self.predictedData[:, i],
+                ax = cP.plot(x, self.predicted_data[:, i],
                              label=self.channel_names[i], **kwargs)
 
         plt.xlabel(utilities.getNameUnits(x))
@@ -347,7 +346,7 @@ class TempestData(TdemData):
         # Put a legend to the right of the current axis
         if legend:
             leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
-            leg.set_title(self.predictedData.getNameUnits())
+            leg.set_title(self.predicted_data.getNameUnits())
 
         return ax
 
@@ -512,7 +511,7 @@ class TempestData(TdemData):
         with h5py.File(dataFilename, 'r') as f:
             gdf = f['linedata']
 
-            self = cls(lineNumber=asarray(gdf['Line'][indices]),
+            self = cls(line_number=asarray(gdf['Line'][indices]),
                         fiducial=asarray(gdf['Fiducial'][indices]),
                         x=asarray(gdf['Easting_Albers'][indices]),
                         y=asarray(gdf['Northing_Albers'][indices]),
@@ -604,7 +603,7 @@ class TempestData(TdemData):
                                       radius=self.system[0].loopRadius())
 
         out = self.single(
-                lineNumber = float64(gdf['Line'][record]),
+                line_number = float64(gdf['Line'][record]),
                 fiducial = float64(gdf['Fiducial'][record]),
                 x = x,
                 y = y,
@@ -622,7 +621,7 @@ class TempestData(TdemData):
         if filename.endswith('.csv'):
             return super()._read_line_fiducial(filename)
 
-        self.lineNumber, self.fiducial = self._read_variable(['Line', 'Fiducial'])
+        self.line_number, self.fiducial = self._read_variable(['Line', 'Fiducial'])
 
     def _read_variable(self, variable):
         gdf = self._file['survey/tabular/0']
@@ -640,7 +639,7 @@ class TempestData(TdemData):
 
         self._file = h5py.File(filename, 'r')
         self._data_filename = filename
-        self.lineNumber, self.fiducial = self._read_variable(['Line', 'Fiducial'])
+        self.line_number, self.fiducial = self._read_variable(['Line', 'Fiducial'])
 
     def create_synthetic_data(self, model, prng):
 

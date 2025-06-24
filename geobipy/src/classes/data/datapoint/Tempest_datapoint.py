@@ -69,26 +69,49 @@ class Tempest_datapoint(TdemDataPoint):
     The same is true for the errors, and the predicted data vector.
 
     """
-    __slots__ = ('_additive_error_multiplier')
+    __slots__ = ('_additive_error_multiplier', '_reference_additive_error')
+    _total_field = None
 
-    def __init__(self, *args, additive_error_multiplier=None, **kwargs):
-
+    def __init__(self, *args, additive_error_multiplier=None, total_field=True, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.reference_additive_error = None
         self.additive_error_multiplier = additive_error_multiplier
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
+        out._reference_additive_error = deepcopy(self._reference_additive_error)
         out._additive_error_multiplier = deepcopy(self.additive_error_multiplier, memo=memo)
         return out
 
-    @TdemDataPoint.additive_error.setter
+    @property
+    def n_data_channels(self):
+        return sum(self.nTimes)
+
+    @property
+    def reference_additive_error(self):
+        return self._reference_additive_error
+
+    @reference_additive_error.setter
+    def reference_additive_error(self, values):
+        if values is None:
+            values = self.n_data_channels
+        else:
+            assert size(values) == self.n_data_channels, ValueError(("additive_error must have size {}").format(self.n_data_channels))
+
+        self._reference_additive_error = StatArray(values, r'$epsilon_{additive}$', self.units)
+
+    @property
+    def additive_error(self):
+        self._additive_error[:] = self.additive_error_multiplier * self.reference_additive_error
+        return self._additive_error
+
+    @additive_error.setter
     def additive_error(self, values):
         if values is None:
-            values = self.nChannels
+            values = self.n_data_channels
         else:
-            assert size(values) == self.nChannels, ValueError(("Tempest data must a have additive error values for all time gates and all components. \n"
-                                                                  "additive_error must have size {}").format(self.nChannels))
+            assert size(values) == self.n_data_channels, ValueError(("additive_error must have size {}").format(self.n_data_channels))
 
         self._additive_error = StatArray(values, r'$epsilon_{additive}$', self.units)
 
@@ -99,42 +122,48 @@ class Tempest_datapoint(TdemDataPoint):
     @additive_error_multiplier.setter
     def additive_error_multiplier(self, values):
         if values is None:
-            self._additive_error_multiplier = StatArray(ones(self.nSystems * self.n_components), 'Multiplier')
+            self._additive_error_multiplier = StatArray(ones(self.nSystems), 'Multiplier')
         else:
-            assert size(values) == self.nSystems * self.n_components, ValueError(f'additive_error_multiplier must have size {self.nSystems * self.n_components} but has size {size(values)}')
+            assert size(values) == self.nSystems, ValueError(f'additive_error_multiplier must have size {self.nSystems} but has size {size(values)}')
             self._additive_error_multiplier = StatArray(values, 'Multiplier')
-
 
     @TdemDataPoint.data.getter
     def data(self):
-        # for j in range(self.nSystems):
+        self._data[:] = 0.0
         for i in range(self.n_components):
             ic = self._component_indices(i, 0)
-            self._data[ic] = self.secondary_field[ic] + self.primary_field[i]
-
+            # Compute Sum(Pc + Sc) for c in x, y, z
+            self._data[:] += (self.primary_field[i] + self.secondary_field[ic])**2.0
+        self._data[:] = sqrt(self._data)
         return self._data
 
-    # @property
-    # def nChannels(self):
-    #     return sum(self.channels_per_system) * self.n_components
+    @TdemDataPoint.predicted_data.setter
+    def predicted_data(self, values):
+        if values is None:
+            values = self.n_data_channels
+        else:
+            assert size(values) == self.n_data_channels, ValueError(f"data must have size {self.n_data_channels} not {size(values)}")
 
-    @TdemDataPoint.predictedData.getter
-    def predictedData(self):
-        # for j in range(self.nSystems):
+        self._predicted_data = DataArray(values, "Predicted total field", self.units)
+
+    @TdemDataPoint.predicted_data.getter
+    def predicted_data(self):
+        self._predicted_data[:] = 0.0
         for i in range(self.n_components):
             ic = self._component_indices(i, 0)
-            self._predictedData[ic] = self.predicted_secondary_field[ic] + self.predicted_primary_field[i]
-        return self._predictedData
+            dic = s_[:]
+            self._predicted_data[dic] += (self.predicted_primary_field[i] + self.predicted_secondary_field[ic])**2.0
+        self._predicted_data[:] = sqrt(self._predicted_data)
+        return self._predicted_data
 
     @TdemDataPoint.relative_error.setter
     def relative_error(self, values):
         if values is None:
-            values = full(self.n_components * self.nSystems, fill_value=0.01)
+            values = full(self.nSystems, fill_value=0.01)
         else:
-            assert size(values) == self.n_components * self.nSystems, ValueError(("Tempest data must a have relative error for the primary and secondary fields, for each system. \n"
-                               "relative_error must have size {}").format(self.n_components * self.nSystems))
+            assert size(values) == self.nSystems, ValueError((f"relative_error must have size {self.nSystems}"))
 
-        assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
+        assert npall(values > 0.0), ValueError(f"Relative error {values} must be > 0.0")
 
         self._relative_error = StatArray(values, r'$\epsilon_{Relative}$', '%')
 
@@ -165,21 +194,25 @@ class Tempest_datapoint(TdemDataPoint):
         """
 
         assert npall(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
-
         # For each system assign error levels using the user inputs
-        # for i in range(self.nSystems):
-        for j in range(self.n_components):
-            ic = self._component_indices(j, 0)
-            # relative_error = self.relative_error[j] * self.secondary_field[ic]
-            relative_error = self.relative_error[j] * self.data[ic]
-            variance = relative_error**2.0 + (self._additive_error_multiplier[j] * self.additive_error[ic])**2.0
-            self._std[ic] = sqrt(variance)
+        relative_error = self.relative_error * self.data
+        variance = relative_error**2.0 + self.additive_error**2.0
+        self._std[:] = sqrt(variance)
 
         # Update the variance of the predicted data prior
-        if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
+        if self.predicted_data.hasPrior:
+            self.predicted_data.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
 
         return self._std
+
+    @property
+    def total_field(self):
+        return self._total_field
+
+    @total_field.setter
+    def total_field(self, value):
+        assert isinstance(value, bool), ValueError("total_field must have type bool")
+        self._total_field = value
 
     @TdemDataPoint.units.setter
     def units(self, value):
@@ -278,6 +311,8 @@ class Tempest_datapoint(TdemDataPoint):
         if 'initial_receiver_pitch' in kwargs:
             self.receiver.pitch = kwargs['initial_receiver_pitch']
 
+        self.reference_additive_error = kwargs['initial_additive_error']
+
     def _init_posterior_plots(self, gs=None):
         """Initialize axes for posterior plots
 
@@ -294,7 +329,8 @@ class Tempest_datapoint(TdemDataPoint):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         n_rows = 1
-        if (self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior) or any([self.transmitter.hasPosterior, self.receiver.hasPosterior]):
+
+        if (self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior) or self.loop_pair.hasPosterior:
             n_rows = 2
 
         splt = gs.subgridspec(n_rows, 1, wspace=0.3)
@@ -308,16 +344,17 @@ class Tempest_datapoint(TdemDataPoint):
         ## Top row of plot
         splt_top = splt[0].subgridspec(1, n_cols, width_ratios=width_ratios)
 
-        ax = []
+        ax = {}
         # Data axis
-        ax.append(subplot(splt_top[-1]))
+        ax['data'] = subplot(splt_top[-1])
 
+        # Place relative error posteriors next to the data.
         if self.relative_error.hasPosterior:
             # Relative error axes
-            ax.append(self.relative_error._init_posterior_plots(splt_top[0]))
-
-        if not self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior:
-            ax.append(self.additive_error_multiplier._init_posterior_plots(splt_top[0]))
+            ax['relative_error'] = self.relative_error._init_posterior_plots(splt_top[0])
+        else: # If no relative error, move additive errors up.
+            if self.additive_error_multiplier.hasPosterior:
+                ax['additive_error_multiplier'] = self.additive_error_multiplier._init_posterior_plots(splt_top[0])
 
         ## Bottom row of plot
         n_cols = sum([self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior, self.transmitter.hasPosterior, super(Loop_pair, self.loop_pair).hasPosterior, self.receiver.hasPosterior])
@@ -328,82 +365,156 @@ class Tempest_datapoint(TdemDataPoint):
             i = 0
             # Additive Error axes
             if self.relative_error.hasPosterior & self.additive_error_multiplier.hasPosterior:
-                ax.append(self.additive_error_multiplier._init_posterior_plots(splt_bottom[i]))
+                ax['additive_error_multiplier'] = self.additive_error_multiplier._init_posterior_plots(splt_bottom[i])
                 i += 1
 
             # Loop pair
             if self.loop_pair.hasPosterior:
-                ax.append(self.loop_pair._init_posterior_plots(splt_bottom[i:]))
+                ax['loop_pair'] = self.loop_pair._init_posterior_plots(splt_bottom[i:])
 
         return ax
 
     def perturb(self):
         super().perturb()
-        self.additive_error_multiplier.perturb()
+        if self.additive_error_multiplier.hasProposal:
+            self.additive_error_multiplier.perturb()
 
     def plotWaveform(self,**kwargs):
         for i in range(self.nSystems):
             if (self.nSystems > 1):
                 subplot(2, 1, i + 1)
             plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
-            cP.xlabel('Time (s)')
-            cP.ylabel('Normalized Current (A)')
+            cp.xlabel('Time (s)')
+            cp.ylabel('Normalized Current (A)')
             margins(0.1, 0.1)
 
-    def plot(self, **kwargs):
-        kwargs['xscale'] = kwargs.get('xscale', 'log')
-        kwargs['yscale'] = kwargs.get('yscale', 'linear')
-        return super().plot(**kwargs)
+    def plot(self, title='Tempest data', with_error_bars=True, **kwargs):
+        """ Plot the Inphase and Quadrature Data for an EM measurement
+        """
+        ax = kwargs.pop('ax', None)
+        ax = plt.gca() if ax is None else ax
+
+        markers = tuple(kwargs.pop('marker', ('o', 'x', 'v')))
+        kwargs['markersize'] = kwargs.pop('markersize', 3)
+        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
+        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
+        assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
+        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
+        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
+        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
+        kwargs['alpha'] = kwargs.pop('alpha', 0.8)
+        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
+        kwargs['linewidth'] = kwargs.pop('linewidth', 1)
+
+        kwargs.pop('logX', None)
+        kwargs.pop('logY', None)
+        xscale = kwargs.get('xscale', 'log')
+        yscale = kwargs.get('yscale', 'linear')
+
+        marker = cycle(markers)
+
+        for j in range(self.nSystems):
+            system_times = self.off_time(j)
+
+            # kwargs['marker'] = markers[self._components[k]]
+            kwargs['marker'] = next(marker)
+
+            if (with_error_bars):
+                ax.errorbar(system_times, self.data, yerr=self.std,
+                                color=c[j],
+                                markerfacecolor=mfc[j],
+                                **kwargs)
+            else:
+                ax.plot(system_times, self.data,
+                            markerfacecolor=mfc[j],
+                            **kwargs)
+
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel(cf.getNameUnits(self.data))
+        ax.set_title(title)
+
+        if self.nSystems > 1:
+            ax.legend()
+
+        return ax
 
     def plot_posteriors(self, axes=None, **kwargs):
 
         if axes is None:
             axes = kwargs.pop('fig', gcf())
-        if not isinstance(axes, list):
+
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
         required_axes = 1 + sum([x.hasPosterior for x in (self.relative_error, self.additive_error_multiplier, self.loop_pair)])
         assert len(axes) == required_axes, ValueError("Must have length {} list of axes for the posteriors. self.init_posterior_plots can generate them".format(required_axes))
 
-        # point_kwargs = kwargs.pop('point_kwargs', {})
         data_kwargs = kwargs.pop('data_kwargs', {})
         rel_error_kwargs = kwargs.pop('rel_error_kwargs', {})
         add_error_kwargs = kwargs.pop('add_error_kwargs', {})
+        loop_pair_kwargs = kwargs.pop('loop_pair_kwargs', {})
 
         overlay = kwargs.get('overlay', None)
         if not overlay is None:
-                # point_kwargs['overlay'] = overlay
                 rel_error_kwargs['overlay'] = overlay.relative_error
-                # add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
-                # add_error_kwargs['axis'] = 1
                 add_error_kwargs['overlay'] = overlay.additive_error_multiplier
+                loop_pair_kwargs['overlay'] = overlay.loop_pair
 
-        i = 0
-        axes[i].cla()
-        self.predictedData.plot_posteriors(ax = axes[i], colorbar=False, **data_kwargs)
-        self.plot(ax=axes[i], **data_kwargs)
+        ax = axes['data']; ax.cla()
+        self.predicted_data.plot_posteriors(ax = ax, colorbar=False, **data_kwargs)
+        self.plot(ax=ax, **data_kwargs)
 
-        c = cP.wellSeparated[0] if overlay is None else cP.wellSeparated[3]
-        self.plot_predicted(color=c, ax=axes[i], **data_kwargs)
-        i += 1
+        c = cp.wellSeparated[0] if overlay is None else cp.wellSeparated[3]
+        self.plot_predicted(color=c, ax=ax, **data_kwargs)
 
         if self.relative_error.hasPosterior:
-            self.relative_error.plot_posteriors(ax=axes[i], **rel_error_kwargs)
-            i += 1
+            self.relative_error.plot_posteriors(ax=axes['relative_error'], **rel_error_kwargs)
 
         if self.additive_error_multiplier.hasPosterior:
             add_error_kwargs['colorbar'] = False
-            self.additive_error_multiplier.plot_posteriors(ax=axes[i], **add_error_kwargs)
-            i += 1
+            self.additive_error_multiplier.plot_posteriors(ax=axes['additive_error_multiplier'], **add_error_kwargs)
 
         if self.loop_pair.hasPosterior:
-            self.loop_pair.plot_posteriors(axes = axes[i], **kwargs)
+            self.loop_pair.plot_posteriors(axes = axes['loop_pair'], **loop_pair_kwargs)
 
-
-    def plot_predicted(self, **kwargs):
+    def plot_predicted(self, title='Tempest data', **kwargs):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
         kwargs['yscale'] = kwargs.get('yscale', 'linear')
-        return super().plot_predicted(**kwargs)
+
+        ax = kwargs.get('ax', None)
+        ax = plt.gca() if ax is None else ax
+
+        labels = kwargs.pop('labels', True)
+
+        if (labels):
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel(cf.getNameUnits(self.predicted_data))
+            ax.set_title(title)
+
+        kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
+        kwargs['linewidth'] = kwargs.pop('linewidth', 1)
+        kwargs['alpha'] = kwargs.pop('alpha', 0.7)
+        xscale = kwargs.pop('xscale', 'log')
+        yscale = kwargs.pop('yscale', 'log')
+
+        kwargs.pop('logX', None)
+        kwargs.pop('logY', None)
+
+        for j in range(self.nSystems):
+            system_times = self.off_time(j)
+
+            if npall(self.data <= 0.0):
+                active = (self.predicted_data > 0.0)
+            else:
+                active = self.active
+
+            p = self.predicted_data[active]
+            p.plot(x=system_times[active], **kwargs)
+
+        ax.set_xscale(xscale)
+        ax.set_yscale(yscale)
 
     def plot_secondary_field(self, title='Secondary field', **kwargs):
 
@@ -413,8 +524,8 @@ class Tempest_datapoint(TdemDataPoint):
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
-        c = kwargs.pop('color', [cP.wellSeparated[i+1] for i in range(self.nSystems)])
-        mfc = kwargs.pop('markerfacecolor', [cP.wellSeparated[i+1] for i in range(self.nSystems)])
+        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
+        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
         assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
         assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
@@ -443,10 +554,10 @@ class Tempest_datapoint(TdemDataPoint):
 
         # if (not noLabels):
         #     kwargs['xlabel'] = 'Time (s)'
-        #     kwargs['ylabel'] = cf.getNameUnits(self.predictedData)
+        #     kwargs['ylabel'] = cf.getNameUnits(self.predicted_data)
         #     kwargs['title'] = title
 
-        kwargs['color'] = kwargs.pop('color', cP.wellSeparated[3])
+        kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
         kwargs['alpha'] = kwargs.pop('alpha', 0.7)
         xscale = kwargs.pop('xscale', 'log')
@@ -466,86 +577,49 @@ class Tempest_datapoint(TdemDataPoint):
         J = self.sensitivity_matrix[self.active, :]
 
         if order == 1:
-            return dot(J.T, self.predictedData.priorDerivative(order=1, i=self.active))
+            return dot(J.T, self.predicted_data.priorDerivative(order=1, i=self.active))
 
         elif order == 2:
-            WdT_Wd = self.predictedData.priorDerivative(order=2)
+            WdT_Wd = self.predicted_data.priorDerivative(order=2)
             return dot(J.T, dot(WdT_Wd, J))
 
-    @property
-    def probability(self):
-        return super().probability
 
-    def set_priors(self, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
+    # def set_priors(self, relative_error_prior=None, additive_error_prior=None, data_prior=None, **kwargs):
 
-        if additive_error_prior is None:
-            if kwargs.get('solve_additive_error', False):
-                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=10, prng=kwargs.get('prng'))
+        # if additive_error_prior is None:
+        #     if kwargs.get('solve_additive_error', False):
+        #         additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=10, prng=kwargs.get('prng'))
 
-        self.additive_error_multiplier.prior = additive_error_prior
+        # self.additive_error.prior = additive_error_prior
 
-        kwargs['solve_additive_error'] = False
-        super().set_priors(relative_error_prior, None, data_prior, **kwargs)
+        # kwargs['solve_additive_error'] = False
+        # super().set_priors(relative_error_prior, None, data_prior, **kwargs)
 
+    # def set_relative_error_prior(self, prior):
+    #     if not prior is None:
+    #         assert prior.ndim == self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
+    #         self.relative_error.prior = prior
 
-    def set_relative_error_prior(self, prior):
-        if not prior is None:
-            assert prior.ndim == self.n_components * self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.n_components * self.nSystems))
-            self.relative_error.prior = prior
+    # def set_additive_error_prior(self, prior):
+    #     if not prior is None:
+    #         assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
+    #         self.additive_error.prior = prior
 
-    def set_additive_error_prior(self, prior):
-        if not prior is None:
-            assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
-            self.additive_error.prior = prior
+    # def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
+    #     super().set_proposals(relative_error_proposal, additive_error_proposal, **kwargs)
 
-    def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
-        super().set_proposals(relative_error_proposal, additive_error_proposal, **kwargs)
-
-    def set_additive_error_proposal(self, proposal, **kwargs):
+    def set_additive_error_proposal(self, proposal=None, **kwargs):
         if proposal is None:
             if kwargs.get('solve_additive_error', False):
-                proposal = Distribution('MvLogNormal', self.additive_error_multiplier, kwargs['additive_error_proposal_variance'], linearSpace=True, prng=kwargs.get('prng'))
+                proposal = Distribution('MvLogNormal', self.additive_error_multiplier, kwargs['additive_error_multiplier_proposal_variance'], linearSpace=True, prng=kwargs.get('prng'))
 
         self.additive_error_multiplier.proposal = proposal
 
-    def set_posteriors(self, log=None):
-        super().set_posteriors(log=log)
-
-    def set_relative_error_posterior(self):
-
-        if self.relative_error.hasPrior:
-            bins = DataArray(atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
-            posterior = []
-            for i in range(self.n_components):
-                b = bins[i, :]
-                mesh = RectilinearMesh1D(edges = b, relative_to=0.5*(b.max()-b.min()), log=10)
-                posterior.append(Histogram(mesh=mesh))
-            self.relative_error.posterior = posterior
-
-    # def set_additive_error_posterior(self, log=None):
-    #     if self.additive_error.hasPrior:
-    #         bins = RectilinearMesh1D(edges=DataArray(self.additive_error.prior.bins()[0, :], name=self.additive_error.name, units=self.data.units), log=10)
-    #         posterior = []
-    #         # for j in range(self.nSystems):
-    #         system_times = RectilinearMesh1D(centres=self.off_time(0), log=10)
-    #         for k in range(self.n_components):
-    #             mesh = RectilinearMesh2D(x=system_times, y=bins)
-    #             posterior.append(Histogram(mesh=mesh))
-    #         self.additive_error.posterior = posterior
-
     def set_additive_error_posterior(self, log=None):
-        """
-
-        """
-        if self.additive_error_multiplier.hasPrior:
-            bins = DataArray(atleast_2d(self.additive_error_multiplier.prior.bins(nBins=200)), name=self.additive_error_multiplier.name)
-
-            posterior = []
-            for i in range(self.n_components):
-                b = bins[i, :]
-                mesh = RectilinearMesh1D(edges = b, log=log, relative_to=0.5*(b.max()-b.min()))
-                posterior.append(Histogram(mesh=mesh))
-            self.additive_error_multiplier.posterior = posterior
+        """"""
+        if self.additive_error.hasPrior:
+            mesh = RectilinearMesh1D(edges = DataArray(logspace(-1, 1, 150), name=self.additive_error_multiplier.name), log=log)
+            self.additive_error_multiplier.posterior = Histogram(mesh=mesh)
 
     # def update_additive_error_posterior(self):
     #     if self.additive_error.hasPosterior:
@@ -561,8 +635,28 @@ class Tempest_datapoint(TdemDataPoint):
         self.additive_error_multiplier.update_posterior(active=self.active_system_indices)
 
     def _empymodForward(self, mod):
-
         print('stuff')
+
+    def sensitivity(self, model, ix=None, model_changed=False):
+        """ Compute the sensitivty matrix for the given model """
+
+        assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
+        tmp = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
+
+        self._sensitivity_matrix = DataArray(zeros((self.n_data_channels, model.nCells.item())))
+        dp = 1.0 / self.predicted_data
+        for i in range(self.n_components):
+            ic = self._component_indices(i, 0)
+            sec_field = self.predicted_secondary_field[ic]
+            # Compute Sum(Pc + Sc) for c in x, y, z
+            # self._sensitivity_matrix += tmp[ic, :]
+            self._sensitivity_matrix += (dp * (self.predicted_primary_field[i] + sec_field) * tmp[ic, :].T).T
+
+        return self.sensitivity_matrix
+
+    def fm_dlogc(self, model):
+        values, J = super().fm_dlogc(model)
+        self._sensitivity_matrix = DataArray(J, 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
 
