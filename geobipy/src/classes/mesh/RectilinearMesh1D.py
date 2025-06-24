@@ -1306,20 +1306,20 @@ class RectilinearMesh1D(Mesh):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         if values is None:
-            splt = gs.subgridspec(2, 1)#, height_ratios=[1, 4])
-            ax = [plt.subplot(splt[0, 0]), plt.subplot(splt[1, 0], sharey=sharey)]
+            splt = gs.subgridspec(2, 1)
+            ax = {'ncells':plt.subplot(splt[0, 0]),
+                  'edges': plt.subplot(splt[1, 0], sharey=sharey)}
         else:
             splt = gs.subgridspec(2, 1, height_ratios=[1, 4])
-            ax = [plt.subplot(splt[0, :])] # ncells
+            ax = {'ncells': plt.subplot(splt[0, :])}
 
             splt2 = splt[1, :].subgridspec(1, 2, width_ratios=[2, 1])
-            ax2 = plt.subplot(splt2[1], sharey=sharey) # edges
+            ax['edges'] = plt.subplot(splt2[1], sharey=sharey)
             if sharey is None:
-                sharey = ax2
-            ax3 = plt.subplot(splt2[0], sharex=sharex, sharey=sharey) # values
-            ax += [ax2, ax3]
+                sharey = ax['edges']
+            ax['values'] = plt.subplot(splt2[0], sharex=sharex, sharey=sharey)
 
-        for a in ax:
+        for k, a in ax.items():
             cp.pretty(a)
 
         return ax
@@ -1330,7 +1330,7 @@ class RectilinearMesh1D(Mesh):
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes, values=values)
 
         assert len(axes) >= 2, ValueError("axes must have length >= 2")
@@ -1348,27 +1348,26 @@ class RectilinearMesh1D(Mesh):
             edges_kwargs['overlay'] = tmp.edges
 
         if self.nCells.hasPosterior:
-            axes[0].cla()
-            self.nCells.plot_posteriors(ax = axes[0], **ncells_kwargs)
+            ax = axes['ncells']; ax.cla()
+            self.nCells.plot_posteriors(ax = ax, **ncells_kwargs)
 
         if self.edges.hasPosterior:
-            axes[1].cla()
-            self.edges.plot_posteriors(ax = axes[1], **edges_kwargs)
+            ax = axes['edges']; ax.cla()
+            self.edges.plot_posteriors(ax = ax, **edges_kwargs)
 
         if values is not None:
-            assert len(axes) == 3, ValueError("axes must have length == 3")
-
-            values.plot_posteriors(ax=axes[2], **values_kwargs)
+            ax = axes['values']
+            values.plot_posteriors(ax=ax, **values_kwargs)
 
             if overlay is not None:
-                overlay.plot(ax=axes[2], xscale=values_kwargs.get('xscale', 'linear'),
+                overlay.plot(ax=ax, xscale=values_kwargs.get('xscale', 'linear'),
                         reciprocateX=values_kwargs.get('reciprocateX', None),
                         labels=False,
                         linewidth=1,
                         color=cp.wellSeparated[3])
 
             doi = values.posterior.opacity_level(percent=90.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
-            axes[2].axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
+            ax.axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
         return axes
 
     @property

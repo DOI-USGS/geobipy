@@ -5,7 +5,7 @@ from copy import deepcopy
 
 from numpy import abs, any, arange, argpartition, argsort, argwhere, asarray, column_stack
 from numpy import cumsum, diag, diff, dot, empty, exp, hstack, inf, isinf, maximum, mean, meshgrid
-from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, unique, vstack, zeros
+from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, sum, unique, vstack, zeros
 from numpy import all as npall
 from numpy import log as nplog
 from numpy.linalg import inv
@@ -503,7 +503,7 @@ class Model(myObject):
         if axes is None:
             axes = kwargs.pop('fig', gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
         self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
@@ -832,6 +832,28 @@ class Model(myObject):
         mx = maximum(value_weight, gradient_weight)
         self.value_weight = value_weight / mx
         self.gradient_weight = gradient_weight / mx
+
+    def sum(self, axis=0):
+        """Gets the mean along the given axis.
+
+        This is not the true mean of the original samples. It is the best estimated mean using the binned counts multiplied by the axis bin centres.
+
+        Parameters
+        ----------
+        log : 'e' or float, optional.
+            Take the log of the mean to base "log"
+        axis : int
+            Axis to take the mean along.
+
+        Returns
+        -------
+        out : geobipy.DataArray
+            The means along the axis.
+
+        """
+        values = sum(self.values, axis=axis)
+        out = self.mesh.remove_axis(axis)
+        return Model(mesh=out, values=values)
 
     def take_along_axis(self, i, axis):
         s = [s_[:] for j in range(self.ndim)]

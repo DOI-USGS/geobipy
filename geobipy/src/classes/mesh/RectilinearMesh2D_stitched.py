@@ -270,16 +270,17 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
             shape = (4, 2)
             splt = gs.subgridspec(*shape)
 
-        ax = [plt.subplot(splt[0, 0], sharex=sharex, sharey=sharey)] # n_cells
-        sharex = ax[0] if sharex is None else sharex
-        ax.append(plt.subplot(splt[0, 1], sharex=sharex, sharey=sharey)) # y_edges
-        sharey = ax[1] if sharey is None else sharey
+        ax = {'ncells': cP.pretty(plt.subplot(splt[0, 0], sharex=sharex, sharey=sharey))}
+
+        sharex = ax['ncells'] if sharex is None else sharex
+        ax['edges'] = cP.pretty(plt.subplot(splt[0, 1], sharex=sharex, sharey=sharey))
+        sharey = ax['edges'] if sharey is None else sharey
 
         if values is not None:
-            ax += [plt.subplot(splt[unravel_index(i, shape)], sharex=sharex, sharey=sharey) for i in range(2, 8)]
+            ax['values'] = [cP.pretty(plt.subplot(splt[unravel_index(i, shape)], sharex=sharex, sharey=sharey)) for i in range(2, 8)]
 
-        for a in ax:
-            cP.pretty(a)
+        # for a in ax:
+        #     cP.pretty(a)
 
         return ax
 
@@ -300,24 +301,24 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         ncells_kwargs = kwargs.get('ncells_kwargs', {})
         y_edges_kwargs = kwargs.get('y_edges_kwargs', {})
 
-        self.nCells.plot_posteriors(ax = axes[0], **ncells_kwargs)
+        self.nCells.plot_posteriors(ax = axes['ncells'], **ncells_kwargs)
 
         if kwargs.pop('flipY', False) :
             y_edges_kwargs['flipY'] = True
-        self.y_edges.plot_posteriors(ax = axes[1], **y_edges_kwargs)
+        self.y_edges.plot_posteriors(ax = axes['edges'], **y_edges_kwargs)
 
         if values is not None:
             axis = value_kwargs.pop('axis', 1)
             mean = values.posterior.mean(axis=axis)
-            mean.pcolor(ax=axes[2], **value_kwargs)
+            mean.pcolor(ax=axes['values'][0], **value_kwargs)
             tmp = values.posterior.percentile(percent=5.0, axis=axis)
-            tmp.pcolor(ax=axes[4], **value_kwargs)
+            tmp.pcolor(ax=axes['values'][2], **value_kwargs)
             tmp = values.posterior.percentile(percent=95.0, axis=axis)
-            tmp.pcolor(ax=axes[6], **value_kwargs)
+            tmp.pcolor(ax=axes['values'][4], **value_kwargs)
             tmp = values.posterior.entropy(axis=axis)
-            tmp.pcolor(ax=axes[3])
+            tmp.pcolor(ax=axes['values'][1])
             tmp = values.posterior.opacity(axis=axis)
-            a, b, cb = tmp.pcolor(axis=axis, ax=axes[5], ticks=[0.0, 0.5, 1.0], cmap='plasma')
+            a, b, cb = tmp.pcolor(axis=axis, ax=axes['values'][3], ticks=[0.0, 0.5, 1.0], cmap='plasma')
 
             if cb is not None:
                 labels = ['Less', '', 'More']

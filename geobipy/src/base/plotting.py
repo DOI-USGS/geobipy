@@ -635,7 +635,7 @@ def _pcolormesh(X, Y, values, **kwargs):
 
     """
 
-    assert ndim(values) == 2, ValueError('Number of dimensions must be 2')
+    assert ndim(values) == 2, ValueError(f'Number of dimensions is {ndim(values)} but must be 2')
 
     geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
     color_kwargs, kwargs = filter_color_kwargs(kwargs)

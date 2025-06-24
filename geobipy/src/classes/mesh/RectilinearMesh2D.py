@@ -374,10 +374,14 @@ class RectilinearMesh2D(Mesh):
 
         if ax is None:
             ax = RectilinearMesh1D(**kwargs)
+
         match axis:
             case 0:
+                self.x.dimension += 1
+                self.y.dimension += 1
                 return RectilinearMesh3D(x=ax, y=self.x, z=self.y)
             case 1:
+                self.y.dimension += 1
                 return RectilinearMesh3D(x=self.x, y=ax, z=self.y)
             case 2:
                 return RectilinearMesh3D(x=self.x, y=self.y, z=ax)

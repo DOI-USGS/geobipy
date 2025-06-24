@@ -803,14 +803,17 @@ class RectilinearMesh3D(RectilinearMesh2D):
         kwargs['axis'] = axis
 
         if index is not None:
-            s = [s_[:] for i in range(self.ndim)]
-            s[axis] = index
+            slic = [s_[:] for i in range(self.ndim)]
+            slic[axis] = index
+            slic = tuple(slic)
 
-            tmp = self[s]
+            tmp = self[slic]
+            kwargs['values'] = values[slic]
 
             return tmp.pcolor(**kwargs)
 
         mesh = self.remove_axis(axis)
+
 
         x_mask = kwargs.get('x_mask', None); y_mask = kwargs.get('y_mask', None)
         mask = (x_mask is not None) or (y_mask is not None)
