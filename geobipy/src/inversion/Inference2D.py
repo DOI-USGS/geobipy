@@ -331,6 +331,10 @@ class Inference2D(myObject):
         self.hdf_file = h5py.File(filename, mode, **kwargs)
         self.mode = mode
 
+    @property
+    def writable(self):
+        return self.mode in ('w', 'r+', 'a')
+
     def close(self):
         """ Check whether the file is open """
         try:
@@ -1026,7 +1030,7 @@ class Inference2D(myObject):
 
         p = self.parameter_posterior().compute_probability(distribution, log, log_probability, axis, **kwargs)
 
-        if save and self.mode == 'r+':
+        if save and self.writable:
             if 'probabilities' in self.hdf_file.keys():
                 p.writeHdf(self.hdf_file, 'probabilities')
             else:

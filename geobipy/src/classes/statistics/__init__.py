@@ -30,7 +30,7 @@ def get_prng(generator=PCG64DXSM, seed=None, jump=None, world=None):
 
         else: # No seed, generate one
             bit_generator = generator()
-            seed = bit_generator.seed_seq.entropy
+            seed = bit_generator._seed_seq.entropy
             with open('seed.pkl', 'wb') as f:
                 pickle.dump(seed, f)
             print('Seed: {}'.format(seed), flush=True)

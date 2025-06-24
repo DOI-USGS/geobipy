@@ -21,6 +21,7 @@ from ..base.utilities import debug_print as dprint
 
 import h5py
 from ..classes.core.DataArray import DataArray
+from ..classes.statistics.StatArray import StatArray
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram import Histogram
 from ..classes.core.myObject import myObject
@@ -377,7 +378,7 @@ class Inference1D(myObject):
         # Compute the data misfit
         self.data_misfit = datapoint.data_misfit()
 
-        self.data_misfit_v = DataArray(2 * self.n_markov_chains, name='Data Misfit')
+        self.data_misfit_v = StatArray(2 * self.n_markov_chains, name='Data Misfit')
         self.data_misfit_v[0] = self.data_misfit
         self._n_target_hits = 0
         self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
@@ -1145,8 +1146,11 @@ class Inference1D(myObject):
 
         self.best_datapoint = self.datapoint
 
-        self.data_misfit_v = hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s)
+        self.data_misfit_v = StatArray(hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s))
         self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
+        edges = DataArray(linspace(1, 2*sum(self.datapoint.active)))
+        self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
+
 
         self.model = hdfRead.readKeyFromFile(hdfFile, '', '/', 'model', index=index)
 
