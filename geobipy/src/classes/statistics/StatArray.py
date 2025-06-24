@@ -145,7 +145,7 @@ class StatArray(DataArray):
 
         nP = size(value)
         if nP > 1:
-            assert nP == self.shape[-1] or (self.shape[-1]%nP == 0), ValueError("Number of posteriors must match size of StatArray's first dimension")
+            assert nP == self.shape[-1] or (self.shape[-1]%nP == 0), ValueError(f"Number of posteriors {nP} must match size of StatArray's first dimension {self.shape[-1]}")
 
         if nP == 1:
             if isinstance(value, list):
@@ -722,6 +722,8 @@ class StatArray(DataArray):
             self.posterior.plot(**kwargs)
 
     def overlay_on_posteriors(self, overlay, ax, **kwargs):
+
+        assert isinstance(overlay, StatArray), TypeError("overlay must have type StatArray")
 
         if size(ax) > 1:
             assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(size(ax), self.n_posteriors))

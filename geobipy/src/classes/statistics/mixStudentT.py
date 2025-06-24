@@ -22,7 +22,8 @@ class mixStudentT(mixNormal):
 
     @amplitudes.setter
     def amplitudes(self, values):
-        assert np.size(values) == self.n_components, ValueError("Must provide {} amplitudes".format(self.n_components))
+        if values is None:
+            values = np.ones(self.n_components)
         self._params[0::self.n_solvable_parameters] = values
 
 

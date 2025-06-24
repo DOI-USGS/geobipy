@@ -274,6 +274,14 @@ class Point(myObject):
         return sum([size(t) == self._nPoints for t in (self.x, self.y, self.z)])
 
     @property
+    def n_coordinate_pairs(self):
+        return sum(arange(self.n_points))
+
+    @property
+    def n_points(self):
+        return self.nPoints
+
+    @property
     def nPoints(self):
         """Get the number of points"""
         return self._nPoints

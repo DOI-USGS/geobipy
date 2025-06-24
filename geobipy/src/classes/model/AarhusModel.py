@@ -45,7 +45,7 @@ class AarhusModel(Model):
         self.mesh.plotXY(**kwargs)
 
 
-    def readLineNumbers(self, fileName):
+    def readline_numbers(self, fileName):
         """Read in the line numbers from an inversion file.
 
         Parameters
@@ -87,7 +87,7 @@ class AarhusModel(Model):
             return np.asarray(tmp)
 
 
-    def read2D(self, fileName, lineNumber):
+    def read2D(self, fileName, line_number):
         """Read in an inversion file from the Aarhus software
 
         Parameters
@@ -96,7 +96,7 @@ class AarhusModel(Model):
             Path to the inversion file.
         index : int
             Index of the line to read in 0 to nLines.
-        lineNumber : float
+        line_number : float
             The line number to read in.
 
         Returns
@@ -172,14 +172,14 @@ class AarhusModel(Model):
             # Skip the first data points that are not the line we need
             line = fio.getRealNumbersfromLine(f.readline())
 
-            while line[lineIndex] != lineNumber:
+            while line[lineIndex] != line_number:
                 line = fio.getRealNumbersfromLine(f.readline())
 
             # Read in the data points for the requested line,
             # assumes the data points for the given line are contiguous.
             nPoints = 0
             first = True
-            while line[lineIndex] == lineNumber:
+            while line[lineIndex] == line_number:
                 if first:
                      depthEdges[:-1] = line[topIndex]
 

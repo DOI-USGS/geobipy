@@ -353,7 +353,6 @@ class RectilinearMesh2D_stitched(RectilinearMesh2D):
         """ Reads in the object from a HDF file """
         from .RectilinearMesh1D import RectilinearMesh1D
         if index is None:
-
             x = RectilinearMesh1D.fromHdf(grp['x'], skip_posterior=skip_posterior)
             nCells = StatArray.fromHdf(grp['nCells'], skip_posterior=skip_posterior)
             edges = StatArray.fromHdf(grp['y/edges'], skip_posterior=skip_posterior)

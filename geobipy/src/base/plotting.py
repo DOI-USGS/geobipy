@@ -128,6 +128,17 @@ def filter_plotting_kwargs(kwargs):
     if out['ax'] is None:
         out['ax'] = plt.gca()
 
+    if out['transpose']:
+        out['flipX'], out['flipY'] = out['flipY'], out['flipX']
+        out['xlim'], out['ylim'] = out['ylim'], out['xlim']
+        out['wrap_xlabel'], out['wrap_ylabel'] = out['wrap_ylabel'], out['wrap_xlabel']
+        out['xlabel'], out['ylabel'] = out['ylabel'], out['xlabel']
+        out['logX'], out['logY'] = out['logY'], out['logX']
+        out['flipX'], out['flipY'] = out['flipY'], out['flipX']
+        out['reciprocateX'], out['reciprocateY'] = out['reciprocateY'], out['reciprocateX']
+        out['xscale'], out['yscale'] = out['yscale'], out['xscale']
+
+
     return out, kwargs
 
 def _filter_kwargs(kwargs, defaults):
@@ -677,6 +688,9 @@ def _pcolormesh(X, Y, values, **kwargs):
             Y = Y.T
     else:
         X = X.T
+
+    if ((X[1, 0] - X[0, 0]) == 0.0) & ((Y[1, 0] - Y[0, 0]) == 0.0):
+        Y = Y.T
 
     pm = ax.pcolormesh(X, Y, values, alpha = color_kwargs['alpha'], **kwargs)
 
@@ -1454,12 +1468,10 @@ def step(x, y, **kwargs):
 
     pretty(ax)
 
-    x, _ = utilities._log(x, geobipy_kwargs['logX'])
-    y, _ = utilities._log(y, geobipy_kwargs['logY'])
-
     if geobipy_kwargs['transpose']:
-        geobipy_kwargs['xscale'], geobipy_kwargs['yscale'] = geobipy_kwargs['yscale'], geobipy_kwargs['xscale']
         x, y = y, x
+
+    x, _ = utilities._log(x, geobipy_kwargs['logX']); y, _ = utilities._log(y, geobipy_kwargs['logY'])
 
     plt.sca(ax)
     stp = plt.step(x=x, y=y, **kwargs)
