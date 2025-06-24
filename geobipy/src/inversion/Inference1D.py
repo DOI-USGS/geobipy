@@ -3,6 +3,7 @@ Class to store inversion results. Contains plotting and writing to file procedur
 """
 from copy import deepcopy
 from os.path import join
+import traceback
 from datetime import timedelta
 
 from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
@@ -544,7 +545,7 @@ class Inference1D(myObject):
         dprint(f'{self.prng.random()=}')
 
         dprint(f'incoming {self.datapoint.data=}')
-        dprint(f'incoming {self.datapoint.predictedData=}')
+        dprint(f'incoming {self.datapoint.predicted_data=}')
         dprint(f'incoming {self.model.values=}')
         test_datapoint = deepcopy(self.datapoint)
 
@@ -553,14 +554,11 @@ class Inference1D(myObject):
         if self.ignore_likelihood:
             observation = None
 
-        # Propose a new data point, using assigned proposal distributions
-        # test_datapoint.perturb()
-
-        # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         try:
             remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, alpha = self.covariance_scaling)
-        except:
-            print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
+        except Exception:
+            # print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
+            print(traceback.format_exc())
             return True
 
         if remapped_model is None:
@@ -805,17 +803,17 @@ class Inference1D(myObject):
 
         gs = fig.add_gridspec(nrows=2, ncols=2, height_ratios=(1, 6))
 
-        ax = []
-        ax.append([cP.pretty(plt.subplot(gs[0, 0]))])  # Acceptance Rate 0
+        ax = {}
+        ax['acceptance_rate'] = cP.pretty(plt.subplot(gs[0, 0]))
 
         splt = gs[0, 1].subgridspec(1, 2, width_ratios=[4, 1])
-        tmp = [];
-        tmp.append(cP.pretty(plt.subplot(splt[0, 0])));
-        tmp.append(cP.pretty(plt.subplot(splt[0, 1])))
-        ax.append(tmp)  # Data misfit vs iteration 1 and posterior
 
-        ax.append(self.model._init_posterior_plots(gs[1, 0]))
-        ax.append(self.datapoint._init_posterior_plots(gs[1, 1]))
+        ax['misfit'] = cP.pretty(plt.subplot(splt[0, 0]))
+        ax['chisq'] = cP.pretty(plt.subplot(splt[0, 1]))
+
+        ax['model'] = self.model._init_posterior_plots(gs[1, 0])
+
+        ax['data'] = self.datapoint._init_posterior_plots(gs[1, 1])
 
         if self.interactive_plot:
             plt.show(block=False)
@@ -849,26 +847,28 @@ class Inference1D(myObject):
         overlay = self.best_model if self.burned_in else self.model
 
         self.model.plot_posteriors(
-            axes=self.posterior_ax[2],
+            axes=self.posterior_ax['model'],
             # ncells_kwargs={
             #     'normalize': True},
             edges_kwargs={
                 'transpose': True,
-                'trim': False},
+                'trim': False,
+                'flipY': True},
             values_kwargs={
                 'colorbar': False,
-                'flipY': True,
                 'xscale': 'log',
                 'credible_interval_kwargs': {
                 }
             },
             overlay=overlay)
 
+
         overlay = self.best_datapoint if self.burned_in else self.datapoint
+
 
         # if self.datapoint.hasPosterior:
         self.datapoint.plot_posteriors(
-            axes=self.posterior_ax[3],
+            axes=self.posterior_ax['data'],
             # height_kwargs={
             #     'normalize': True},
             data_kwargs={},
@@ -880,9 +880,9 @@ class Inference1D(myObject):
         )
 
         if '_observed_datapoint' in self.__dict__:
-            self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax[3], linecolor='k')
+            self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax['data'], linecolor='k')
         if self.burned_in:
-            self.datapoint.overlay_on_posteriors(self.best_datapoint, axes=self.posterior_ax[3])
+            self.datapoint.overlay_on_posteriors(self.best_datapoint, axes=self.posterior_ax['data'])
 
         self.posterior_fig.suptitle(title)
 
@@ -900,7 +900,7 @@ class Inference1D(myObject):
         # i_positive = argwhere(acceptance_rate > 0.0)
         # i_zero = argwhere(acceptance_rate == 0.0)
 
-        kwargs['ax'] = kwargs.get('ax', self.posterior_ax[0][0])
+        kwargs['ax'] = kwargs.get('ax', self.posterior_ax['acceptance_rate'])
         kwargs['marker'] = kwargs.get('marker', 'o')
         kwargs['alpha'] = kwargs.get('alpha', 0.7)
         kwargs['linestyle'] = kwargs.get('linestyle', 'none')
@@ -909,6 +909,8 @@ class Inference1D(myObject):
         i = s_[:int64(self.iteration / self.update_plot_every)]
 
         self.acceptance_rate.plot(x=self.acceptance_x, i=i, color='k', **kwargs)
+        kwargs['ax'].axhline(y=23.4, color='#C92641', linestyle='dashed')
+
 
     def _plotMisfitVsIteration(self, **kwargs):
         """ Plot the data misfit against iteration. """
@@ -918,7 +920,7 @@ class Inference1D(myObject):
         ls = kwargs.pop('linestyle', 'none')
         c = kwargs.pop('color', 'k')
 
-        ax = self.posterior_ax[1][0]
+        ax = self.posterior_ax['misfit']
         ax.cla()
         tmp_ax = self.data_misfit_v.plot(self.iRange, i=s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, ax=ax, **kwargs)
         ax.set_ylabel('Data Misfit')
@@ -938,7 +940,7 @@ class Inference1D(myObject):
 
         self.data_misfit_v.posterior.update(self.data_misfit_v[maximum(0, self.iteration-self.update_plot_every):self.iteration], trim=True)
 
-        ax = self.posterior_ax[1][1]
+        ax = self.posterior_ax['chisq']
         ax.cla()
 
         misfit_ax, _, _ = self.data_misfit_v.posterior.plot(transpose=True, ax=ax, normalize=True, **kwargs)
@@ -951,7 +953,7 @@ class Inference1D(myObject):
     # def _plotObservedPredictedData(self, **kwargs):
     #     """ Plot the observed and predicted data """
     #     if self.burnedIn:
-    #         # self.datapoint.predictedData.plot_posteriors(colorbar=False)
+    #         # self.datapoint.predicted_data.plot_posteriors(colorbar=False)
     #         self.datapoint.plot(**kwargs)
     #         self.bestDataPoint.plot_predicted(color=cP.wellSeparated[3], **kwargs)
     #     else:
@@ -995,7 +997,7 @@ class Inference1D(myObject):
         self._n_resets += 1
         self.initialize(self.datapoint)
         if self.interactive_plot:
-            for ax in self.posterior_ax:
+            for k, ax in self.posterior_ax.items():
                 clear(ax)
 
         self.clk.restart()

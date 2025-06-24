@@ -119,6 +119,9 @@ class EmLoop(Point, ABC):
 
             self._pitch[:] = values
 
+    @property
+    def priors(self):
+        return super().priors | {k:v.prior for k,v in zip(['pitch', 'roll', 'yaw'], (self.pitch, self.roll, self.yaw)) if v.hasPrior}
 
     @property
     def roll(self):
@@ -135,7 +138,6 @@ class EmLoop(Point, ABC):
                 return
 
             self._roll[:] = values
-
 
     @property
     def size(self):
@@ -364,16 +366,16 @@ class EmLoop(Point, ABC):
         shp = (minimum(3, self.n_posteriors), ceil(self.n_posteriors / 3).astype(int32))
         splt = gs.subgridspec(*shp, wspace=0.3, hspace=1.0)
 
-        ax = []
+        ax = {}
         if super().hasPosterior:
-            ax = super()._init_posterior_plots(splt[:super().n_posteriors, 0])
+            ax['point'] = super()._init_posterior_plots(splt[:super().n_posteriors, 0])
 
         k = 0
-        for c in [self.pitch, self.roll, self.yaw]:
+        for l, c in zip(('pitch', 'roll', 'yaw'), [self.pitch, self.roll, self.yaw]):
             if c.hasPosterior:
                 j = super().n_posteriors + k
                 s = unravel_index(j, shp, order='F')
-                ax.append(c._init_posterior_plots(splt[s[0], s[1]]))
+                ax[l] = c._init_posterior_plots(splt[s[0], s[1]])
                 k += 1
 
         return ax
@@ -383,12 +385,13 @@ class EmLoop(Point, ABC):
         if axes is None:
             axes = kwargs.pop('fig', gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
         assert len(axes) == self.n_posteriors, ValueError("Must have length {} list of axes for the posteriors. self._init_posterior_plots can generate them.".format(self.n_posteriors))
 
-        super().plot_posteriors(axes[:super().n_posteriors], **kwargs)
+        if super().hasPosterior:
+            super().plot_posteriors(axes['point'], **kwargs)
 
         pitch_kwargs = kwargs.pop('pitch_kwargs', {})
         roll_kwargs = kwargs.pop('roll_kwargs', {})
@@ -396,24 +399,22 @@ class EmLoop(Point, ABC):
 
         overlay = kwargs.pop('overlay', None)
 
-        i = super().n_posteriors
-        for c, kw in zip([self.pitch, self.roll, self.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
+        for l, c, kw in zip(('pitch', 'roll', 'yaw'), [self.pitch, self.roll, self.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
             if c.hasPosterior:
-                c.plot_posteriors(ax = axes[i], **kw)
-                i += 1
+                c.plot_posteriors(ax = axes[l], **kw)
 
         if overlay is not None:
             self.overlay_on_posteriors(overlay, axes, pitch_kwargs, roll_kwargs, yaw_kwargs)
 
     def overlay_on_posteriors(self, overlay, axes, pitch_kwargs={}, roll_kwargs={}, yaw_kwargs={}, **kwargs):
 
+        assert isinstance(overlay, EmLoop), TypeError("overlay must have type EmLoop")
+
         super().overlay_on_posteriors(overlay, axes[:super().n_posteriors], **kwargs)
 
-        i = super().n_posteriors
-        for s, o, kw in zip([self.pitch, self.roll, self.yaw], [overlay.pitch, overlay.roll, overlay.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
-            if s.hasPosterior:
-                s.posterior.plot_overlay(value = o, ax = axes[i], **kw)
-                i += 1
+        for l, c, o, kw in zip(('pitch', 'roll', 'yaw'), [self.pitch, self.roll, self.yaw], [overlay.pitch, overlay.roll, overlay.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
+            if c.hasPosterior:
+                c.posterior.plot_overlay(value = o, ax = axes[l], **kw)
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
         """ Create the hdf group metadata in file

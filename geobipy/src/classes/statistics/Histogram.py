@@ -1,6 +1,6 @@
 from copy import deepcopy
-from numpy import arange, cumsum, hstack, int32, int64, interp, isnan, minimum
-from numpy import nanmin, nanmax, ndim, s_, size, sqrt, sum, unique, var
+from numpy import arange, atleast_1d, cumsum, hstack, int32, int64, interp, isnan, minimum
+from numpy import nanmin, nanmax, ndim, s_, size, sqrt, squeeze, sum, unique, var
 from numpy import all as npall
 from numpy.random import rand
 import matplotlib as mpl
@@ -84,11 +84,7 @@ class Histogram(Model):
         return Model(self.mesh, DataArray(cdf, name='Cumulative Density Function'))
 
     def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
-        from ..mesh.RectilinearMesh1D import RectilinearMesh1D
-        mesh = deepcopy(self.mesh)
-        mesh.set_axis(axis, RectilinearMesh1D(centres = DataArray(arange(distribution.ndim), name='class')))
-
-        return Model(mesh, self.mesh._compute_probability(distribution, self.pdf.values, log, log_probability, axis, **kwargs))
+        return self.mesh._compute_probability(distribution, self.pdf.values, log, log_probability, axis, **kwargs)
 
     def credible_intervals(self, percent=90.0, axis=0):
         """Gets the median and the credible intervals for the specified axis.
@@ -458,6 +454,7 @@ class Histogram(Model):
 
     def plotCredibleIntervals(self, percent=[95.0], axis=0, **kwargs):
 
+        percent = atleast_1d(percent)
         for p in percent:
             med, low, high = self.credible_intervals(percent=p, axis=axis)
 

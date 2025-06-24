@@ -81,6 +81,9 @@ class RectilinearMesh2D(Mesh):
         The 2D mesh.
 
     """
+    x_axis = 0
+    y_axis = 1
+
     def __init__(self, x=None, y=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
@@ -90,11 +93,9 @@ class RectilinearMesh2D(Mesh):
         self.x = kwargs if x is None else x
         self.y = kwargs if y is None else y
 
-        # if self.x._relative_to is not None:
-        #     assert any([s == self.shape[1] for s in self.x.relative_to.shape]), "x axis relative to must have shape {}".format(self.shape[1])
+        self.check_x_relative_to()
+        self.check_y_relative_to()
 
-        # if self.y._relative_to is not None:
-        #     assert any([s == self.shape[0] for s in self.y.relative_to.shape]), "y axis relative to must have shape {}".format(self.shape[0])
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
@@ -124,6 +125,17 @@ class RectilinearMesh2D(Mesh):
 
         out = self.axis(1-axis)[slic[1-axis]]
         return out
+
+    def check_x_relative_to(self):
+        if self.x.relative_to is not None:
+            if ndim(self.x.relative_to) == 1 and self.x.relative_to.size > 1:
+                assert self.x.relative_to.size == self.y.size, ValueError(f"1D relative_to on x needs size {self.y.size}")
+
+    def check_y_relative_to(self):
+        if self.y.relative_to is not None:
+            if ndim(self.y.relative_to) == 1 and self.y.relative_to.size > 1:
+                assert self.y.relative_to.size == self.x.size, ValueError(f"1D relative_to on y needs size {self.x.size}")
+
 
     @property
     def addressof(self):
@@ -251,10 +263,9 @@ class RectilinearMesh2D(Mesh):
                         edges=values.get('x_edges'),
                         log=values.get('x_log'),
                         relative_to=values.get('x_relative_to'),
-                        dimension=0)
+                        dimension=self.x_axis)
 
         assert isinstance(values, RectilinearMesh1D), TypeError('x must be a RectilinearMesh1D')
-        assert values.dimension == 0
         self._x = values
 
     @property
@@ -270,7 +281,7 @@ class RectilinearMesh2D(Mesh):
                         edges=values.get('y_edges'),
                         log=values.get('y_log'),
                         relative_to=values.get('y_relative_to'),
-                        dimension=1)
+                        dimension=self.y_axis)
         assert isinstance(values, RectilinearMesh1D), TypeError('y must be a RectilinearMesh1D')
         self._y = values
 
@@ -317,16 +328,12 @@ class RectilinearMesh2D(Mesh):
 
         ax = self.other_axis(axis)
 
-        a = [x for x in (0, 1) if not x == axis]
-        b = [x for x in (0, 1) if x == axis]
-
         shp = list(self.shape)
 
-        n = distribution.ndim
-
+        n_dim = distribution.ndim
         if distribution.multivariate:
-            n = 1
-        shp[axis] = n
+            n_dim = 1
+        shp[axis] = n_dim
         probability = zeros(shp)
 
         track = kwargs.pop('track', True)
@@ -344,21 +351,40 @@ class RectilinearMesh2D(Mesh):
             probability[j] = dot(p, pdf[j])
 
         # Normalize probabilities along the dims of the distribution
-        if n > 1:
+        if n_dim > 1:
             probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
         mesh = deepcopy(self)
-        if n > 1:
-            mesh.set_axis(axis, RectilinearMesh1D(centres=DataArray(r_[0.0, 1.0, 2.0], name='component')))
+        if n_dim > 1:
+            mesh.set_axis(axis, RectilinearMesh1D(centres=DataArray(np.arange(n_dim), name='component')))
         else:
             mesh = mesh.remove_axis(axis)
 
         from ..model.Model import Model
-        return Model(mesh=mesh, values=DataArray(probability.T, name='Marginal Probability'))
+        return Model(mesh=mesh, values=DataArray(squeeze(probability.T), name='Marginal Probability'))
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
         return RectilinearMesh2D(x=self.x, y=self.y)
+
+    def add_axis(self, axis, ax=None, **kwargs):
+        from .RectilinearMesh3D import RectilinearMesh3D
+
+        assert 0 <= axis <= 2, ValueError("Invalid axis 0 <= axis <= 2")
+
+        if ax is None:
+            ax = RectilinearMesh1D(**kwargs)
+
+        match axis:
+            case 0:
+                self.x.dimension += 1
+                self.y.dimension += 1
+                return RectilinearMesh3D(x=ax, y=self.x, z=self.y)
+            case 1:
+                self.y.dimension += 1
+                return RectilinearMesh3D(x=self.x, y=ax, z=self.y)
+            case 2:
+                return RectilinearMesh3D(x=self.x, y=self.y, z=ax)
 
     def edges(self, axis):
         """ Gets the cell edges in the given dimension """
@@ -735,7 +761,7 @@ class RectilinearMesh2D(Mesh):
 
         assert (size(x) == size(y)), ValueError("x and y must have the same size")
         if trim:
-            flag = self.x.inBounds(x) & self.y.inBounds(y)
+            flag = self.x.in_bounds(x) & self.y.in_bounds(y)
             i = where(flag)[0]
             out = empty([2, i.size], dtype=int32)
             out[0, :] = self.x.cellIndex(x[i])

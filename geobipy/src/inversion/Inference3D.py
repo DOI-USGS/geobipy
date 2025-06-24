@@ -141,16 +141,16 @@ class Inference3D(myObject):
 
     def _set_inference2d(self, mode='r+', world=None):
         lines = []
-        lineNumber = empty(self.nLines)
+        line_number = empty(self.nLines)
 
         for i, file in enumerate(self.h5files):
             LR = Inference2D()
             LR.open(filename=file, mode=mode, world=world)
             lines.append(LR)
-            lineNumber[i] = LR.line_number
+            line_number[i] = LR.line_number
 
         self.lines = lines
-        self.lineNumber = lineNumber
+        self.line_number = line_number
 
     @property
     def data(self):
@@ -317,7 +317,7 @@ class Inference3D(myObject):
         self.print('Files are being created for data files {} and system files {}'.format(kwargs['data_filename'], kwargs['system_filename']))
 
         # No need to create and close the files like in parallel, so create and keep them open
-        for line in self.lineNumber:
+        for line in self.line_number:
 
             subset = self.data.line(line)
 
@@ -381,7 +381,7 @@ class Inference3D(myObject):
 
     @cached_property
     def line_number(self):
-        return unique(hstack([line.data.lineNumber for line in self.lines]))
+        return unique(self.data.line_number)
 
     @property
     def nLines(self):
@@ -449,8 +449,8 @@ class Inference3D(myObject):
 
                 tmp = (self.data.fiducial == fiducial)
 
-                if unique(self.data.lineNumber).size > 1:
-                    tmp = tmp & (self.data.lineNumber == line_number)
+                if unique(self.data.line_number).size > 1:
+                    tmp = tmp & (self.data.line_number == line_number)
 
                 index = squeeze(argwhere(tmp))
 
@@ -465,13 +465,16 @@ class Inference3D(myObject):
             datapoint = self.data._read_record(record = i)
 
             # Pass through the line results file object if a parallel file system is in use.
-            iLine = self.lineNumber.searchsorted(datapoint.lineNumber)[0]
+            iLine = self.line_number.searchsorted(datapoint.line_number)[0]
 
             inference = Inference1D(prng=self.prng, **options)
 
             inference.initialize(datapoint)
 
-            inference.infer(hdf_file_handle=self.lines[iLine].hdf_file)
+            file_handle = None
+            if options['save_hdf5']:
+                file_handle = self.lines[iLine].hdf_file
+            inference.infer(hdf_file_handle=file_handle)
 
             e = time.time() - t0
             elapsed = str(timedelta(seconds=e))
@@ -572,7 +575,7 @@ class Inference3D(myObject):
         # Import here so serial code still works...
         from ..base import MPI as myMPI
 
-        lineNumber = self.lineNumber
+        line_number = self.line_number
         Inference2D = self._lines
         world = self.world
 
@@ -594,7 +597,7 @@ class Inference3D(myObject):
             # paras.check(datapoint)
 
             # Pass through the line results file object if a parallel file system is in use.
-            iLine = lineNumber.searchsorted(datapoint.lineNumber)[0]
+            iLine = line_number.searchsorted(datapoint.line_number)[0]
 
             inference = Inference1D(prng=self.prng, world=self.world, **options)
             inference.initialize(datapoint)
@@ -602,7 +605,7 @@ class Inference3D(myObject):
             failed = inference.infer(hdf_file_handle=self._lines[iLine].hdf_file)
 
             if failed and inference.datapoint.n_active_channels > 0:
-                myMPI.print(f"datapoint --line={datapoint.lineNumber.item()} --fiducial={datapoint.fiducial.item()} failed to converge")
+                myMPI.print(f"datapoint --line={datapoint.line_number.item()} --fiducial={datapoint.fiducial.item()} failed to converge")
 
             # Ping the head rank to request a new index
             world.send('requesting', dest=0)
@@ -1232,12 +1235,12 @@ class Inference3D(myObject):
     def line_index(self, line_number=None, fiducial=None, index=None):
         """Get the line index """
         tmp = sum([not x is None for x in [line_number, fiducial, index]])
-        assert tmp == 1, Exception("Please specify one argument, lineNumber, fiducial, or index")
+        assert tmp == 1, Exception("Please specify one argument, line_number, fiducial, or index")
 
         index = atleast_1d(index)
 
         if line_number is not None:
-            assert line_number in self.line_number, ValueError("line {} not found in data set".format(lineNumber))
+            assert line_number in self.line_number, ValueError("line {} not found in data set".format(line_number))
             return squeeze(where(self.line_number == line_number)[0])
 
         if fiducial is not None:
@@ -1550,7 +1553,7 @@ class Inference3D(myObject):
 
     #         counter += 1
     #         if counter == nUpdate:
-    #             print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.lineNumber[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+    #             print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.line_number[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
     #             t0 = MPI.Wtime()
     #             counter = 0
 
@@ -2000,7 +2003,7 @@ class Inference3D(myObject):
         return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
 
     def plot_cross_section(self, line_number, values, **kwargs):
-        line_index = self.lineNumber.searchsorted(line_number)
+        line_index = self.line_number.searchsorted(line_number)
         indices = self.lineIndices[line_index]
 
         return self.lines[line_index].plot_cross_section(values=values[indices, :], **kwargs)

@@ -6,6 +6,7 @@ import pathlib
 import argparse
 import sys
 import shutil
+from pprint import pprint
 from datetime import timedelta
 from numpy import int32
 from numpy.random import Generator
@@ -79,7 +80,7 @@ def checkCommandArguments():
     Parser = argparse.ArgumentParser(description="GeoBIPy", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     Parser.add_argument('options_file', help='User options file')
     Parser.add_argument('output_directory', help='Output directory for results')
-    # Parser.add_argument('--skip_hdf5', dest='skip_hdf5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
+    Parser.add_argument('--skip_hdf5', dest='skip_hdf5', default=False, help='Skip the creation of the HDF5 files.  Only do this if you know they have been created.')
     Parser.add_argument('--seed', dest='seed', default=None, help='Specify a seed file to fix the random number generator.')
     Parser.add_argument('--jump', dest='jump', default=None, type=int, help='Specify a number to jump the PRNG by. Only used in serial mode and for debugging purposes.')
     Parser.add_argument('--index', dest='index', type=int, default=None, help='Invert this data point only. Only used in serial mode.')
@@ -162,7 +163,8 @@ def serial_geobipy(input_file, output_directory, **kwargs):
 
     inference3d = Inference3D(data=data, prng=prng, debug=kwargs.get('debug', False))
 
-    inference3d.create_hdf5(directory=output_directory, **options)
+    if options.get('save_hdf5', True):
+        inference3d.create_hdf5(directory=output_directory, **options)
 
     inference3d.infer(index=index,
                       fiducial=fiducial,
@@ -240,4 +242,5 @@ def geobipy():
                        line_number=args.line_number,
                        debug=args.debug,
                        jump=args.jump,
-                       data_directory=args.data_directory)
+                       data_directory=args.data_directory,
+                       skip_hdf5=args.skip_hdf5)

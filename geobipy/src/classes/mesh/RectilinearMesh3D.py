@@ -2,7 +2,7 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import deepcopy
-from numpy import asarray, dot, empty, expand_dims, full, int32, integer, insert
+from numpy import argwhere, asarray, dot, empty, expand_dims, full, int32, integer, insert
 from numpy import max,  min, nan, ndim, outer, prod, ravel_multi_index
 from numpy import repeat, s_, size, squeeze, sum, swapaxes, take, unravel_index
 from numpy import where, zeros
@@ -68,6 +68,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
         The 2D mesh.
 
     """
+    x_axis = 0
+    y_axis = 1
+    z_axis = 2
 
     def __init__(self, x=None, y=None, z=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
@@ -79,14 +82,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
         self.y = kwargs if y is None else y
         self.z = kwargs if z is None else z
 
-        # if self.x._relative_to is not None:
-        #     assert all(self.x.relative_to.shape == self.shape[1:]), "x axis relative to must have shape {} but has shape {}".format(self.shape[1:], self.x.relative_to.shape)
-
-        # if self.y._relative_to is not None:
-        #     assert all(self.y.relative_to.shape == self.shape[::2]), "y axis relative to must have shape {} but has shape {}".format(self.shape[::2], self.y.relative_to.shape)
-
-        # if self.z._relative_to is not None:
-        #     assert all(self.z.relative_to.shape == self.shape[:2]), "z axis relative to must have shape {} but has shape {}".format(self.shape[:2], self.z.relative_to.shape)
+        self.check_x_relative_to()
+        self.check_y_relative_to()
+        self.check_z_relative_to()
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
@@ -97,7 +95,9 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         assert not len(axis) == 3, ValueError("slice cannot be a single cell")
 
-        match len(axis):
+        axis = squeeze(asarray(axis, dtype=int32))
+
+        match axis.size:
             case 0: # Returning a 3D mesh
                 return self.__slice_3d(slic)
             case 1: # Returning a 2D mesh
@@ -158,45 +158,26 @@ class RectilinearMesh3D(RectilinearMesh2D):
         return out
 
     def __slice_2d(self, slic, axis):
-
         a = [x for x in (0, 1, 2) if not x in axis]
-        b = [x for x in (0, 1, 2) if x in axis]
+        b = [x for x in (0, 1, 2) if x in axis][0]
 
-        x = deepcopy(self.axis(a[0]))
+        x = deepcopy(self.axis(a[0])) # X is always X or Y
         if x._relative_to is not None :
-            if (x._relative_to.size > 1) and (npall(x._relative_to > 0.0)):
-                if a[0] == 0:
-                    if b[0] == 1:
-                        axis = 0
-                    if b[0] == 2:
-                        axis = 1
-                elif a[0] == 1:
-                    if b[0] == 0:
-                        axis = 0
-                    if b[0] == 2:
-                        axis = 'OOPS'
+            if (x._relative_to.size > 1) and (npall(x._relative_to != 0.0)):
+                rt_dims = asarray([t for t in (0, 1, 2) if t != x.dimension])
+                axis = squeeze(argwhere(rt_dims == b))
                 if x.relative_to.ndim == 2:
-                    x.relative_to = take(x.relative_to, slic[b[0]], axis)
+                    x.relative_to = take(x.relative_to, slic[b], axis)
             else:
                 x.relative_to = None
 
-        y = deepcopy(self.axis(a[1]))
+        y = deepcopy(self.axis(a[1])) # Y is always Z or Y
         if y._relative_to is not None:
-            if (y._relative_to.size > 1) and (npall(y._relative_to > 0.0)):
-                if a[1] == 1:
-                    if b[0] == 0:
-                        axis = 0
-                    elif b[0] == 2:
-                        axis = 1
-                elif a[1] == 2:
-                    if b[0] == 0:
-                        axis = 0
-                    elif b[0] == 1:
-                        axis = 1
-
+            if (y._relative_to.size > 1) and (npall(y._relative_to != 0.0)):
+                rt_dims = asarray([t for t in (0, 1, 2) if t != y.dimension])
+                axis = squeeze(argwhere(rt_dims == b))
                 if y.relative_to.ndim == 2:
-                    y.relative_to = take(y.relative_to, slic[b[0]], axis)
-
+                    y.relative_to = take(y.relative_to, slic[b], axis)
             else:
                 y.relative_to = None
 
@@ -377,14 +358,26 @@ class RectilinearMesh3D(RectilinearMesh2D):
                         edges=values.get('z_edges'),
                         log=values.get('z_log'),
                         relative_to=values.get('z_relative_to'),
-                        dimension=2)
+                        dimension=self.z_axis)
 
         assert isinstance(values, RectilinearMesh1D), TypeError('z must be a RectilinearMesh1D')
         assert values.dimension == 2
         self._z = values
 
-        # if self.z._relative_to is not None:
-        #     assert all(self.z.relative_to.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
+    def check_x_relative_to(self):
+        if self.x.relative_to is not None:
+            if ndim(self.x.relative_to) == 2:
+                assert npall(self.x.relative_to.shape == self.shape[1:]), ValueError(f"2D relative_to on x has shape {self.x.relative_to.shape} but needs shape {self.shape[:2]}")
+
+    def check_y_relative_to(self):
+        if self.y.relative_to is not None:
+            if ndim(self.y.relative_to) == 2:
+                assert npall(self.y.relative_to.shape == self.shape[0::2]), ValueError(f"2D relative_to on y has shape {self.y.relative_to.shape} but needs size {self.shape[0::2]}")
+
+    def check_z_relative_to(self):
+        if self.y.relative_to is not None:
+            if ndim(self.z.relative_to) == 2:
+                assert npall(self.z.relative_to.shape == self.shape[:2]), ValueError(f"2D relative_to on z has shape {self.z.relative_to.shape} but needs size {self.shape[0::2]}")
 
     def other_axis(self, axis):
 
@@ -810,14 +803,17 @@ class RectilinearMesh3D(RectilinearMesh2D):
         kwargs['axis'] = axis
 
         if index is not None:
-            s = [s_[:] for i in range(self.ndim)]
-            s[axis] = index
+            slic = [s_[:] for i in range(self.ndim)]
+            slic[axis] = index
+            slic = tuple(slic)
 
-            tmp = self[s]
+            tmp = self[slic]
+            kwargs['values'] = values[slic]
 
             return tmp.pcolor(**kwargs)
 
         mesh = self.remove_axis(axis)
+
 
         x_mask = kwargs.get('x_mask', None); y_mask = kwargs.get('y_mask', None)
         mask = (x_mask is not None) or (y_mask is not None)

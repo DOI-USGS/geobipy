@@ -93,7 +93,7 @@ class Mixture(myObject):
                 fig = plt.gcf()
                 ax = plt.gca()
 
-        norm = kwargs.pop('norm', np.inf)
+        norm = kwargs.pop('norm', np.inf) 
         epsilon = kwargs.pop('epsilon', 0.05)
         mu = kwargs.pop('mu', 0.1)
         log = kwargs.pop('log', None)

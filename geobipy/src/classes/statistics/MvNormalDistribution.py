@@ -186,8 +186,6 @@ class MvNormal(baseDistribution):
         bins = self.bins()
         t = r"$\tilde{N}(\mu="+str(self.mean)+r", \sigma^{2}="+str(self.variance)+")$"
 
-        print(bins)
-
         p = self.probability(bins, log=log)
 
         cP.plot(bins, p, label=t, **kwargs)
@@ -199,54 +197,21 @@ class MvNormal(baseDistribution):
             d = Normal(mean=self._mean[axis], variance=self.variance[axis, axis])
             return d.probability(x, log)
 
-        N = size(x)
-        nD = size(self.mean)
+        import numpy as np
+        N = size(x); nsd = np.ndim(x)
+        nD = self.ndim
 
-        if N != nD:
-            probability = empty((nD, *x.shape))
-            for i in range(nD):
-                d = Normal(mean=self._mean[i], variance=self.variance[i, i])
-
-                probability[i, :] = d.probability(x, log)
-            return probability
-
-        if log:
-            # assert (N == nD), TypeError(
-            #     'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
-
-            mean = self._mean
-            if (nD == 1):
-                mean = repeat(self._mean, N)
-
-            dv = 0.5 * prod(slogdet(self.variance))
-            # subtract the mean from the samples
-            xMu = x - mean
-            # Start computing the exponent term
-            # e^(-0.5*(x-mu)'*inv(cov)*(x-mu))                        (1)
-            # Compute the multiplication on the right of equation 1
-            # Probability Density Function
-            return -(0.5 * N) * nplog(2.0 * pi) - dv - 0.5 * dot(xMu, dot(self.precision, xMu))
-
-        else:
-
+        if nsd != nD:
             if N != nD:
-                probability = empty((nD, *x.shape))
-                for i in range(nD):
-                    probability[i, :] = self.probability(x, log, axis=i)
-                return probability
+                x = np.repeat(x[:, np.newaxis], nD, 1)
 
+        mean = self._mean
+        if (nD == 1):
+            mean = repeat(self._mean, N)
 
-            # assert (N == nD), TypeError(
-            #     'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
-            # For a diagonal matrix, the determinant is the product of the diagonal
-            # entries
-            # subtract the mean from the samples.
-            xMu = x - self._mean
-            # Take the inverse of the variance
-            expo = exp(-0.5 * dot(xMu, dot(self.precision, xMu)))
-            # Probability Density Function
-            prob = (1.0 / sqrt(((2.0 * pi)**N) * cf.Det(self.variance))) * expo
-            return prob
+        pdf = multivariate_normal.logpdf if log else multivariate_normal.pdf
+
+        return DataArray(pdf(x, mean=mean, cov=self.variance), name='Probability Density')
 
     @property
     def summary(self):

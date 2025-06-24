@@ -26,6 +26,12 @@ class Loop_pair(Point):
         self.receiver = receiver
 
     @property
+    def priors(self):
+        out = super().priors
+
+        return {k:v.prior for k,v in zip(['x', 'y', 'z'], (self.x, self.y, self.z)) if v.hasPrior}
+
+    @property
     def x_offset(self):
         return self._x
 
@@ -175,6 +181,7 @@ class Loop_pair(Point):
         position_kwargs = {k:receiver_kwargs.pop(k, False) for k in list(receiver_kwargs.keys()) if any(x in k for x in ('_x', 'x_', '_y', 'y_', '_z', 'z_'))}
         position_kwargs['prng'] = kwargs.get('prng')
         super().set_priors(**position_kwargs)
+
         self.receiver.set_priors(**receiver_kwargs)
 
     def set_proposals(self, **kwargs):
@@ -216,7 +223,7 @@ class Loop_pair(Point):
     def _init_posterior_plots(self, gs=None):
 
         if not self.transmitter.hasPosterior and not super().hasPosterior and not self.receiver.hasPosterior:
-            return []
+            return {}
 
         if gs is None:
             gs = plt.figure()
@@ -225,19 +232,19 @@ class Loop_pair(Point):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         splt = gs.subgridspec(1, self.transmitter.hasPosterior + super().hasPosterior + self.receiver.hasPosterior, wspace=0.3)
-        ax = []
+        ax = {}
         i = 0
         if self.transmitter.hasPosterior:
-            ax.append(self.transmitter._init_posterior_plots(splt[i]))
+            ax['transmitter'] = self.transmitter._init_posterior_plots(splt[i])
             i += 1
 
         if super().hasPosterior:
-            ax.append(super()._init_posterior_plots(splt[i]))
+            ax['offset'] = super()._init_posterior_plots(splt[i])
             i += 1
 
         # Reciever axes
         if self.receiver.hasPosterior:
-            ax.append(self.receiver._init_posterior_plots(splt[i]))
+            ax['receiver'] = self.receiver._init_posterior_plots(splt[i])
 
         return ax
 
@@ -250,7 +257,7 @@ class Loop_pair(Point):
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
         n_posteriors = self.transmitter.hasPosterior + super().hasPosterior + self.receiver.hasPosterior
@@ -262,33 +269,30 @@ class Loop_pair(Point):
 
         overlay = kwargs.pop('overlay', None)
 
-        i = 0
         if self.transmitter.hasPosterior:
-            self.transmitter.plot_posteriors(axes = axes[i], **transmitter_kwargs)
-            i += 1
+            self.transmitter.plot_posteriors(axes = axes['transmitter'], **transmitter_kwargs)
 
         if super().hasPosterior:
-            super().plot_posteriors(axes = axes[i], **offset_kwargs)
-            i += 1
+            super().plot_posteriors(axes = axes['offset'], **offset_kwargs)
 
         if self.receiver.hasPosterior:
-            self.receiver.plot_posteriors(axes = axes[i], **receiver_kwargs)
+            self.receiver.plot_posteriors(axes = axes['receiver'], **receiver_kwargs)
 
         if overlay is not None:
             self.overlay_on_posteriors(overlay, axes, **kwargs)
 
     def overlay_on_posteriors(self, overlay, axes, **kwargs):
-        i = 0
+
+        assert isinstance(overlay, Loop_pair), TypeError("overlay must have type Loop_pair")
+
         if self.transmitter.hasPosterior:
-            self.transmitter.overlay_on_posteriors(overlay=overlay.transmitter, axes = axes[i], **kwargs)
-            i += 1
+            self.transmitter.overlay_on_posteriors(overlay=overlay.transmitter, axes = axes['transmitter'], **kwargs)
 
         if super().hasPosterior:
-            super().overlay_on_posteriors(overlay=overlay, axes = axes[i], **kwargs)
-            i += 1
+            super().overlay_on_posteriors(overlay=overlay, axes = axes['offset'], **kwargs)
 
         if self.receiver.hasPosterior:
-            self.receiver.overlay_on_posteriors(overlay=overlay.receiver, axes = axes[i], **kwargs)
+            self.receiver.overlay_on_posteriors(overlay=overlay.receiver, axes = axes['receiver'], **kwargs)
 
     @property
     def probability(self):

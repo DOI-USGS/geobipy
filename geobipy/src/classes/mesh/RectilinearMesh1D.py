@@ -128,8 +128,8 @@ class RectilinearMesh1D(Mesh):
     def __getitem__(self, slic):
         """Slice into the class. """
 
-        if shape(slic) == ():#, ValueError("slic must have one dimension.")
-            return deepcopy(self)
+        # if shape(slic) == ():#, ValueError("slic must have one dimension.")
+        #     return deepcopy(self)
 
         s2stop = None
         if isinstance(slic, slice):
@@ -142,6 +142,7 @@ class RectilinearMesh1D(Mesh):
         tmp = self.edges[slic]
         assert tmp.size > 1, ValueError("slic must contain at least one cell.")
         out = type(self)(edges=tmp)
+
         out.log = self.log
         if self._relative_to is not None:
             out._relative_to = deepcopy(self._relative_to)
@@ -329,6 +330,10 @@ class RectilinearMesh1D(Mesh):
             self._log = value
 
     @property
+    def log_scale(self):
+        return 'linear' if self.log is None else 'log'
+
+    @property
     def max_cells(self):
         return self._max_cells
 
@@ -431,6 +436,10 @@ class RectilinearMesh1D(Mesh):
         self._relative_to = StatArray(value)
 
     @property
+    def size(self):
+        return self.nCells.item()
+
+    @property
     def shape(self):
         return (self.nCells.item(), )
 
@@ -448,6 +457,19 @@ class RectilinearMesh1D(Mesh):
 
         # self._widths = values
         self.edges =  StatArray(hstack([0.0, cumsum(values)]), utilities.getName(values), utilities.getUnits(values))
+
+    def add_axis(self, axis, ax=None, **kwargs):
+        from .RectilinearMesh2D import RectilinearMesh2D
+
+        assert 0 <= axis <= 1, ValueError("Invalid axis 0 <= axis <= 1")
+
+        if ax is None:
+            ax = RectilinearMesh1D(**kwargs)
+        match axis:
+            case 0:
+                return RectilinearMesh2D(x=self, y=ax)
+            case 1:
+                return RectilinearMesh2D(x=ax, y=self)
 
     def axis(self, axis):
         return self
@@ -571,23 +593,20 @@ class RectilinearMesh1D(Mesh):
         """
 
         edges = self.edges
-        values = atleast_1d(values)
-
-        # Remove values that are out of bounds
-        if trim:
-            values = values[(values >= edges[0]) &
-                            (values < edges[-1])]
-
-        reversed = False
-        if self.edges[-1] < self.edges[0]:
-            reversed = True
-            edges = self.edges[::-1]
-
 
         values, dum = utilities._log(atleast_1d(values).flatten(), self.log)
 
         if self.relative_to.size == 1:
             values = values - self.relative_to
+
+        # Remove values that are out of bounds
+        if trim:
+            values = values[(values >= edges[0]) & (values < edges[-1])]
+
+        reversed = False
+        if self.edges[-1] < self.edges[0]:
+            reversed = True
+            edges = self.edges[::-1]
 
         # Get the bin indices for all values
         iBin = atleast_1d(edges.searchsorted(values, side='right') - 1)
@@ -603,7 +622,7 @@ class RectilinearMesh1D(Mesh):
         else:
             if not trim:
                 iBin[values < edges[0]] = -1
-                iBin[values >= edges[-1]] = self.nCells.item()
+                iBin[values >= edges[-1]] = self.nCells.item()-1
 
         return squeeze(iBin)
 
@@ -806,7 +825,8 @@ class RectilinearMesh1D(Mesh):
 
         """
         values, _ = utilities._log(values, self.log)
-        return (values >= self._edges[0]) & (values < self._edges[-1])
+        edges = self.edges_absolute
+        return (values >= edges.min()) & (values < edges.max())
 
     def insert_edge(self, value, values=None):
         """Insert a new edge.
@@ -1189,15 +1209,11 @@ class RectilinearMesh1D(Mesh):
 
         """
         reciprocateX = kwargs.pop("reciprocateX", False)
-        kwargs['transpose'] = kwargs.get('transpose', True)
 
         # Repeat the last entry since we are plotting against edges
         par = values.append(values[-1])
         if (reciprocateX):
             par = 1.0 / par
-
-        if self.log is not None:
-            kwargs['yscale'] = 'log'
 
         kwargs.pop('line', None)
 
@@ -1290,37 +1306,38 @@ class RectilinearMesh1D(Mesh):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         if values is None:
-            splt = gs.subgridspec(2, 1)#, height_ratios=[1, 4])
-            ax = [plt.subplot(splt[0, 0]), plt.subplot(splt[1, 0], sharey=sharey)]
+            splt = gs.subgridspec(2, 1)
+            ax = {'ncells':plt.subplot(splt[0, 0]),
+                  'edges': plt.subplot(splt[1, 0], sharey=sharey)}
         else:
             splt = gs.subgridspec(2, 1, height_ratios=[1, 4])
-            ax = [plt.subplot(splt[0, :])] # ncells
+            ax = {'ncells': plt.subplot(splt[0, :])}
 
             splt2 = splt[1, :].subgridspec(1, 2, width_ratios=[2, 1])
-            ax2 = plt.subplot(splt2[1], sharey=sharey) # edges
+            ax['edges'] = plt.subplot(splt2[1], sharey=sharey)
             if sharey is None:
-                sharey = ax2
-            ax3 = plt.subplot(splt2[0], sharex=sharex, sharey=sharey) # values
-            ax += [ax2, ax3]
+                sharey = ax['edges']
+            ax['values'] = plt.subplot(splt2[0], sharex=sharex, sharey=sharey)
 
-        for a in ax:
+        for k, a in ax.items():
             cp.pretty(a)
 
         return ax
 
-    def plot_posteriors(self, axes=None, values=None, values_kwargs={}, **kwargs):
+    def plot_posteriors(self, axes=None, values=None, **kwargs):
         # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes, values=values)
 
         assert len(axes) >= 2, ValueError("axes must have length >= 2")
 
         ncells_kwargs = kwargs.get('ncells_kwargs', {})
         edges_kwargs = kwargs.get('edges_kwargs', {})
+        values_kwargs = kwargs.get('values_kwargs',{})
 
         overlay = kwargs.pop('overlay', None)
         if overlay is not None:
@@ -1331,27 +1348,26 @@ class RectilinearMesh1D(Mesh):
             edges_kwargs['overlay'] = tmp.edges
 
         if self.nCells.hasPosterior:
-            axes[0].cla()
-            self.nCells.plot_posteriors(ax = axes[0], **ncells_kwargs)
+            ax = axes['ncells']; ax.cla()
+            self.nCells.plot_posteriors(ax = ax, **ncells_kwargs)
 
         if self.edges.hasPosterior:
-            axes[1].cla()
-            self.edges.plot_posteriors(ax = axes[1], **edges_kwargs)
+            ax = axes['edges']; ax.cla()
+            self.edges.plot_posteriors(ax = ax, **edges_kwargs)
 
         if values is not None:
-            assert len(axes) == 3, ValueError("axes must have length == 3")
-            values.plot_posteriors(ax=axes[2], **values_kwargs)
+            ax = axes['values']
+            values.plot_posteriors(ax=ax, **values_kwargs)
 
             if overlay is not None:
-                overlay.plot(ax=axes[2], xscale=values_kwargs.get('xscale', 'linear'),
-                        flipY=False,
+                overlay.plot(ax=ax, xscale=values_kwargs.get('xscale', 'linear'),
                         reciprocateX=values_kwargs.get('reciprocateX', None),
                         labels=False,
                         linewidth=1,
                         color=cp.wellSeparated[3])
 
             doi = values.posterior.opacity_level(percent=90.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
-            axes[2].axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
+            ax.axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
         return axes
 
     @property
@@ -1542,6 +1558,9 @@ class RectilinearMesh1D(Mesh):
 
         self.set_n_cells_prior(n_cells_prior)
         self.set_edges_prior(edges_prior)
+
+    def set_axis(self, axis, value):
+            self = value
 
     def set_n_cells_prior(self, prior):
         if prior is not None:

@@ -36,7 +36,7 @@ class TdemDataPoint(EmDataPoint):
     """ Initialize a Time domain EMData Point
 
 
-    TdemDataPoint(x, y, z, elevation, data, std, system, transmitter_loop, receiver_loop, lineNumber, fiducial)
+    TdemDataPoint(x, y, z, elevation, data, std, system, transmitter_loop, receiver_loop, line_number, fiducial)
 
     Parameters
     ----------
@@ -60,7 +60,7 @@ class TdemDataPoint(EmDataPoint):
         Transmitter loop class
     receiver_loop : EmLoop, optional
         Receiver loop class
-    lineNumber : float, optional
+    line_number : float, optional
         The line number associated with the datapoint
     fiducial : float, optional
         The fiducial associated with the datapoint
@@ -86,15 +86,15 @@ class TdemDataPoint(EmDataPoint):
                  predicted_primary_field=None, predicted_secondary_field=None,
                  system=None,
                  transmitter_loop=None, receiver_loop=None,
-                 lineNumber=0.0, fiducial=0.0):
+                 line_number=0.0, fiducial=0.0):
 
         self.system = system
 
         super().__init__(x=x, y=y, z=z, elevation=elevation,
                          components=self.components,
                          channels_per_system=self.nTimes,
-                         data=None, std=std, predictedData=None,
-                         lineNumber=lineNumber, fiducial=fiducial)
+                         data=None, std=std, predicted_data=None,
+                         line_number=line_number, fiducial=fiducial)
 
         self.additive_error = additive_error
         self.relative_error = relative_error
@@ -118,10 +118,6 @@ class TdemDataPoint(EmDataPoint):
             values = self.nSystems
         else:
             assert size(values) == self.nSystems, ValueError("additive_error must be a list of size equal to the number of systems {}".format(self.nSystems))
-            # assert (npall(asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
-            # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
-            #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-
         self._additive_error = StatArray(values, r'$\epsilon_{Additive}$', self.units)
 
     @property
@@ -166,7 +162,7 @@ class TdemDataPoint(EmDataPoint):
 
     @EmDataPoint.data.getter
     def data(self):
-        self._data = self.secondary_field
+        self._data[:] = self.secondary_field
         return self._data
 
     @property
@@ -178,10 +174,10 @@ class TdemDataPoint(EmDataPoint):
         assert isinstance(value, Loop_pair), TypeError("loop_pair must be a Loop_pair")
         self._loop_pair = value
 
-    @EmDataPoint.predictedData.getter
-    def predictedData(self):
-        self._predictedData = self._predicted_secondary_field
-        return self._predictedData
+    @EmDataPoint.predicted_data.getter
+    def predicted_data(self):
+        self._predicted_data = self._predicted_secondary_field
+        return self._predicted_data
 
     @property
     def predicted_primary_field(self):
@@ -375,8 +371,8 @@ class TdemDataPoint(EmDataPoint):
 
 
         # Update the variance of the predicted data prior
-        if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
+        if self.predicted_data.hasPrior:
+            self.predicted_data.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
 
         return self._std
 
@@ -429,7 +425,7 @@ class TdemDataPoint(EmDataPoint):
         for fName in dataFileName:
             with open(fName, 'r') as f:
                 # Header line
-                dtype, x, y, z, elevation, fiducial, lineNumber, current = self.__aarhus_header(
+                dtype, x, y, z, elevation, fiducial, line_number, current = self.__aarhus_header(
                     f)
                 # Source type
                 source, polarization = self.__aarhus_source(f)
@@ -465,12 +461,12 @@ class TdemDataPoint(EmDataPoint):
                                          offTimeFilters=offTimeFilters))
 
         TdemDataPoint.__init__(self, x, y, 0.0, elevation, data, std,
-                               system=system, lineNumber=lineNumber, fiducial=fiducial)
+                               system=system, line_number=line_number, fiducial=fiducial)
 
     def __aarhus_header(self, f):
         line = f.readline().strip().split(';')
         dtype = x = y = z = elevation = current = None
-        fiducial = lineNumber = 0.0
+        fiducial = line_number = 0.0
         for item in line:
             item = item.split("=")
             tag = item[0].lower()
@@ -486,15 +482,15 @@ class TdemDataPoint(EmDataPoint):
                 elevation = float64(value)
             elif tag == "stationnumber":
                 fiducial = float64(value)
-            elif tag == "linenumber":
-                lineNumber = float64(value)
+            elif tag == "line_number":
+                line_number = float64(value)
             elif tag == "current":
                 current = float64(value)
 
         assert not any([x, y, elevation, current] is None), ValueError(
             "Aarhus file header line must contain 'XUTM', 'YUTM', 'Elevation', 'current'")
 
-        return dtype, x, y, z, elevation, fiducial, lineNumber, current
+        return dtype, x, y, z, elevation, fiducial, line_number, current
 
     def __aarhus_source(self, f):
         line = f.readline().strip().split()
@@ -699,8 +695,6 @@ class TdemDataPoint(EmDataPoint):
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        n_plots = sum([self.relative_error.hasPosterior, self.additive_error.hasPosterior, self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior])
-
         n_rows = 1
         if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) or any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior]):
             n_rows = 2
@@ -716,15 +710,16 @@ class TdemDataPoint(EmDataPoint):
 
         splt_top = splt[0].subgridspec(1, n_cols, width_ratios=width_ratios)
 
-        ax = []
+        ax = {}
         # Data axis
-        ax.append(subplot(splt_top[-1]))
+        ax['data'] = subplot(splt_top[-1])
 
         if self.relative_error.hasPosterior:
             # Relative error axes
-            ax.append(self.relative_error._init_posterior_plots(splt_top[0]))
+            ax['relative_error'] = self.relative_error._init_posterior_plots(splt_top[0])
         else:
-            ax.append(self.additive_error._init_posterior_plots(splt_top[0]))
+            if self.additive_error.hasPosterior:
+                ax['additive_error'] = self.additive_error._init_posterior_plots(splt_top[0])
 
         ## Bottom row of plot
         n_cols = any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior])
@@ -749,12 +744,12 @@ class TdemDataPoint(EmDataPoint):
                     for j in range(self.nSystems):
                         others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
                         tmp[1].get_shared_y_axes().joined(tmp[1], *tmp[others])
-                ax.append(tmp)
+                ax['additive_error'] = tmp
                 i += 1
 
             if any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior]):
                 # Loop pair
-                ax.append(self.loop_pair._init_posterior_plots(splt_bottom[i]))
+                ax['loop_pair'] = self.loop_pair._init_posterior_plots(splt_bottom[i])
 
         return ax
 
@@ -764,64 +759,49 @@ class TdemDataPoint(EmDataPoint):
         if axes is None:
             axes = kwargs.pop('fig', gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
-        # assert len(axes) == 4, ValueError("Must have length 4 list of axes for the posteriors. self.init_posterior_plots can generate them")
-
-        # point_kwargs = kwargs.pop('point_kwargs', {})
         data_kwargs = kwargs.pop('data_kwargs', {})
         rel_error_kwargs = kwargs.pop('rel_error_kwargs', {})
         add_error_kwargs = kwargs.pop('add_error_kwargs', {})
 
         overlay = kwargs.pop('overlay', None)
-        # if not overlay is None:
-        #         # point_kwargs['overlay'] = overlay
-        #         rel_error_kwargs['overlay'] = overlay.relative_error
-        #         # add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
-        #         # add_error_kwargs['axis'] = 1
-        #         add_error_kwargs['overlay'] = overlay.additive_error
 
-
-        axes[0].clear()
-        if self.predictedData.hasPosterior:
-            self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
-        self.plot(ax=axes[0], **data_kwargs)
+        ax = axes['data']; ax.cla()
+        if self.predicted_data.hasPosterior:
+            self.predicted_data.plot_posteriors(ax = ax, colorbar=False, **data_kwargs)
+        self.plot(ax=ax, **data_kwargs)
 
         c = cp.wellSeparated[0] if overlay is None else cp.wellSeparated[3]
-        self.plot_predicted(color=c, ax=axes[0], **data_kwargs)
+        self.plot_predicted(color=c, ax=ax, **data_kwargs)
 
-        i = 1
         if self.relative_error.hasPosterior:
-            self.relative_error.plot_posteriors(ax=axes[i], **rel_error_kwargs)
-            i += 1
+            self.relative_error.plot_posteriors(ax=axes['relative_error'], **rel_error_kwargs)
 
         if self.additive_error.hasPosterior:
             add_error_kwargs['colorbar'] = False
-            self.additive_error.plot_posteriors(ax=axes[i], **add_error_kwargs)
-            i += 1
+            self.additive_error.plot_posteriors(ax=axes['additive_error'], **add_error_kwargs)
 
         if any([x.hasPosterior for x in [self.transmitter, self.loop_pair, self.receiver]]):
-            self.loop_pair.plot_posteriors(axes = axes[i], **kwargs)
+            self.loop_pair.plot_posteriors(axes = axes['loop_pair'], **kwargs)
 
         if overlay is not None:
             self.overlay_on_posteriors(overlay, axes, **kwargs)
 
     def overlay_on_posteriors(self, overlay, axes, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
 
-        i = 1
+        assert isinstance(overlay, TdemDataPoint), TypeError("overlay must have type TdemDataPoint")
+
         if self.relative_error.hasPosterior:
-            self.relative_error.overlay_on_posteriors(overlay.relative_error, ax=axes[i], **rel_error_kwargs, **kwargs)
-            i += 1
+            self.relative_error.overlay_on_posteriors(overlay.relative_error, ax=axes['relative_error'], **rel_error_kwargs, **kwargs)
 
         if self.additive_error.hasPosterior:
             add_error_kwargs['colorbar'] = False
-            self.additive_error.overlay_on_posteriors(overlay.additive_error, ax=axes[i], **add_error_kwargs, **kwargs)
-            i += 1
+            self.additive_error.overlay_on_posteriors(overlay.additive_error, ax=axes['additive_error'], **add_error_kwargs, **kwargs)
 
-        if any([x.hasPosterior for x in [self.transmitter, self.loop_pair, self.receiver]]):
-            self.loop_pair.overlay_on_posteriors(overlay=overlay, axes = axes[i], **kwargs)
-
+        if self.loop_pair.hasPosterior:
+            self.loop_pair.overlay_on_posteriors(overlay=overlay.loop_pair, axes = axes['loop_pair'], **kwargs)
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):
@@ -903,7 +883,7 @@ class TdemDataPoint(EmDataPoint):
 
         if (labels):
             ax.set_xlabel('Time (s)')
-            ax.set_ylabel(cf.getNameUnits(self.predictedData))
+            ax.set_ylabel(cf.getNameUnits(self.predicted_data))
             ax.set_title(title)
 
         kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
@@ -922,12 +902,12 @@ class TdemDataPoint(EmDataPoint):
                 iS = self._component_indices(k, j)
 
                 if npall(self.data <= 0.0):
-                    active = (self.predictedData[iS] > 0.0)
+                    active = (self.predicted_data[iS] > 0.0)
 
                 else:
                     active = self.active[iS]
 
-                p = self.predictedData[iS][active]
+                p = self.predicted_data[iS][active]
                 p.plot(x=system_times[active], **kwargs)
 
         ax.set_xscale(xscale)
@@ -990,7 +970,6 @@ class TdemDataPoint(EmDataPoint):
 
         self.additive_error.proposal = proposal
 
-
     @property
     def summary(self):
         msg = super().summary + self.loop_pair.summary
@@ -1029,35 +1008,12 @@ class TdemDataPoint(EmDataPoint):
 
     def sensitivity(self, model, ix=None, model_changed=False):
         """ Compute the sensitivty matrix for the given model """
-
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
         self._sensitivity_matrix = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
         return self.sensitivity_matrix
 
     def fm_dlogc(self, model):
         values, J = ga_fm_dlogc(self, model)
-
-        # for i in range(self.nSystems):
-        #     fm = values[i]
-        #     iSys = self._systemIndices(i)
-        #     primary = []
-        #     secondary = []
-        #     if 'x' in self.components:
-        #         primary.append(fm.PX)
-        #         secondary.append(fm.SX)
-        #     if 'y' in self.components:
-        #         primary.append(fm.PY)
-        #         secondary.append(fm.SY)
-        #     if 'z' in self.components:
-        #         primary.append(-fm.PZ)
-        #         secondary.append(-fm.SZ)
-
-        #     self.predicted_secondary_field[iSys] = hstack(secondary)  # Store the necessary component
-
-        #     s = s_[i * self.n_components: (i * self.n_components) + self.n_components]
-
-        #     self.predicted_primary_field[s] = hstack(primary)
-
         self._sensitivity_matrix = DataArray(J, 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
 
     def _empymodForward(self, mod):
@@ -1122,7 +1078,7 @@ class TdemDataPoint(EmDataPoint):
 
     #     prob.pair(simPEG_survey)
 
-    #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
+    #     self._predicted_data[:] = -simPEG_survey.dpred(mod.par)
 
     def Isend(self, dest, world, **kwargs):
 
