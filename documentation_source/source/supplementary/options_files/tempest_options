@@ -56,16 +56,16 @@ solve_relative_error = True
 # Assign an initial percentage relative Error
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_relative_error = [0.001, 0.001]
+initial_relative_error = 0.001
 ## Relative Error Prior Details
 # Distribution('Uniform', min=[0.01, 0.01], max=[0.5, 0.5])
 # Minimum Relative Error
-minimum_relative_error = [0.0001, 0.0001]
+minimum_relative_error = 0.0001
 # Maximum Relative Error
-maximum_relative_error = [0.01, 0.01]
+maximum_relative_error = 0.05
 ## Proposal variance for the relative error
 # Distribution('Normal', mean=[0.0, 0.0], variance=[2.5e-7, 2.5e-7])
-relative_error_proposal_variance = [1e-6, 1e-6]
+relative_error_proposal_variance = 1e-6
 # -------------------------------------------------------
 # -------------------------------------------------------
 # Use the prior on the additive data errors
@@ -73,8 +73,7 @@ solve_additive_error = True
 # Assign an initial additive error level.
 # If the file contains no standard deviations, this will be used
 # to assign the initial data uncertainties.
-initial_additive_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
-                               0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
+initial_additive_error = np.r_[0.0136441 , 0.01401807, 0.00995895, 0.00632076, 0.00585013, 0.00541495, 0.00519146, 0.00480287, 0.00435161, 0.00415024, 0.00400544, 0.00380665, 0.00312555, 0.00247537, 0.00254764]
 # # Additive Error Prior Details
 # # Distribution('Uniform', min=1.0, max=3.0)
 # # Minimum Additive Error
@@ -84,13 +83,14 @@ initial_additive_error = np.r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742,
 # Proposal variance for the additive error
 # Distribution('Normal', mean=VALUE, variance=0.0025)
 additive_error_proposal_variance = 1e-6
+additive_error_multiplier_proposal_variance = 1e-6
 
 # Additive Error Prior Details
 # Distribution('Uniform', min=1.0, max=3.0)
 # Minimum Additive Error
-minimum_additive_error = np.r_[0.001, 0.001]
+minimum_additive_error = 0.001
 # Maximum Relative Error
-maximum_additive_error = np.r_[100.0, 100.0]
+maximum_additive_error = 100.0
 # -------------------------------------------------------
 # -------------------------------------------------------
 # Transmitter loop parameters.
