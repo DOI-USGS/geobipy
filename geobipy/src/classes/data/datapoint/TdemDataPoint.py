@@ -695,8 +695,6 @@ class TdemDataPoint(EmDataPoint):
         if isinstance(gs, Figure):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
-        n_plots = sum([self.relative_error.hasPosterior, self.additive_error.hasPosterior, self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior])
-
         n_rows = 1
         if (self.relative_error.hasPosterior & self.additive_error.hasPosterior) or any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior]):
             n_rows = 2
@@ -712,15 +710,16 @@ class TdemDataPoint(EmDataPoint):
 
         splt_top = splt[0].subgridspec(1, n_cols, width_ratios=width_ratios)
 
-        ax = []
+        ax = {}
         # Data axis
-        ax.append(subplot(splt_top[-1]))
+        ax['data'] = subplot(splt_top[-1])
 
         if self.relative_error.hasPosterior:
             # Relative error axes
-            ax.append(self.relative_error._init_posterior_plots(splt_top[0]))
+            ax['relative_error'] = self.relative_error._init_posterior_plots(splt_top[0])
         else:
-            ax.append(self.additive_error._init_posterior_plots(splt_top[0]))
+            if self.additive_error.hasPosterior:
+                ax['additive_error'] = self.additive_error._init_posterior_plots(splt_top[0])
 
         ## Bottom row of plot
         n_cols = any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior])
@@ -745,12 +744,12 @@ class TdemDataPoint(EmDataPoint):
                     for j in range(self.nSystems):
                         others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
                         tmp[1].get_shared_y_axes().joined(tmp[1], *tmp[others])
-                ax.append(tmp)
+                ax['additive_error'] = tmp
                 i += 1
 
             if any([self.transmitter.hasPosterior, self.loop_pair.hasPosterior, self.receiver.hasPosterior]):
                 # Loop pair
-                ax.append(self.loop_pair._init_posterior_plots(splt_bottom[i]))
+                ax['loop_pair'] = self.loop_pair._init_posterior_plots(splt_bottom[i])
 
         return ax
 
@@ -760,64 +759,49 @@ class TdemDataPoint(EmDataPoint):
         if axes is None:
             axes = kwargs.pop('fig', gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
-        # assert len(axes) == 4, ValueError("Must have length 4 list of axes for the posteriors. self.init_posterior_plots can generate them")
-
-        # point_kwargs = kwargs.pop('point_kwargs', {})
         data_kwargs = kwargs.pop('data_kwargs', {})
         rel_error_kwargs = kwargs.pop('rel_error_kwargs', {})
         add_error_kwargs = kwargs.pop('add_error_kwargs', {})
 
         overlay = kwargs.pop('overlay', None)
-        # if not overlay is None:
-        #         # point_kwargs['overlay'] = overlay
-        #         rel_error_kwargs['overlay'] = overlay.relative_error
-        #         # add_error_kwargs['overlay'] = [overlay.additive_error[i] for i in self.component_indices]
-        #         # add_error_kwargs['axis'] = 1
-        #         add_error_kwargs['overlay'] = overlay.additive_error
 
-
-        axes[0].clear()
-        if self.predictedData.hasPosterior:
-            self.predictedData.plot_posteriors(ax = axes[0], colorbar=False, **data_kwargs)
-        self.plot(ax=axes[0], **data_kwargs)
+        ax = axes['data']; ax.cla()
+        if self.predicted_data.hasPosterior:
+            self.predicted_data.plot_posteriors(ax = ax, colorbar=False, **data_kwargs)
+        self.plot(ax=ax, **data_kwargs)
 
         c = cp.wellSeparated[0] if overlay is None else cp.wellSeparated[3]
-        self.plot_predicted(color=c, ax=axes[0], **data_kwargs)
+        self.plot_predicted(color=c, ax=ax, **data_kwargs)
 
-        i = 1
         if self.relative_error.hasPosterior:
-            self.relative_error.plot_posteriors(ax=axes[i], **rel_error_kwargs)
-            i += 1
+            self.relative_error.plot_posteriors(ax=axes['relative_error'], **rel_error_kwargs)
 
         if self.additive_error.hasPosterior:
             add_error_kwargs['colorbar'] = False
-            self.additive_error.plot_posteriors(ax=axes[i], **add_error_kwargs)
-            i += 1
+            self.additive_error.plot_posteriors(ax=axes['additive_error'], **add_error_kwargs)
 
         if any([x.hasPosterior for x in [self.transmitter, self.loop_pair, self.receiver]]):
-            self.loop_pair.plot_posteriors(axes = axes[i], **kwargs)
+            self.loop_pair.plot_posteriors(axes = axes['loop_pair'], **kwargs)
 
         if overlay is not None:
             self.overlay_on_posteriors(overlay, axes, **kwargs)
 
     def overlay_on_posteriors(self, overlay, axes, rel_error_kwargs={}, add_error_kwargs={}, **kwargs):
 
-        i = 1
+        assert isinstance(overlay, TdemDataPoint), TypeError("overlay must have type TdemDataPoint")
+
         if self.relative_error.hasPosterior:
-            self.relative_error.overlay_on_posteriors(overlay.relative_error, ax=axes[i], **rel_error_kwargs, **kwargs)
-            i += 1
+            self.relative_error.overlay_on_posteriors(overlay.relative_error, ax=axes['relative_error'], **rel_error_kwargs, **kwargs)
 
         if self.additive_error.hasPosterior:
             add_error_kwargs['colorbar'] = False
-            self.additive_error.overlay_on_posteriors(overlay.additive_error, ax=axes[i], **add_error_kwargs, **kwargs)
-            i += 1
+            self.additive_error.overlay_on_posteriors(overlay.additive_error, ax=axes['additive_error'], **add_error_kwargs, **kwargs)
 
-        if any([x.hasPosterior for x in [self.transmitter, self.loop_pair, self.receiver]]):
-            self.loop_pair.overlay_on_posteriors(overlay=overlay, axes = axes[i], **kwargs)
-
+        if self.loop_pair.hasPosterior:
+            self.loop_pair.overlay_on_posteriors(overlay=overlay.loop_pair, axes = axes['loop_pair'], **kwargs)
 
     def plotWaveform(self, **kwargs):
         for i in range(self.nSystems):

@@ -396,16 +396,17 @@ class DataPoint(Point):
 
         # Split the top and bottom
         splt = gs.subgridspec(2, 2, width_ratios=[1, 4], height_ratios=[2, 1], wspace=0.3)
-        ax = []
         # Point posteriors
-        ax.append(super()._init_posterior_plots(splt[0, 0]))
+        ax = super()._init_posterior_plots(splt[0, 0])
         # Data axis
-        ax.append(plt.subplot(splt[0, 1]))
+        ax['data'] = plt.subplot(splt[0, 1])
 
         # Relative error axes
-        ax.append(self.relative_error._init_posterior_plots(splt[1, 0]))
+        if self.relative_error.hasPosterior:
+            ax['relative_error'] = self.relative_error._init_posterior_plots(splt[1, 0])
         # Additive Error axes
-        ax.append(self.additive_error._init_posterior_plots(splt[1, 1]))
+        if self.additive_error.hasPosterior:
+            ax['additive_error'] = self.additive_error._init_posterior_plots(splt[1, 1])
 
         return ax
 
@@ -414,7 +415,7 @@ class DataPoint(Point):
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
 
@@ -425,30 +426,34 @@ class DataPoint(Point):
         #     rel_error_kwargs['overlay'] = overlay.relative_error
         #     add_error_kwargs['overlay'] = overlay.additive_error
 
-        super().plot_posteriors(axes=axes[0], **kwargs)
+        super().plot_posteriors(axes=axes, **kwargs)
 
-        axes[1].cla()
-        self.predictedData.plot_posteriors(ax = axes[1], colorbar=False, **data_kwargs)
-        self.plot(ax=axes[1], **data_kwargs)
+        ax = axes['data']; ax.cla()
+        self.predicted_data.plot_posteriors(ax = ax, colorbar=False, **data_kwargs)
+        self.plot(ax=ax, **data_kwargs)
 
         if overlay is None:
             c = cP.wellSeparated[0]
-            self.plot_predicted(color=c, ax=axes[1], **data_kwargs)
+            self.plot_predicted(color=c, ax=ax, **data_kwargs)
         else:
             c = cP.wellSeparated[3]
-            overlay.plot_predicted(color=c, ax=axes[1], **data_kwargs)
+            overlay.plot_predicted(color=c, ax=ax, **data_kwargs)
 
-        self.relative_error.plot_posteriors(ax=axes[2], **rel_error_kwargs)
-        self.additive_error.plot_posteriors(ax=axes[3], **add_error_kwargs)
+        if self.relative_error.hasPosterior:
+            self.relative_error.plot_posteriors(ax=axes['relative_error'], **rel_error_kwargs)
+        if self.additive_error.hasPosterior:
+            self.additive_error.plot_posteriors(ax=axes['additive_error'], **add_error_kwargs)
 
     def overlay_on_posteriors(self, overlay, axes, **kwargs):
 
-        super().overlay_on_posteriors(self, overlay, axes[0], **kwargs)
+        assert isinstance(overlay, DataPoint), TypeError("overlay must have type DataPoint")
 
-        self.relative_error.overlay_on_posteriors(overlay=overlay.relative_error, ax=axes[2], **kwargs)
-        self.additive_error.overlay_on_posteriors(overlay=overlay.additive_error, ax=axes[3], **kwargs)
+        super().overlay_on_posteriors(self, overlay, axes['data'], **kwargs)
 
-
+        if self.relative_error.hasPosterior:
+            self.relative_error.overlay_on_posteriors(overlay=overlay.relative_error, ax=axes['relative_error'], **kwargs)
+        if self.additive_error.hasPosterior:
+            self.additive_error.overlay_on_posteriors(overlay=overlay.additive_error, ax=axes['additive_error'], **kwargs)
 
     @property
     def system_indices(self):
@@ -678,6 +683,20 @@ class DataPoint(Point):
                 posterior.append(Histogram(mesh=mesh))
 
             self.additive_error.posterior = posterior
+
+    def update_posteriors(self):
+        """Update any attached posteriors"""
+
+        super().update_posteriors()
+
+        self.update_relative_error_posterior()
+        self.update_additive_error_posterior()
+
+    def update_relative_error_posterior(self):
+        self.relative_error.update_posterior(active=self.active_system_indices)
+
+    def update_additive_error_posterior(self):
+        self.additive_error.update_posterior(active=self.active_system_indices)
 
     # def scaleJ(self, Jin, power=1.0):
     #     """ Scales a matrix by the errors in the given data
