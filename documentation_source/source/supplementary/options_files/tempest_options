@@ -65,7 +65,7 @@ minimum_relative_error = [0.0001, 0.0001]
 maximum_relative_error = [0.01, 0.01]
 ## Proposal variance for the relative error
 # Distribution('Normal', mean=[0.0, 0.0], variance=[2.5e-7, 2.5e-7])
-relative_error_proposal_variance = [1e-6, 1e-6]
+relative_error_proposal_variance = [1e-5, 1e-5]
 # -------------------------------------------------------
 # -------------------------------------------------------
 # Use the prior on the additive data errors
@@ -167,6 +167,7 @@ maximum_depth = 550.0
 # Minimum layer thickness.
 # If minimumThickness: None, it will be autocalculated.
 minimum_thickness = None
+number_of_depth_bins = 132
 
 # Evolution Probabilities for earth model manipulation during the Markov chain.
 # These four values are internally scaled such that their sum is 1.0.
@@ -187,15 +188,18 @@ probability_of_no_change = 0.5
 factor = None
 # Standard Deviation for the difference in layer resistivity
 # Default is 1.5
-gradient_standard_deviation = 5
+gradient_standard_deviation = None
 # Initial scaling factor for proposal covariance
-covariance_scaling = 0.5
+covariance_scaling = None
 # Scaling factor for data misfit
 multiplier = None
 # Clipping Ratio for interface contrasts
 clip_ratio = None
 # Only sample the prior
 ignore_likelihood = False
+parameter_weight = 1.0
+gradient_weight = 0.0
+minimum_burn_in = 15000
 
 # Impose bounds on the parameter value
 # None, or a length 2 list i.e. [a, b]
