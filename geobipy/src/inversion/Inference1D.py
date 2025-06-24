@@ -3,6 +3,7 @@ Class to store inversion results. Contains plotting and writing to file procedur
 """
 from copy import deepcopy
 from os.path import join
+import traceback
 from datetime import timedelta
 
 from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
@@ -543,7 +544,7 @@ class Inference1D(myObject):
         dprint(f'{self.prng.random()=}')
 
         dprint(f'incoming {self.datapoint.data=}')
-        dprint(f'incoming {self.datapoint.predictedData=}')
+        dprint(f'incoming {self.datapoint.predicted_data=}')
         dprint(f'incoming {self.model.values=}')
         test_datapoint = deepcopy(self.datapoint)
 
@@ -552,14 +553,11 @@ class Inference1D(myObject):
         if self.ignore_likelihood:
             observation = None
 
-        # Propose a new data point, using assigned proposal distributions
-        # test_datapoint.perturb()
-
-        # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
         try:
             remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, alpha = self.covariance_scaling)
-        except:
-            print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
+        except Exception:
+            # print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
+            print(traceback.format_exc())
             return True
 
         if remapped_model is None:
@@ -853,17 +851,19 @@ class Inference1D(myObject):
             #     'normalize': True},
             edges_kwargs={
                 'transpose': True,
-                'trim': False},
+                'trim': False,
+                'flipY': True},
             values_kwargs={
                 'colorbar': False,
-                'flipY': True,
                 'xscale': 'log',
                 'credible_interval_kwargs': {
                 }
             },
             overlay=overlay)
 
+
         overlay = self.best_datapoint if self.burned_in else self.datapoint
+
 
         # if self.datapoint.hasPosterior:
         self.datapoint.plot_posteriors(
@@ -908,6 +908,8 @@ class Inference1D(myObject):
         i = s_[:int64(self.iteration / self.update_plot_every)]
 
         self.acceptance_rate.plot(x=self.acceptance_x, i=i, color='k', **kwargs)
+        kwargs['ax'].axhline(y=23.4, color='#C92641', linestyle='dashed')
+
 
     def _plotMisfitVsIteration(self, **kwargs):
         """ Plot the data misfit against iteration. """
@@ -950,7 +952,7 @@ class Inference1D(myObject):
     # def _plotObservedPredictedData(self, **kwargs):
     #     """ Plot the observed and predicted data """
     #     if self.burnedIn:
-    #         # self.datapoint.predictedData.plot_posteriors(colorbar=False)
+    #         # self.datapoint.predicted_data.plot_posteriors(colorbar=False)
     #         self.datapoint.plot(**kwargs)
     #         self.bestDataPoint.plot_predicted(color=cP.wellSeparated[3], **kwargs)
     #     else:

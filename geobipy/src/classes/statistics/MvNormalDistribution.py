@@ -186,8 +186,6 @@ class MvNormal(baseDistribution):
         bins = self.bins()
         t = r"$\tilde{N}(\mu="+str(self.mean)+r", \sigma^{2}="+str(self.variance)+")$"
 
-        print(bins)
-
         p = self.probability(bins, log=log)
 
         cP.plot(bins, p, label=t, **kwargs)

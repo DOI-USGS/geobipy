@@ -36,7 +36,7 @@ class TdemDataPoint(EmDataPoint):
     """ Initialize a Time domain EMData Point
 
 
-    TdemDataPoint(x, y, z, elevation, data, std, system, transmitter_loop, receiver_loop, lineNumber, fiducial)
+    TdemDataPoint(x, y, z, elevation, data, std, system, transmitter_loop, receiver_loop, line_number, fiducial)
 
     Parameters
     ----------
@@ -60,7 +60,7 @@ class TdemDataPoint(EmDataPoint):
         Transmitter loop class
     receiver_loop : EmLoop, optional
         Receiver loop class
-    lineNumber : float, optional
+    line_number : float, optional
         The line number associated with the datapoint
     fiducial : float, optional
         The fiducial associated with the datapoint
@@ -86,15 +86,15 @@ class TdemDataPoint(EmDataPoint):
                  predicted_primary_field=None, predicted_secondary_field=None,
                  system=None,
                  transmitter_loop=None, receiver_loop=None,
-                 lineNumber=0.0, fiducial=0.0):
+                 line_number=0.0, fiducial=0.0):
 
         self.system = system
 
         super().__init__(x=x, y=y, z=z, elevation=elevation,
                          components=self.components,
                          channels_per_system=self.nTimes,
-                         data=None, std=std, predictedData=None,
-                         lineNumber=lineNumber, fiducial=fiducial)
+                         data=None, std=std, predicted_data=None,
+                         line_number=line_number, fiducial=fiducial)
 
         self.additive_error = additive_error
         self.relative_error = relative_error
@@ -118,10 +118,6 @@ class TdemDataPoint(EmDataPoint):
             values = self.nSystems
         else:
             assert size(values) == self.nSystems, ValueError("additive_error must be a list of size equal to the number of systems {}".format(self.nSystems))
-            # assert (npall(asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
-            # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
-            #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
-
         self._additive_error = StatArray(values, r'$\epsilon_{Additive}$', self.units)
 
     @property
@@ -166,7 +162,7 @@ class TdemDataPoint(EmDataPoint):
 
     @EmDataPoint.data.getter
     def data(self):
-        self._data = self.secondary_field
+        self._data[:] = self.secondary_field
         return self._data
 
     @property
@@ -178,10 +174,10 @@ class TdemDataPoint(EmDataPoint):
         assert isinstance(value, Loop_pair), TypeError("loop_pair must be a Loop_pair")
         self._loop_pair = value
 
-    @EmDataPoint.predictedData.getter
-    def predictedData(self):
-        self._predictedData = self._predicted_secondary_field
-        return self._predictedData
+    @EmDataPoint.predicted_data.getter
+    def predicted_data(self):
+        self._predicted_data = self._predicted_secondary_field
+        return self._predicted_data
 
     @property
     def predicted_primary_field(self):
@@ -375,8 +371,8 @@ class TdemDataPoint(EmDataPoint):
 
 
         # Update the variance of the predicted data prior
-        if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
+        if self.predicted_data.hasPrior:
+            self.predicted_data.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
 
         return self._std
 
@@ -429,7 +425,7 @@ class TdemDataPoint(EmDataPoint):
         for fName in dataFileName:
             with open(fName, 'r') as f:
                 # Header line
-                dtype, x, y, z, elevation, fiducial, lineNumber, current = self.__aarhus_header(
+                dtype, x, y, z, elevation, fiducial, line_number, current = self.__aarhus_header(
                     f)
                 # Source type
                 source, polarization = self.__aarhus_source(f)
@@ -465,12 +461,12 @@ class TdemDataPoint(EmDataPoint):
                                          offTimeFilters=offTimeFilters))
 
         TdemDataPoint.__init__(self, x, y, 0.0, elevation, data, std,
-                               system=system, lineNumber=lineNumber, fiducial=fiducial)
+                               system=system, line_number=line_number, fiducial=fiducial)
 
     def __aarhus_header(self, f):
         line = f.readline().strip().split(';')
         dtype = x = y = z = elevation = current = None
-        fiducial = lineNumber = 0.0
+        fiducial = line_number = 0.0
         for item in line:
             item = item.split("=")
             tag = item[0].lower()
@@ -486,15 +482,15 @@ class TdemDataPoint(EmDataPoint):
                 elevation = float64(value)
             elif tag == "stationnumber":
                 fiducial = float64(value)
-            elif tag == "linenumber":
-                lineNumber = float64(value)
+            elif tag == "line_number":
+                line_number = float64(value)
             elif tag == "current":
                 current = float64(value)
 
         assert not any([x, y, elevation, current] is None), ValueError(
             "Aarhus file header line must contain 'XUTM', 'YUTM', 'Elevation', 'current'")
 
-        return dtype, x, y, z, elevation, fiducial, lineNumber, current
+        return dtype, x, y, z, elevation, fiducial, line_number, current
 
     def __aarhus_source(self, f):
         line = f.readline().strip().split()
@@ -903,7 +899,7 @@ class TdemDataPoint(EmDataPoint):
 
         if (labels):
             ax.set_xlabel('Time (s)')
-            ax.set_ylabel(cf.getNameUnits(self.predictedData))
+            ax.set_ylabel(cf.getNameUnits(self.predicted_data))
             ax.set_title(title)
 
         kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
@@ -922,12 +918,12 @@ class TdemDataPoint(EmDataPoint):
                 iS = self._component_indices(k, j)
 
                 if npall(self.data <= 0.0):
-                    active = (self.predictedData[iS] > 0.0)
+                    active = (self.predicted_data[iS] > 0.0)
 
                 else:
                     active = self.active[iS]
 
-                p = self.predictedData[iS][active]
+                p = self.predicted_data[iS][active]
                 p.plot(x=system_times[active], **kwargs)
 
         ax.set_xscale(xscale)
@@ -990,7 +986,6 @@ class TdemDataPoint(EmDataPoint):
 
         self.additive_error.proposal = proposal
 
-
     @property
     def summary(self):
         msg = super().summary + self.loop_pair.summary
@@ -1029,35 +1024,12 @@ class TdemDataPoint(EmDataPoint):
 
     def sensitivity(self, model, ix=None, model_changed=False):
         """ Compute the sensitivty matrix for the given model """
-
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
         self._sensitivity_matrix = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
         return self.sensitivity_matrix
 
     def fm_dlogc(self, model):
         values, J = ga_fm_dlogc(self, model)
-
-        # for i in range(self.nSystems):
-        #     fm = values[i]
-        #     iSys = self._systemIndices(i)
-        #     primary = []
-        #     secondary = []
-        #     if 'x' in self.components:
-        #         primary.append(fm.PX)
-        #         secondary.append(fm.SX)
-        #     if 'y' in self.components:
-        #         primary.append(fm.PY)
-        #         secondary.append(fm.SY)
-        #     if 'z' in self.components:
-        #         primary.append(-fm.PZ)
-        #         secondary.append(-fm.SZ)
-
-        #     self.predicted_secondary_field[iSys] = hstack(secondary)  # Store the necessary component
-
-        #     s = s_[i * self.n_components: (i * self.n_components) + self.n_components]
-
-        #     self.predicted_primary_field[s] = hstack(primary)
-
         self._sensitivity_matrix = DataArray(J, 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
 
     def _empymodForward(self, mod):
@@ -1122,7 +1094,7 @@ class TdemDataPoint(EmDataPoint):
 
     #     prob.pair(simPEG_survey)
 
-    #     self._predictedData[:] = -simPEG_survey.dpred(mod.par)
+    #     self._predicted_data[:] = -simPEG_survey.dpred(mod.par)
 
     def Isend(self, dest, world, **kwargs):
 

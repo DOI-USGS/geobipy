@@ -33,13 +33,13 @@ class EmDataPoint(DataPoint):
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
                        components=None, channels_per_system=None,
-                       data=None, std=None, predictedData=None,
+                       data=None, std=None, predicted_data=None,
                        channel_names=None,
-                       lineNumber=0.0, fiducial=0.0, **kwargs):
+                       line_number=0.0, fiducial=0.0, **kwargs):
 
         super().__init__(x = x, y = y, z = z, elevation = elevation,
-                         data = data, std = std, predictedData = predictedData,
-                         channel_names=channel_names, lineNumber=lineNumber, fiducial=fiducial, **kwargs)
+                         data = data, std = std, predicted_data = predicted_data,
+                         channel_names=channel_names, line_number=line_number, fiducial=fiducial, **kwargs)
 
     @property
     def active(self):
@@ -69,6 +69,10 @@ class EmDataPoint(DataPoint):
         self._channels_per_system = values
 
     @property
+    def n_data_channels(self):
+        return self.nChannels
+
+    @property
     def components(self):
         m = ('x', 'y', 'z')
         return [m[x] for x in self._components]
@@ -93,12 +97,10 @@ class EmDataPoint(DataPoint):
 
     @DataPoint.data.setter
     def data(self, values):
-
         if values is None:
-            values = self.nChannels
+            values = self.n_data_channels
         else:
-            assert size(values) == self.nChannels, ValueError("data must have size {} not {}".format(self.nChannels, size(values)))
-
+            assert size(values) == self.n_data_channels, ValueError(f"data must have size {self.n_data_channels} not {size(values)}")
         self._data = DataArray(values, "Data", self.units)
 
     @property
@@ -113,16 +115,21 @@ class EmDataPoint(DataPoint):
     def nSystems(self):
         return size(self.channels_per_system)
 
-    @DataPoint.predictedData.setter
-    def predictedData(self, values):
+    @DataPoint.predicted_data.setter
+    def predicted_data(self, values):
         if values is None:
-            values = self.nChannels
+            values = self.n_data_channels
         else:
-            if isinstance(values, list):
-                assert len(values) == self.nSystems, ValueError("predictedData as a list must have {} elements".format(self.nSystems))
-                values = hstack(values)
-            assert size(values) == self.nChannels, ValueError("Size of predictedData must equal total number of time channels {}".format(self.nChannels))
-        self._predictedData = StatArray(values, "Predicted Data", self.units)
+            assert size(values) == self.n_data_channels, ValueError("Size of predicted_data must equal total number of time channels {}".format(self.n_data_channels))
+        self._predicted_data = StatArray(values, "Predicted Data", self.units)
+
+    @DataPoint.std.setter
+    def std(self, values):
+        if values is None:
+            values = self.n_data_channels
+        else:
+            assert size(values) == self.n_data_channels, ValueError(f"data must have size {self.n_data_channels} not {size(values)}")
+        self._std = DataArray(values, "Data", self.units)
 
     @property
     def system(self):
@@ -221,19 +228,3 @@ class EmDataPoint(DataPoint):
         plt.loglog(c, PhiD, **kwargs)
         plt.xlabel(c.getNameUnits())
         plt.ylabel('Data misfit')
-
-    def update_posteriors(self):
-        """Update any attached posteriors"""
-
-        super().update_posteriors()
-
-        if self.relative_error.hasPosterior:
-            self.relative_error.update_posterior(active=self.active_system_indices)
-
-        self.update_additive_error_posterior()
-
-    def update_relative_error_posterior(self):
-        self.relative_error.update_posterior(active=self.active_system_indices)
-
-    def update_additive_error_posterior(self):
-        self.additive_error.update_posterior(active=self.active_system_indices)

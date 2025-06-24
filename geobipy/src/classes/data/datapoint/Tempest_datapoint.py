@@ -2,9 +2,10 @@ from copy import deepcopy
 
 from numpy import any, atleast_2d, diag_indices, dot
 from numpy import full, linspace, log10, logspace
-from numpy import ones, s_, size, sqrt, sum
+from numpy import ones, s_, size, sqrt, sum, squeeze, zeros
 from numpy import all as npall
-
+from itertools import cycle
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
 
@@ -20,13 +21,13 @@ from ...mesh.RectilinearMesh2D import RectilinearMesh2D
 from ...system.Loop_pair import Loop_pair
 
 from ....base import utilities as cf
-from ....base import plotting as cP
+from ....base import plotting as cp
+
 
 class Tempest_datapoint(TdemDataPoint):
     """ Initialize a Tempest Time domain data point
 
-
-    TdemDataPoint(x, y, z, elevation, data, std, system, transmitter_loop, receiver_loop, lineNumber, fiducial)
+    TdemDataPoint(x, y, z, elevation, data, std, system, transmitter_loop, receiver_loop, line_number, fiducial)
 
     Parameters
     ----------
@@ -50,7 +51,7 @@ class Tempest_datapoint(TdemDataPoint):
         Transmitter loop class
     receiver_loop : EmLoop, optional
         Receiver loop class
-    lineNumber : float, optional
+    line_number : float, optional
         The line number associated with the datapoint
     fiducial : float, optional
         The fiducial associated with the datapoint

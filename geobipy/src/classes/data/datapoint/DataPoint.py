@@ -50,7 +50,7 @@ class DataPoint(Point):
     std : geobipy.StatArray or array_like, optional
         Estimated uncertainty standard deviation of the data of length sum(nChannelsPerSystem).
         * If None, initialized with ones if data is None, else 0.1*data values.
-    predictedData : geobipy.StatArray or array_like, optional
+    predicted_data : geobipy.StatArray or array_like, optional
         Predicted data values to assign the data of length sum(nChannelsPerSystem).
         * If None, initialized with zeros.
     units : str, optional
@@ -59,13 +59,13 @@ class DataPoint(Point):
         Names of each channel of length sum(nChannelsPerSystem)
 
     """
-    __slots__ = ('_units', '_data', '_std', '_predictedData', '_lineNumber', '_fiducial', '_channel_names',
+    __slots__ = ('_units', '_data', '_std', '_predicted_data', '_line_number', '_fiducial', '_channel_names',
                  '_relative_error', '_additive_error', '_sensitivity_matrix', '_components')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
-                       data=None, std=None, predictedData=None,
+                       data=None, std=None, predicted_data=None,
                        units=None, channel_names=None,
-                       lineNumber=0.0, fiducial=0.0, **kwargs):
+                       line_number=0.0, fiducial=0.0, **kwargs):
         """ Initialize the Data class """
 
         super().__init__(x, y, z, elevation=elevation, **kwargs)
@@ -77,9 +77,9 @@ class DataPoint(Point):
 
         self.std = std
 
-        self.predictedData = predictedData
+        self.predicted_data = predicted_data
 
-        self.lineNumber = lineNumber
+        self.line_number = line_number
 
         self.fiducial = fiducial
 
@@ -109,7 +109,7 @@ class DataPoint(Point):
 
     @property
     def line_number(self):
-        return self._lineNumber
+        return self._line_number
 
     @property
     def additive_error(self):
@@ -132,9 +132,9 @@ class DataPoint(Point):
         """ Print a summary of the EMdataPoint """
         msg = super().addressof
         msg += "data:\n{}".format("|   "+(self.data.addressof.replace("\n", "\n|   "))[:-4])
-        msg += "predicted data:\n{}".format("|   "+(self.predictedData.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "predicted data:\n{}".format("|   "+(self.predicted_data.addressof.replace("\n", "\n|   "))[:-4])
         msg += "std:\n{}".format("|   "+(self.std.addressof.replace("\n", "\n|   "))[:-4])
-        msg += "line number:\n{}".format("|   "+(self.lineNumber.addressof.replace("\n", "\n|   "))[:-4])
+        msg += "line number:\n{}".format("|   "+(self.line_number.addressof.replace("\n", "\n|   "))[:-4])
         msg += "fiducial:\n{}".format("|   "+(self.fiducial.addressof.replace("\n", "\n|   "))[:-4])
         msg += "relative error:\n{}".format("|   "+(self.relative_error.addressof.replace("\n", "\n|   "))[:-4])
         msg += "additive error:\n{}".format("|   "+(self.additive_error.addressof.replace("\n", "\n|   "))[:-4])
@@ -145,7 +145,7 @@ class DataPoint(Point):
     @property
     def address(self):
         out = super().address
-        for x in [self.data, self.predictedData, self.std, self.line_number, self.fiducial, self.relative_error, self.additive_error]:
+        for x in [self.data, self.predicted_data, self.std, self.line_number, self.fiducial, self.relative_error, self.additive_error]:
             out = hstack([out, x.address.flatten()])
 
         return out
@@ -171,12 +171,12 @@ class DataPoint(Point):
         self._fiducial = DataArray(value, 'fiducial')
 
     @property
-    def lineNumber(self):
-        return self._lineNumber
+    def line_number(self):
+        return self._line_number
 
-    @lineNumber.setter
-    def lineNumber(self, value):
-        self._lineNumber = DataArray(float64(value), 'Line number')
+    @line_number.setter
+    def line_number(self, value):
+        self._line_number = DataArray(float64(value), 'Line number')
 
     @property
     def n_posteriors(self):
@@ -211,7 +211,7 @@ class DataPoint(Point):
             with size equal to the number of active channels.
 
         """
-        return DataArray(self.predictedData - self.data, name=r"$\mathbf{Fm} - \mathbf{d}_{obs}$", units=self.units)
+        return DataArray(self.predicted_data - self.data, name=r"$\mathbf{Fm} - \mathbf{d}_{obs}$", units=self.units)
 
     @property
     def n_active_channels(self):
@@ -226,21 +226,17 @@ class DataPoint(Point):
         return 1
 
     @property
-    def predictedData(self):
+    def n_systems(self):
+        return self.nSystems
+
+    @property
+    def predicted_data(self):
         """The predicted data. """
-        return self._predictedData
+        return self._predicted_data
 
-    @predictedData.setter
-    def predictedData(self, values):
-        if values is None:
-            values = self.nChannels
-        else:
-            if isinstance(values, list):
-                assert len(values) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
-                values = hstack(values)
-            assert size(values) == self.nChannels, ValueError("Size of std must equal total number of time channels {}".format(self.nChannels))
-
-        self._predictedData = StatArray(values, "Predicted Data", self.units)
+    @predicted_data.setter
+    def predicted_data(self, values):
+        self._predicted_data = StatArray(values, "Predicted Data", self.units)
 
     @property
     def relative_error(self):
@@ -276,22 +272,15 @@ class DataPoint(Point):
         self._std[:] = sqrt(variance)
 
         # Update the variance of the predicted data prior
-        if self.predictedData.hasPrior:
-            self.predictedData.prior.variance[diag_indices(sum(self.active))] = variance[self.active]
+        if self.predicted_data.hasPrior:
+            self.predicted_data.prior.variance[diag_indices(sum(self.active))] = variance[self.active]
 
         return self._std
 
     @std.setter
     def std(self, value):
-
         if value is None:
             value = full(self.nChannels, fill_value=0.01)
-        else:
-            if isinstance(value, list):
-                assert len(value) == self.nSystems, ValueError("std as a list must have {} elements".format(self.nSystems))
-                value = hstack(value)
-            assert size(value) == self.nChannels, ValueError("Size of std {} must equal total number of time channels {}".format(size(value), self.nChannels))
-
         self._std = DataArray(value, "Standard deviation", self.units)
 
     @property
@@ -314,12 +303,12 @@ class DataPoint(Point):
         out._channels_per_system = deepcopy(self.channels_per_system, memo)
 
         out._units = deepcopy(self.units, memo)
-        out._data = deepcopy(self.data, memo)
-        out._relative_error = deepcopy(self.relative_error, memo)
-        out._additive_error = deepcopy(self.additive_error, memo)
-        out._std = deepcopy(self.std, memo)
-        out._predictedData = deepcopy(self.predictedData, memo)
-        out._lineNumber = deepcopy(self.lineNumber, memo)
+        out._data = deepcopy(self._data, memo)
+        out._relative_error = deepcopy(self._relative_error, memo)
+        out._additive_error = deepcopy(self._additive_error, memo)
+        out._std = deepcopy(self._std, memo)
+        out._predicted_data = deepcopy(self._predicted_data, memo)
+        out._line_number = deepcopy(self.line_number, memo)
         out._fiducial = deepcopy(self.fiducial, memo)
         out._channel_names = deepcopy(self.channel_names, memo)
 
@@ -334,7 +323,7 @@ class DataPoint(Point):
 
     def generate_noise(self, additive_error, relative_error):
 
-        std = sqrt(additive_error**2.0 + (relative_error * self.predictedData)**2.0)
+        std = sqrt(additive_error**2.0 + (relative_error * self.predicted_data)**2.0)
         return randn(self.nChannels) * std
 
     def prior_derivative(self, order):
@@ -342,10 +331,10 @@ class DataPoint(Point):
         J = self.sensitivity_matrix[self.active, :]
 
         if order == 1:
-            return dot(J.T, self.predictedData.priorDerivative(order=1, i=self.active))
+            return dot(J.T, self.predicted_data.priorDerivative(order=1, i=self.active))
 
         elif order == 2:
-            WdT_Wd = self.predictedData.priorDerivative(order=2)
+            WdT_Wd = self.predicted_data.priorDerivative(order=2)
             return dot(J.T, dot(WdT_Wd, J))
 
     @property
@@ -386,12 +375,8 @@ class DataPoint(Point):
             probability += self.relative_error.probability(log=True, active=self.active_system_indices)
 
         if self.additive_error.hasPrior:  # Additive Errors
-            probability += self.additive_error.probability(log=True, active=self.active_system_indices)
+            probability += sum(self.additive_error.probability(log=True, active=self.active_system_indices))
 
-        # P_calibration = float64(0.0)
-        # if calibration:  # Calibration parameters
-        #     P_calibration = self.calibration.probability(log=True)
-        #     probability += P_calibration
         return probability
 
     def _init_posterior_plots(self, gs=None):
@@ -497,7 +482,7 @@ class DataPoint(Point):
             Likelihood of the data point
 
         """
-        return self.predictedData.probability(i=self.active, log=log)
+        return self.predicted_data.probability(i=self.active, log=log)
 
     def data_misfit(self):
         r"""Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
@@ -597,7 +582,7 @@ class DataPoint(Point):
     def set_data_prior(self, prior):
 
         if not prior is None:
-            self.predictedData.prior = prior
+            self.predicted_data.prior = prior
 
     def set_relative_error_prior(self, prior):
         if not prior is None:
@@ -734,9 +719,9 @@ class DataPoint(Point):
 
         msg += "channel names:\n{}\n".format("|   "+(', '.join(names).replace("\n,", "\n|  ")))
         msg += "data:\n{}\n".format("|   "+(self.data[self.active].summary.replace("\n", "\n|   "))[:-4])
-        msg += "predicted data:\n{}\n".format("|   "+(self.predictedData[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "predicted data:\n{}\n".format("|   "+(self.predicted_data[self.active].summary.replace("\n", "\n|   "))[:-4])
         msg += "std:\n{}\n".format("|   "+(self.std[self.active].summary.replace("\n", "\n|   "))[:-4])
-        msg += "line number:\n{}\n".format("|   "+(self.lineNumber.summary.replace("\n", "\n|   "))[:-4])
+        msg += "line number:\n{}\n".format("|   "+(self.line_number.summary.replace("\n", "\n|   "))[:-4])
         msg += "fiducial:\n{}\n".format("|   "+(self.fiducial.summary.replace("\n", "\n|   "))[:-4])
         msg += "relative error:\n{}\n".format("|   "+(self.relative_error.summary.replace("\n", "\n|   "))[:-4])
         msg += "additive error:\n{}\n".format("|   "+(self.additive_error.summary.replace("\n", "\n|   "))[:-4])
@@ -752,10 +737,10 @@ class DataPoint(Point):
         grp = super().createHdf(parent, myName, withPosterior, add_axis, fillvalue)
 
         self.fiducial.createHdf(grp, 'fiducial', add_axis=add_axis, fillvalue=fillvalue)
-        self.lineNumber.createHdf(grp, 'line_number', add_axis=add_axis, fillvalue=fillvalue)
+        self.line_number.createHdf(grp, 'line_number', add_axis=add_axis, fillvalue=fillvalue)
         self.data.createHdf(grp, 'data', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.std.createHdf(grp, 'std', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
-        self.predictedData.createHdf(grp, 'predicted_data', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
+        self.predicted_data.createHdf(grp, 'predicted_data', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.relative_error.createHdf(grp, 'relative_error', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
         self.additive_error.createHdf(grp, 'additive_error', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue)
 
@@ -784,10 +769,10 @@ class DataPoint(Point):
         grp = parent[name]
 
         self.fiducial.writeHdf(grp, 'fiducial', index=index)
-        self.lineNumber.writeHdf(grp, 'line_number', index=index)
+        self.line_number.writeHdf(grp, 'line_number', index=index)
         self.data.writeHdf(grp, 'data',  withPosterior=withPosterior, index=index)
         self.std.writeHdf(grp, 'std',  withPosterior=withPosterior, index=index)
-        self.predictedData.writeHdf(grp, 'predicted_data',  withPosterior=withPosterior, index=index)
+        self.predicted_data.writeHdf(grp, 'predicted_data',  withPosterior=withPosterior, index=index)
 
         # if not self.errorPosterior is None:
         #     for i, x in enumerate(self.errorPosterior):
@@ -807,14 +792,14 @@ class DataPoint(Point):
         if 'fiducial' in grp:
             out.fiducial = StatArray.fromHdf(grp['fiducial'], index=index)
         if 'line_number' in grp:
-            out.lineNumber = StatArray.fromHdf(grp['line_number'], index=index)
+            out.line_number = StatArray.fromHdf(grp['line_number'], index=index)
 
         if 'components' in grp:
             out._components = asarray(grp['components'])
 
         out.data = StatArray.fromHdf(grp['data'], index=index)
         out.std = StatArray.fromHdf(grp['std'], index=index)
-        out.predictedData = StatArray.fromHdf(grp['predicted_data'], index=index)
+        out.predicted_data = StatArray.fromHdf(grp['predicted_data'], index=index)
 
         out._relative_error = StatArray.fromHdf(grp['relative_error'], index=index)
         out._additive_error = StatArray.fromHdf(grp['additive_error'], index=index)
@@ -826,7 +811,7 @@ class DataPoint(Point):
 
         super().Isend(dest, world)
 
-        self.lineNumber.Isend(dest, world)
+        self.line_number.Isend(dest, world)
         self.fiducial.Isend(dest, world)
 
         self.relative_error.Isend(dest, world)
@@ -837,7 +822,7 @@ class DataPoint(Point):
 
         out = super(DataPoint, cls).Irecv(source, world, **kwargs)
 
-        out._lineNumber = DataArray.Irecv(source, world)
+        out._line_number = DataArray.Irecv(source, world)
         out._fiducial = DataArray.Irecv(source, world)
 
         out._relative_error = DataArray.Irecv(source, world)

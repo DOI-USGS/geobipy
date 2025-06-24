@@ -32,7 +32,7 @@ class Data(Point):
     """Class defining a set of Data.
 
 
-    Data(channels_per_system, x, y, z, data, std, predictedData, dataUnits, channel_names)
+    Data(channels_per_system, x, y, z, data, std, predicted_data, dataUnits, channel_names)
 
     Parameters
     ----------
@@ -54,7 +54,7 @@ class Data(Point):
     std : geobipy.StatArrayor array_like, optional
         The uncertainty estimates of the data.
         * If None, ones are assigned if data is None, else 0.1*data
-    predictedData : geobipy.StatArrayor array_like, optional
+    predicted_data : geobipy.StatArrayor array_like, optional
         The predicted data.
         * If None, zeros are assigned.
     dataUnits : str
@@ -69,10 +69,10 @@ class Data(Point):
 
     """
     __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file',
-                 '_data_filename', '_lineNumber', '_data', '_predictedData', '_std', '_relative_error', '_additive_error',
+                 '_data_filename', '_line_number', '_data', '_predicted_data', '_std', '_relative_error', '_additive_error',
                  '_system', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_channels')
 
-    def __init__(self, components=None, channels_per_system=0, x=None, y=None, z=None, elevation=None, data=None, std=None, predictedData=None, fiducial=None, lineNumber=None, units=None, channel_names=None, **kwargs):
+    def __init__(self, components=None, channels_per_system=0, x=None, y=None, z=None, elevation=None, data=None, std=None, predicted_data=None, fiducial=None, line_number=None, units=None, channel_names=None, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
@@ -83,11 +83,11 @@ class Data(Point):
         super().__init__(x, y, z, elevation)
 
         self._fiducial = DataArray(arange(self.nPoints), "Fiducial")
-        self._lineNumber = DataArray(self.nPoints, "Line number")
+        self._line_number = DataArray(self.nPoints, "Line number")
 
         shp = (self._nPoints, self.nChannels)
         self._data = DataArray(shp, "Data", self.units)
-        self._predictedData = DataArray(shp, "Predicted Data", self.units)
+        self._predicted_data = DataArray(shp, "Predicted Data", self.units)
         self._std = DataArray(ones(shp), "std", self.units)
 
         shp = (self.nPoints, self.nSystems)
@@ -95,10 +95,10 @@ class Data(Point):
         self._additive_error = DataArray(shp, "Additive error", self.units)
 
         self.fiducial = fiducial
-        self.lineNumber = lineNumber
+        self.line_number = line_number
         self.data = data
         self.std = std
-        self.predictedData = predictedData
+        self.predicted_data = predicted_data
         self.channel_names = channel_names
         # self.relative_error = None
         # self.additive_error = None
@@ -120,11 +120,11 @@ class Data(Point):
     def _as_dict(self):
         out, order = super()._as_dict()
         out[self.fiducial.name.replace(' ', '_')] = self.fiducial
-        out[self.lineNumber.name.replace(' ', '_')] = self.lineNumber
+        out[self.line_number.name.replace(' ', '_')] = self.line_number
         for i, name in enumerate(self.channel_names):
             out[name.replace(' ', '_')] = self.data[:, i]
 
-        return out, [self.lineNumber.name.replace(' ', '_'),
+        return out, [self.line_number.name.replace(' ', '_'),
                      self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channel_names]]
 
     @property
@@ -272,7 +272,7 @@ class Data(Point):
             The residual between the active observed and predicted data.
 
         """
-        return self.predictedData - self.data
+        return self.predicted_data - self.data
 
     @property
     def fiducial(self):
@@ -291,20 +291,20 @@ class Data(Point):
             self._fiducial[:] = values
 
     @property
-    def lineNumber(self):
-        if size(self._lineNumber) == 0:
-            self._lineNumber = DataArray(self.nPoints, "Line number")
-        return self._lineNumber
+    def line_number(self):
+        if size(self._line_number) == 0:
+            self._line_number = DataArray(self.nPoints, "Line number")
+        return self._line_number
 
-    @lineNumber.setter
-    def lineNumber(self, values):
+    @line_number.setter
+    def line_number(self, values):
         if values is not None:
             self.nPoints = size(values)
-            if self._lineNumber.size != self.nPoints:
-                self._lineNumber = DataArray(values, "Line number")
+            if self._line_number.size != self.nPoints:
+                self._line_number = DataArray(values, "Line number")
                 return
 
-            self._lineNumber[:] = values
+            self._line_number[:] = values
 
     @property
     def nActiveChannels(self):
@@ -325,7 +325,7 @@ class Data(Point):
 
     @property
     def nLines(self):
-        return unique(self.lineNumber).size
+        return unique(self.line_number).size
 
     @property
     def n_posteriors(self):
@@ -336,25 +336,25 @@ class Data(Point):
         return size(self.channels_per_system)
 
     @property
-    def predictedData(self):
+    def predicted_data(self):
         """The predicted data. """
-        if size(self._predictedData, 0) == 0:
-            self._predictedData = DataArray((self.nPoints, self.nChannels), "Predicted Data", self.units)
-        return self._predictedData
+        if size(self._predicted_data, 0) == 0:
+            self._predicted_data = DataArray((self.nPoints, self.nChannels), "Predicted Data", self.units)
+        return self._predicted_data
 
-    @predictedData.setter
-    def predictedData(self, values):
+    @predicted_data.setter
+    def predicted_data(self, values):
 
         if values is not None:
             values = atleast_2d(values)
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
             shp = (self.nPoints, self.nChannels)
-            if not allclose(self._predictedData.shape, shp):
-                self._predictedData = DataArray(values, "Predicted Data", self.units)
+            if not allclose(self._predicted_data.shape, shp):
+                self._predicted_data = DataArray(values, "Predicted Data", self.units)
                 return
 
-            self._predictedData[:, :] = values
+            self._predicted_data[:, :] = values
 
     @property
     def relative_error(self):
@@ -409,9 +409,9 @@ class Data(Point):
 
         msg += "channel names:\n{}\n".format("|   "+(', '.join(names).replace("\n,", "\n|  ")))
         msg += "data:\n{}\n".format("|   "+(self.data[self.active].summary.replace("\n", "\n|   "))[:-4])
-        msg += "predicted data:\n{}\n".format("|   "+(self.predictedData[self.active].summary.replace("\n", "\n|   "))[:-4])
+        msg += "predicted data:\n{}\n".format("|   "+(self.predicted_data[self.active].summary.replace("\n", "\n|   "))[:-4])
         msg += "std:\n{}\n".format("|   "+(self.std[self.active].summary.replace("\n", "\n|   "))[:-4])
-        msg += "line number:\n{}\n".format("|   "+(self.lineNumber.summary.replace("\n", "\n|   "))[:-4])
+        msg += "line number:\n{}\n".format("|   "+(self.line_number.summary.replace("\n", "\n|   "))[:-4])
         msg += "fiducial:\n{}\n".format("|   "+(self.fiducial.summary.replace("\n", "\n|   "))[:-4])
         msg += "relative error:\n{}\n".format("|   "+(self.relative_error.summary.replace("\n", "\n|   "))[:-4])
         msg += "additive error:\n{}\n".format("|   "+(self.additive_error.summary.replace("\n", "\n|   "))[:-4])
@@ -441,12 +441,12 @@ class Data(Point):
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
         out._fiducial = deepcopy(self.fiducial, memo)
-        out._lineNumber = deepcopy(self.lineNumber, memo)
+        out._line_number = deepcopy(self.line_number, memo)
         out._channel_names = deepcopy(self.channel_names, memo)
         out._components = deepcopy(self.components, memo)
         out._data = deepcopy(self.data, memo)
         out._std = deepcopy(self.std, memo)
-        out._predictedData = deepcopy(self.predictedData, memo)
+        out._predicted_data = deepcopy(self.predicted_data, memo)
         out._relative_error = deepcopy(self.relative_error, memo)
         out._additive_error = deepcopy(self._additive_error, memo)
         return out
@@ -474,7 +474,7 @@ class Data(Point):
             if p == "data":
                 tmp = self.data
             elif p == "predicted":
-                tmp = self.predictedData
+                tmp = self.predicted_data
             elif p == "std":
                 tmp = self.std
 
@@ -510,7 +510,7 @@ class Data(Point):
         channels = fIO.get_column_name(filename)
         nChannels = len(channels)
 
-        line_names = ('line', 'linenumber', 'line_number')
+        line_names = ('line', 'line_number', 'line_number')
         fiducial_names = ('fid', 'fiducial', 'id')
 
         n = 0
@@ -557,7 +557,7 @@ class Data(Point):
             df = read_csv(filename, index_col=False, usecols=channels[:2], sep=r"\s+", skipinitialspace = True)
 
         df = df.replace('NaN',nan)
-        self.lineNumber = df[channels[0]].values
+        self.line_number = df[channels[0]].values
         self.fiducial = df[channels[1]].values
 
     def _systemIndices(self, system=None):
@@ -588,19 +588,19 @@ class Data(Point):
 
         super().append(other)
         self._fiducial = self._fiducial.append(other.fiducial)
-        self._lineNumber = self._lineNumber.append(other.lineNumber)
+        self._line_number = self._line_number.append(other.line_number)
         self._data = self._data.append(other.data, axis=0)
-        self._predictedData = self._predictedData.append(other.predictedData, axis=0)
+        self._predicted_data = self._predicted_data.append(other.predicted_data, axis=0)
         self._std = self._std.append(other.std, axis=0)
 
         return self
 
     def check_line_numbers(self):
 
-        ln = unique(self.lineNumber)
+        ln = unique(self.line_number)
 
         import numpy as np
-        bad_lines = [l for l in ln if sum(diff(asarray(self.lineNumber == l, dtype=np.int8)) > 0) > 1]
+        bad_lines = [l for l in ln if sum(diff(asarray(self.line_number == l, dtype=np.int8)) > 0) > 1]
 
         return bad_lines
 
@@ -635,7 +635,7 @@ class Data(Point):
         return type(self)(channels_per_system=self.channels_per_system,
                    x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
                    data=self.data[i, :], std=self.std[i, :],
-                   predictedData=self.predictedData[i, :],
+                   predicted_data=self.predicted_data[i, :],
                    channel_names=self.channel_names)
 
     # def dataChannel(self, channel, system=0):
@@ -677,7 +677,7 @@ class Data(Point):
         assert size(i) == 1, ValueError("i must be a single integer")
         assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
         return DataPoint(x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
-                         data=self.data[i, :], std=self.std[i, :], predictedData=self.predictedData[i, :],
+                         data=self.data[i, :], std=self.std[i, :], predicted_data=self.predicted_data[i, :],
                          channel_names=self.channel_names)
 
     def _init_posterior_plots(self, gs):
@@ -711,11 +711,11 @@ class Data(Point):
     def line(self, line):
         """ Get the data from the given line number """
         if size(line) > 1:
-            i = where(self.lineNumber == line[0])[0]
+            i = where(self.line_number == line[0])[0]
             for j in range(1, size(line)):
-                i = hstack([i, where(self.lineNumber == line[j])[0]])
+                i = hstack([i, where(self.line_number == line[j])[0]])
         else:
-            i = where(self.lineNumber == line)[0]
+            i = where(self.line_number == line)[0]
         assert (i.size > 0), 'Could not get line with number {}'.format(line)
         return self[i]
 
@@ -729,14 +729,14 @@ class Data(Point):
             Number of points in each line
 
         """
-        nPoints = zeros(unique(self.lineNumber).size)
-        lines = unique(self.lineNumber)
+        nPoints = zeros(unique(self.line_number).size)
+        lines = unique(self.line_number)
         for i, line in enumerate(lines):
-            nPoints[i] = sum(self.lineNumber == line)
+            nPoints[i] = sum(self.line_number == line)
         return nPoints
 
 
-    # def predictedDataChannel(self, channel, system=None):
+    # def predicted_dataChannel(self, channel, system=None):
     #     """Gets the predicted data in the specified channel
 
     #     Parameters
@@ -755,10 +755,10 @@ class Data(Point):
     #     """
 
     #     if system is None:
-    #         return DataArray(self.predictedData[:, channel], "Predicted data {}".format(self.channel_names[channel]), self.predictedData.units)
+    #         return DataArray(self.predicted_data[:, channel], "Predicted data {}".format(self.channel_names[channel]), self.predicted_data.units)
     #     else:
     #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-    #         return DataArray(self.predictedData[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channel_names[self.systemOffset[system] + channel]), self.predictedData.units)
+    #         return DataArray(self.predicted_data[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channel_names[self.systemOffset[system] + channel]), self.predicted_data.units)
 
 
     # def stdChannel(self, channel, system=None):
@@ -850,7 +850,7 @@ class Data(Point):
             assert 0 >= channel < self.nChannelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.nChannelsPerSystem[system]))
             channel = self.systemOffset[system] + channel
 
-        kwargs['c'] = self.predictedDataChannel(channel)
+        kwargs['c'] = self.predicted_dataChannel(channel)
 
         self.map(*args, **kwargs)
 
@@ -1012,7 +1012,7 @@ class Data(Point):
             assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
             rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
-        ax = super().plot(values=self.predictedData[:, rTmp], xAxis=xAxis, label=self.channel_names[rTmp], **kwargs)
+        ax = super().plot(values=self.predicted_data[:, rTmp], xAxis=xAxis, label=self.channel_names[rTmp], **kwargs)
 
         if legend:
             box = ax.get_position()
@@ -1020,7 +1020,7 @@ class Data(Point):
 
             # Put a legend to the right of the current axis
             legend = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5),fancybox=True)
-            legend.set_title(self.predictedData.getNameUnits())
+            legend.set_title(self.predicted_data.getNameUnits())
         else:
             legend = None
 
@@ -1123,7 +1123,7 @@ class Data(Point):
         df = df.replace('NaN', nan)
 
         # Assign columns to variables
-        self.lineNumber = df[iC[0]].values
+        self.line_number = df[iC[0]].values
         self.fiducial = df[iC[1]].values
         self.x = df[iC[2]].values
         self.y = df[iC[3]].values
@@ -1141,7 +1141,7 @@ class Data(Point):
         out = super().pyvista_mesh()
 
         out[self.data.label] = self.data
-        out[self.predictedData.label] = self.predictedData
+        out[self.predicted_data.label] = self.predicted_data
         out[self.std.label] = self.std
 
         return out
@@ -1156,10 +1156,10 @@ class Data(Point):
         grp = super().createHdf(parent, myName, withPosterior, fillvalue)
 
         self.fiducial.createHdf(grp, 'fiducial', fillvalue=fillvalue)
-        self.lineNumber.createHdf(grp, 'line_number', fillvalue=fillvalue)
+        self.line_number.createHdf(grp, 'line_number', fillvalue=fillvalue)
         self.data.createHdf(grp, 'data', withPosterior=withPosterior, fillvalue=fillvalue)
         self.std.createHdf(grp, 'std', withPosterior=withPosterior, fillvalue=fillvalue)
-        self.predictedData.createHdf(grp, 'predicted_data', withPosterior=withPosterior, fillvalue=fillvalue)
+        self.predicted_data.createHdf(grp, 'predicted_data', withPosterior=withPosterior, fillvalue=fillvalue)
 
         self.relative_error.createHdf(grp, 'relative_error', withPosterior=withPosterior, fillvalue=fillvalue)
         self.additive_error.createHdf(grp, 'additive_error', withPosterior=withPosterior, fillvalue=fillvalue)
@@ -1179,11 +1179,11 @@ class Data(Point):
         grp = parent[name]
 
         self.fiducial.writeHdf(grp, 'fiducial')
-        self.lineNumber.writeHdf(grp, 'line_number')
+        self.line_number.writeHdf(grp, 'line_number')
 
         self.data.writeHdf(grp, 'data',  withPosterior=withPosterior)
         self.std.writeHdf(grp, 'std',  withPosterior=withPosterior)
-        self.predictedData.writeHdf(grp, 'predicted_data',  withPosterior=withPosterior)
+        self.predicted_data.writeHdf(grp, 'predicted_data',  withPosterior=withPosterior)
 
         self.relative_error.writeHdf(grp, 'relative_error',  withPosterior=withPosterior)
         self.additive_error.writeHdf(grp, 'additive_error',  withPosterior=withPosterior)
@@ -1195,11 +1195,11 @@ class Data(Point):
         self = super(Data, cls).fromHdf(grp, **kwargs)
 
         self.fiducial = DataArray.fromHdf(grp['fiducial'])
-        self.lineNumber = DataArray.fromHdf(grp['line_number'])
+        self.line_number = DataArray.fromHdf(grp['line_number'])
 
         self.data = DataArray.fromHdf(grp['data'])
         self.std = DataArray.fromHdf(grp['std'])
-        self.predictedData = DataArray.fromHdf(grp['predicted_data'])
+        self.predicted_data = DataArray.fromHdf(grp['predicted_data'])
 
         self.relative_error = DataArray.fromHdf(grp['relative_error'])
         self.additive_error = DataArray.fromHdf(grp['additive_error'])
@@ -1241,10 +1241,10 @@ class Data(Point):
         out.channels_per_system = myMPI.Bcast(self.channels_per_system, world, root=root)
 
         out.fiducial = self.fiducial.Bcast(world, root=root)
-        out.lineNumber = self.lineNumber.Bcast(world, root=root)
+        out.line_number = self.line_number.Bcast(world, root=root)
         out._data = self.data.Bcast(world, root=root)
         out._std = self.std.Bcast(world, root=root)
-        out._predictedData = self.predictedData.Bcast(world, root=root)
+        out._predicted_data = self.predicted_data.Bcast(world, root=root)
 
         return out
 
@@ -1272,8 +1272,8 @@ class Data(Point):
 
         out.channels_per_system = myMPI.Bcast(self.channels_per_system, world, root=root)
         out.fiducial = self.fiducial.Scatterv(starts, chunks, world, root=root)
-        out.lineNumber = self.lineNumber.Scatterv(starts, chunks, world, root=root)
+        out.line_number = self.line_number.Scatterv(starts, chunks, world, root=root)
         out.data = self.data.Scatterv(starts, chunks, world, root=root)
         out.std = self.std.Scatterv(starts, chunks, world, root=root)
-        out.predictedData = self.predictedData.Scatterv(starts, chunks, world, root=root)
+        out.predicted_data = self.predicted_data.Scatterv(starts, chunks, world, root=root)
         return out

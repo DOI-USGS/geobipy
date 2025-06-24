@@ -190,7 +190,7 @@ class Inference2D(myObject):
 
     @cached_property
     def line_number(self):
-        return self.data.lineNumber[0]
+        return self.data.line_number[0]
 
     @property
     def longest_coordinate(self):
@@ -1950,7 +1950,7 @@ class Inference2D(myObject):
         parent = inference1d.createHdf(parent, add_axis=self.data.fiducial)
 
         # Write the line number
-        self.data.lineNumber.writeHdf(parent, 'data/line_number')
+        self.data.line_number.writeHdf(parent, 'data/line_number')
 
         # Write the sorted fiducials
         fiducials = sort(self.data.fiducial)

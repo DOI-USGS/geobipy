@@ -366,8 +366,8 @@ class FdemData(Data):
                        elevation=self.elevation[i],
                        data=self.data[i, :],
                        std=self.std[i, :],
-                       predictedData=self.predictedData[i, :],
-                       lineNumber=self.lineNumber[i],
+                       predicted_data=self.predicted_data[i, :],
+                       line_number=self.line_number[i],
                        fiducial=self.fiducial[i],
                        powerline=self.powerline[i],
                        magnetic=self.magnetic[i])
@@ -407,9 +407,9 @@ class FdemData(Data):
                              self.elevation[index],
                              self.data[index, :],
                              self.std[index, :],
-                             self.predictedData[index, :],
+                             self.predicted_data[index, :],
                              system=self.system,
-                             lineNumber=self.lineNumber[index],
+                             line_number=self.line_number[index],
                              fiducial=self.fiducial[index])
 
 
@@ -559,7 +559,7 @@ class FdemData(Data):
         df = df.replace('NaN',nan)
 
         # Assign columns to variables
-        self.lineNumber = df[iC[0]].values
+        self.line_number = df[iC[0]].values
         self.fiducial = df[iC[1]].values
         self.x = df[iC[2]].values
         self.y = df[iC[3]].values
@@ -767,7 +767,7 @@ class FdemData(Data):
                              z=df[self._iC[4]].values,
                              elevation=df[self._iC[5]].values,
                              data=D, std=S, system=self.system,
-                             lineNumber=df[self._iC[0]].values,
+                             line_number=df[self._iC[0]].values,
                              fiducial=df[self._iC[1]].values)
 
 
@@ -812,7 +812,7 @@ class FdemData(Data):
         values = fIO.read_columns(dataFilename[0], indicesForFile, nHeaderLines, nPoints)
 
         # Assign columns to variables
-        self._lineNumber[:] = values[:, 0]
+        self._line_number[:] = values[:, 0]
         self._fiducial[:] = values[:, 1]
         self.x[:] = values[:, 2]
         self.y[:] = values[:, 3]
@@ -1040,7 +1040,7 @@ class FdemData(Data):
 
 
 
-    def write(self, fileNames, std=False, predictedData=False):
+    def write(self, fileNames, std=False, predicted_data=False):
 
         if isinstance(fileNames, str):
             fileNames = [fileNames]
@@ -1076,11 +1076,11 @@ class FdemData(Data):
         #         with printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
         #             for j in range(self.nPoints):
 
-        #                 x = asarray([self.lineNumber[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
+        #                 x = asarray([self.line_number[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
 
-        #                 if predictedData:
-        #                     d[0::2] = self.predictedData[j, :sys.nFrequencies]
-        #                     d[1::2] = self.predictedData[j, sys.nFrequencies:]
+        #                 if predicted_data:
+        #                     d[0::2] = self.predicted_data[j, :sys.nFrequencies]
+        #                     d[1::2] = self.predicted_data[j, sys.nFrequencies:]
         #                 else:
         #                     d[0::2] = self.data[j, :sys.nFrequencies]
         #                     d[1::2] = self.data[j, sys.nFrequencies:]
@@ -1119,7 +1119,7 @@ class FdemData(Data):
         for k in range(model.x.nCells):
             mod = model[k]
             dp.forward(mod)
-            ds.data[k, :] = dp.predictedData
+            ds.data[k, :] = dp.predicted_data
 
         ds_noisy = deepcopy(ds)
 
