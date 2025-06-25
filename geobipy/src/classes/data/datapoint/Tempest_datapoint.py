@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from numpy import any, atleast_2d, diag_indices, dot
+from numpy import any, atleast_2d, diag, diag_indices, dot
 from numpy import full, linspace, log10, logspace
 from numpy import ones, s_, size, sqrt, sum, squeeze, zeros
 from numpy import all as npall
@@ -619,7 +619,7 @@ class Tempest_datapoint(TdemDataPoint):
     def set_additive_error_posterior(self, log=None):
         """"""
         if self.additive_error.hasPrior:
-            mesh = RectilinearMesh1D(edges = DataArray(logspace(-1, 1, 150), name=self.additive_error_multiplier.name), log=log)
+            mesh = RectilinearMesh1D(edges = DataArray(logspace(-0.1, 0.1, 150), name=self.additive_error_multiplier.name), log=log)
             self.additive_error_multiplier.posterior = Histogram(mesh=mesh)
 
     # def update_additive_error_posterior(self):
@@ -642,26 +642,36 @@ class Tempest_datapoint(TdemDataPoint):
         """ Compute the sensitivty matrix for the given model """
 
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        tmp = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
+
+        J = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
 
         self._sensitivity_matrix = DataArray(zeros((self.n_data_channels, model.nCells.item())))
-        # dp = 1.0 / self.predicted_data
+        dp = 1.0 / self.predicted_data
         for i in range(self.n_components):
             ic = self._component_indices(i, 0)
-            # sec_field = self.predicted_secondary_field[ic]
             # Compute Sum(Pc + Sc) for c in x, y, z
-            self._sensitivity_matrix += tmp[ic, :]
-            # self._sensitivity_matrix += (dp * (self.predicted_primary_field[i] + sec_field) * tmp[ic, :].T).T
+            # self._sensitivity_matrix += J[ic, :]
+
+            dc = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
+            self._sensitivity_matrix += dot(diag(dc * dp), J[ic, :])
 
         return self.sensitivity_matrix
 
     def fm_dlogc(self, model):
+
+        assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
+
         self._sensitivity_matrix = DataArray(zeros((self.n_data_channels, model.nCells.item())), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
         values, J = ga_fm_dlogc(self, model)
+        dp = 1.0 / self.predicted_data
         for i in range(self.n_components):
             ic = self._component_indices(i, 0)
             # Compute Sum(Pc + Sc) for c in x, y, z
-            self._sensitivity_matrix += J[ic, :]
+            # self._sensitivity_matrix += J[ic, :]
+
+            dc = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
+            self._sensitivity_matrix += dot(diag(dc * dp), J[ic, :])
+            # self._sensitivity_matrix += (dp * dc * J[ic, :].T).T
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
 

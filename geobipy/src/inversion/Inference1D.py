@@ -518,7 +518,7 @@ class Inference1D(myObject):
         if self.ignore_likelihood:
             observation = None
         else:
-            observation.sensitivity(self.model)
+            observation.fm_dlogc(self.model)
 
         self.model.set_proposal_weights(**kwargs)
 
