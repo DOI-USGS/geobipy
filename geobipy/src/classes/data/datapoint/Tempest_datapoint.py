@@ -645,13 +645,13 @@ class Tempest_datapoint(TdemDataPoint):
         tmp = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
 
         self._sensitivity_matrix = DataArray(zeros((self.n_data_channels, model.nCells.item())))
-        dp = 1.0 / self.predicted_data
+        # dp = 1.0 / self.predicted_data
         for i in range(self.n_components):
             ic = self._component_indices(i, 0)
-            sec_field = self.predicted_secondary_field[ic]
+            # sec_field = self.predicted_secondary_field[ic]
             # Compute Sum(Pc + Sc) for c in x, y, z
-            # self._sensitivity_matrix += tmp[ic, :]
-            self._sensitivity_matrix += (dp * (self.predicted_primary_field[i] + sec_field) * tmp[ic, :].T).T
+            self._sensitivity_matrix += tmp[ic, :]
+            # self._sensitivity_matrix += (dp * (self.predicted_primary_field[i] + sec_field) * tmp[ic, :].T).T
 
         return self.sensitivity_matrix
 
