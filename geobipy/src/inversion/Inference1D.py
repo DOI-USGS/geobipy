@@ -554,12 +554,7 @@ class Inference1D(myObject):
         if self.ignore_likelihood:
             observation = None
 
-        try:
-            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, alpha = self.covariance_scaling)
-        except Exception:
-            # print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
-            print(traceback.format_exc())
-            return True
+        remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, alpha = self.covariance_scaling)
 
         if remapped_model is None:
             self.accepted = False
@@ -645,7 +640,12 @@ class Inference1D(myObject):
         failed = not Go
         while (Go):
             # Accept or reject the new model
-            failed = self.accept_reject()
+            try:
+                failed = self.accept_reject()
+            except Exception as e:
+                print(f'singularity --line={self.datapoint.line_number.item()} --fiducial={self.datapoint.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
+                print(traceback.format_exc())
+                failed = True
 
             self.update()
 
