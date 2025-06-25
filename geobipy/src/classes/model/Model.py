@@ -410,7 +410,7 @@ class Model(myObject):
             # Only J should be updated here.  The predicted data needs to be centered
             # on the previous dimensional model.
             if remapped_model.mesh.action[0] != 'none':
-                observation.sensitivity(remapped_model, model_changed=True)
+                observation.fm_dlogc(remapped_model)
 
         # remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
 

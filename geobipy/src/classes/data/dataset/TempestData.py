@@ -101,9 +101,39 @@ class TempestData(TdemData):
 
             self._additive_error_multiplier[:, :] = values
 
+    @TdemData.data.getter
+    def data(self):
+        if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
+            self._data = DataArray((self.nPoints, self.n_data_channels), "Data", self.units)
+
+        self._data[:] = 0.0
+        for j in range(self.nSystems):
+            for i in range(self.n_components):
+                ic = self._component_indices(i, j)
+                self._data[:, :] += self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
+
+        return self._data
+
+    @TdemData.predicted_data.getter
+    def predicted_data(self):
+        if size(self._predicted_data, 0) == 0 or (self._predicted_data.shape[0] != self.nPoints):
+            self._predicted_data = DataArray((self.nPoints, self.n_data_channels), "Predicted Data", self.units)
+
+        self._predicted_data[:] = 0.0
+        for j in range(self.nSystems):
+            for i in range(self.n_components):
+                ic = self._component_indices(i, j)
+                self._predicted_data[:, :] += self.predicted_primary_field[:, i][:, None] + self.predicted_secondary_field[:, ic]
+
+        return self._predicted_data
+
     @property
     def file(self):
         return self._file
+
+    @property
+    def n_data_channels(self):
+        return sum(self.nTimes)
 
     @property
     def relative_error(self):

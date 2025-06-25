@@ -12,7 +12,8 @@ from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
 from ...core.DataArray import DataArray
 from ...statistics.StatArray import StatArray
 from .TdemDataPoint import TdemDataPoint
-from ...forwardmodelling.Electromagnetic.TD.tdem1d import (tdem1dfwd, tdem1dsen)
+from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
+    tdem1dfwd, tdem1dsen, ga_fm_dlogc)
 from ...statistics.Distribution import Distribution
 from ...statistics.Histogram import Histogram
 from ...model.Model import Model
@@ -655,8 +656,12 @@ class Tempest_datapoint(TdemDataPoint):
         return self.sensitivity_matrix
 
     def fm_dlogc(self, model):
-        values, J = super().fm_dlogc(model)
-        self._sensitivity_matrix = DataArray(J, 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
+        self._sensitivity_matrix = DataArray(zeros((self.n_data_channels, model.nCells.item())), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
+        values, J = ga_fm_dlogc(self, model)
+        for i in range(self.n_components):
+            ic = self._component_indices(i, 0)
+            # Compute Sum(Pc + Sc) for c in x, y, z
+            self._sensitivity_matrix += J[ic, :]
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
 

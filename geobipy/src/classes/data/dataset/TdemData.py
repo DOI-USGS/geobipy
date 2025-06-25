@@ -129,7 +129,7 @@ class TdemData(Data):
     @Data.data.getter
     def data(self):
         if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
-            self._data = DataArray((self.nPoints, self.nChannels), "Data", self.units)
+            self._data = DataArray((self.nPoints, self.n_data_channels), "Data", self.units)
 
         for j in range(self.nSystems):
             for i in range(self.n_components):
@@ -270,7 +270,7 @@ class TdemData(Data):
     @Data.std.getter
     def std(self):
         if (size(self._std, 0) == 0) or (self._std.shape[0] != self.nPoints):
-            self._std = DataArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+            self._std = DataArray((self.nPoints, self.n_data_channels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
             for i in range(self.nSystems):
@@ -849,7 +849,6 @@ class TdemData(Data):
                     receiver=self.receiver[i],
                     secondary_field=self.secondary_field[i, :],
                     primary_field=self.primary_field[i, :],
-                    std=self.std[i, :],
                     predicted_secondary_field=self.predicted_secondary_field[i, :],
                     predicted_primary_field=self.predicted_primary_field[i, :],
                     channel_names=self.channel_names)

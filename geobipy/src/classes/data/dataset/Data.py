@@ -28,6 +28,7 @@ try:
 except:
     pass
 
+
 class Data(Point):
     """Class defining a set of Data.
 
@@ -322,6 +323,10 @@ class Data(Point):
     @property
     def n_components(self):
         return size(self.components)
+
+    @property
+    def n_data_channels(self):
+        return self.nChannels
 
     @property
     def nLines(self):
