@@ -410,7 +410,7 @@ class Model(myObject):
             # Only J should be updated here.  The predicted data needs to be centered
             # on the previous dimensional model.
             if remapped_model.mesh.action[0] != 'none':
-                observation.fm_dlogc(remapped_model)#, model_changed=True)
+                observation.sensitivity(remapped_model, model_changed=True)
 
         # remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
 
@@ -642,7 +642,7 @@ class Model(myObject):
             # that were generated using pertured data, using the unperturbed data.
             # We therefore scale the sensitivity matrix by the proposed errors in the data, and our gradient uses
             # the data residual using the perturbed parameter values.
-            observation.fm_dlogc(self)#, model_changed=True)
+            observation.sensitivity(self, model_changed=True)
 
             # Compute the gradient according to the perturbed parameters and data residual
             # observation fm is at candidate
