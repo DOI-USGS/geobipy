@@ -609,36 +609,36 @@ class TempestData(TdemData):
 
         assert record is not None, ValueError("Need to provide a record index for netcdf files")
 
-        gdf = self._file['survey/tabular/0']
-        x = float64(gdf['Easting'][record])
-        y = float64(gdf['Northing'][record])
-        z = float64(gdf['Tx_Height'][record])
-        primary_field = asarray([float64(gdf['X_PrimaryField'][record]), float64(gdf['Z_PrimaryField'][record])])
+        gdf = self._file['/']
+        x = float64(gdf['easting'][record])
+        y = float64(gdf['northing'][record])
+        z = float64(gdf['tx_height'][record])
+        primary_field = asarray([float64(gdf['x_primaryfield'][record]), float64(gdf['z_primaryfield'][record])])
         secondary_field = hstack([gdf['EMX_NonHPRG'][record, :], gdf['EMZ_NonHPRG'][record, :]])
 
         transmitter_loop = CircularLoop(x=x, y=y, z=z,
-                                        pitch=float64(gdf['Tx_Pitch'][record]),
-                                        roll=float64(gdf['Tx_Roll'][record]),
-                                        yaw=float64(gdf['Tx_Yaw'][record]),
+                                        pitch=float64(gdf['tx_pitch'][record]),
+                                        roll=float64(gdf['tx_roll'][record]),
+                                        yaw=float64(gdf['tx_yaw'][record]),
                                         radius=self.system[0].loopRadius())
 
-        loopOffset = vstack([asarray(gdf['HSep_GPS'][record]), asarray(gdf['TSep_GPS'][record]), asarray(gdf['VSep_GPS'][record])])
+        loopOffset = vstack([asarray(gdf['hsep_gps'][record]), asarray(gdf['tsep_gps'][record]), asarray(gdf['vsep_gps'][record])])
 
         receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
                                       y=transmitter_loop.y + loopOffset[1],
                                       z=transmitter_loop.z + loopOffset[2],
-                                      pitch=float64(gdf['Rx_Pitch'][record]),
-                                      roll=float64(gdf['Rx_Roll'][record]),
-                                      yaw=float64(gdf['Rx_Yaw'][record]),
+                                      pitch=float64(gdf['rx_pitch'][record]),
+                                      roll=float64(gdf['rx_roll'][record]),
+                                      yaw=float64(gdf['rx_yaw'][record]),
                                       radius=self.system[0].loopRadius())
 
         out = self.single(
-                line_number = float64(gdf['Line'][record]),
-                fiducial = float64(gdf['Fiducial'][record]),
+                line_number = float64(gdf['line'][record]),
+                fiducial = float64(gdf['fiducial'][record]),
                 x = x,
                 y = y,
                 z = z,
-                elevation = float64(gdf['DTM'][record]),
+                elevation = float64(gdf['dtm'][record]),
                 transmitter_loop = transmitter_loop,
                 receiver_loop = receiver_loop,
                 primary_field = primary_field,
@@ -651,10 +651,10 @@ class TempestData(TdemData):
         if filename.endswith('.csv'):
             return super()._read_line_fiducial(filename)
 
-        self.line_number, self.fiducial = self._read_variable(['Line', 'Fiducial'])
+        self.line_number, self.fiducial = self._read_variable(['line', 'fiducial'])
 
     def _read_variable(self, variable):
-        gdf = self._file['survey/tabular/0']
+        gdf = self._file['/']
 
         if isinstance(variable, str):
             variable = [variable]
@@ -669,7 +669,7 @@ class TempestData(TdemData):
 
         self._file = h5py.File(filename, 'r')
         self._data_filename = filename
-        self.line_number, self.fiducial = self._read_variable(['Line', 'Fiducial'])
+        self.line_number, self.fiducial = self._read_variable(['line', 'fiducial'])
 
     def create_synthetic_data(self, model, prng):
 
