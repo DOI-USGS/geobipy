@@ -372,7 +372,7 @@ class TdemDataPoint(EmDataPoint):
 
         # Update the variance of the predicted data prior
         if self.predicted_data.hasPrior:
-            self.predicted_data.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
+            self.predicted_data.prior.variance = self._std[self.active]**2.0
 
         return self._std
 
@@ -948,7 +948,11 @@ class TdemDataPoint(EmDataPoint):
 
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
-                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=True, prng=kwargs.get('prng'))
+                additive_error_prior = Distribution('Uniform',
+                                                    kwargs['minimum_additive_error'],
+                                                    kwargs['maximum_additive_error'],
+                                                    log=True,
+                                                    prng=kwargs.get('prng'))
 
         if data_prior is None:
             data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))
@@ -1018,7 +1022,7 @@ class TdemDataPoint(EmDataPoint):
 
     def _empymodForward(self, mod):
 
-        print('stuff')
+        stuff = None
 
     # def _simPEGForward(self, mod):
 

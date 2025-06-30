@@ -687,6 +687,7 @@ class TdemData(Data):
             if record is None:
                 df = self._file.get_chunk()
             else:
+                assert record < self.nPoints, Exception(f"Record index {record} is out of bounds for data set with {self.n_points} points.")
                 df = self._file.get_chunk()
                 if not mpi_enabled:
                     i = 1

@@ -58,7 +58,7 @@ class user_parameters(dict):
         return deepcopy(self)
 
     def optional_arguments(self, **kwargs):
-        kwargs = self.assign_default('parameter_standard_deviation', float64(11.0), **kwargs)
+        kwargs = self.assign_default('parameter_standard_deviation', float64(2.39), **kwargs)
         kwargs = self.assign_default('gradient_standard_deviation', float64(1.5), **kwargs)
         kwargs = self.assign_default('multiplier', float64(1.0), **kwargs)
         kwargs = self.assign_default('factor', float64(10.0), **kwargs)
@@ -66,6 +66,7 @@ class user_parameters(dict):
         kwargs = self.assign_default('parameter_weight', float64(1.0), **kwargs)
         kwargs = self.assign_default('gradient_weight', float64(0.0), **kwargs)
         kwargs = self.assign_default('minimum_burn_in', float64(5000.0), **kwargs)
+        kwargs = self.assign_default('parameter_limits', np.r_[1e-20, 1e20], **kwargs)
 
         if "number_of_depth_bins" in kwargs:
             kwargs["number_of_edge_bins"] = kwargs.pop("number_of_depth_bins")

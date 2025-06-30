@@ -49,9 +49,6 @@ class MvNormal(baseDistribution):
 
         """
 
-        if (type(variance) is float):
-            variance = float64(variance)
-
         super().__init__(prng)
 
         if ndim is None:
@@ -69,7 +66,7 @@ class MvNormal(baseDistribution):
             ndim = int32(maximum(1, ndim))
             self._constant = True
             self._mean = full(ndim, fill_value=mean)
-            self._variance = diag(full(ndim, fill_value=variance))
+            self._variance = full(ndim, fill_value=variance)
 
     @property
     def address(self):
@@ -110,13 +107,10 @@ class MvNormal(baseDistribution):
         else:
             mean = self._mean[0]
 
-        # if ndim(self.variance) == 0:
-        #     variance = self.variance
-        # else:
         variance = self.variance[0, 0]
 
         self._mean = full(newDimension, fill_value=mean)
-        self._variance = diag(full(newDimension, fill_value=variance))
+        self._variance = full(newDimension, fill_value=variance)
 
     @property
     def std(self):
@@ -124,28 +118,31 @@ class MvNormal(baseDistribution):
 
     @property
     def variance(self):
+
+        if npndim(self._variance) < 2:
+            return diag(self._variance)
         return self._variance
 
     @variance.setter
     def variance(self, values):
+        self._variance = atleast_1d(values).copy()
+        # self._variance = zeros((self.ndim, self.ndim))
 
-        self._variance = zeros((self.ndim, self.ndim))
+        # # Variance
+        # nd = npndim(values)
+        # if nd == 0:
+        #     self._variance[diag_indices(self.ndim)] = values
 
-        # Variance
-        nd = npndim(values)
-        if nd == 0:
-            self._variance[diag_indices(self.ndim)] = values
+        # elif nd == 1:
+        #     assert size(values) == self.ndim, Exception('Mismatch in size of mean and variance')
+        #     self._variance[diag_indices(self.ndim)] = values
 
-        elif nd == 1:
-            assert size(values) == self.ndim, Exception('Mismatch in size of mean and variance')
-            self._variance[diag_indices(self.ndim)] = values
-
-        elif nd == 2:
-            self._variance[:, :] = values
+        # elif nd == 2:
+        #     self._variance[:, :] = values
 
     @property
     def precision(self):
-        return inv(self.variance)
+        return cf.inv(self._variance)
 
     def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
@@ -180,6 +177,7 @@ class MvNormal(baseDistribution):
 
     def rng(self, size=1):
         """  """
+
         return atleast_1d(squeeze(self.prng.multivariate_normal(self._mean, self.variance, size=size)))
 
     def plot_pdf(self, log=False, **kwargs):
@@ -211,7 +209,7 @@ class MvNormal(baseDistribution):
 
         pdf = multivariate_normal.logpdf if log else multivariate_normal.pdf
 
-        return DataArray(pdf(x, mean=mean, cov=self.variance), name='Probability Density')
+        return DataArray(pdf(x, mean=mean, cov=self.variance, allow_singular=True), name='Probability Density')
 
     @property
     def summary(self):
@@ -224,9 +222,9 @@ class MvNormal(baseDistribution):
         """ Pads the mean and variance to the given size
         N: Padded size
         """
-        if (self.variance.ndim == 1):
+        if (self._variance.ndim == 1):
             return MvNormal(zeros(N, dtype=self.mean.dtype), zeros(N, dtype=self.variance.dtype), prng=self.prng)
-        if (self.variance.ndim == 2):
+        if (self._variance.ndim == 2):
             return MvNormal(zeros(N, dtype=self.mean.dtype), zeros([N, N], dtype=self.variance.dtype), prng=self.prng)
 
     def bins(self, nBins=99, nStd=4.0, axis=None, relative=False):

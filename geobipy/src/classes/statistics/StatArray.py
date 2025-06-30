@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from numpy import abs, allclose, arange, argmax, array, asarray, atleast_1d, concatenate, delete, hstack
+from numpy import abs, allclose, arange, argmax, array, asarray, atleast_1d, concatenate, delete, hstack, diag
 from numpy import diff, divide, expand_dims, flip, float32, float64, histogram, inf, insert, int32, int64, isnan
 from numpy import mean, nan, nanmax, nanmin, ndarray, ndim, ones, r_, resize, s_, size, squeeze, sum, unique, where, zeros
 from numpy import shape as npshape
@@ -377,6 +377,9 @@ class StatArray(DataArray):
         if i is None:
             i = s_[:]
         out = self.prior.derivative(self[i], order)
+
+        if order == 2 and ndim(out) < 2:
+                return diag(out)
         return out
 
     def proposal_derivative(self, order, i=None):

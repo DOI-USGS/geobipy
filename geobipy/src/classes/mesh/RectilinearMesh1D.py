@@ -696,8 +696,6 @@ class RectilinearMesh1D(Mesh):
         out.edges = out.edges.delete(i)
 
         out._action = ['delete', int32(i), squeeze(self.edges[i])]
-        # if self._nCells is not None:
-        #     self._nCells[0] +=
 
         if values is not None:
             values = deepcopy(values)

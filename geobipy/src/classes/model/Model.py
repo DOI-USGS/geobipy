@@ -8,9 +8,8 @@ from numpy import cumsum, diag, diff, dot, empty, exp, hstack, inf, isinf, maxim
 from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, sum, unique, vstack, zeros
 from numpy import all as npall
 from numpy import log as nplog
-from numpy.linalg import inv
 from matplotlib.pyplot import gcf
-from ...base.utilities import reslice, expReal, nodata_value
+from ...base.utilities import reslice, expReal, nodata_value, Ax, inv
 from ...base.utilities import debug_print as dprint
 from ...base import plotting
 from ..core.myObject import myObject
@@ -219,19 +218,11 @@ class Model(myObject):
 
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
-        # if (self.mesh.action[0] in ['insert', 'delete']):
-            # Propose new layer conductivities
         return self.local_variance(observation)
-        # else:
-        #     return self.values.proposal.variance
 
     def delete_edge(self, i):
         out, values = self.mesh.delete_edge(i, values=self.values)
         out = type(self)(mesh=out, values=values)
-
-        # if len(values) > 1:
-        #     for k, v in zip(self.__values, values[1:]):
-        #         out.setattr(k, v)
 
         return out
 
@@ -315,7 +306,18 @@ class Model(myObject):
             Inverse Hessian matrix
 
         """
-        return inv(self.local_precision(observation))
+        tries = 0
+        while tries < 10:
+            # Try to invert the local Hessian using data.
+            try:
+                return inv(self.local_precision(observation))
+            except:
+                # If the Hessian is singular, we need to increase the variance of the prior to stabilize the inversion.
+                self.values.prior.variance *= 2.0
+                tries += 1
+                print(f'Increased prior variance to {self.values.prior.variance}', flush=True)
+
+        return self.prior_derivative(order=2)
 
     def pad(self, shape):
         """Copies the properties of a model including all priors or proposals, but pads memory to the given size
@@ -394,7 +396,7 @@ class Model(myObject):
 
         return fk
 
-    def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, alpha=1.0):
+    def stochastic_newton_perturbation(self, observation=None, alpha=1.0):
 
         # repeat = True
         # n_tries = 0
@@ -411,14 +413,6 @@ class Model(myObject):
             # on the previous dimensional model.
             if remapped_model.mesh.action[0] != 'none':
                 observation.sensitivity(remapped_model, model_changed=True)
-
-        # remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
-
-        # if remapped_model.nCells > 1:
-        #     v = remapped_model.gradient.prior.variance[0,0] + remapped_model.gradient_weight.rng(1)
-        #     remapped_model.gradient.prior.variance = np.diag(np.full(remapped_model.nCells.item()-1, fill_value=v))
-
-        # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
 
         # Update the local Hessian around the current model.
         # B^-1 = H = inv(J'Wd'WdJ + Wm'Wm)
@@ -454,7 +448,7 @@ class Model(myObject):
 
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
-            operator += self.gradient_weight * dot(Wz.T, dot(self.gradient.priorDerivative(order=2), Wz))
+            operator += self.gradient_weight * dot(Wz.T, Ax(self.gradient.priorDerivative(order=2), Wz))
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
@@ -508,13 +502,13 @@ class Model(myObject):
 
         self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
 
-        # self.values.posterior.mean(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
-        #                                            flipY=False,
-        #                                            reciprocateX=values_kwargs.get('reciprocateX', None),
-        #                                            labels=False,
-        #                                            linewidth=1,
-        #                                            color='#5046C8',
-        #                                            ax=axes[-1])
+        self.values.posterior.mean(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
+                                                   flipY=False,
+                                                   reciprocateX=values_kwargs.get('reciprocateX', None),
+                                                   labels=False,
+                                                   linewidth=1,
+                                                   color='#1a8bff',
+                                                   ax=axes['values'])
         # self.values.posterior.mode(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
         #                                            flipY=False,
         #                                            reciprocateX=values_kwargs.get('reciprocateX', None),
@@ -579,7 +573,7 @@ class Model(myObject):
 
         # Check that the parameters are within the limits if they are bound
         if not self.value_bounds is None:
-            pInBounds = self.value_bounds.probability(x=self.values, log=True).item()
+            pInBounds = sum(self.value_bounds.probability(x=self.values, log=True))
             if any(isinf(pInBounds)):
                 return -inf
 
@@ -657,7 +651,6 @@ class Model(myObject):
 
             log_values = nplog(self.values) - alpha * (pk)
             mean = expReal(log_values)
-            # mean = self.values
 
             if any(mean == inf) or any(mean == 0.0):
                 return -inf, -inf
@@ -668,7 +661,6 @@ class Model(myObject):
             # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
             # tmp = Distribution('MvLogNormal', mean, self.values.proposal.variance, linearSpace=True, prng=prng)
             tmp = Distribution('MvLogNormal', mean, H, linearSpace=True, prng=prng)
-            # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
             # Probability of jumping from our perturbed parameter values to the unperturbed values.
             proposal = tmp.probability(x=remapped_model.values, log=True)
 
@@ -754,7 +746,8 @@ class Model(myObject):
             if kwargs.get('solve_value', False):
                 assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
                 # Assign the initial prior to the parameters
-                variance = nplog(kwargs.get('parameter_standard_deviation', 11.0))**2.0
+                variance = kwargs.get('parameter_standard_deviation', 2.3978952727983707)**2.0
+                assert variance > 0.0, ValueError("parameter_standard_deviation must be greater than 0.0")
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
                                                 variance=variance,
                                                 ndim=self.mesh.nCells,

@@ -569,13 +569,21 @@ class DataPoint(Point):
         # Define prior, proposal, posterior for relative error
         if relative_error_prior is None:
             if kwargs.get('solve_relative_error', False):
-                relative_error_prior = Distribution('Uniform', kwargs['minimum_relative_error'], kwargs['maximum_relative_error'], log=True, prng=kwargs.get('prng'))
+                relative_error_prior = Distribution('Uniform',
+                                                    kwargs['minimum_relative_error'],
+                                                    kwargs['maximum_relative_error'],
+                                                    log=True,
+                                                    prng=kwargs.get('prng'))
 
         # Define prior, proposal, posterior for additive error
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
                 # log = Trisinstance(self, TdemDataPoint)
-                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=True, prng=kwargs.get('prng'))
+                additive_error_prior = Distribution('Uniform',
+                                                    kwargs['minimum_additive_error'],
+                                                    kwargs['maximum_additive_error'],
+                                                    log=True,
+                                                    prng=kwargs.get('prng'))
 
         if data_prior is None:
             data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))
