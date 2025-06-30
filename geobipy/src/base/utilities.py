@@ -9,7 +9,8 @@ from numpy import real, s_, shape, sign, sin, size, squeeze, where, zeros
 from numpy import all as npall
 from numpy import log as nplog
 
-from numpy.linalg import cholesky, det, inv, slogdet
+from numpy.linalg import cholesky, det, slogdet
+from numpy.linalg import inv as npinv
 from numpy.lib.stride_tricks import as_strided
 
 from numpy.ma import masked_array
@@ -280,6 +281,11 @@ def debug_print(*args, **kwargs):
     # if world_rank == print_rank:
     #     print(*args, flush=True, **kwargs)
     return None
+
+def inv(values):
+    if ndim(values) < 2:
+        return diag(1.0 / values)
+    return npinv(values)
 
 def interleave(a, b):
         """Interleave two arrays together like zip
