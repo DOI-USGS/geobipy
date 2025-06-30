@@ -372,7 +372,7 @@ class TdemDataPoint(EmDataPoint):
 
         # Update the variance of the predicted data prior
         if self.predicted_data.hasPrior:
-            self.predicted_data.prior.variance[diag_indices(sum(self.active))] = self._std[self.active]**2.0
+            self.predicted_data.prior.variance = self._std[self.active]**2.0
 
         return self._std
 

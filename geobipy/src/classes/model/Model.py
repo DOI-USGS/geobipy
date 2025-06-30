@@ -8,9 +8,8 @@ from numpy import cumsum, diag, diff, dot, empty, exp, hstack, inf, isinf, maxim
 from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, sum, unique, vstack, zeros
 from numpy import all as npall
 from numpy import log as nplog
-from numpy.linalg import inv
 from matplotlib.pyplot import gcf
-from ...base.utilities import reslice, expReal, nodata_value
+from ...base.utilities import reslice, expReal, nodata_value, Ax, inv
 from ...base.utilities import debug_print as dprint
 from ...base import plotting
 from ..core.myObject import myObject
@@ -454,7 +453,7 @@ class Model(myObject):
 
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
-            operator += self.gradient_weight * dot(Wz.T, dot(self.gradient.priorDerivative(order=2), Wz))
+            operator += self.gradient_weight * dot(Wz.T, Ax(self.gradient.priorDerivative(order=2), Wz))
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
