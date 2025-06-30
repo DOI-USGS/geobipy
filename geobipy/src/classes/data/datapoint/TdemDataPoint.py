@@ -1022,7 +1022,7 @@ class TdemDataPoint(EmDataPoint):
 
     def _empymodForward(self, mod):
 
-        print('stuff')
+        stuff = None
 
     # def _simPEGForward(self, mod):
 

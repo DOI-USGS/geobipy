@@ -218,19 +218,11 @@ class Model(myObject):
 
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
-        # if (self.mesh.action[0] in ['insert', 'delete']):
-            # Propose new layer conductivities
         return self.local_variance(observation)
-        # else:
-        #     return self.values.proposal.variance
 
     def delete_edge(self, i):
         out, values = self.mesh.delete_edge(i, values=self.values)
         out = type(self)(mesh=out, values=values)
-
-        # if len(values) > 1:
-        #     for k, v in zip(self.__values, values[1:]):
-        #         out.setattr(k, v)
 
         return out
 
@@ -659,7 +651,6 @@ class Model(myObject):
 
             log_values = nplog(self.values) - alpha * (pk)
             mean = expReal(log_values)
-            # mean = self.values
 
             if any(mean == inf) or any(mean == 0.0):
                 return -inf, -inf
@@ -670,7 +661,6 @@ class Model(myObject):
             # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
             # tmp = Distribution('MvLogNormal', mean, self.values.proposal.variance, linearSpace=True, prng=prng)
             tmp = Distribution('MvLogNormal', mean, H, linearSpace=True, prng=prng)
-            # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
             # Probability of jumping from our perturbed parameter values to the unperturbed values.
             proposal = tmp.probability(x=remapped_model.values, log=True)
 

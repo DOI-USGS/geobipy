@@ -303,7 +303,6 @@ class FdemDataPoint(EmDataPoint):
             # from ..dataset.FdemData import FdemData
             # return FdemData.fromHdf(grp, **kwargs)
 
-
         system = FdemSystem.fromHdf(grp['sys'])
         out = super(FdemDataPoint, cls).fromHdf(grp, index, system=system)
 
@@ -465,60 +464,6 @@ class FdemDataPoint(EmDataPoint):
         self.J = self.sensitivity(model)
 
 
-    # def FindBestHalfSpace(self, minConductivity=1e-6, maxConductivity=1e2, percentThreshold=1.0, maxIterations=100):
-    #     """Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit
-
-    #     Parameters
-    #     ----------
-    #     minConductivity : float
-    #         Minimum conductivity to start the search
-    #     maxConductivity : float
-    #         Maximum conductivity to start the search
-    #     percentThreshold : float, optional
-    #         Stopping criteria for the relative change in data fit
-    #     maxIterations : int, optional
-    #         Stop after this number of iterations
-
-    #     Returns
-    #     -------
-    #     out : geobipy.Model1D
-    #         Best fitting halfspace model
-
-    #     """
-    #     percentThreshold = 0.01 * percentThreshold
-    #     c0 = log10(minConductivity)
-    #     c1 = log10(maxConductivity)
-    #     cnew = 0.5 * (c0 + c1)
-    #     # Initialize a single layer model
-    #     p = DataArray(1, 'Conductivity', r'$\frac{S}{m}$')
-    #     model = Model(mesh=RectilinearMesh1D(edges=asarray([0.0, inf])), values=p)
-    #     # Initialize the first conductivity
-    #     model._values[0] = 10.0**c0
-    #     self.forward(model)  # Forward model the EM data
-    #     PhiD1 = self.data_misfit()  # Compute the measure between observed and predicted data
-    #     # Initialize the second conductivity
-    #     model._values[0] = 10.0**c1
-    #     self.forward(model)  # Forward model the EM data
-    #     PhiD2 = self.data_misfit()  # Compute the measure between observed and predicted data
-    #     # Compute a relative change in the data misfit
-    #     dPhiD = abs(PhiD2 - PhiD1) / PhiD2
-    #     i = 1
-    #     # Continue until there is less than 1% change
-    #     while (dPhiD > percentThreshold and i < maxIterations):
-    #         cnew = 0.5 * (c0 + c1)  # Bisect the conductivities
-    #         model._values[0] = 10.0**cnew
-    #         self.forward(model)  # Forward model the EM data
-    #         PhiDnew = self.data_misfit()
-    #         if (PhiD2 > PhiDnew):
-    #             c1 = cnew
-    #             PhiD2 = PhiDnew
-    #         elif (PhiD1 > PhiDnew):
-    #             c0 = cnew
-    #             PhiD1 = PhiDnew
-    #         dPhiD = abs(PhiD2 - PhiD1) / PhiD2
-    #         i += 1
-
-    #     return model
 
 
     def forward(self, mod):
