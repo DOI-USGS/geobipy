@@ -948,7 +948,11 @@ class TdemDataPoint(EmDataPoint):
 
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
-                additive_error_prior = Distribution('Uniform', kwargs['minimum_additive_error'], kwargs['maximum_additive_error'], log=True, prng=kwargs.get('prng'))
+                additive_error_prior = Distribution('Uniform',
+                                                    kwargs['minimum_additive_error'],
+                                                    kwargs['maximum_additive_error'],
+                                                    log=True,
+                                                    prng=kwargs.get('prng'))
 
         if data_prior is None:
             data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))
