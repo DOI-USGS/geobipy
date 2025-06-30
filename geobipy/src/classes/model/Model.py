@@ -314,7 +314,18 @@ class Model(myObject):
             Inverse Hessian matrix
 
         """
-        return inv(self.local_precision(observation))
+        tries = 0
+        while tries < 10:
+            # Try to invert the local Hessian using data.
+            try:
+                return inv(self.local_precision(observation))
+            except:
+                # If the Hessian is singular, we need to increase the variance of the prior to stabilize the inversion.
+                self.values.prior.variance *= 2.0
+                tries += 1
+                print(f'Increased prior variance to {self.values.prior.variance}', flush=True)
+
+        return self.prior_derivative(order=2)
 
     def pad(self, shape):
         """Copies the properties of a model including all priors or proposals, but pads memory to the given size
@@ -393,7 +404,7 @@ class Model(myObject):
 
         return fk
 
-    def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, alpha=1.0):
+    def stochastic_newton_perturbation(self, observation=None, alpha=1.0):
 
         # repeat = True
         # n_tries = 0
@@ -410,14 +421,6 @@ class Model(myObject):
             # on the previous dimensional model.
             if remapped_model.mesh.action[0] != 'none':
                 observation.sensitivity(remapped_model, model_changed=True)
-
-        # remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
-
-        # if remapped_model.nCells > 1:
-        #     v = remapped_model.gradient.prior.variance[0,0] + remapped_model.gradient_weight.rng(1)
-        #     remapped_model.gradient.prior.variance = np.diag(np.full(remapped_model.nCells.item()-1, fill_value=v))
-
-        # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
 
         # Update the local Hessian around the current model.
         # B^-1 = H = inv(J'Wd'WdJ + Wm'Wm)
@@ -578,7 +581,7 @@ class Model(myObject):
 
         # Check that the parameters are within the limits if they are bound
         if not self.value_bounds is None:
-            pInBounds = self.value_bounds.probability(x=self.values, log=True).item()
+            pInBounds = sum(self.value_bounds.probability(x=self.values, log=True))
             if any(isinf(pInBounds)):
                 return -inf
 
