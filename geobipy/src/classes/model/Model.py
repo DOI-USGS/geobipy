@@ -756,7 +756,8 @@ class Model(myObject):
             if kwargs.get('solve_value', False):
                 assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
                 # Assign the initial prior to the parameters
-                variance = nplog(kwargs.get('parameter_standard_deviation', 11.0))**2.0
+                variance = kwargs.get('parameter_standard_deviation', 2.3978952727983707)**2.0
+                assert variance > 0.0, ValueError("parameter_standard_deviation must be greater than 0.0")
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
                                                 variance=variance,
                                                 ndim=self.mesh.nCells,

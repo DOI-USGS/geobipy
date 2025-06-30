@@ -58,7 +58,7 @@ class user_parameters(dict):
         return deepcopy(self)
 
     def optional_arguments(self, **kwargs):
-        kwargs = self.assign_default('parameter_standard_deviation', float64(11.0), **kwargs)
+        kwargs = self.assign_default('parameter_standard_deviation', float64(2.39), **kwargs)
         kwargs = self.assign_default('gradient_standard_deviation', float64(1.5), **kwargs)
         kwargs = self.assign_default('multiplier', float64(1.0), **kwargs)
         kwargs = self.assign_default('factor', float64(10.0), **kwargs)
