@@ -419,7 +419,7 @@ class DataPoint(Point):
             axes = self._init_posterior_plots(axes)
 
 
-        assert len(axes) == 4, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
+        assert len(axes) == 3, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         overlay = kwargs.pop('overlay', None)
         # if not overlay is None:
