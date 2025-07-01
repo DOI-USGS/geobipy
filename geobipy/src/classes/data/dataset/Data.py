@@ -83,7 +83,7 @@ class Data(Point):
 
         super().__init__(x, y, z, elevation)
 
-        self._fiducial = DataArray(arange(self.nPoints), "Fiducial")
+        self._fiducial = DataArray(arange(self.nPoints, dtype=float64), "Fiducial")
         self._line_number = DataArray(self.nPoints, "Line number")
 
         shp = (self._nPoints, self.nChannels)
@@ -278,7 +278,7 @@ class Data(Point):
     @property
     def fiducial(self):
         if size(self._fiducial) == 0:
-            self._fiducial = DataArray(arange(self.nPoints), "Fiducial")
+            self._fiducial = DataArray(arange(self.nPoints, dtype=float64), "Fiducial")
         return self._fiducial
 
     @fiducial.setter
@@ -639,6 +639,7 @@ class Data(Point):
 
         return type(self)(channels_per_system=self.channels_per_system,
                    x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
+                   fiducial=self.fiducial[i], line_number=self.line_number[i],
                    data=self.data[i, :], std=self.std[i, :],
                    predicted_data=self.predicted_data[i, :],
                    channel_names=self.channel_names)
