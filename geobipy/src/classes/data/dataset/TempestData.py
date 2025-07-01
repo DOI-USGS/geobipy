@@ -610,8 +610,9 @@ class TempestData(TdemData):
         assert record is not None, ValueError("Need to provide a record index for netcdf files")
 
         gdf = self._file['/']
-        x = float64(gdf['easting'][record])
-        y = float64(gdf['northing'][record])
+
+        x = float64(gdf['x'][record])
+        y = float64(gdf['y'][record])
         z = float64(gdf['tx_height'][record])
         primary_field = asarray([float64(gdf['x_primaryfield'][record]), float64(gdf['z_primaryfield'][record])])
         secondary_field = hstack([gdf['EMX_NonHPRG'][record, :], gdf['EMZ_NonHPRG'][record, :]])
