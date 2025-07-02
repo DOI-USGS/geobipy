@@ -1952,14 +1952,15 @@ class Inference2D(myObject):
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        parent = inference1d.createHdf(parent, add_axis=self.data.fiducial)
 
-        # Write the line number
-        self.data.line_number.writeHdf(parent, 'data/line_number')
+        parent = inference1d.createHdf(parent, add_axis=self.data.fiducial)
 
         # Write the sorted fiducials
         fiducials = sort(self.data.fiducial)
         fiducials.writeHdf(parent, 'data/fiducial')
+
+        # Write the line number
+        self.data.line_number.writeHdf(parent, 'data/line_number')
 
         return parent
 

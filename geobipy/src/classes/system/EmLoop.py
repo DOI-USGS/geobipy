@@ -410,9 +410,12 @@ class EmLoop(Point, ABC):
 
         assert isinstance(overlay, EmLoop), TypeError("overlay must have type EmLoop")
 
-        super().overlay_on_posteriors(overlay, axes[:super().n_posteriors], **kwargs)
+        super().overlay_on_posteriors(overlay, axes['point'], **kwargs)
 
-        for l, c, o, kw in zip(('pitch', 'roll', 'yaw'), [self.pitch, self.roll, self.yaw], [overlay.pitch, overlay.roll, overlay.yaw], [pitch_kwargs, roll_kwargs, yaw_kwargs]):
+        for l, c, o, kw in zip(('pitch', 'roll', 'yaw'),
+                               [self.pitch, self.roll, self.yaw],
+                               [overlay.pitch, overlay.roll, overlay.yaw],
+                               [pitch_kwargs, roll_kwargs, yaw_kwargs]):
             if c.hasPosterior:
                 c.posterior.plot_overlay(value = o, ax = axes[l], **kw)
 
