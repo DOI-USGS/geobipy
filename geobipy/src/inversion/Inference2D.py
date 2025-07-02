@@ -428,17 +428,20 @@ class Inference2D(myObject):
         # Read in the opacity if present
         key = "percentile_{}".format(percent)
         if key in self.hdf_file.keys():
-            return StatArray.fromHdf(self.hdf_file[key], index=slic)
-        else:
-            h = self.parameter_posterior()
-            ci = h.percentile(percent=percent, axis=1)
+            try:
+                return StatArray.fromHdf(self.hdf_file[key], index=slic)
+            except:
+                pass
 
-            if self.mode == 'r+':
-                if key in self.hdf_file.keys():
-                    ci.writeHdf(self.hdf_file, key)
-                else:
-                    ci.toHdf(self.hdf_file, key)
-            return ci
+        h = self.parameter_posterior()
+        ci = h.percentile(percent=percent, axis=1)
+
+        if self.mode == 'r+':
+            if key in self.hdf_file.keys():
+                ci.writeHdf(self.hdf_file, key)
+            else:
+                ci.toHdf(self.hdf_file, key)
+        return ci
 
     def credible_interval(self, percent=90.0):
         percent = 0.5 * minimum(percent, 100.0 - percent)
@@ -463,18 +466,18 @@ class Inference2D(myObject):
     def compute_median_parameter(self, log=None, track=True):
 
         posterior = self.parameter_posterior()
-        mean = posterior.median(axis=1)
+        median = posterior.median(axis=1)
 
-        # if self.mode == 'r+':
-        #     key = 'mean_parameter'
-        #     if key in self.hdf_file.keys():
-        #         mean.writeHdf(self.hdf_file, key)
-        #     else:
-        #         mean.toHdf(self.hdf_file, key)
-        #     self.hdf_file[key].attrs['name'] = mean.values.name
-        #     self.hdf_file[key].attrs['units'] = mean.values.units
+        if self.mode == 'r+':
+            key = 'median_parameter'
+            if key in self.hdf_file.keys():
+                median.writeHdf(self.hdf_file, key)
+            else:
+                median.toHdf(self.hdf_file, key)
+            self.hdf_file[key].attrs['name'] = median.values.name
+            self.hdf_file[key].attrs['units'] = median.values.units
 
-        return mean
+        return median
 
     def compute_mode_parameter(self, log=None, track=True):
 
@@ -482,14 +485,14 @@ class Inference2D(myObject):
 
         mode = posterior.mode(axis=1)
 
-        # if self.mode == 'r+':
-        #     key = 'mean_parameter'
-        #     if key in self.hdf_file.keys():
-        #         mean.writeHdf(self.hdf_file, key)
-        #     else:
-        #         mean.toHdf(self.hdf_file, key)
-        #     self.hdf_file[key].attrs['name'] = mean.values.name
-        #     self.hdf_file[key].attrs['units'] = mean.values.units
+        if self.mode == 'r+':
+            key = 'mode_parameter'
+            if key in self.hdf_file.keys():
+                mode.writeHdf(self.hdf_file, key)
+            else:
+                mode.toHdf(self.hdf_file, key)
+            self.hdf_file[key].attrs['name'] = mode.values.name
+            self.hdf_file[key].attrs['units'] = mode.values.units
 
         return mode
 
@@ -1512,11 +1515,9 @@ class Inference2D(myObject):
         from pprint import pprint
         mask = None
         if kwargs.pop('mask_by_confidence', False):
-            print('here')
             mask = self.opacity().values
-            print(f"{mask=}")
 
-        if kwargs.pop('mask_by_burned_in', True):
+        if kwargs.pop('mask_by_burned_in', False):
             if mask is not None:
                 mask *= self.burned_in_mask
             else:
@@ -1986,7 +1987,6 @@ class Inference2D(myObject):
 
         pp = self.parameter_posterior()
         mm = self.mean_parameters()
-
 
         kwargs['x'] = kwargs.get('x', 'x')
 
