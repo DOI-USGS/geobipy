@@ -137,7 +137,7 @@ The path that you see should point to the implementation that you want mpi4py to
 Make sure you are about to install mpi4py to the correct python installation.
 If you type ‘which python’ it should return the path to the correct python distribution.
 If you are using environments, make sure you have activated the correct one.</p>
-<p>Next, use “env MPICC=&lt;Your mpicc compiler&gt; python -m pip install mpi4py”.  This last option is very important, without it, pip might install its own MPI library called MPICH2.
+<p>Next, use “env MPICC=&lt;Your mpicc compiler&gt; python -m pip install --no-binary=mpi4py mpi4py”.  This last option is very important, without it, pip might install its own MPI library called MPICH2.
 I would try to avoid this because if you need to install the HDF5 library you will need know which directories to link to (see <a class="reference internal" href="#installing-parallel-hdf5-and-h5py">Installing parallel HDF5 and h5py</a>).</p>
 <p>At the end of the day,  h5py needs to communicate with both the correct HDF5 library and mpi4py, and both of those need to communicate with the same MPI library.</p>
 </section>
