@@ -1086,10 +1086,12 @@ class Point(myObject):
         #     y_kwargs['overlay'] = overlay.y
         #     z_kwargs['overlay'] = overlay.z
 
-        if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
-            z_kwargs['transpose'] = z_kwargs.get('transpose', True)
+        # if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
+        #     z_kwargs['transpose'] = z_kwargs.get('transpose', True)
 
-        for c, l, kw in zip((self.x, self.y, self.z), ('x', 'y', 'z'), (x_kwargs, y_kwargs, z_kwargs)):
+        for c, l, kw in zip((self.x, self.y, self.z),
+                            ('x', 'y', 'z'),
+                            (x_kwargs, y_kwargs, z_kwargs)):
             if c.hasPosterior:
                 c.plot_posteriors(ax = axes[l], **kw)
 
@@ -1100,10 +1102,13 @@ class Point(myObject):
 
         assert isinstance(overlay, Point), TypeError("overlay must have type Point")
 
-        if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
-            z_kwargs['transpose'] = z_kwargs.get('transpose', True)
+        # if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
+        #     z_kwargs['transpose'] = z_kwargs.get('transpose', True)
 
-        for c, l, o, kw in zip([self.x, self.y, self.z], ('x', 'y', 'z'), [overlay.x, overlay.y, overlay.z], [x_kwargs, y_kwargs, z_kwargs]):
+        for c, l, o, kw in zip([self.x, self.y, self.z],
+                               ('x', 'y', 'z'),
+                               [overlay.x, overlay.y, overlay.z],
+                               [x_kwargs, y_kwargs, z_kwargs]):
             if c.hasPosterior:
                 c.posterior.plot_overlay(value = o, ax = axes[l], **kw, **kwargs)
         return axes
