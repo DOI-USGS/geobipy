@@ -106,21 +106,20 @@ class Inference3D(myObject):
 
         """
 
-        h5_files = Inference3D._get_h5Files(directory)
+        # h5_files = Inference3D._get_h5Files(directory)
 
         # if world is None:
         #     lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in h5_files]
         # else:
-        lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in h5_files]
+        # lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in h5_files]
 
         self = cls(None, world=world, prng=prng, global_access=global_access)
-        self.mode = kwargs.get('mode', 'r')
-        self._lines = lines
+        self.open(directory=directory, **kwargs)
+
         return self
 
     def open(self, directory, **kwargs):
         assert kwargs.get('mode', 'r') in ('r', 'r+', 'a', 'w'), ValueError("mode must be in ('r', 'r+', 'a', 'w')")
-
         self._lines = [Inference2D.fromHdf(file, prng=self.prng, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
 
     @staticmethod
