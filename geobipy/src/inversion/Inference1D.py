@@ -999,8 +999,9 @@ class Inference1D(myObject):
         self._n_resets += 1
         self.initialize(self.datapoint)
         if self.interactive_plot:
-            for k, ax in self.posterior_ax.items():
-                clear(ax)
+            if self.posterior_ax is not None:
+                for k, ax in self.posterior_ax.items():
+                    clear(ax)
 
         self.clk.restart()
 
