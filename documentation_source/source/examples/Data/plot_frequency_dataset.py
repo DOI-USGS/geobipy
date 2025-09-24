@@ -147,7 +147,7 @@ FD1.to_vtk('FD_one.vtk')
 
 #%%
 # Take a look at the line numbers in the dataset
-print(np.unique(FD1.lineNumber))
+print(np.unique(FD1.line_number))
 
 #%%
 L = FD1.line(30010.0)

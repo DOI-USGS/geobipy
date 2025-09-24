@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Histogram 3D &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>Histogram 3D &mdash; GeoBIPy 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
@@ -20,7 +20,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/documentation_options.js?v=c3c8ae58"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -42,7 +42,7 @@
             GeoBIPy
           </a>
               <div class="version">
-                1.0.0
+                2.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -119,9 +119,9 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <p>Create some histogram bins in x and y</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="s1">&#39;Variable 1&#39;</span><span class="p">)</span>
-<span class="n">y</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="s1">&#39;Variable 2&#39;</span><span class="p">)</span>
-<span class="n">z</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="s1">&#39;Variable 3&#39;</span><span class="p">)</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="s1">&#39;Variable X&#39;</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">21</span><span class="p">),</span> <span class="s1">&#39;Variable Y&#39;</span><span class="p">)</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">StatArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span> <span class="s1">&#39;Variable Z&#39;</span><span class="p">)</span>
 
 <span class="n">mesh</span> <span class="o">=</span> <span class="n">RectilinearMesh3D</span><span class="p">(</span><span class="n">x_edges</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y_edges</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z_edges</span><span class="o">=</span><span class="n">z</span><span class="p">)</span>
 </pre></div>
@@ -134,7 +134,6 @@ saving as HDF5.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
-<span class="c1"># x = np.asarray([a, b, c])</span>
 </pre></div>
 </div>
 <p>Update the histogram counts</p>
@@ -172,17 +171,42 @@ saving as HDF5.</p>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
 
-<span class="c1"># #%%</span>
-<span class="c1"># # We can map the credible range to an opacity or transparency</span>
-<span class="c1"># H.opacity()</span>
-<span class="c1"># H.transparency()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;5th percentile&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
 
-<span class="n">H</span><span class="o">.</span><span class="n">animate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;test.mp4&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;95th percentile&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">percent</span><span class="o">=</span><span class="mf">95.0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../_images/sphx_glr_plot_histogram_3d_004.png" srcset="../../_images/sphx_glr_plot_histogram_3d_004.png" alt="Median along each axis" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_histogram_3d_005.png" srcset="../../_images/sphx_glr_plot_histogram_3d_005.png" alt="5th percentile" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_histogram_3d_006.png" srcset="../../_images/sphx_glr_plot_histogram_3d_006.png" alt="95th percentile" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p>We can map the credible range to an opacity or transparency</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Opacity&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">opacity</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_histogram_3d_007.png" srcset="../../_images/sphx_glr_plot_histogram_3d_007.png" alt="Opacity" class = "sphx-glr-single-img"/><p>We can map the credible range to an opacity or transparency</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Transparency&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">transparency</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
+
+<span class="n">H</span><span class="o">.</span><span class="n">animate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;test_a.mp4&#39;</span><span class="p">)</span>
 
 <span class="n">H</span><span class="o">.</span><span class="n">to_vtk</span><span class="p">(</span><span class="s1">&#39;h3d.vtk&#39;</span><span class="p">)</span>
-
-
-
 
 <span class="c1"># Create some histogram bins in x and y</span>
 <span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">centres</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">centres</span><span class="p">)</span>
@@ -198,8 +222,8 @@ saving as HDF5.</p>
 </pre></div>
 </div>
 <ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_plot_histogram_3d_004.png" srcset="../../_images/sphx_glr_plot_histogram_3d_004.png" alt="Median along each axis" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_histogram_3d_005.png" srcset="../../_images/sphx_glr_plot_histogram_3d_005.png" alt="3.60" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_histogram_3d_008.png" srcset="../../_images/sphx_glr_plot_histogram_3d_008.png" alt="Transparency" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../_images/sphx_glr_plot_histogram_3d_009.png" srcset="../../_images/sphx_glr_plot_histogram_3d_009.png" alt="3.60" class = "sphx-glr-multi-img"/></li>
 </ul>
 <p>Instantiate</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">H</span> <span class="o">=</span> <span class="n">Histogram</span><span class="p">(</span><span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">)</span>
@@ -209,7 +233,6 @@ saving as HDF5.</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
-<span class="c1"># x = np.asarray([a, b, c])</span>
 </pre></div>
 </div>
 <p>Update the histogram counts</p>
@@ -224,7 +247,7 @@ saving as HDF5.</p>
     <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray_r&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_3d_006.png" srcset="../../_images/sphx_glr_plot_histogram_3d_006.png" alt="Slice half way along each dimension" class = "sphx-glr-single-img"/><p>Generate marginal histograms along an axis</p>
+<img src="../../_images/sphx_glr_plot_histogram_3d_010.png" srcset="../../_images/sphx_glr_plot_histogram_3d_010.png" alt="Slice half way along each dimension" class = "sphx-glr-single-img"/><p>Generate marginal histograms along an axis</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Marginals along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
@@ -232,7 +255,7 @@ saving as HDF5.</p>
     <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">marginalize</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_3d_007.png" srcset="../../_images/sphx_glr_plot_histogram_3d_007.png" alt="Marginals along each axis" class = "sphx-glr-single-img"/><p>Take the mean estimate from the histogram</p>
+<img src="../../_images/sphx_glr_plot_histogram_3d_011.png" srcset="../../_images/sphx_glr_plot_histogram_3d_011.png" alt="Marginals along each axis" class = "sphx-glr-single-img"/><p>Take the mean estimate from the histogram</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Mean along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
@@ -240,30 +263,20 @@ saving as HDF5.</p>
     <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_histogram_3d_008.png" srcset="../../_images/sphx_glr_plot_histogram_3d_008.png" alt="Mean along each axis" class = "sphx-glr-single-img"/><p>Take the median estimate from the histogram</p>
+<img src="../../_images/sphx_glr_plot_histogram_3d_012.png" srcset="../../_images/sphx_glr_plot_histogram_3d_012.png" alt="Mean along each axis" class = "sphx-glr-single-img"/><p>Take the median estimate from the histogram</p>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">&quot;Median along each axis&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">axis</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">_</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span><span class="o">.</span><span class="n">pcolor</span><span class="p">()</span>
 
-<span class="c1"># #%%</span>
-<span class="c1"># # We can map the credible range to an opacity or transparency</span>
-<span class="c1"># H.opacity()</span>
-<span class="c1"># H.transparency()</span>
-
-<span class="n">H</span><span class="o">.</span><span class="n">animate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;test.mp4&#39;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="c1"># H.to_vtk(&#39;h3d.vtk&#39;)</span>
 </pre></div>
 </div>
-<ul class="sphx-glr-horizontal">
-<li><img src="../../_images/sphx_glr_plot_histogram_3d_009.png" srcset="../../_images/sphx_glr_plot_histogram_3d_009.png" alt="Median along each axis" class = "sphx-glr-multi-img"/></li>
-<li><img src="../../_images/sphx_glr_plot_histogram_3d_010.png" srcset="../../_images/sphx_glr_plot_histogram_3d_010.png" alt="3.60" class = "sphx-glr-multi-img"/></li>
-</ul>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.881 seconds)</p>
+<img src="../../_images/sphx_glr_plot_histogram_3d_013.png" srcset="../../_images/sphx_glr_plot_histogram_3d_013.png" alt="Median along each axis" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 20.644 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-statistics-plot-histogram-3d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/93e086b68a2d08aac2f637ab24f17e8a/plot_histogram_3d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_histogram_3d.ipynb</span></code></a></p>

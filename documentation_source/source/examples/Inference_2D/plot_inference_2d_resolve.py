@@ -31,7 +31,7 @@ def plot_2d_summary(folder, data_type, model_type):
    prng = Generator(generator)
 
    #%%
-   results_2d = Inference2D.fromHdf('{}/{}/{}/0.0.h5'.format(folder, data_type, model_type), prng=prng)
+   results_2d = Inference2D.fromHdf('{}/{}/{}/0.0.h5'.format(folder, data_type, model_type), prng=prng, mode='r+')
 
    kwargs = {
          "log" : 10,
@@ -40,7 +40,7 @@ def plot_2d_summary(folder, data_type, model_type):
 
    fig = plt.figure(figsize=(16, 8))
    plt.suptitle("{} {}".format(data_type, model_type))
-   gs0 = fig.add_gridspec(6, 2, hspace=1.0)
+   gs0 = fig.add_gridspec(8, 2, hspace=1.0)
 
    true_model = Model.create_synthetic_model(model_type)
    true_model.mesh.y_edges = true_model.mesh.y_edges / 10.0
@@ -134,17 +134,38 @@ def plot_2d_summary(folder, data_type, model_type):
    results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
    results_2d.plot_elevation(linewidth=0.3, ax=ax1);
 
+   from geobipy import mixNormal
+   mx = mixNormal(np.log10(np.unique(true_model.values)), np.r_[0.5, 0.5, 0.5])
+
+   plt.figure()
+   results_2d.plot_marginal_probabilities()
+
+   plt.figure()
+   results_2d.plot_highest_marginal()
+   results_2d.plot_data_elevation(linewidth=0.3, ax=ax1);
+   results_2d.plot_elevation(linewidth=0.3, ax=ax1);
+
+   # ax1 = fig.add_subplot(gs0[6, 0], sharex=ax, sharey=ax)
+   # H = p[:, 0, :].pcolor(transpose=True, vmin=p.values.min(), vmax=p.values.max(), ax=ax1)
+   # ax1 = fig.add_subplot(gs0[6, 1], sharex=ax, sharey=ax)
+   # H = p[:, 1, :].pcolor(transpose=True, vmin=p.values.min(), vmax=p.values.max(), ax=ax1)
+   # ax1 = fig.add_subplot(gs0[7, 0], sharex=ax, sharey=ax)
+   # H = p[:, 2, :].pcolor(transpose=True, vmin=p.values.min(), vmax=p.values.max(), ax=ax1)
+
+   # mp = p.apply_along_axis(np.argmax, axis=1)
+   # ax1 = fig.add_subplot(gs0[7, 1], sharex=ax, sharey=ax)
+   # mp.pcolor(ax=ax1, cmap='jet')
 
    plt.show()
    # plt.savefig('{}_{}.png'.format(data_type, model_type), dpi=300)
 
 if __name__ == '__main__':
-   models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
+   models = ['glacial']#, 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
    for model in models:
-      try:
-         plot_2d_summary("../../../Parallel_Inference/", "resolve", model)
-      except Exception as e:
-         print(model)
-         print(e)
-         pass
+      # try:
+      plot_2d_summary("../../../Parallel_Inference/", "resolve", model)
+      # except Exception as e:
+      #    print(model)
+      #    print(e)
+         # pass

@@ -228,12 +228,11 @@ We can plot the mesh in 3D!
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 110-136
+.. GENERATED FROM PYTHON SOURCE LINES 110-135
 
 .. code-block:: Python
 
     mesh = rm.pyvista_mesh().save('rm3d_re2.vtk')
-
 
     xx, yy = np.meshgrid(rm.z.centres, rm.y.centres)
     x_re = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "x_re")
@@ -270,11 +269,11 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 137-138
+.. GENERATED FROM PYTHON SOURCE LINES 136-137
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 138-140
+.. GENERATED FROM PYTHON SOURCE LINES 137-139
 
 .. code-block:: Python
 
@@ -287,11 +286,11 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 141-142
+.. GENERATED FROM PYTHON SOURCE LINES 140-141
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-153
+.. GENERATED FROM PYTHON SOURCE LINES 141-152
 
 .. code-block:: Python
 
@@ -316,7 +315,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 1.145 seconds)
+   **Total running time of the script:** (0 minutes 1.304 seconds)
 
 
 .. _sphx_glr_download_examples_Meshes_plot_rectilinear_mesh_3d.py:

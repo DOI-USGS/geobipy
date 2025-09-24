@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:49.840** total execution time for 27 files **from all galleries**:
+**03:46.395** total execution time for 28 files **from all galleries**:
 
 .. container::
 
@@ -32,11 +32,23 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
+   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_tempest.py` (``examples/Inference_1D/plot_inference_1d_tempest.py``)
+     - 01:16.614
+     - 0.0
+   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_skytem.py` (``examples/Inference_1D/plot_inference_1d_skytem.py``)
+     - 01:03.378
+     - 0.0
+   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_resolve.py` (``examples/Inference_1D/plot_inference_1d_resolve.py``)
+     - 00:42.723
+     - 0.0
    * - :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_skytem.py` (``examples/Inference_2D/plot_inference_2d_skytem.py``)
-     - 00:25.774
+     - 00:19.867
      - 0.0
    * - :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_tempest.py` (``examples/Inference_2D/plot_inference_2d_tempest.py``)
-     - 00:24.066
+     - 00:19.304
+     - 0.0
+   * - :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_resolve.py` (``examples/Inference_2D/plot_inference_2d_resolve.py``)
+     - 00:04.510
      - 0.0
    * - :ref:`sphx_glr_examples_Data_plot_frequency_dataset.py` (``examples/Data/plot_frequency_dataset.py``)
      - 00:00.000
@@ -65,21 +77,6 @@ Computation times
    * - :ref:`sphx_glr_examples_HDF5_hdf5.py` (``examples/HDF5/hdf5.py``)
      - 00:00.000
      - 0.0
-   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_resolve.py` (``examples/Inference_1D/plot_inference_1d_resolve.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_skytem.py` (``examples/Inference_1D/plot_inference_1d_skytem.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_tempest.py` (``examples/Inference_1D/plot_inference_1d_tempest.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_examples_Inference_2D_plot_inference_2d_resolve.py` (``examples/Inference_2D/plot_inference_2d_resolve.py``)
-     - 00:00.000
-     - 0.0
-   * - :ref:`sphx_glr_examples_Inference_2D_test.py` (``examples/Inference_2D/test.py``)
-     - 00:00.000
-     - 0.0
    * - :ref:`sphx_glr_examples_Meshes_plot_rectilinear_mesh_1d.py` (``examples/Meshes/plot_rectilinear_mesh_1d.py``)
      - 00:00.000
      - 0.0
@@ -101,6 +98,9 @@ Computation times
    * - :ref:`sphx_glr_examples_Statistics_plot_DataArray.py` (``examples/Statistics/plot_DataArray.py``)
      - 00:00.000
      - 0.0
+   * - :ref:`sphx_glr_examples_Statistics_plot_Distributions.py` (``examples/Statistics/plot_Distributions.py``)
+     - 00:00.000
+     - 0.0
    * - :ref:`sphx_glr_examples_Statistics_plot_StatArray.py` (``examples/Statistics/plot_StatArray.py``)
      - 00:00.000
      - 0.0
@@ -111,5 +111,8 @@ Computation times
      - 00:00.000
      - 0.0
    * - :ref:`sphx_glr_examples_Statistics_plot_histogram_3d.py` (``examples/Statistics/plot_histogram_3d.py``)
+     - 00:00.000
+     - 0.0
+   * - :ref:`sphx_glr_examples_Statistics_plot_mixtures.py` (``examples/Statistics/plot_mixtures.py``)
      - 00:00.000
      - 0.0

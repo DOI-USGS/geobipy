@@ -18,9 +18,9 @@ import numpy as np
 
 #%%
 # Create some histogram bins in x and y
-x = StatArray(np.linspace(-4.0, 4.0, 11), 'Variable 1')
-y = StatArray(np.linspace(-4.0, 4.0, 21), 'Variable 2')
-z = StatArray(np.linspace(-4.0, 4.0, 31), 'Variable 3')
+x = StatArray(np.linspace(-4.0, 4.0, 11), 'Variable X')
+y = StatArray(np.linspace(-4.0, 4.0, 21), 'Variable Y')
+z = StatArray(np.linspace(-4.0, 4.0, 31), 'Variable Z')
 
 mesh = RectilinearMesh3D(x_edges=x, y_edges=y, z_edges=z)
 
@@ -33,8 +33,6 @@ H = Histogram(mesh=mesh)
 a = np.random.randn(100000)
 b = np.random.randn(100000)
 c = np.random.randn(100000)
-# x = np.asarray([a, b, c])
-
 
 #%%
 # Update the histogram counts
@@ -73,17 +71,37 @@ for axis in range(3):
     plt.subplot(1, 3, axis+1)
     _ = H.median(axis=axis).pcolor()
 
-# #%%
-# # We can map the credible range to an opacity or transparency
-# H.opacity()
-# H.transparency()
+plt.figure()
+plt.suptitle("5th percentile")
+for axis in range(3):
+    plt.subplot(1, 3, axis+1)
+    _ = H.percentile(percent=5.0, axis=axis).pcolor()
 
-H.animate(0, 'test.mp4')
+plt.figure()
+plt.suptitle("95th percentile")
+for axis in range(3):
+    plt.subplot(1, 3, axis+1)
+    _ = H.percentile(percent=95.0, axis=axis).pcolor()
+
+#%%
+# We can map the credible range to an opacity or transparency
+plt.figure()
+plt.suptitle("Opacity")
+for axis in range(3):
+    plt.subplot(1, 3, axis+1)
+    _ = H.opacity(axis=axis).pcolor()
+
+#%%
+# We can map the credible range to an opacity or transparency
+plt.figure()
+plt.suptitle("Transparency")
+for axis in range(3):
+    plt.subplot(1, 3, axis+1)
+    _ = H.transparency(axis=axis).pcolor()
+
+H.animate(0, 'test_a.mp4')
 
 H.to_vtk('h3d.vtk')
-
-
-
 
 # Create some histogram bins in x and y
 xx, yy = np.meshgrid(mesh.z.centres, mesh.y.centres)
@@ -106,7 +124,6 @@ H = Histogram(mesh=mesh)
 a = np.random.randn(100000)
 b = np.random.randn(100000)
 c = np.random.randn(100000)
-# x = np.asarray([a, b, c])
 
 #%%
 # Update the histogram counts
@@ -145,12 +162,6 @@ for axis in range(3):
     plt.subplot(1, 3, axis+1)
     _ = H.median(axis=axis).pcolor()
 
-# #%%
-# # We can map the credible range to an opacity or transparency
-# H.opacity()
-# H.transparency()
-
-H.animate(0, 'test.mp4')
 
 plt.show()
 

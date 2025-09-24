@@ -65,7 +65,7 @@ data = np.r_[145.3, 435.8, 260.6, 875.1, 1502.7, 1516.9,
 
 fdp = FdemDataPoint(x=0.0, y=0.0, z=30.0, elevation=0.0,
                     data=data, std=None, predictedData=None,
-                    system=fds, lineNumber=0.0, fiducial=0.0)
+                    system=fds, line_number=0.0, fiducial=0.0)
 
 # plt.figure()
 # _ = fdp.plot()
@@ -192,7 +192,6 @@ fdp.forward(mod)
 for i in range(10):
     fdp.perturb()
     fdp.update_posteriors()
-
 
 # Plot the posterior distributions
 fig = plt.figure()

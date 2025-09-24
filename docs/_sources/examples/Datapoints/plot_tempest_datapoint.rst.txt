@@ -82,24 +82,6 @@ Thanks to Dieter for his help getting Empymod ready for incorporation into GeoBI
    :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/Tempest_datapoint.py:138: SyntaxWarning: invalid escape sequence '\e'
-      self._relative_error = DataArray(values, '$\epsilon_{Relative}$', '%')
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-    self.n_components=2, self.nTimes=array([15])
-
 
 
 
@@ -186,12 +168,12 @@ Forward model the data
  .. code-block:: none
 
     primary [34.27253219 17.55503397]
-    sx [4.46362582 2.52720951 2.10544857 1.76862398 1.52893914 1.38117676
-     1.19246619 1.10920301 0.94437018 0.81202664 0.67054942 0.4124596
-     0.34346631 0.27359586 0.19875285]
-    sz [6.47100177 4.53101158 3.87594468 3.43396174 3.10487058 2.80230168
-     2.59759025 2.34406113 2.09040444 1.83288007 1.59137993 1.34037776
-     1.05345525 0.79969548 0.56994112]
+    sx [4.48586312 2.56964105 2.09851703 1.82350354 1.55012521 1.35197612
+     1.21609392 1.07023377 0.98658682 0.85599836 0.65358203 0.51300828
+     0.26719013 0.20870394 0.24175921]
+    sz [6.52849763 4.44641667 3.79891555 3.422228   3.09330199 2.80846999
+     2.56242396 2.35391636 2.10282696 1.86716394 1.5674884  1.27936183
+     1.02142283 0.77467114 0.56114713]
     J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01  1.79809001e-01
        1.49232157e-01  9.28385121e-02  3.82492975e-02  8.70404368e-03
        7.17305034e-04 -2.13238764e-04 -3.69663472e-04 -5.69915094e-04
@@ -433,12 +415,12 @@ Forward model the data
        7.62988405e-06 -1.95004388e-06  8.68582964e-08 -1.28316523e-09
        1.11041966e-10 -2.41585978e-12]]
     new primary [34.27253219 17.55503397]
-    sx [4.46362582 2.52720951 2.10544857 1.76862398 1.52893914 1.38117676
-     1.19246619 1.10920301 0.94437018 0.81202664 0.67054942 0.4124596
-     0.34346631 0.27359586 0.19875285]
-    sz [6.47100177 4.53101158 3.87594468 3.43396174 3.10487058 2.80230168
-     2.59759025 2.34406113 2.09040444 1.83288007 1.59137993 1.34037776
-     1.05345525 0.79969548 0.56994112]
+    sx [4.48586312 2.56964105 2.09851703 1.82350354 1.55012521 1.35197612
+     1.21609392 1.07023377 0.98658682 0.85599836 0.65358203 0.51300828
+     0.26719013 0.20870394 0.24175921]
+    sz [6.52849763 4.44641667 3.79891555 3.422228   3.09330199 2.80846999
+     2.56242396 2.35391636 2.10282696 1.86716394 1.5674884  1.27936183
+     1.02142283 0.77467114 0.56114713]
     new J [[ 1.13463137e-01  1.49920887e-01  1.76789170e-01  1.79809001e-01
        1.49232157e-01  9.28385121e-02  3.82492975e-02  8.70404368e-03
        7.17305034e-04 -2.13238764e-04 -3.69663472e-04 -5.69915094e-04
@@ -733,8 +715,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -36389.6500813217
-    72940.71365767403
+    [-35936.48570823]
+    72034.40139563786
 
 
 
@@ -898,7 +880,7 @@ Note we are not using the priors to accept or reject perturbations.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 8.179 seconds)
+   **Total running time of the script:** (0 minutes 4.367 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_tempest_datapoint.py:

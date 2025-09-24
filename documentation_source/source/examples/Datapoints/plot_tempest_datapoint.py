@@ -60,50 +60,36 @@ prng = get_prng(seed=146100583096709124601953385843316024947)
 par = StatArray(np.r_[0.01, 0.1, 1.], "Conductivity", "$\frac{S}{m}$")
 mod = Model(mesh=RectilinearMesh1D(edges=np.r_[0.0, 50.0, 75.0, np.inf]), values=par)
 
-par = StatArray(np.logspace(-3, 3, 30), "Conductivity", "$\frac{S}{m}$")
-e = np.linspace(0, 350, 31); e[-1] = np.inf
-mod = Model(mesh=RectilinearMesh1D(edges=e), values=par)
+# par = StatArray(np.logspace(-3, 3, 30), "Conductivity", "$\frac{S}{m}$")
+# e = np.linspace(0, 350, 31); e[-1] = np.inf
+# mod = Model(mesh=RectilinearMesh1D(edges=e), values=par)
 
 #%%
 # Forward model the data
 tdp.forward(mod)
 
-print('primary', tdp.primary_field)
-print('sx', tdp.secondary_field[:15])
-print('sz', tdp.secondary_field[15:])
+#%%
+plt.figure()
+plt.subplot(121)
+_ = mod.pcolor(transpose=True)
+plt.subplot(122)
+_ = tdp.plot()
+_ = tdp.plot_predicted()
+plt.tight_layout()
+plt.suptitle('Model and response')
 
-# #%%
-# plt.figure()
-# plt.subplot(121)
-# _ = mod.pcolor(transpose=True)
-# plt.subplot(122)
-# _ = tdp.plot()
-# _ = tdp.plot_predicted()
-# plt.tight_layout()
-# plt.suptitle('Model and response')
+#%%
+plt.figure()
+tdp.plotDataResidual(xscale='log')
+plt.title('data residual')
 
-# #%%
-# # plt.figure()
-# # tdp.plotDataResidual(xscale='log')
-# # plt.title('data residual')
-
-# #%%
-# # Compute the sensitivity matrix for a given model
+#%%
+from geobipy import DataArray
+# Compute the sensitivity matrix for a given model
 J = tdp.sensitivity(mod)
-# plt.figure()
-# _ = np.abs(J).pcolor(equalize=True, log=10, flipY=True)
-
-print('J', J)
-# print('J shape', J.shape)
-# print('sx 0', J[:16, 0])
-
-tdp.fm_dlogc(mod)
-
-print('new primary', tdp.primary_field)
-print('sx', tdp.secondary_field[:15])
-print('sz', tdp.secondary_field[15:])
-
-print('new J', tdp.sensitivity_matrix)
+J = np.dot(J.T, J)
+plt.figure()
+_ = J.pcolor(equalize=True, flipY=True)
 
 #%%
 # Attaching statistical descriptors to the tempest datapoint
@@ -114,13 +100,14 @@ generator = PCG64DXSM(seed=0)
 prng = Generator(generator)
 
 # Set relative errors for the primary fields, and secondary fields.
-tdp.relative_error = np.r_[0.001, 0.001]
+tdp.relative_error = 0.001
 
 # Set the additive errors for
-tdp.additive_error = np.hstack([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
-                                [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]])
+tmp = np.asarray([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
+                  [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]])
+tdp.additive_error = np.sqrt((tmp**2.0).sum(axis=0))
 # Define a multivariate log normal distribution as the prior on the predicted data.
-tdp.predictedData.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
+tdp.predicted_data.prior = Distribution('MvLogNormal', tdp.data[tdp.active], tdp.std[tdp.active]**2.0, prng=prng)
 
 #%%
 # This allows us to evaluate the likelihood of the predicted data
@@ -147,28 +134,33 @@ plt.figure()
 tdp.plot_secondary_field()
 tdp.plot_predicted_secondary_field()
 
-# #%%
-# # We can attach priors to the height of the datapoint,
-# # the relative error multiplier, and the additive error noise floor
+#%%
+# We can attach priors to the height of the datapoint,
+# the relative error multiplier, and the additive error noise floor
 
 # Define the distributions used as priors.
-relative_prior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5], prng=prng)
-receiver_x_prior = Distribution('Uniform', min=np.float64(tdp.receiver.x) - 1.0, max=np.float64(tdp.receiver.x) + 1.0, prng=prng)
-receiver_z_prior = Distribution('Uniform', min=np.float64(tdp.receiver.z) - 1.0, max=np.float64(tdp.receiver.z) + 1.0, prng=prng)
-receiver_pitch_prior = Distribution('Uniform', min=tdp.receiver.pitch - 5.0, max=tdp.receiver.pitch + 5.0, prng=prng)
-tdp.set_priors(relative_error_prior=relative_prior, receiver_x_prior=receiver_x_prior, receiver_z_prior=receiver_z_prior, receiver_pitch_prior=receiver_pitch_prior, prng=prng)
+relative_prior = Distribution('Uniform', min=0.01, max=0.5, prng=prng)
+receiver_x_prior = Distribution('Uniform', min=tdp.receiver.x - 1.0, max=tdp.receiver.x + 1.0, prng=prng)
+receiver_z_prior = Distribution('Uniform', min=tdp.receiver.z - 1.0, max=tdp.receiver.z + 1.0, prng=prng)
+transmitter_pitch_prior = Distribution('Uniform', min=tdp.receiver.pitch - 5.0, max=tdp.receiver.pitch + 5.0, prng=prng)
+tdp.set_priors(prng=prng,
+               relative_error_prior=relative_prior,
+               receiver_x_prior=receiver_x_prior,
+               receiver_z_prior=receiver_z_prior,
+               transmitter_pitch_prior=transmitter_pitch_prior)
 
 #%%
 # In order to perturb our solvable parameters, we need to attach proposal distributions
-relative_proposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-4, prng=prng)
+relative_proposal = Distribution('MvNormal', mean=tdp.relative_error, variance=1e-5, prng=prng)
 receiver_x_proposal = Distribution('Normal', mean=tdp.receiver.x, variance = 0.01, prng=prng)
 receiver_z_proposal = Distribution('Normal', mean=tdp.receiver.z, variance = 0.01, prng=prng)
-receiver_pitch_proposal = Distribution('Normal', mean=tdp.receiver.pitch, variance = 0.01, prng=prng)
-tdp.set_proposals(relative_error_proposal=relative_proposal,
+transmitter_pitch_proposal = Distribution('Normal', mean=tdp.receiver.pitch, variance = 0.01, prng=prng)
+tdp.set_proposals(prng=prng,
+                  relative_error_proposal=relative_proposal,
                   receiver_x_proposal=receiver_x_proposal,
                   receiver_z_proposal=receiver_z_proposal,
-                  receiver_pitch_proposal=receiver_pitch_proposal,
-                  solve_additive_error=True, additive_error_proposal_variance=1e-4, prng=prng)
+                  transmitter_pitch_proposal=transmitter_pitch_proposal)
+                #   solve_additive_error=True, additive_error_proposal_variance=1e-4, prng=prng)
 
 #%%
 # With priors set we can auto generate the posteriors
@@ -177,8 +169,15 @@ tdp.set_posteriors()
 #%%
 # Perturb the datapoint and record the perturbations
 # Note we are not using the priors to accept or reject perturbations.
-for i in range(10):
+for i in range(1000):
     tdp.perturb()
     tdp.update_posteriors()
 
+plt.figure()
+ax = tdp._init_posterior_plots()
+print(ax)
+
+tdp.plot_posteriors(axes=ax)
+
 plt.show()
+# %%

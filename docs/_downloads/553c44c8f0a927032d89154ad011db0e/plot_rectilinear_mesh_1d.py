@@ -248,10 +248,7 @@ with h5py.File('rm1d.h5', 'w') as f:
     tmp = rm.pad(rm.max_cells)
     tmp.createHdf(f, 'rm1d', withPosterior=True, add_axis=DataArray(np.arange(3.0), name='Easting', units="m"))
 
-    print(list(f['rm1d'].keys()))
-
     rm.relative_to = 5.0
-    print(rm.summary)
     rm.writeHdf(f, 'rm1d', withPosterior = True, index=0)
 
     rm = deepcopy(rm0)

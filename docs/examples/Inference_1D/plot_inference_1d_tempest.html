@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Running GeoBIPy to invert Tempest data &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>Running GeoBIPy to invert Tempest data &mdash; GeoBIPy 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
@@ -20,7 +20,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/documentation_options.js?v=c3c8ae58"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -42,7 +42,7 @@
             GeoBIPy
           </a>
               <div class="version">
-                1.0.0
+                2.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -130,10 +130,6 @@ to download the full example code.</p>
     <span class="k">return</span> <span class="n">Parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/Tempest_datapoint.py:138: SyntaxWarning: invalid escape sequence &#39;\e&#39;
-  self._relative_error = StatArray(values, &#39;$\epsilon_{Relative}$&#39;, &#39;%&#39;)
-</pre></div>
-</div>
 <div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="n">args</span> <span class="o">=</span> <span class="n">checkCommandArguments</span><span class="p">()</span>
@@ -199,138 +195,17 @@ to download the full example code.</p>
 </div>
 <img src="../../_images/sphx_glr_plot_inference_1d_tempest_001.png" srcset="../../_images/sphx_glr_plot_inference_1d_tempest_001.png" alt="Fiducial [2.], Time Domain EM Data" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Using user input file ..//..//supplementary////options_files//Tempest_options
 Output files will be produced at Tempest/glacial
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
 Creating HDF5 files, this may take a few minutes...
 Files are being created for data files ..//..//supplementary////data//Tempest_glacial.csv and system files ..//..//supplementary////data//..//data/tempest.stm
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-RectilinearMesh1D
-Number of Cells:
-|   StatArray
-|   Name:   Number of cells
-|   Address:[&#39;0x1466c44d0&#39; &#39;0x141cff320&#39; &#39;0x1467675d0&#39; &#39;0x146779290&#39;]
-|   Shape:  (1,)
-|   Values: [30]
-|   Min:    30
-|   Max:    30
-|   Prior:
-|   |   Uniform Distribution:
-|   |   Min: 1
-|   |   Max: 30
-|   has_posterior: True
-
-Cell Centres:
-|   StatArray
-|   Name:   Depth (m)
-|   Address:[&#39;0x146776d50&#39;]
-|   Shape:  (30,)
-|   Values: [0. 0. 0. ... 0. 0. 0.]
-|   Min:    0.0
-|   Max:    0.0
-|   has_posterior: False
-
-Cell Edges:
-|   StatArray
-|   Name:   Depth (m)
-|   Address:[&#39;0x146776fd0&#39;]
-|   Shape:  (31,)
-|   Values: [0. 0. 0. ... 0. 0. 0.]
-|   Min:    0.0
-|   Max:    0.0
-|   has_posterior: True
-
-log:
-|   None
-relative_to:
-|   StatArray
-|   Name:
-|   Address:[&#39;0x1466c4250&#39;]
-|   Shape:  (1,)
-|   Values: [0.]
-|   Min:    0.0
-|   Max:    0.0
-|   has_posterior: False
-
-
 Created hdf5 file for line 0.0 with 79 data points
 Created hdf5 files 79 total data points
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-Created hdf5 files in 0:00:00.519640 h:m:s
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-self.n_components=2, self.nTimes=array([15])
-i=5000, k=5, acc=*24.800, 0.023 s/Model, 116.088 s Elapsed, eta=--:--:-- h:m:s
+Created hdf5 files in 0:00:00.377333 h:m:s
+i=5000, k=7, acc=*12.240, 0.014 s/Model, 71.420 s Elapsed, eta=--:--:-- h:m:s
 
-Remaining Points -2/1 || Elapsed Time: 0:01:58.086853 h:m:s || ETA 0:00:39.362284 h:m:s
+Remaining Points -2/1 || Elapsed Time: 0:01:12.767199 h:m:s || ETA 0:00:24.255733 h:m:s
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (2 minutes 10.939 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 16.614 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-inference-1d-plot-inference-1d-tempest-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/d846da4c19c00a52fbf7a1e0d8828a4b/plot_inference_1d_tempest.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_inference_1d_tempest.ipynb</span></code></a></p>

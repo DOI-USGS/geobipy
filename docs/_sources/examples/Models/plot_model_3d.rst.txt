@@ -120,7 +120,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x140fcaea0>, <matplotlib.colorbar.Colorbar object at 0x140ffa210>)
+    (<Axes: xlabel='Northing (m)', ylabel='Depth (m)'>, <matplotlib.collections.QuadMesh object at 0x163dc7b00>, <matplotlib.colorbar.Colorbar object at 0x164044470>)
 
 
 
@@ -203,7 +203,7 @@ Specify some cell centres in x and y
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x15741b740>, <matplotlib.colorbar.Colorbar object at 0x157464a70>)
+    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x163832ae0>, <matplotlib.colorbar.Colorbar object at 0x164151c70>)
 
 
 
@@ -266,7 +266,7 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x1593edc40>, <matplotlib.colorbar.Colorbar object at 0x15941b050>)
+    (<Axes: xlabel='Northing (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x1643bbd10>, <matplotlib.colorbar.Colorbar object at 0x1637a1670>)
 
 
 
@@ -291,12 +291,11 @@ We can plot the mesh in 3D!
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 133-155
+.. GENERATED FROM PYTHON SOURCE LINES 133-154
 
 .. code-block:: Python
 
     model.pyvista_mesh().save('model3d_re2.vtk')
-
 
     xx, yy = np.meshgrid(mesh.z.centres, mesh.x.centres)
     y_re = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "y_re")
@@ -331,15 +330,15 @@ We can plot the mesh in 3D!
  .. code-block:: none
 
 
-    (<Axes: xlabel='y_re (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x1594800e0>, <matplotlib.colorbar.Colorbar object at 0x1594b0140>)
+    (<Axes: xlabel='y_re (m)', ylabel='z_re (m)'>, <matplotlib.collections.QuadMesh object at 0x1642c46e0>, <matplotlib.colorbar.Colorbar object at 0x1120aef90>)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 156-157
+.. GENERATED FROM PYTHON SOURCE LINES 155-156
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 157-159
+.. GENERATED FROM PYTHON SOURCE LINES 156-158
 
 .. code-block:: Python
 
@@ -352,11 +351,11 @@ We can plot the mesh in 3D!
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 160-161
+.. GENERATED FROM PYTHON SOURCE LINES 159-160
 
 We can plot the mesh in 3D!
 
-.. GENERATED FROM PYTHON SOURCE LINES 161-172
+.. GENERATED FROM PYTHON SOURCE LINES 160-171
 
 .. code-block:: Python
 
@@ -381,7 +380,7 @@ We can plot the mesh in 3D!
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 2.234 seconds)
+   **Total running time of the script:** (0 minutes 1.181 seconds)
 
 
 .. _sphx_glr_download_examples_Models_plot_model_3d.py:

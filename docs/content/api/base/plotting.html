@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>plotting &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>plotting &mdash; GeoBIPy 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
@@ -20,7 +20,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/documentation_options.js?v=c3c8ae58"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -42,7 +42,7 @@
             GeoBIPy
           </a>
               <div class="version">
-                1.0.0
+                2.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -63,7 +63,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.generate_subplots"><code class="docutils literal notranslate"><span class="pre">generate_subplots()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.hillshade"><code class="docutils literal notranslate"><span class="pre">hillshade()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.hlines"><code class="docutils literal notranslate"><span class="pre">hlines()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.make_colourmap"><code class="docutils literal notranslate"><span class="pre">make_colourmap()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pause"><code class="docutils literal notranslate"><span class="pre">pause()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pcolor"><code class="docutils literal notranslate"><span class="pre">pcolor()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.pcolor_1D"><code class="docutils literal notranslate"><span class="pre">pcolor_1D()</span></code></a></li>
@@ -75,6 +74,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.sizeLegend"><code class="docutils literal notranslate"><span class="pre">sizeLegend()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.stackplot2D"><code class="docutils literal notranslate"><span class="pre">stackplot2D()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.step"><code class="docutils literal notranslate"><span class="pre">step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.visible_ticks"><code class="docutils literal notranslate"><span class="pre">visible_ticks()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.plotting.vlines"><code class="docutils literal notranslate"><span class="pre">vlines()</span></code></a></li>
 </ul>
 </li>
@@ -230,27 +230,6 @@ Values in c that are &lt;= 0 are masked.</p></li>
 </dd>
 </dl>
 </div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="geobipy.src.base.plotting.make_colourmap">
-<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">make_colourmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cname</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.make_colourmap" title="Link to this definition"></a></dt>
-<dd><p>Generate a Linear Segmented colourmap</p>
-<p>Generates a colourmap from the sequence given and registers the colourmap with matplotlib.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>seq</strong> (<em>array</em><em> of </em><em>hex colours.</em>) – e.g. [‘#000000’,’#00fcfd’,…]</p></li>
-<li><p><strong>cname</strong> (<em>str</em>) – Name of the colourmap.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>matplotlib.colors.LinearSegmentedColormap.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>out</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -568,6 +547,17 @@ Values in c that are &lt;= 0 are masked.</p></li>
 <li><p><strong>flipY</strong> – Flip the Y axis</p></li>
 <li><p><strong>noLabels</strong> (<em>bool</em><em>, </em><em>optional</em>) – Do not plot the labels</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.plotting.visible_ticks">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.plotting.</span></span><span class="sig-name descname"><span class="pre">visible_ticks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ws'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.plotting.visible_ticks" title="Link to this definition"></a></dt>
+<dd><p>Set the ticks to be visible on the specified sides of the plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sides</strong> (<em>str</em>) – ‘ws’ for west and south, ‘en’ for east and north, ‘all’ for all sides.</p>
 </dd>
 </dl>
 </dd></dl>

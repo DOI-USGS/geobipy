@@ -67,7 +67,7 @@ print('Output files will be produced at {}'.format(output_directory))
 
 kwargs = user_parameters.read(inputFile)
 
-kwargs['n_markov_chains'] = 5000
+kwargs['n_markov_chains'] = 100000
 
 kwargs['data_filename'] = supplementary + '//data//' + data_filename + '.csv'
 kwargs['system_filename'] = [supplementary + "//data//" + x for x in kwargs['system_filename']]

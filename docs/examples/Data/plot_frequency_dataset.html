@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frequency domain dataset &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>Frequency domain dataset &mdash; GeoBIPy 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
@@ -20,7 +20,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/documentation_options.js?v=c3c8ae58"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -42,7 +42,7 @@
             GeoBIPy
           </a>
               <div class="version">
-                1.0.0
+                2.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -290,7 +290,7 @@ surface [WARNING]: Possibly some data were half-way between nodes and subject to
 <section id="obtain-a-line-from-the-data-set">
 <h2>Obtain a line from the data set<a class="headerlink" href="#obtain-a-line-from-the-data-set" title="Link to this heading"></a></h2>
 <p>Take a look at the line numbers in the dataset</p>
-<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">FD1</span><span class="o">.</span><span class="n">lineNumber</span><span class="p">))</span>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">FD1</span><span class="o">.</span><span class="n">line_number</span><span class="p">))</span>
 </pre></div>
 </div>
 <div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[30010 30020 30030 ... 30100 39010 39020]
@@ -307,7 +307,7 @@ surface [WARNING]: Possibly some data were half-way between nodes and subject to
 x:
 |   StatArray
 |   Name:   Easting (m)
-|   Address:[&#39;0x142163950&#39;]
+|   Address:[&#39;0x1636e65d0&#39;]
 |   Shape:  (6710,)
 |   Values: [586852.29 586852.23 586852.17 ... 586123.57 586123.2  586122.82]
 |   Min:    586122.82
@@ -317,7 +317,7 @@ x:
 y:
 |   StatArray
 |   Name:   Northing (m)
-|   Address:[&#39;0x142161cd0&#39;]
+|   Address:[&#39;0x1636e5750&#39;]
 |   Shape:  (6710,)
 |   Values: [4639119.38 4639122.68 4639125.98 ... 4661765.26 4661768.84 4661772.42]
 |   Min:    4639119.38
@@ -327,7 +327,7 @@ y:
 z:
 |   StatArray
 |   Name:   Height (m)
-|   Address:[&#39;0x1421623d0&#39;]
+|   Address:[&#39;0x1636e47d0&#39;]
 |   Shape:  (6710,)
 |   Values: [36.115 36.498 36.835 ... 27.799 27.704 27.601]
 |   Min:    23.830000000000002
@@ -337,7 +337,7 @@ z:
 elevation:
 |   StatArray
 |   Name:   Elevation (m)
-|   Address:[&#39;0x142161550&#39;]
+|   Address:[&#39;0x1636e6750&#39;]
 |   Shape:  (6710,)
 |   Values: [1246.84 1246.71 1246.61 ... 1337.94 1337.96 1338.02]
 |   Min:    1213.18
@@ -351,7 +351,7 @@ channel names:
 data:
 |   DataArray
 |   Name:   Data (ppm)
-|   Address:[&#39;0x1421042d0&#39;]
+|   Address:[&#39;0x16403bed0&#39;]
 |   Shape:  (80520,)
 |   Values: [145.3 435.8 260.6 ... 749.2 976.5 928.3]
 |   Min:    37.7
@@ -360,7 +360,7 @@ data:
 predicted data:
 |   DataArray
 |   Name:   Predicted Data (ppm)
-|   Address:[&#39;0x1421042d0&#39;]
+|   Address:[&#39;0x16403bed0&#39;]
 |   Shape:  (80520,)
 |   Values: [0. 0. 0. ... 0. 0. 0.]
 |   Min:    0.0
@@ -369,7 +369,7 @@ predicted data:
 std:
 |   DataArray
 |   Name:   std (ppm)
-|   Address:[&#39;0x142104150&#39;]
+|   Address:[&#39;0x16403b9d0&#39;]
 |   Shape:  (80520,)
 |   Values: [1.453 4.358 2.606 ... 7.492 9.765 9.283]
 |   Min:    0.37700000000000006
@@ -378,7 +378,7 @@ std:
 line number:
 |   DataArray
 |   Name:   Line number
-|   Address:[&#39;0x140e9c850&#39;]
+|   Address:[&#39;0x164606c50&#39;]
 |   Shape:  (6710,)
 |   Values: [30010. 30010. 30010. ... 30010. 30010. 30010.]
 |   Min:    30010.0
@@ -387,7 +387,7 @@ line number:
 fiducial:
 |   DataArray
 |   Name:   Fiducial
-|   Address:[&#39;0x1799cdfd0&#39;]
+|   Address:[&#39;0x165f0d2d0&#39;]
 |   Shape:  (6710,)
 |   Values: [30000 30000 30000 ... 30670 30670 30670]
 |   Min:    30000
@@ -396,7 +396,7 @@ fiducial:
 relative error:
 |   DataArray
 |   Name:   Relative error (%)
-|   Address:[&#39;0x142160a50&#39;]
+|   Address:[&#39;0x1636e7c50&#39;]
 |   Shape:  (6710, 1)
 |   Values: [[0.01]
 |    [0.01]
@@ -411,7 +411,7 @@ relative error:
 additive error:
 |   DataArray
 |   Name:   Additive error (ppm)
-|   Address:[&#39;0x142160ad0&#39;]
+|   Address:[&#39;0x1636e7550&#39;]
 |   Shape:  (6710, 1)
 |   Values: [[0.]
 |    [0.]
@@ -461,7 +461,11 @@ xAxis can be index, x, y, z, r2d, r3d</p>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<img src="../../_images/sphx_glr_plot_frequency_dataset_006.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_006.png" alt="plot frequency dataset" class = "sphx-glr-single-img"/></section>
+<img src="../../_images/sphx_glr_plot_frequency_dataset_006.png" srcset="../../_images/sphx_glr_plot_frequency_dataset_006.png" alt="plot frequency dataset" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/dataset/Data.py:940: UserWarning: No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+  leg = ax.legend(loc=&#39;center left&#39;, bbox_to_anchor=(1, 0.5),fancybox=True)
+</pre></div>
+</div>
+</section>
 <section id="file-format-for-frequency-domain-data">
 <h2>File Format for frequency domain data<a class="headerlink" href="#file-format-for-frequency-domain-data" title="Link to this heading"></a></h2>
 <p>Here we describe the file format for frequency domain data.</p>
@@ -525,7 +529,7 @@ These must appear after the data colums.</p>
 <p>Example system files are contained in
 <a class="reference external" href="https://github.com/usgs/geobipy/tree/master/documentation_source/source/examples/supplementary/Data">the supplementary folder</a> in this repository</p>
 <p>See the Resolve.stm files.</p>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.206 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.111 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-data-plot-frequency-dataset-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/ffa7a17936c32d098025040a94f8af46/plot_frequency_dataset.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_frequency_dataset.ipynb</span></code></a></p>

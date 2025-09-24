@@ -79,8 +79,8 @@ def plot_2d_summary(folder, data_type, model_type):
    results_2d.plot_elevation(linewidth=0.3, ax=ax1);
    ax1.set_title('Best model')
 
-   del kwargs['vmin']
-   del kwargs['vmax']
+   # del kwargs['vmin']
+   # del kwargs['vmax']
 
    ax1 = fig.add_subplot(gs0[3, 1], sharex=ax, sharey=ax); ax1.set_title('5%')
    results_2d.plot_percentile(ax=ax1, percent=0.05, wrap_clabel=True, **kwargs)
@@ -144,9 +144,9 @@ if __name__ == '__main__':
    # import warnings
    # warnings.filterwarnings('error')
    for model in models:
-      try:
-         plot_2d_summary('../../../Parallel_Inference/', "tempest", model)
-      except Exception as e:
-         print(model)
-         print(e)
-         pass
+      # try:
+      plot_2d_summary('../../../Parallel_Inference/', "tempest", model)
+      # except Exception as e:
+      #    print(model)
+      #    print(e)
+      #    pass

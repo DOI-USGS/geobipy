@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**02:10.939** total execution time for 3 files **from examples/Inference_1D**:
+**03:02.715** total execution time for 3 files **from examples/Inference_1D**:
 
 .. container::
 
@@ -33,11 +33,11 @@ Computation times
      - Time
      - Mem (MB)
    * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_tempest.py` (``plot_inference_1d_tempest.py``)
-     - 02:10.939
-     - 0.0
-   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_resolve.py` (``plot_inference_1d_resolve.py``)
-     - 00:00.000
+     - 01:16.614
      - 0.0
    * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_skytem.py` (``plot_inference_1d_skytem.py``)
-     - 00:00.000
+     - 01:03.378
+     - 0.0
+   * - :ref:`sphx_glr_examples_Inference_1D_plot_inference_1d_resolve.py` (``plot_inference_1d_resolve.py``)
+     - 00:42.723
      - 0.0
