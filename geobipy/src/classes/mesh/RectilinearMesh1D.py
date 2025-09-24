@@ -706,7 +706,14 @@ class RectilinearMesh1D(Mesh):
                     values[j] = tmp.delete(i)
                     values[j][i-1] = val
             else:
-                val = 0.5 * (values[i-1] + values[i])
+                choice = self.event_proposal.prng.integers(low=0, high=3, size=1).item()
+                match choice:
+                    case 0:
+                        val = values[i-1]
+                    case 1:
+                        val = 0.5 * (values[i-1] + values[i])
+                    case 2:
+                         val = values[i]
                 values = values.delete(i)
                 values[i-1] = val
             return out, values
@@ -1595,7 +1602,7 @@ class RectilinearMesh1D(Mesh):
         self.edges.proposal = Distribution('Uniform',
                                            min=self.min_edge,
                                            max=self.max_edge,
-                                           log=True,
+                                        #    log=True,
                                            prng=kwargs.get('prng', None))
 
     def unperturb(self):

@@ -6,7 +6,7 @@ from copy import deepcopy
 import matplotlib.pyplot as plt
 
 from numpy import allclose, arange, asarray, atleast_1d, atleast_2d, float64, full, hstack, int32
-from numpy import nan, ones, r_, repeat
+from numpy import nan, ones, r_, repeat, sqrt
 from numpy import s_, shape, size, vstack, zeros
 from pandas import read_csv
 from matplotlib.figure import Figure
@@ -59,7 +59,7 @@ class TempestData(TdemData):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._additive_error = DataArray((self.nPoints, self.nChannels), "Additive error", "%")
+        self._additive_error = DataArray((self.nPoints, self.n_data_channels), "Additive error", "%")
         self._relative_error = DataArray((self.nPoints, self.nSystems), "Relative error", "%")
 
         self._additive_error_multiplier = DataArray(ones((self.nPoints, self.nSystems)), "multiplier")
@@ -67,7 +67,7 @@ class TempestData(TdemData):
     @property
     def additive_error(self):
         if size(self._additive_error, 0) == 0:
-            self._additive_error = DataArray((self.nPoints, self.nChannels), "Additive error", "%")
+            self._additive_error = DataArray((self.nPoints, self.n_data_channels), "Additive error", "%")
         return self._additive_error
 
     @additive_error.setter
@@ -75,8 +75,8 @@ class TempestData(TdemData):
         if values is not None:
             values = atleast_2d(values)
 
-            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
-            shp = (self.nPoints, self.nChannels)
+            self.nPoints, n_data_channels = size(values, 0), size(values, 1)
+            shp = (self.nPoints, n_data_channels)
             if not allclose(self._additive_error.shape, shp):
                 self._additive_error = DataArray(values, "Additive error", self.units)
                 return
@@ -109,10 +109,22 @@ class TempestData(TdemData):
         self._data[:] = 0.0
         for j in range(self.nSystems):
             for i in range(self.n_components):
-                ic = self._component_indices(i, j)
-                self._data[:, :] += self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
+                ic = self._component_indices(component=i, system=j)
+                self._data[:, :] += (self.primary_field[:, i][:, None]) + self.secondary_field[:, ic]
 
         return self._data
+
+    @TdemData.std.getter
+    def std(self):
+        if (size(self._std, 0) == 0) or (self._std.shape[0] != self.nPoints):
+            self._std = DataArray((self.nPoints, self.n_data_channels), "Standard deviation", self.units)
+
+        if self.relative_error.max() > 0.0:
+            for i in range(self.nSystems):
+                j = self._systemIndices(i)
+                self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
+
+        return self._std
 
     @TdemData.predicted_data.getter
     def predicted_data(self):
@@ -626,12 +638,12 @@ class TempestData(TdemData):
         loopOffset = vstack([asarray(gdf['hsep_gps'][record]), asarray(gdf['tsep_gps'][record]), asarray(gdf['vsep_gps'][record])])
 
         receiver_loop = CircularLoop(x=transmitter_loop.x + loopOffset[0],
-                                      y=transmitter_loop.y + loopOffset[1],
-                                      z=transmitter_loop.z + loopOffset[2],
-                                      pitch=float64(gdf['rx_pitch'][record]),
-                                      roll=float64(gdf['rx_roll'][record]),
-                                      yaw=float64(gdf['rx_yaw'][record]),
-                                      radius=self.system[0].loopRadius())
+                                     y=transmitter_loop.y + loopOffset[1],
+                                     z=transmitter_loop.z + loopOffset[2],
+                                     pitch=float64(gdf['rx_pitch'][record]),
+                                     roll=float64(gdf['rx_roll'][record]),
+                                     yaw=float64(gdf['rx_yaw'][record]),
+                                     radius=self.system[0].loopRadius())
 
         out = self.single(
                 line_number = float64(gdf['line'][record]),
@@ -640,7 +652,7 @@ class TempestData(TdemData):
                 y = y,
                 z = z,
                 elevation = float64(gdf['dtm'][record]),
-                transmitter_loop = transmitter_loop,
+                transmitter = transmitter,
                 receiver_loop = receiver_loop,
                 primary_field = primary_field,
                 secondary_field = secondary_field,
@@ -700,10 +712,15 @@ class TempestData(TdemData):
 
         ds.loop_pair = Loop_pair(transmitter, receiver)
 
-        ds.relative_error = repeat(r_[0.001, 0.001][None, :], model.x.nCells, 0)
-        add_error = r_[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201,
-                        0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]
+        ds.relative_error = full((model.x.nCells, 1), fill_value=0.001)
+        # add_error = asarray([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
+        #                      [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]])
+        # add_error = (add_error**2.0).sum(axis=0)**0.5  # Convert to RMS error
+        add_error = r_[0.0136441 , 0.01401807, 0.00995895, 0.00632076, 0.00585013, 0.00541495, 0.00519146, 0.00480287, 0.00435161, 0.00415024, 0.00400544, 0.00380665, 0.00312555, 0.00247537, 0.00254764]
         ds.additive_error = repeat(add_error[None, :], model.x.nCells, 0)
+
+        ds.primary_field; ds.secondary_field; ds.data
+        ds.std
 
         dp = ds.datapoint(0)
 
@@ -711,8 +728,9 @@ class TempestData(TdemData):
             mod = model[k]
 
             dp.forward(mod)
-            dp.secondary_field[:] = dp.predicted_secondary_field
+
             dp.primary_field[:] = dp.predicted_primary_field
+            dp.secondary_field[:] = dp.predicted_secondary_field
 
             ds.primary_field[k, :] = dp.primary_field
             ds.secondary_field[k, :] = dp.secondary_field
@@ -728,7 +746,9 @@ class TempestData(TdemData):
         # ds.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
         # ds.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
 
-        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.nChannels))
+
+
+        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.n_data_channels))
 
         return ds, ds_noisy
 

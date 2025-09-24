@@ -152,7 +152,7 @@ class EmDataPoint(DataPoint):
 
         return out
 
-    def find_best_halfspace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
+    def find_best_halfspace(self, minConductivity=1e-10, maxConductivity=1e2, nSamples=1000):
         """Computes the best value of a half space that fits the data.
 
         Carries out a brute force search of the halfspace conductivity that best fits the data.
@@ -215,7 +215,7 @@ class EmDataPoint(DataPoint):
         """
 
         # tmp = deepcopy(self)
-        c = DataArray(logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
+        c = DataArray(logspace(min, max, nSamples), 'Conductivity', '$S/m$')
         PhiD = DataArray(size(c), 'Normalized Data Misfit', '')
 
         model = self.new_model

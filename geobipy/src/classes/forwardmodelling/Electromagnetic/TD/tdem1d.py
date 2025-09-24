@@ -36,8 +36,9 @@ def tdem1dfwd(datapoint, model1d):
             "For airborne data, system must be type TdemSystem_GAAEM")
         return gaTdem1dfwd(datapoint, model1d)
 
-    # else:
-    #     return empymod_tdem1dfwd(datapoint, model1d)
+    else:
+        raise NotImplementedError("Cant do ground stuff yet")
+        # return empymod_tdem1dfwd(datapoint, model1d)
 
 
 def tdem1dsen(datapoint, model1d, ix=None, model_changed=True):

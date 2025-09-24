@@ -39,9 +39,9 @@ class user_parameters(dict):
 
         kwargs.pop('join', None)
 
-        kwargs =self.optional_arguments(**kwargs)
+        kwargs = self.optional_arguments(**kwargs)
 
-        kwargs['stochastic_newton'] = not kwargs.get('ignore_likelihood', False)
+        # kwargs['stochastic_newton'] = not kwargs.get('ignore_likelihood', False)
 
         kwargs['data_filename'] = join(kwargs['data_directory'], kwargs['data_filename'])
         if isinstance(kwargs['system_filename'], list):
@@ -67,6 +67,7 @@ class user_parameters(dict):
         kwargs = self.assign_default('gradient_weight', float64(0.0), **kwargs)
         kwargs = self.assign_default('minimum_burn_in', float64(5000.0), **kwargs)
         kwargs = self.assign_default('parameter_limits', np.r_[1e-20, 1e20], **kwargs)
+        kwargs = self.assign_default('stochastic_newton', True, **kwargs)
 
         if "number_of_depth_bins" in kwargs:
             kwargs["number_of_edge_bins"] = kwargs.pop("number_of_depth_bins")

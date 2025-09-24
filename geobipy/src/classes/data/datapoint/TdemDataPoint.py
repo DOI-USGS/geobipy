@@ -85,8 +85,8 @@ class TdemDataPoint(EmDataPoint):
                  relative_error=None, additive_error=None, std=None,
                  predicted_primary_field=None, predicted_secondary_field=None,
                  system=None,
-                 transmitter_loop=None, receiver_loop=None,
-                 line_number=0.0, fiducial=0.0):
+                 transmitter=None, receiver=None,
+                 line_number=0.0, fiducial=0.0, **kwargs):
 
         self.system = system
 
@@ -94,12 +94,12 @@ class TdemDataPoint(EmDataPoint):
                          components=self.components,
                          channels_per_system=self.nTimes,
                          data=None, std=std, predicted_data=None,
-                         line_number=line_number, fiducial=fiducial)
+                         line_number=line_number, fiducial=fiducial, **kwargs)
 
         self.additive_error = additive_error
         self.relative_error = relative_error
 
-        self.loop_pair = Loop_pair(transmitter_loop, receiver_loop)
+        self.loop_pair = Loop_pair(transmitter, receiver)
 
         self.primary_field = primary_field
         self.secondary_field = secondary_field
@@ -185,10 +185,11 @@ class TdemDataPoint(EmDataPoint):
 
     @predicted_primary_field.setter
     def predicted_primary_field(self, values):
+
         if values is None:
             values = self.n_components
         else:
-            assert size(values) == self.n_components, ValueError("predicted primary field must have size {}".format(self.n_components))
+            assert size(values) == self.n_components*self.n_systems, ValueError("predicted primary field must have size {}".format(self.n_components*self.n_systems))
 
         self._predicted_primary_field = StatArray(values, "Predicted primary field", self.units)
 

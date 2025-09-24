@@ -251,16 +251,16 @@ class TdemData(Data):
     def secondary_field(self):
         """The data. """
         if size(self._secondary_field, 0) == 0:
-            self._secondary_field = DataArray((self.nPoints, self.nChannels), "Secondary field", self.units)
+            self._secondary_field = DataArray((self.nPoints, self.n_data_channels), "Secondary field", self.units)
         return self._secondary_field
 
     @secondary_field.setter
     def secondary_field(self, values):
         if values is not None:
             values = atleast_2d(values)
-            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+            self.nPoints, n_data_channels = size(values, 0), size(values, 1)
 
-            shp = (self.nPoints, self.nChannels)
+            shp = (self.nPoints, n_data_channels)
             if not allclose(self._secondary_field.shape, shp):
                 self._secondary_field = DataArray(values, "Secondary field", self.units)
                 return
@@ -736,7 +736,7 @@ class TdemData(Data):
                         secondary_field=secondary_field,
                         primary_field=primary_field,
                         system=self.system,
-                        transmitter_loop=T, receiver_loop=R,
+                        transmitter=T, receiver=R,
                         line_number=data[0], fiducial=data[1])
         return out
 
@@ -821,7 +821,7 @@ class TdemData(Data):
                              relative_error=self.relative_error[i, :], additive_error=self.additive_error[i, :], std = self.std[i, :],
                              predicted_primary_field=None, predicted_secondary_field=None,
                              system = self.system,
-                             transmitter_loop = self.transmitter[i], receiver_loop = self.receiver[i],
+                             transmitter = self.transmitter[i], receiver = self.receiver[i],
                              line_number = self.line_number[i], fiducial = self.fiducial[i])
 
     def off_time(self, system=0):

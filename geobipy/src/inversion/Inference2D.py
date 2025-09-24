@@ -21,6 +21,7 @@ from ..classes.statistics.Histogram import Histogram
 # from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+from ..classes.data.datapoint.DataPoint import DataPoint
 from ..classes.data.dataset.Data import Data
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
@@ -102,7 +103,7 @@ class Inference2D(myObject):
 
     @data.setter
     def data(self, value):
-        assert isinstance(value, Data), TypeError("data must have type geobipy.Data, instead has type {}".format(type(value)))
+        assert isinstance(value, (Data, DataPoint)), TypeError("data must have type geobipy.Data, instead has type {}".format(type(value)))
         assert value.nPoints > 0, ValueError("Data has no value. nPoints is 0.")
         self._data = value
 

@@ -1482,4 +1482,3 @@ class DataArray(ndarray, myObject):
         tmp = myMPI.Irecv(source=source, world=world,
                           ndim=ndim, shape=shape, dtype=dtype)
         return cls(tmp, name, units)
-

@@ -379,7 +379,7 @@ class StatArray(DataArray):
         out = self.prior.derivative(self[i], order)
 
         if order == 2 and ndim(out) < 2:
-                return diag(out)
+            return diag(out)
         return out
 
     def proposal_derivative(self, order, i=None):

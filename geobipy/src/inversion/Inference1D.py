@@ -338,6 +338,10 @@ class Inference1D(myObject):
         self.options['solve_gradient'] = value
 
     @property
+    def stochastic_newton(self):
+        return self.options['stochastic_newton']
+
+    @property
     def update_plot_every(self):
         return self.options['update_plot_every']
 
@@ -550,9 +554,9 @@ class Inference1D(myObject):
         test_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
-        observation = test_datapoint
-        if self.ignore_likelihood:
-            observation = None
+        observation = None
+        if self.stochastic_newton and not self.ignore_likelihood:
+            observation = test_datapoint
 
         # try:
         remapped_model, test_model = self.model.perturb(observation, alpha = self.covariance_scaling)
@@ -667,19 +671,19 @@ class Inference1D(myObject):
                     failed = True
 
 
-            if self._n_resets == 3 and not self.burned_in:
-                if self.low_variance == -inf:
-                    # If we reset 3 times, we might have either too low or high a proposal variance.
-                    # Add limiters and try again.
-                    self.low_variance = 0.1
-                    self.high_variance = 2.0
-                    self._n_resets = 0
-                    self.reset()
+            # if self._n_resets == 3 and not self.burned_in:
+            #     if self.low_variance == -inf:
+            #         # If we reset 3 times, we might have either too low or high a proposal variance.
+            #         # Add limiters and try again.
+            #         self.low_variance = 0.1
+            #         self.high_variance = 2.0
+            #         self._n_resets = 0
+            #         self.reset()
 
                 # If we tried limiters and reset again 3 times, fail the datapoint.
-                else:
-                    Go = False
-                    failed = True
+                # else:
+                #     Go = False
+                #     failed = True
 
         self.clk.stop()
 
@@ -767,22 +771,22 @@ class Inference1D(myObject):
                 print(tmp, flush=True)
 
             # Test resetting of the inversion.
-            if self.update_plot_every > 1:
-                if not self.burned_in:
-                    if self.acceptance_percent == 0.0:
+            # if self.update_plot_every > 1:
+            #     if not self.burned_in:
+            #         if self.acceptance_percent == 0.0:
 
-                        self._n_zero_acceptance += 1
+            #             self._n_zero_acceptance += 1
 
-                        # Reset if we have 3 zero acceptances
-                        if self._n_zero_acceptance == self.reset_limit:
-                            self.reset()
-                            self._n_zero_acceptance = 0
-                    else:
-                        self._n_zero_acceptance = 0
-                else:
-                    if self.acceptance_percent == 0.0:
-                        self.low_variance = -inf
-                        self.high_variance = inf
+            #             # Reset if we have 3 zero acceptances
+            #             if self._n_zero_acceptance == self.reset_limit:
+            #                 self.reset()
+            #                 self._n_zero_acceptance = 0
+            #         else:
+            #             self._n_zero_acceptance = 0
+            #     else:
+            #         if self.acceptance_percent == 0.0:
+            #             self.low_variance = -inf
+            #             self.high_variance = inf
 
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.options['multiplier']
