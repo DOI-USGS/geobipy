@@ -21,7 +21,7 @@ from ..statistics.Histogram import Histogram
 from ..statistics.Distribution import Distribution
 from scipy.spatial import cKDTree
 from scipy.interpolate import CloughTocher2DInterpolator
-from scipy.interpolate._interpnd import _ndim_coords_from_arrays
+# from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 
 try:
     from pyvtk import VtkData, Scalars, PolyData, PointData, UnstructuredGrid
@@ -33,6 +33,33 @@ try:
     gmt = True
 except:
     gmt = False
+
+def _ndim_coords_from_arrays(points, ndim=None):
+    """
+    Convert a tuple of coordinate arrays to a (..., ndim)-shaped array.
+
+    """
+    if isinstance(points, tuple) and len(points) == 1:
+        # handle argument tuple
+        points = points[0]
+    if isinstance(points, tuple):
+        p = np.broadcast_arrays(*points)
+        n = len(p)
+        for j in range(1, n):
+            if p[j].shape != p[0].shape:
+                raise ValueError("coordinate arrays do not have the same shape")
+        points = np.empty(p[0].shape + (len(points),), dtype=float)
+        for j, item in enumerate(p):
+            points[...,j] = item
+    else:
+        points = np.asanyarray(points)
+        if points.ndim == 1:
+            if ndim is None:
+                points = points.reshape(-1, 1)
+            else:
+                points = points.reshape(-1, ndim)
+    return points
+
 
 class Point(myObject):
     """3D Point Cloud with x,y,z co-ordinates
@@ -63,7 +90,7 @@ class Point(myObject):
     def __init__(self, x=None, y=None, z=None, elevation=None, **kwargs):
         """ Initialize the class """
 
-        # Number of points in the cloud
+        # # Number of points in the cloud
         self._nPoints = 0
         self._x = StatArray(self._nPoints, "Easting", "m")
         self._y = StatArray(self._nPoints, "Northing", "m")
@@ -153,11 +180,7 @@ class Point(myObject):
 
     @property
     def hasPosterior(self):
-        return any((self.x.hasPosterior, self.y.hasPosterior, self.z.hasPosterior))
-
-    @property
-    def priors(self):
-        return {k:v.prior for k,v in zip(['x', 'y', 'z'], (self.x, self.y, self.z)) if v.hasPrior}
+        return (self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior) > 0
 
     @property
     def probability(self):
@@ -276,14 +299,6 @@ class Point(myObject):
     @property
     def ndim(self):
         return sum([size(t) == self._nPoints for t in (self.x, self.y, self.z)])
-
-    @property
-    def n_coordinate_pairs(self):
-        return sum(arange(self.n_points))
-
-    @property
-    def n_points(self):
-        return self.nPoints
 
     @property
     def nPoints(self):
@@ -1044,7 +1059,7 @@ class Point(myObject):
         """
         n_posteriors = self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
         if n_posteriors == 0:
-            return {}
+            return []
 
         if gs is None:
             gs = Figure()
@@ -1054,10 +1069,11 @@ class Point(myObject):
 
         splt = gs.subgridspec(n_posteriors, 1, wspace=0.3, hspace=1.0)
 
-        ax = {}; i = 0
-        for k, v in zip(('x', 'y', 'z'), (self.x, self.y, self.z)):
-            if v.hasPosterior:
-                ax[k] = v._init_posterior_plots(splt[i])
+        ax = []
+        i = 0
+        for c in [self.x, self.y, self.z]:
+            if c.hasPosterior:
+                ax.append(c._init_posterior_plots(splt[i]))
                 i += 1
 
         return ax
@@ -1071,7 +1087,7 @@ class Point(myObject):
         if axes is None:
             axes = kwargs.pop('fig', gcf())
 
-        if not isinstance(axes, dict):
+        if not isinstance(axes, list):
             axes = self._init_posterior_plots(axes)
 
         assert len(axes) == n_posteriors, ValueError("Must have length {} list of axes for the posteriors. self._init_posterior_plots can generate them.".format(n_posteriors))
@@ -1086,31 +1102,28 @@ class Point(myObject):
         #     y_kwargs['overlay'] = overlay.y
         #     z_kwargs['overlay'] = overlay.z
 
-        # if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
-        #     z_kwargs['transpose'] = z_kwargs.get('transpose', True)
+        if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
+            z_kwargs['transpose'] = z_kwargs.get('transpose', True)
 
-        for c, l, kw in zip((self.x, self.y, self.z),
-                            ('x', 'y', 'z'),
-                            (x_kwargs, y_kwargs, z_kwargs)):
+        i = 0
+        for c, kw in zip([self.x, self.y, self.z], [x_kwargs, y_kwargs, z_kwargs]):
             if c.hasPosterior:
-                c.plot_posteriors(ax = axes[l], **kw)
+                c.plot_posteriors(ax = axes[i], **kw)
+                i += 1
 
         if overlay is not None:
             axes = self.overlay_on_posteriors(overlay, axes)
 
     def overlay_on_posteriors(self, overlay, axes, x_kwargs={}, y_kwargs={}, z_kwargs={}, **kwargs):
 
-        assert isinstance(overlay, Point), TypeError("overlay must have type Point")
+        if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
+            z_kwargs['transpose'] = z_kwargs.get('transpose', True)
 
-        # if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
-        #     z_kwargs['transpose'] = z_kwargs.get('transpose', True)
-
-        for c, l, o, kw in zip([self.x, self.y, self.z],
-                               ('x', 'y', 'z'),
-                               [overlay.x, overlay.y, overlay.z],
-                               [x_kwargs, y_kwargs, z_kwargs]):
-            if c.hasPosterior:
-                c.posterior.plot_overlay(value = o, ax = axes[l], **kw, **kwargs)
+        i = 0
+        for s, o, kw in zip([self.x, self.y, self.z], [overlay.x, overlay.y, overlay.z], [x_kwargs, y_kwargs, z_kwargs]):
+            if s.hasPosterior:
+                s.posterior.plot_overlay(value = o, ax = axes[i], **kw, **kwargs)
+                i += 1
         return axes
 
 

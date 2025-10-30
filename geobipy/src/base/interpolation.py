@@ -4,6 +4,12 @@ from numpy import argwhere, ceil, column_stack, diff, floor, hstack, inf, int32,
 from numpy import minimum, maximum, nan, nanmax, nanmin, tile, zeros
 
 from .fileIO import deleteFile
+from ..classes.statistics import StatArray
+from . import utilities as cf
+from scipy import interpolate
+from scipy.interpolate import CloughTocher2DInterpolator
+#from scipy.interpolate import Rbf
+from scipy.spatial import cKDTree
 try:
     from netCDF4 import Dataset
 except:
@@ -15,6 +21,7 @@ from numba import jit
 _numba_settings = {'nopython': True, 'nogil': False, 'fastmath': True, 'cache': False}
 
 def sibson(x, y, values, grid_x, grid_y, z=None, grid_z = None, max_distance=inf):
+
     if grid_z is None:
         return __sibson_2d(x, y, values, grid_x, grid_y, max_distance)
     else:
