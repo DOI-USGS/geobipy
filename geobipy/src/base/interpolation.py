@@ -8,7 +8,6 @@ from ..classes.statistics import StatArray
 from . import utilities as cf
 from scipy import interpolate
 from scipy.interpolate import CloughTocher2DInterpolator
-from scipy.interpolate.interpnd import _ndim_coords_from_arrays
 #from scipy.interpolate import Rbf
 from scipy.spatial import cKDTree
 try:
