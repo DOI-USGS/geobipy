@@ -34,32 +34,6 @@ try:
 except:
     gmt = False
 
-def _ndim_coords_from_arrays(points, ndim=None):
-    """
-    Convert a tuple of coordinate arrays to a (..., ndim)-shaped array.
-
-    """
-    if isinstance(points, tuple) and len(points) == 1:
-        # handle argument tuple
-        points = points[0]
-    if isinstance(points, tuple):
-        p = np.broadcast_arrays(*points)
-        n = len(p)
-        for j in range(1, n):
-            if p[j].shape != p[0].shape:
-                raise ValueError("coordinate arrays do not have the same shape")
-        points = np.empty(p[0].shape + (len(points),), dtype=float)
-        for j, item in enumerate(p):
-            points[...,j] = item
-    else:
-        points = np.asanyarray(points)
-        if points.ndim == 1:
-            if ndim is None:
-                points = points.reshape(-1, 1)
-            else:
-                points = points.reshape(-1, ndim)
-    return points
-
 
 class Point(myObject):
     """3D Point Cloud with x,y,z co-ordinates
@@ -902,7 +876,7 @@ class Point(myObject):
         # Use distance masking
         if mask:
             kdt = cKDTree(column_stack((x, y)))
-            xi = _ndim_coords_from_arrays(tuple(meshgrid(mesh.x.centres, mesh.y.centres)), ndim=2)
+            xi = cf._ndim_coords_from_arrays(tuple(meshgrid(mesh.x.centres, mesh.y.centres)), ndim=2)
             dists, indexes = kdt.query(xi)
             vals[dists > mask] = nan
 
