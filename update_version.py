@@ -16,19 +16,6 @@ with open("documentation_source/source/conf.py", "w") as f:
                 f.write(line)
 
 try:
-    with open("setup.py", "r") as f:
-        lines = f.readlines()
-
-    with open("setup.py", "w") as f:
-        for line in lines:
-            if "__version__ =" in line:
-                f.write('__version__ = "{}"\n'.format(args.version))
-            else:
-                f.write(line)
-except:
-    pass
-
-try:
     with open("pyproject.toml", "r") as f:
         lines = f.readlines()
 

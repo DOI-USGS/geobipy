@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>utilities &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>utilities &mdash; GeoBIPy 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
@@ -20,7 +20,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../../_static/documentation_options.js?v=c3c8ae58"></script>
         <script src="../../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -42,7 +42,7 @@
             GeoBIPy
           </a>
               <div class="version">
-                1.0.0
+                2.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -77,6 +77,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.isIntorSlice"><code class="docutils literal notranslate"><span class="pre">isIntorSlice()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.isNumpy"><code class="docutils literal notranslate"><span class="pre">isNumpy()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.mergeComplex"><code class="docutils literal notranslate"><span class="pre">mergeComplex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.nodata_value"><code class="docutils literal notranslate"><span class="pre">nodata_value()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.rosenbrock"><code class="docutils literal notranslate"><span class="pre">rosenbrock()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.smooth"><code class="docutils literal notranslate"><span class="pre">smooth()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#geobipy.src.base.utilities.splitComplex"><code class="docutils literal notranslate"><span class="pre">splitComplex()</span></code></a></li>
@@ -493,6 +494,12 @@ If this fails, the specified default will be returned.</p>
 <dd class="field-odd"><p>numpy.ndarray of complex128</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="geobipy.src.base.utilities.nodata_value">
+<span class="sig-prename descclassname"><span class="pre">geobipy.src.base.utilities.</span></span><span class="sig-name descname"><span class="pre">nodata_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#geobipy.src.base.utilities.nodata_value" title="Link to this definition"></a></dt>
+<dd><p>Returns a nodata value for a given numpy dtype.</p>
 </dd></dl>
 
 <dl class="py function">

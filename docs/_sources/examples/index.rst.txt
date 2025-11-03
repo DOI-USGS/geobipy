@@ -151,6 +151,40 @@ Statistics
     </div>
 
 
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="_summary_">
+
+.. only:: html
+
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_mixtures_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Statistics_plot_mixtures.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">_summary_</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="_summary_">
+
+.. only:: html
+
+  .. image:: /examples/Statistics/images/thumb/sphx_glr_plot_Distributions_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_examples_Statistics_plot_Distributions.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">_summary_</div>
+    </div>
+
+
 .. thumbnail-parent-div-close
 
 .. raw:: html
@@ -166,6 +200,8 @@ Statistics
    /examples/Statistics/plot_histogram_2d
    /examples/Statistics/plot_histogram_3d
    /examples/Statistics/plot_StatArray
+   /examples/Statistics/plot_mixtures
+   /examples/Statistics/plot_Distributions
 
 Meshes
 ======
@@ -603,23 +639,6 @@ In both cases, you will need to write an options file (also shown in these examp
 
 .. only:: html
 
-  .. image:: /examples/Inference_2D/images/thumb/sphx_glr_test_thumb.png
-    :alt:
-
-  :ref:`sphx_glr_examples_Inference_2D_test.py`
-
-.. raw:: html
-
-      <div class="sphx-glr-thumbnail-title">2D Posterior analysis of Resolve inference</div>
-    </div>
-
-
-.. raw:: html
-
-    <div class="sphx-glr-thumbcontainer" tooltip="All plotting in GeoBIPy can be carried out using the 3D inference class">
-
-.. only:: html
-
   .. image:: /examples/Inference_2D/images/thumb/sphx_glr_plot_inference_2d_skytem_thumb.png
     :alt:
 
@@ -659,7 +678,6 @@ In both cases, you will need to write an options file (also shown in these examp
    :hidden:
 
    /examples/Inference_2D/plot_inference_2d_resolve
-   /examples/Inference_2D/test
    /examples/Inference_2D/plot_inference_2d_skytem
    /examples/Inference_2D/plot_inference_2d_tempest
 

@@ -5,7 +5,7 @@ from copy import deepcopy
 
 from numpy import arange, argwhere, array, asarray, atleast_1d
 from numpy import cumsum, diag, diff, dot, exp,expand_dims, float64, full, hstack, inf, int_
-from numpy import int32, int64, integer, interp, isclose, isinf, isnan, logical_not, kron
+from numpy import int32, int64, integer, interp, isclose, isinf, isnan, linspace, logical_not, kron
 from numpy import maximum, mean, min, minimum, nan, ndim, ones, r_, repeat, s_, shape, sign
 from numpy import size, sqrt, squeeze, where, zeros
 from numpy import log as nplog
@@ -128,8 +128,8 @@ class RectilinearMesh1D(Mesh):
     def __getitem__(self, slic):
         """Slice into the class. """
 
-        if shape(slic) == ():#, ValueError("slic must have one dimension.")
-            return deepcopy(self)
+        # if shape(slic) == ():#, ValueError("slic must have one dimension.")
+        #     return deepcopy(self)
 
         s2stop = None
         if isinstance(slic, slice):
@@ -142,6 +142,7 @@ class RectilinearMesh1D(Mesh):
         tmp = self.edges[slic]
         assert tmp.size > 1, ValueError("slic must contain at least one cell.")
         out = type(self)(edges=tmp)
+
         out.log = self.log
         if self._relative_to is not None:
             out._relative_to = deepcopy(self._relative_to)
@@ -197,7 +198,11 @@ class RectilinearMesh1D(Mesh):
 
     @centres.setter
     def centres(self, values):
+
         values = StatArray(values)
+
+        # assert values.sorted, ValueError("centres must be monotonically increasing")
+
         values, _ = utilities._log(values, log=self.log)
 
         if self.relative_to.size == 1:
@@ -246,6 +251,8 @@ class RectilinearMesh1D(Mesh):
     def edges(self, values):
         values = StatArray(values)
 
+        # assert values.sorted, ValueError("edges must be monotonically increasing")
+
         values, _ = utilities._log(values, log=self.log)
 
         if self.relative_to.size == 1:
@@ -261,8 +268,10 @@ class RectilinearMesh1D(Mesh):
     @property
     def edge_to_edge(self):
 
-        b = self.edges[-2] if self.open_right else self.edges[-1]
-        a = self.edges[1] if self.open_left else self.edges[0]
+        large = 1e6
+
+        a = self.edges[1]-large if self.open_left else self.edges[0]
+        b = self.edges[-2]+large if self.open_right else self.edges[-1]
 
         return b - a
 
@@ -321,6 +330,10 @@ class RectilinearMesh1D(Mesh):
             self._log = value
 
     @property
+    def log_scale(self):
+        return 'linear' if self.log is None else 'log'
+
+    @property
     def max_cells(self):
         return self._max_cells
 
@@ -347,15 +360,13 @@ class RectilinearMesh1D(Mesh):
 
     @property
     def min_width(self):
-        if self._min_width is None:
-            return 1.0
         return self._min_width
 
     @min_width.setter
     def min_width(self, value):
         self._min_width = value
         if value is None:
-            self._min_width = 1.0#(self.max_edge - self.min_edge) / (2.0 * self.max_cells)
+            self._min_width = (self.max_edge - self.min_edge) / (2.0 * self.max_cells)
         if self._min_width > self.min_edge:
             self._min_edge = self._min_width
 
@@ -425,6 +436,10 @@ class RectilinearMesh1D(Mesh):
         self._relative_to = StatArray(value)
 
     @property
+    def size(self):
+        return self.nCells.item()
+
+    @property
     def shape(self):
         return (self.nCells.item(), )
 
@@ -442,6 +457,19 @@ class RectilinearMesh1D(Mesh):
 
         # self._widths = values
         self.edges =  StatArray(hstack([0.0, cumsum(values)]), utilities.getName(values), utilities.getUnits(values))
+
+    def add_axis(self, axis, ax=None, **kwargs):
+        from .RectilinearMesh2D import RectilinearMesh2D
+
+        assert 0 <= axis <= 1, ValueError("Invalid axis 0 <= axis <= 1")
+
+        if ax is None:
+            ax = RectilinearMesh1D(**kwargs)
+        match axis:
+            case 0:
+                return RectilinearMesh2D(x=self, y=ax)
+            case 1:
+                return RectilinearMesh2D(x=ax, y=self)
 
     def axis(self, axis):
         return self
@@ -565,23 +593,20 @@ class RectilinearMesh1D(Mesh):
         """
 
         edges = self.edges
-        values = values.copy()
-
-        # Remove values that are out of bounds
-        if trim:
-            values = values[(values >= edges[0]) &
-                            (values < edges[-1])]
-
-        reversed = False
-        if self.edges[-1] < self.edges[0]:
-            reversed = True
-            edges = self.edges[::-1]
-
 
         values, dum = utilities._log(atleast_1d(values).flatten(), self.log)
 
         if self.relative_to.size == 1:
             values = values - self.relative_to
+
+        # Remove values that are out of bounds
+        if trim:
+            values = values[(values >= edges[0]) & (values < edges[-1])]
+
+        reversed = False
+        if self.edges[-1] < self.edges[0]:
+            reversed = True
+            edges = self.edges[::-1]
 
         # Get the bin indices for all values
         iBin = atleast_1d(edges.searchsorted(values, side='right') - 1)
@@ -597,7 +622,7 @@ class RectilinearMesh1D(Mesh):
         else:
             if not trim:
                 iBin[values < edges[0]] = -1
-                iBin[values >= edges[-1]] = self.nCells.item()
+                iBin[values >= edges[-1]] = self.nCells.item()-1
 
         return squeeze(iBin)
 
@@ -630,7 +655,9 @@ class RectilinearMesh1D(Mesh):
 
         probability = zeros(self.shape)
         p = distribution.probability(centres, log_probability)
-        probability = dot(p, pdf)
+
+        probability = p.T * pdf
+
         probability = probability / expand_dims(sum(probability, 0), axis=0)
 
         return DataArray(probability, name='marginal_probability')
@@ -669,8 +696,6 @@ class RectilinearMesh1D(Mesh):
         out.edges = out.edges.delete(i)
 
         out._action = ['delete', int32(i), squeeze(self.edges[i])]
-        # if self._nCells is not None:
-        #     self._nCells[0] +=
 
         if values is not None:
             values = deepcopy(values)
@@ -681,7 +706,14 @@ class RectilinearMesh1D(Mesh):
                     values[j] = tmp.delete(i)
                     values[j][i-1] = val
             else:
-                val = 0.5 * (values[i-1] + values[i])
+                choice = self.event_proposal.prng.integers(low=0, high=3, size=1).item()
+                match choice:
+                    case 0:
+                        val = values[i-1]
+                    case 1:
+                        val = 0.5 * (values[i-1] + values[i])
+                    case 2:
+                         val = values[i]
                 values = values.delete(i)
                 values[i-1] = val
             return out, values
@@ -689,21 +721,21 @@ class RectilinearMesh1D(Mesh):
         return out
 
     def gradient(self, values):
-        """Compute the gradient
+        r"""Compute the gradient
 
-        Parameter gradient :math:`\\nabla_{z}\\sigma` at the ith layer is computed via
+        Parameter gradient :math:`\nabla_{z}\sigma` at the ith layer is computed via
 
         .. math::
             :label: dpdz1
 
-            \\nabla_{z}^{i}\\sigma = \\frac{\\sigma_{i+1} - \\sigma_{i}}{h_{i} - h_{min}}
+            \nabla_{z}^{i}\sigma = \frac{\sigma_{i+1} - \sigma_{i}}{h_{i} - h_{min}}
 
-        where :math:`\\sigma_{i+1}` and :math:`\\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
+        where :math:`\sigma_{i+1}` and :math:`\sigma_{i}` are the log-parameters on either side of an interface, :math:`h_{i}` is the log-thickness of the ith layer, and :math:`h_{min}` is the minimum log thickness defined by
 
         .. math::
             :label: minThickness1
 
-            h_{min} = \\frac{z_{max} - z_{min}}{2 k_{max}}
+            h_{min} = \frac{z_{max} - z_{min}}{2 k_{max}}
 
         where :math:`k_{max}` is a maximum number of layers, set to be far greater than the expected final solution.
 
@@ -720,7 +752,6 @@ class RectilinearMesh1D(Mesh):
 
         x = self.widths.copy()
         e2e = self.edge_to_edge
-        e2e = 10000.0
 
         # Sort out infinity here
         if self.open_left:
@@ -753,7 +784,6 @@ class RectilinearMesh1D(Mesh):
         x = self.widths.copy()
 
         e2e = self.edge_to_edge
-        # e2e = 10000.0
 
         # Sort out infinity here
         if self.open_left:
@@ -800,7 +830,8 @@ class RectilinearMesh1D(Mesh):
 
         """
         values, _ = utilities._log(values, self.log)
-        return (values >= self._edges[0]) & (values < self._edges[-1])
+        edges = self.edges_absolute
+        return (values >= edges.min()) & (values < edges.max())
 
     def insert_edge(self, value, values=None):
         """Insert a new edge.
@@ -1183,15 +1214,11 @@ class RectilinearMesh1D(Mesh):
 
         """
         reciprocateX = kwargs.pop("reciprocateX", False)
-        # kwargs['transpose'] = kwargs.get('transpose', True)
 
         # Repeat the last entry since we are plotting against edges
         par = values.append(values[-1])
         if (reciprocateX):
             par = 1.0 / par
-
-        if self.log is not None:
-            kwargs['yscale'] = 'log'
 
         kwargs.pop('line', None)
 
@@ -1284,37 +1311,38 @@ class RectilinearMesh1D(Mesh):
             gs = gs.add_gridspec(nrows=1, ncols=1)[0, 0]
 
         if values is None:
-            splt = gs.subgridspec(2, 1)#, height_ratios=[1, 4])
-            ax = [plt.subplot(splt[0, 0]), plt.subplot(splt[1, 0], sharey=sharey)]
+            splt = gs.subgridspec(2, 1)
+            ax = {'ncells':plt.subplot(splt[0, 0]),
+                  'edges': plt.subplot(splt[1, 0], sharey=sharey)}
         else:
             splt = gs.subgridspec(2, 1, height_ratios=[1, 4])
-            ax = [plt.subplot(splt[0, :])] # ncells
+            ax = {'ncells': plt.subplot(splt[0, :])}
 
             splt2 = splt[1, :].subgridspec(1, 2, width_ratios=[2, 1])
-            ax2 = plt.subplot(splt2[1], sharey=sharey) # edges
+            ax['edges'] = plt.subplot(splt2[1], sharey=sharey)
             if sharey is None:
-                sharey = ax2
-            ax3 = plt.subplot(splt2[0], sharex=sharex, sharey=sharey) # values
-            ax += [ax2, ax3]
+                sharey = ax['edges']
+            ax['values'] = plt.subplot(splt2[0], sharex=sharex, sharey=sharey)
 
-        for a in ax:
+        for k, a in ax.items():
             cp.pretty(a)
 
         return ax
 
-    def plot_posteriors(self, axes=None, values=None, values_kwargs={}, **kwargs):
+    def plot_posteriors(self, axes=None, values=None, **kwargs):
         # assert len(axes) == 2, ValueError("Must have length 2 list of axes for the posteriors. self.init_posterior_plots can generate them")
 
         if axes is None:
             axes = kwargs.pop('fig', plt.gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes, values=values)
 
         assert len(axes) >= 2, ValueError("axes must have length >= 2")
 
         ncells_kwargs = kwargs.get('ncells_kwargs', {})
         edges_kwargs = kwargs.get('edges_kwargs', {})
+        values_kwargs = kwargs.get('values_kwargs',{})
 
         overlay = kwargs.pop('overlay', None)
         if overlay is not None:
@@ -1325,39 +1353,38 @@ class RectilinearMesh1D(Mesh):
             edges_kwargs['overlay'] = tmp.edges
 
         if self.nCells.hasPosterior:
-            axes[0].cla()
-            self.nCells.plot_posteriors(ax = axes[0], **ncells_kwargs)
+            ax = axes['ncells']; ax.cla()
+            self.nCells.plot_posteriors(ax = ax, **ncells_kwargs)
 
         if self.edges.hasPosterior:
-            axes[1].cla()
-            self.edges.plot_posteriors(ax = axes[1], **edges_kwargs)
+            ax = axes['edges']; ax.cla()
+            self.edges.plot_posteriors(ax = ax, **edges_kwargs)
 
         if values is not None:
-            assert len(axes) == 3, ValueError("axes must have length == 3")
-            values.plot_posteriors(ax=axes[2], **values_kwargs)
+            ax = axes['values']
+            values.plot_posteriors(ax=ax, **values_kwargs)
 
             if overlay is not None:
-                overlay.plot(ax=axes[2], xscale=values_kwargs.get('xscale', 'linear'),
-                        flipY=False,
+                overlay.plot(ax=ax, xscale=values_kwargs.get('xscale', 'linear'),
                         reciprocateX=values_kwargs.get('reciprocateX', None),
                         labels=False,
                         linewidth=1,
                         color=cp.wellSeparated[3])
 
             doi = values.posterior.opacity_level(percent=90.0, log=values_kwargs.get('logX', None), axis=values_kwargs.get('axis', 0))
-            axes[2].axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
+            ax.axhline(doi, color = '#5046C8', linestyle = 'dashed', alpha = 0.6)
         return axes
 
     @property
     def probability(self):
-        """Evaluate the prior probability for the mesh.
+        r"""Evaluate the prior probability for the mesh.
 
         The following equation describes the components of the prior that correspond to the Model1D,
 
         .. math::
-            p(k | I)p(\\boldsymbol{e}| k, I),
+            p(k | I)p(\boldsymbol{e}| k, I),
 
-        where :math:`k, I, \\boldsymbol{e}` are the number of cells, prior information, edge location respectively.
+        where :math:`k, I, \boldsymbol{e}` are the number of cells, prior information, edge location respectively.
 
         The multiplication here can be turned into a summation by taking the log of the components.
 
@@ -1435,7 +1462,7 @@ class RectilinearMesh1D(Mesh):
         self.nCells.reset_posteriors()
         self.edges.reset_posteriors()
 
-    def set_posteriors(self, nCells_posterior=None, edges_posterior=None):
+    def set_posteriors(self, nCells_posterior=None, edges_posterior=None, **kwargs):
 
         # Initialize the posterior histogram for the number of layers
         if nCells_posterior is None:
@@ -1447,15 +1474,17 @@ class RectilinearMesh1D(Mesh):
             assert not self.max_cells is None, ValueError(
                 "No priors are set, user self.set_priors().")
 
-            # Discretize the parameter values
-            grid = DataArray(arange(0.0, 1.1 * self.max_edge, 0.5*self.min_width), self.edges.name, self.edges.units)
-            mesh = RectilinearMesh1D(edges=grid)
+            number_of_edge_bins = kwargs.get('number_of_edge_bins', int(self.max_edge / (0.5 * self.min_width)))
 
+            # Discretize the parameter values
+            edges = DataArray(linspace(0.0, 1.01 * self.max_edge, number_of_edge_bins+1), self.edges.name, self.edges.units)
+
+            mesh = RectilinearMesh1D(edges=edges)
             # Initialize the interface Depth Histogram
             self.edges.posterior = Histogram.Histogram(mesh=mesh)
 
     def set_priors(self, n_cells_prior=None, edges_prior=None, **kwargs):
-        """Setup the priors of the mesh.
+        r"""Setup the priors of the mesh.
 
         By default the following priors are set unless explictly specified.
 
@@ -1467,10 +1496,10 @@ class RectilinearMesh1D(Mesh):
             :label: layers
 
             p(k | I) =
-            \\begin{cases}
-            \\frac{1}{k_{max} - 1} & \\quad 1 \\leq k \\leq k_{max} \\newline
-            0 & \\quad otherwise
-            \\end{cases}.
+            \begin{cases}
+            \frac{1}{k_{max} - 1} & \quad 1 \leq k \leq k_{max} \newline
+            0 & \quad otherwise
+            \end{cases}.
 
         **Prior on the cell edges**
 
@@ -1479,10 +1508,10 @@ class RectilinearMesh1D(Mesh):
         .. math::
             :label: depth
 
-            p(\\boldsymbol{e} | k, I) = \\frac{(k -1)!}{\\prod_{i=0}^{k-1} \\Delta e_{i}},
+            p(\boldsymbol{e} | k, I) = \frac{(k -1)!}{\prod_{i=0}^{k-1} \Delta e_{i}},
 
         where the numerator describes the number of ways that :math:`(k - 1)` interfaces can be ordered and
-        :math:`\\Delta e_{i} = (e_{max} - e_{min}) - 2 i h_{min}` describes the interval that is available to place an edge when there are already i edges in the model
+        :math:`\Delta e_{i} = (e_{max} - e_{min}) - 2 i h_{min}` describes the interval that is available to place an edge when there are already i edges in the model
 
         Parameters
         ----------
@@ -1535,6 +1564,9 @@ class RectilinearMesh1D(Mesh):
         self.set_n_cells_prior(n_cells_prior)
         self.set_edges_prior(edges_prior)
 
+    def set_axis(self, axis, value):
+            self = value
+
     def set_n_cells_prior(self, prior):
         if prior is not None:
             self.nCells.prior = prior
@@ -1570,7 +1602,7 @@ class RectilinearMesh1D(Mesh):
         self.edges.proposal = Distribution('Uniform',
                                            min=self.min_edge,
                                            max=self.max_edge,
-                                           log=True,
+                                        #    log=True,
                                            prng=kwargs.get('prng', None))
 
     def unperturb(self):
@@ -1671,7 +1703,6 @@ class RectilinearMesh1D(Mesh):
             self.createHdf(out, 'y', withPosterior=withPosterior, add_axis=add_axis, fillvalue=fillvalue, upcast=False)
 
         else:
-            print(self.summary)
             mesh = RectilinearMesh2D_stitched(x=x, relative_to=self.relative_to, max_cells=self.max_cells)
             if self.nCells.hasPosterior:
                 mesh.nCells.posterior = Histogram.Histogram(mesh=RectilinearMesh2D(x=mesh.x, y=self.nCells.posterior.mesh))
@@ -1773,9 +1804,11 @@ class RectilinearMesh1D(Mesh):
 
         # If relative_to is present, the edges/centres should be 1 dimensional
         relative_to = None
-        if 'relative_to' in grp:
-            i = index if grp['relative_to/data'].size > 1 else None
-            relative_to = DataArray.fromHdf(grp['relative_to'], index=i, skip_posterior=skip_posterior)
+        key = 'relative_to' if 'relative_to' in grp else 'relativeTo'
+
+        if key in grp:
+            i = index if grp[f'{key}/data'].size > 1 else None
+            relative_to = DataArray.fromHdf(grp[key], index=i, skip_posterior=skip_posterior)
 
             s = index if nCells is None else s_[:nCells.item() + 1]
             pi = None #if nCells is None else s_[:]
@@ -1819,8 +1852,9 @@ class RectilinearMesh1D(Mesh):
 
         # If relative_to is present, the edges/centres should be 1 dimensional
         relative_to = None
-        if 'relative_to' in grp:
-            relative_to = StatArray.fromHdf(grp['relative_to'], index=index, skip_posterior=skip_posterior)
+        key = 'relative_to' if 'relative_to' in grp else 'relativeTo'
+        if key in grp:
+            relative_to = StatArray.fromHdf(grp[key], index=index, skip_posterior=skip_posterior)
         #     edges = StatArray.fromHdf(grp['edges'], skip_posterior=skip_posterior)
         # else:
 
@@ -1862,8 +1896,9 @@ class RectilinearMesh1D(Mesh):
 
         # If relative_to is present, the edges/centres should be 1 dimensional
         relative_to = None
-        if 'relative_to' in grp:
-            relative_to = DataArray.fromHdf(grp['relative_to'], index=index, skip_posterior=skip_posterior)
+        key = 'relative_to' if 'relative_to' in grp else 'relativeTo'
+        if key in grp:
+            relative_to = DataArray.fromHdf(grp[key], index=index, skip_posterior=skip_posterior)
             if relative_to == 0.0:
                 relative_to = None
 
@@ -1886,7 +1921,8 @@ class RectilinearMesh1D(Mesh):
         s = s_[:self.nCells.item()]
         if index is not None:
             s = (index, s)
-        return StatArray.fromHdf(grp, key, index=s, skip_posterior=skip_posterior)
+
+        return StatArray.fromHdf(grp[key], index=s, skip_posterior=skip_posterior)
 
     @property
     def summary(self):

@@ -12,3 +12,4 @@ scikit-learn
 pygmt
 numba_kdtree
 lmfit
+mpi4py_utilities

@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-from geobipy import RectilinearMesh2D_stitched
-from geobipy import RectilinearMesh1D
 from geobipy import Model
-from geobipy import CircularLoops
-from geobipy import Distribution
 from geobipy import get_prng
 
 import numpy as np
@@ -25,7 +21,7 @@ def make_figure(ds, model, title):
     ds.plot_data();
     ax.get_legend().remove();
     ax1 = plt.subplot(splt[1, 1], sharex=ax);
-    model.pcolor(flipY=True, log=10);
+    model.pcolor(log=10);
     ax1.sharex(ax)
 
     d = ds.datapoint(69); plt.subplot(splt[0, 2]); d.plot();
@@ -41,7 +37,8 @@ def create_resolve(model):
 
     prng = get_prng(seed=0)
 
-    model.mesh.y_edges = model.mesh.y_edges / 10.0
+    model.mesh.y_edges[:, 1] = -np.linspace(25.0, 1.0, model.mesh.x.nCells)
+    model.mesh.y_edges[:, 2] = -np.linspace(30.0, 200.0, model.mesh.x.nCells)
 
     ds = FdemData(system=data_path+'//resolve.stm')
     ds, ds_noisy = ds.create_synthetic_data(model, prng)
@@ -51,7 +48,7 @@ def create_resolve(model):
     make_figure(ds, model, title)
 
 def create_skytem(model):
-    from geobipy import TdemData, CircularLoops
+    from geobipy import TdemData
 
     title = 'skytem_' + model
 
@@ -87,9 +84,9 @@ def create_tempest(model):
     make_figure(ds, model, title)
 
 if __name__ == '__main__':
-    models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
+    models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water', 'water_into_basalt']
 
     for model in models:
         create_resolve(model)
-        create_skytem(model)
-        create_tempest(model)
+        # create_skytem(model)
+        # create_tempest(model)

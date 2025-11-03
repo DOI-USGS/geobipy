@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frequency domain datapoint &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>Frequency domain datapoint &mdash; GeoBIPy 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
@@ -20,7 +20,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/documentation_options.js?v=c3c8ae58"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -42,7 +42,7 @@
             GeoBIPy
           </a>
               <div class="version">
-                1.0.0
+                2.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -168,7 +168,7 @@ to download the full example code.</p>
 
 <span class="n">fdp</span> <span class="o">=</span> <span class="n">FdemDataPoint</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                     <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">predictedData</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">system</span><span class="o">=</span><span class="n">fds</span><span class="p">,</span> <span class="n">lineNumber</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fiducial</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+                    <span class="n">system</span><span class="o">=</span><span class="n">fds</span><span class="p">,</span> <span class="n">line_number</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">fiducial</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
 
 <span class="c1"># plt.figure()</span>
 <span class="c1"># _ = fdp.plot()</span>
@@ -296,7 +296,6 @@ Prepare the dataset so that we can read a point at a time.</p>
     <span class="n">fdp</span><span class="o">.</span><span class="n">perturb</span><span class="p">()</span>
     <span class="n">fdp</span><span class="o">.</span><span class="n">update_posteriors</span><span class="p">()</span>
 
-
 <span class="c1"># Plot the posterior distributions</span>
 <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">fdp</span><span class="o">.</span><span class="n">plot_posteriors</span><span class="p">(</span><span class="n">overlay</span><span class="o">=</span><span class="n">fdp</span><span class="p">)</span>
@@ -338,13 +337,481 @@ Prepare the dataset so that we can read a point at a time.</p>
 <li><img src="../../_images/sphx_glr_plot_resolve_datapoint_005.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_005.png" alt="Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_resolve_datapoint_006.png" srcset="../../_images/sphx_glr_plot_resolve_datapoint_006.png" alt="Frequency Domain EM Data, Frequency Domain EM Data" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>-733.5454886696688
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[-733.54548867]
 1367.81945885548
 Best half space conductivity is [0.097701] $S/m$
 45286.828623928755
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
+
+
+Histogram:
+mesh:
+|   RectilinearMesh1D
+|   Number of Cells:
+|   |   99
+|   Cell Centres:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd7950&#39;]
+|   |   Shape:  (99,)
+|   |   Values: [0.00434309 0.0129441  0.02137807 ... 0.46974511 0.47270962 0.47565404]
+|   |   Min:    0.004343089592546312
+|   |   Max:    0.47565403805013773
+|   |   has_posterior: False
+|
+|   Cell Edges:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd4450&#39;]
+|   |   Shape:  (100,)
+|   |   Values: [0.         0.00868618 0.01720203 ... 0.47123243 0.47418682 0.47712125]
+|   |   Min:    0.0
+|   |   Max:    0.4771212547196625
+|   |   has_posterior: False
+|
+|   log:
+|   |   10
+|   relative_to:
+|   |   StatArray
+|   |   Name:   $\epsilon_{Additive}$ (ppm)
+|   |   Address:[&#39;0x155bd65d0&#39;]
+|   |   Shape:  (1,)
+|   |   Values: [0.69897]
+|   |   Min:    0.6989700043360189
+|   |   Max:    0.6989700043360189
+|   |   has_posterior: False
+|
+values:
+|   DataArray
+|   Name:   Frequency
+|   Address:[&#39;0x15567f350&#39;]
+|   Shape:  (99,)
+|   Values: [0 0 0 ... 0 0 0]
+|   Min:    0
+|   Max:    0
 </pre></div>
 </div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 9.803 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 27.145 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-datapoints-plot-resolve-datapoint-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/521357f099bff44b6fc76f69b371108f/plot_resolve_datapoint.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_resolve_datapoint.ipynb</span></code></a></p>

@@ -3,11 +3,12 @@ Class to store inversion results. Contains plotting and writing to file procedur
 """
 from copy import deepcopy
 from os.path import join
+import traceback
 from datetime import timedelta
 
 from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
 from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
-from numpy import max, min, log, array, full, longdouble, exp, maximum, sqrt
+from numpy import max, min, log, log10, array, full, longdouble, exp, maximum, sqrt
 
 from numpy.random import Generator
 from numpy.linalg import norm
@@ -21,6 +22,7 @@ from ..base.utilities import debug_print as dprint
 
 import h5py
 from ..classes.core.DataArray import DataArray
+from ..classes.statistics.StatArray import StatArray
 from ..classes.statistics.Distribution import Distribution
 from ..classes.statistics.Histogram import Histogram
 from ..classes.core.myObject import myObject
@@ -76,7 +78,7 @@ class Inference1D(myObject):
     """
 
     def __init__(self,
-                 covariance_scaling:float = 0.75,
+                 covariance_scaling:float = 1.0,
                  high_variance:float = inf,
                  ignore_likelihood:bool = False,
                  interactive_plot:bool = True,
@@ -92,6 +94,7 @@ class Inference1D(myObject):
                  solve_gradient:bool = True,
                  solve_parameter:bool = False,
                  update_plot_every:int = 5000,
+                 minimum_burn_in:int = 5000,
                  world = None,
                  **kwargs):
         """ Initialize the results of the inversion """
@@ -116,6 +119,7 @@ class Inference1D(myObject):
         self.low_variance = low_variance
         self.high_variance = high_variance
         self.covariance_scaling = covariance_scaling
+        self.minimum_burn_in = minimum_burn_in
 
         assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
 
@@ -334,6 +338,10 @@ class Inference1D(myObject):
         self.options['solve_gradient'] = value
 
     @property
+    def stochastic_newton(self):
+        return self.options['stochastic_newton']
+
+    @property
     def update_plot_every(self):
         return self.options['update_plot_every']
 
@@ -375,6 +383,11 @@ class Inference1D(myObject):
         # Compute the data misfit
         self.data_misfit = datapoint.data_misfit()
 
+        self.data_misfit_v = StatArray(2 * self.n_markov_chains, name='Data Misfit')
+        self.data_misfit_v[0] = self.data_misfit
+        self._n_target_hits = 0
+        self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
+
         # # Calibrate the response if it is being solved for
         # if (self.kwargs.solveCalibration):
         #     self.datapoint.calibrate()
@@ -404,18 +417,9 @@ class Inference1D(myObject):
 
         # Initialize the vectors to save results
         # StatArray of the data misfit
-
-        self.data_misfit_v = DataArray(2 * self.n_markov_chains, name='Data Misfit')
-        self.data_misfit_v[0] = self.data_misfit
-
-        target = sum(self.datapoint.active)
-        self._n_target_hits = 0
-
-        self.data_misfit_v.prior = Distribution('chi2', df=target, prng=self.prng)
-
         self.relative_chi_squared_fit = 100.0
 
-        edges = DataArray(linspace(1, 2*target))
+        edges = DataArray(linspace(1, 2*sum(self.datapoint.active)))
         self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
 
         # Initialize a stopwatch to keep track of time
@@ -487,7 +491,7 @@ class Inference1D(myObject):
         halfspace = self.datapoint.find_best_halfspace()
 
         # dprint('halfspace', halfspace.values)
-        self.halfspace = DataArray(halfspace.values, 'halfspace')
+        self.halfspace = halfspace.values
 
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
@@ -521,6 +525,8 @@ class Inference1D(myObject):
         else:
             observation.sensitivity(self.model)
 
+        self.model.set_proposal_weights(**kwargs)
+
         local_variance = self.model.local_variance(observation)
 
         # Instantiate the proposal for the parameters.
@@ -530,9 +536,10 @@ class Inference1D(myObject):
                          kwargs['probability_of_death'],
                          kwargs['probability_of_perturb'],
                          kwargs['probability_of_no_change']]
-        self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, prng=self.prng)
 
-        self.model.set_posteriors()
+        self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, **kwargs)
+
+        self.model.set_posteriors(**kwargs)
 
     def accept_reject(self):
         """ Propose a new random model and accept or reject it """
@@ -542,24 +549,21 @@ class Inference1D(myObject):
         dprint(f'{self.prng.random()=}')
 
         dprint(f'incoming {self.datapoint.data=}')
-        dprint(f'incoming {self.datapoint.predictedData=}')
+        dprint(f'incoming {self.datapoint.predicted_data=}')
         dprint(f'incoming {self.model.values=}')
         test_datapoint = deepcopy(self.datapoint)
 
         # Perturb the current model
-        observation = test_datapoint
-        if self.ignore_likelihood:
-            observation = None
+        observation = None
+        if self.stochastic_newton and not self.ignore_likelihood:
+            observation = test_datapoint
 
-        # Propose a new data point, using assigned proposal distributions
-        # test_datapoint.perturb()
-
-        # print('sensitivity before perturbing', np.diag(test_datapoint.sensitivity_matrix))
-        try:
-            remapped_model, test_model = self.model.perturb(observation, self.low_variance, self.high_variance, alpha = self.covariance_scaling)
-        except:
-            print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
-            return True
+        # try:
+        remapped_model, test_model = self.model.perturb(observation, alpha = self.covariance_scaling)
+        # except Exception:
+        #     # print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
+        #     print(traceback.format_exc())
+        #     return True
 
         if remapped_model is None:
             self.accepted = False
@@ -645,7 +649,12 @@ class Inference1D(myObject):
         failed = not Go
         while (Go):
             # Accept or reject the new model
-            failed = self.accept_reject()
+            try:
+                failed = self.accept_reject()
+            except Exception as e:
+                print(f'singularity --line={self.datapoint.line_number.item()} --fiducial={self.datapoint.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
+                print(traceback.format_exc())
+                failed = True
 
             self.update()
 
@@ -662,19 +671,19 @@ class Inference1D(myObject):
                     failed = True
 
 
-            if self._n_resets == 3 and not self.burned_in:
-                if self.low_variance == -inf:
-                    # If we reset 3 times, we might have either too low or high a proposal variance.
-                    # Add limiters and try again.
-                    self.low_variance = 0.1
-                    self.high_variance = 2.0
-                    self._n_resets = 0
-                    self.reset()
+            # if self._n_resets == 3 and not self.burned_in:
+            #     if self.low_variance == -inf:
+            #         # If we reset 3 times, we might have either too low or high a proposal variance.
+            #         # Add limiters and try again.
+            #         self.low_variance = 0.1
+            #         self.high_variance = 2.0
+            #         self._n_resets = 0
+            #         self.reset()
 
                 # If we tried limiters and reset again 3 times, fail the datapoint.
-                else:
-                    Go = False
-                    failed = True
+                # else:
+                #     Go = False
+                #     failed = True
 
         self.clk.stop()
 
@@ -683,7 +692,7 @@ class Inference1D(myObject):
 
         if self.save_png:
             self.plot_posteriors(axes = self.posterior_ax, fig=self.posterior_fig)
-            self.toPNG('.', self.datapoint.fiducial)
+            self.toPNG(f'.//{self.datapoint.fiducial.item()}.png')
 
         return failed
 
@@ -723,7 +732,7 @@ class Inference1D(myObject):
             # converged = (((self.iteration > 10000) and (self.relative_chi_squared_fit < 1.0)) or
             #              ((self.iteration > 10000) and (self._n_target_hits > 1000)))
 
-            converged = (self.iteration > 5000) and (self.data_misfit < target_misfit)
+            converged = (self.iteration > self.minimum_burn_in) and (self.data_misfit < target_misfit)
 
             if converged:
                 self.burned_in = True  # Let the results know they are burned in
@@ -762,22 +771,22 @@ class Inference1D(myObject):
                 print(tmp, flush=True)
 
             # Test resetting of the inversion.
-            if self.update_plot_every > 1:
-                if not self.burned_in:
-                    if self.acceptance_percent == 0.0:
+            # if self.update_plot_every > 1:
+            #     if not self.burned_in:
+            #         if self.acceptance_percent == 0.0:
 
-                        self._n_zero_acceptance += 1
+            #             self._n_zero_acceptance += 1
 
-                        # Reset if we have 3 zero acceptances
-                        if self._n_zero_acceptance == self.reset_limit:
-                            self.reset()
-                            self._n_zero_acceptance = 0
-                    else:
-                        self._n_zero_acceptance = 0
-                else:
-                    if self.acceptance_percent == 0.0:
-                        self.low_variance = -inf
-                        self.high_variance = inf
+            #             # Reset if we have 3 zero acceptances
+            #             if self._n_zero_acceptance == self.reset_limit:
+            #                 self.reset()
+            #                 self._n_zero_acceptance = 0
+            #         else:
+            #             self._n_zero_acceptance = 0
+            #     else:
+            #         if self.acceptance_percent == 0.0:
+            #             self.low_variance = -inf
+            #             self.high_variance = inf
 
             if (not self.burned_in and not self.datapoint.relative_error.hasPrior):
                 self.multiplier *= self.options['multiplier']
@@ -803,17 +812,17 @@ class Inference1D(myObject):
 
         gs = fig.add_gridspec(nrows=2, ncols=2, height_ratios=(1, 6))
 
-        ax = []
-        ax.append([cP.pretty(plt.subplot(gs[0, 0]))])  # Acceptance Rate 0
+        ax = {}
+        ax['acceptance_rate'] = cP.pretty(plt.subplot(gs[0, 0]))
 
         splt = gs[0, 1].subgridspec(1, 2, width_ratios=[4, 1])
-        tmp = [];
-        tmp.append(cP.pretty(plt.subplot(splt[0, 0])));
-        tmp.append(cP.pretty(plt.subplot(splt[0, 1])))
-        ax.append(tmp)  # Data misfit vs iteration 1 and posterior
 
-        ax.append(self.model._init_posterior_plots(gs[1, 0]))
-        ax.append(self.datapoint._init_posterior_plots(gs[1, 1]))
+        ax['misfit'] = cP.pretty(plt.subplot(splt[0, 0]))
+        ax['chisq'] = cP.pretty(plt.subplot(splt[0, 1]))
+
+        ax['model'] = self.model._init_posterior_plots(gs[1, 0])
+
+        ax['data'] = self.datapoint._init_posterior_plots(gs[1, 1])
 
         if self.interactive_plot:
             plt.show(block=False)
@@ -847,25 +856,28 @@ class Inference1D(myObject):
         overlay = self.best_model if self.burned_in else self.model
 
         self.model.plot_posteriors(
-            axes=self.posterior_ax[2],
+            axes=self.posterior_ax['model'],
             # ncells_kwargs={
             #     'normalize': True},
             edges_kwargs={
                 'transpose': True,
-                'trim': False},
+                'trim': False,
+                'flipY': True},
             values_kwargs={
                 'colorbar': False,
-                'flipY': True,
                 'xscale': 'log',
                 'credible_interval_kwargs': {
                 }
             },
             overlay=overlay)
 
+
         overlay = self.best_datapoint if self.burned_in else self.datapoint
 
+
+        # if self.datapoint.hasPosterior:
         self.datapoint.plot_posteriors(
-            axes=self.posterior_ax[3],
+            axes=self.posterior_ax['data'],
             # height_kwargs={
             #     'normalize': True},
             data_kwargs={},
@@ -877,9 +889,9 @@ class Inference1D(myObject):
         )
 
         if '_observed_datapoint' in self.__dict__:
-            self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax[3], linecolor='k')
+            self.datapoint.overlay_on_posteriors(self.observed_datapoint, axes=self.posterior_ax['data'], linecolor='k')
         if self.burned_in:
-            self.datapoint.overlay_on_posteriors(self.best_datapoint, axes=self.posterior_ax[3])
+            self.datapoint.overlay_on_posteriors(self.best_datapoint, axes=self.posterior_ax['data'])
 
         self.posterior_fig.suptitle(title)
 
@@ -897,7 +909,7 @@ class Inference1D(myObject):
         # i_positive = argwhere(acceptance_rate > 0.0)
         # i_zero = argwhere(acceptance_rate == 0.0)
 
-        kwargs['ax'] = kwargs.get('ax', self.posterior_ax[0][0])
+        kwargs['ax'] = kwargs.get('ax', self.posterior_ax['acceptance_rate'])
         kwargs['marker'] = kwargs.get('marker', 'o')
         kwargs['alpha'] = kwargs.get('alpha', 0.7)
         kwargs['linestyle'] = kwargs.get('linestyle', 'none')
@@ -906,6 +918,8 @@ class Inference1D(myObject):
         i = s_[:int64(self.iteration / self.update_plot_every)]
 
         self.acceptance_rate.plot(x=self.acceptance_x, i=i, color='k', **kwargs)
+        kwargs['ax'].axhline(y=23.4, color='#C92641', linestyle='dashed')
+
 
     def _plotMisfitVsIteration(self, **kwargs):
         """ Plot the data misfit against iteration. """
@@ -915,7 +929,7 @@ class Inference1D(myObject):
         ls = kwargs.pop('linestyle', 'none')
         c = kwargs.pop('color', 'k')
 
-        ax = self.posterior_ax[1][0]
+        ax = self.posterior_ax['misfit']
         ax.cla()
         tmp_ax = self.data_misfit_v.plot(self.iRange, i=s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, ax=ax, **kwargs)
         ax.set_ylabel('Data Misfit')
@@ -935,7 +949,7 @@ class Inference1D(myObject):
 
         self.data_misfit_v.posterior.update(self.data_misfit_v[maximum(0, self.iteration-self.update_plot_every):self.iteration], trim=True)
 
-        ax = self.posterior_ax[1][1]
+        ax = self.posterior_ax['chisq']
         ax.cla()
 
         misfit_ax, _, _ = self.data_misfit_v.posterior.plot(transpose=True, ax=ax, normalize=True, **kwargs)
@@ -948,7 +962,7 @@ class Inference1D(myObject):
     # def _plotObservedPredictedData(self, **kwargs):
     #     """ Plot the observed and predicted data """
     #     if self.burnedIn:
-    #         # self.datapoint.predictedData.plot_posteriors(colorbar=False)
+    #         # self.datapoint.predicted_data.plot_posteriors(colorbar=False)
     #         self.datapoint.plot(**kwargs)
     #         self.bestDataPoint.plot_predicted(color=cP.wellSeparated[3], **kwargs)
     #     else:
@@ -966,11 +980,10 @@ class Inference1D(myObject):
         with h5py.File(join(outdir, str(fiducial)+'.h5'), 'w') as f:
             self.toHdf(f, str(fiducial))
 
-    def toPNG(self, directory, fiducial, dpi=300):
+    def toPNG(self, filename, dpi=300):
        """ save a png of the results """
        self.posterior_fig.set_size_inches(19, 11)
-       figName = join(directory, '{}.png'.format(fiducial))
-       self.posterior_fig.savefig(figName, dpi=dpi)
+       self.posterior_fig.savefig(filename, dpi=dpi)
 
     def read(self, fileName, system_file_path, fiducial=None, index=None):
         """ Reads a data point's results from HDF5 file """
@@ -983,7 +996,10 @@ class Inference1D(myObject):
 
     def reset(self):
         def clear(this):
-            if isinstance(this, list):
+            if isinstance(this, dict):
+                for k, ax in this.items():
+                    clear(ax)
+            elif isinstance(this, list):
                 for ax in this:
                     clear(ax)
             else:
@@ -993,8 +1009,9 @@ class Inference1D(myObject):
         self._n_resets += 1
         self.initialize(self.datapoint)
         if self.interactive_plot:
-            for ax in self.posterior_ax:
-                clear(ax)
+            if self.posterior_ax is not None:
+                for k, ax in self.posterior_ax.items():
+                    clear(ax)
 
         self.clk.restart()
 
@@ -1120,7 +1137,7 @@ class Inference1D(myObject):
                 update_plot_every = array(hdfFile.get('update_plot_every', 5000)),
                 dont_initialize = True,
                 prng=prng)
-        self._datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
+        self.datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
 
         s = s_[index, :]
 
@@ -1144,10 +1161,14 @@ class Inference1D(myObject):
 
         self.best_datapoint = self.datapoint
 
-        self.data_misfit_v = hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s)
+        self.data_misfit_v = StatArray(hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s))
         self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
+        edges = DataArray(linspace(1, 2*sum(self.datapoint.active)))
+        self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
+
 
         self.model = hdfRead.readKeyFromFile(hdfFile, '', '/', 'model', index=index)
+
         self.best_model = self.model
 
         self.halfspace = hdfRead.readKeyFromFile(hdfFile, '', '/', 'halfspace', index=index)

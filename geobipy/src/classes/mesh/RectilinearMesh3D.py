@@ -2,10 +2,11 @@
 Module describing a 2D Rectilinear Mesh class with x and y axes specified
 """
 from copy import deepcopy
-from numpy import dot, empty, expand_dims, int32, integer
-from numpy import max,  min, ndim, outer, prod, ravel_multi_index
-from numpy import repeat, s_, size, squeeze, swapaxes, take, unravel_index
+from numpy import argwhere, asarray, dot, empty, expand_dims, full, int32, integer, insert
+from numpy import max,  min, nan, ndim, outer, prod, ravel_multi_index
+from numpy import repeat, s_, size, squeeze, sum, swapaxes, take, unravel_index
 from numpy import where, zeros
+from numpy import all as npall
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from ..core.DataArray import DataArray
@@ -67,22 +68,23 @@ class RectilinearMesh3D(RectilinearMesh2D):
         The 2D mesh.
 
     """
+    x_axis = 0
+    y_axis = 1
+    z_axis = 2
 
     def __init__(self, x=None, y=None, z=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
+        self._x_edges = None
+        self._y_edges = None
+        self._z_edges = None
         self.x = kwargs if x is None else x
         self.y = kwargs if y is None else y
         self.z = kwargs if z is None else z
 
-        # if self.x._relative_to is not None:
-        #     assert all(self.x.relative_to.shape == self.shape[1:]), "x axis relative to must have shape {} but has shape {}".format(self.shape[1:], self.x.relative_to.shape)
-
-        # if self.y._relative_to is not None:
-        #     assert all(self.y.relative_to.shape == self.shape[::2]), "y axis relative to must have shape {} but has shape {}".format(self.shape[::2], self.y.relative_to.shape)
-
-        # if self.z._relative_to is not None:
-        #     assert all(self.z.relative_to.shape == self.shape[:2]), "z axis relative to must have shape {} but has shape {}".format(self.shape[:2], self.z.relative_to.shape)
+        self.check_x_relative_to()
+        self.check_y_relative_to()
+        self.check_z_relative_to()
 
     def __getitem__(self, slic):
         """Slice into the mesh. """
@@ -91,106 +93,108 @@ class RectilinearMesh3D(RectilinearMesh2D):
             if isinstance(x, (integer, int)):
                 axis.append(i)
 
-        assert not len(axis) == 3, ValueError("Slic cannot be a single cell")
+        assert not len(axis) == 3, ValueError("slice cannot be a single cell")
 
-        if len(axis) == 0: # Returning a 3D mesh
-            x = self.x[slic[0]]
-            y = self.y[slic[1]]
-            z = self.z[slic[2]]
-            if x._relative_to is not None:
-                nd = ndim(x.relative_to)
-                slc = s_[:]
-                if nd == 2:
-                    slc = slic[1:]
-                elif nd == 1:
-                    s = x.relative_to.size
-                    if s == self.shape[1]:
-                        slc = slic[1]
-                    elif s == self.shape[2]:
-                        slc = slic[2]
+        axis = squeeze(asarray(axis, dtype=int32))
 
-                x.relative_to = x.relative_to[slc]
+        match axis.size:
+            case 0: # Returning a 3D mesh
+                return self.__slice_3d(slic)
+            case 1: # Returning a 2D mesh
+                return self.__slice_2d(slic, axis)
+            case 2: # Returning a 1D mesh
+                return self.__slice_1d(slic, axis)
+            case _:
+                raise ValueError(f"invalid slice {slic}")
 
-            if y._relative_to is not None:
-                nd = ndim(y.relative_to)
-                slc = s_[:]
-                if nd == 2:
-                    slc = slic[::2]
-                elif nd == 1:
-                    s = y.relative_to.size
-                    if s == self.shape[0]:
-                        slc = slic[0]
-                    elif s == self.shape[2]:
-                        slc = slic[2]
 
-                y.relative_to = y.relative_to[slc]
+    def __slice_3d(self, slic):
+        x = self.x[slic[0]]
+        y = self.y[slic[1]]
+        z = self.z[slic[2]]
+        if x._relative_to is not None:
+            nd = ndim(x.relative_to)
+            slc = s_[:]
+            if nd == 2:
+                slc = slic[1:]
+            elif nd == 1:
+                s = x.relative_to.size
+                if s == self.shape[1]:
+                    slc = slic[1]
+                elif s == self.shape[2]:
+                    slc = slic[2]
 
-            if z._relative_to is not None:
-                nd = ndim(z.relative_to)
-                slc = s_[:]
-                if nd == 2:
-                    slc = slic[:2]
-                elif nd == 1:
-                    s = z.relative_to.size
-                    if s == self.shape[0]:
-                        slc = slic[0]
-                    elif s == self.shape[1]:
-                        slc = slic[1]
+            x.relative_to = x.relative_to[slc]
 
-                z.relative_to = z.relative_to[slc]
+        if y._relative_to is not None:
+            nd = ndim(y.relative_to)
+            slc = s_[:]
+            if nd == 2:
+                slc = slic[::2]
+            elif nd == 1:
+                s = y.relative_to.size
+                if s == self.shape[0]:
+                    slc = slic[0]
+                elif s == self.shape[2]:
+                    slc = slic[2]
 
-            out = type(self)(x=x, y=y, z=z)
-            return out
+            y.relative_to = y.relative_to[slc]
 
-        if len(axis) == 1: # Returning a 2D mesh
-            a = [x for x in (0, 1, 2) if not x in axis]
-            b = [x for x in (0, 1, 2) if x in axis]
+        if z._relative_to is not None:
+            nd = ndim(z.relative_to)
+            slc = s_[:]
+            if nd == 2:
+                slc = slic[:2]
+            elif nd == 1:
+                s = z.relative_to.size
+                if s == self.shape[0]:
+                    slc = slic[0]
+                elif s == self.shape[1]:
+                    slc = slic[1]
 
-            x = deepcopy(self.axis(a[0]))
-            if x._relative_to is not None:
-                if x._relative_to.size > 1:
-                    if a[0] == 0:
-                        if b[0] == 1:
-                            axis = 0
-                        if b[0] == 2:
-                            axis = 1
-                    elif a[0] == 1:
-                        if b[0] == 0:
-                            axis = 0
-                        if b[0] == 2:
-                            axis = 'OOPS'
-                    x.relative_to = take(x.relative_to, slic[b[0]], axis)
+            z.relative_to = z.relative_to[slc]
 
-            y = deepcopy(self.axis(a[1]))
-            if y._relative_to is not None:
-                if y._relative_to.size > 1:
-                    if a[1] == 1:
-                        if b[0] == 0:
-                            axis = 0
-                        elif b[0] == 2:
-                            axis = 1
-                    elif a[1] == 2:
-                        if b[0] == 0:
-                            axis = 0
-                        elif b[0] == 1:
-                            axis = 1
+        out = type(self)(x=x, y=y, z=z)
+        return out
 
-                    y.relative_to = take(y.relative_to, slic[b[0]], axis)
+    def __slice_2d(self, slic, axis):
+        a = [x for x in (0, 1, 2) if not x in axis]
+        b = [x for x in (0, 1, 2) if x in axis][0]
 
-            x = x[slic[a[0]]]
-            x.dimension = 0
-            y = y[slic[a[1]]]
-            y.dimension = 1
+        x = deepcopy(self.axis(a[0])) # X is always X or Y
+        if x._relative_to is not None :
+            if (x._relative_to.size > 1) and (npall(x._relative_to != 0.0)):
+                rt_dims = asarray([t for t in (0, 1, 2) if t != x.dimension])
+                axis = squeeze(argwhere(rt_dims == b))
+                if x.relative_to.ndim == 2:
+                    x.relative_to = take(x.relative_to, slic[b], axis)
+            else:
+                x.relative_to = None
 
-            out = RectilinearMesh2D(x=x, y=y)
+        y = deepcopy(self.axis(a[1])) # Y is always Z or Y
+        if y._relative_to is not None:
+            if (y._relative_to.size > 1) and (npall(y._relative_to != 0.0)):
+                rt_dims = asarray([t for t in (0, 1, 2) if t != y.dimension])
+                axis = squeeze(argwhere(rt_dims == b))
+                if y.relative_to.ndim == 2:
+                    y.relative_to = take(y.relative_to, slic[b], axis)
+            else:
+                y.relative_to = None
 
-        else: # Returning a 1D mesh
-            a = [x for x in (0, 1, 2) if not x in axis]
-            b = [x for x in (0, 1, 2) if x in axis]
+        x = x[slic[a[0]]]
+        x.dimension = 0
+        y = y[slic[a[1]]]
+        y.dimension = 1
 
-            out = self.axis(a[0])[slic[a[0]]]
-            if out._relative_to is not None:
-                out.relative_to = out.relative_to[slic[b[0]], slic[b[1]]]
+        return RectilinearMesh2D(x=x, y=y)
+
+    def __slice_1d(self, slic, axis):
+        a = [x for x in (0, 1, 2) if not x in axis]
+        b = [x for x in (0, 1, 2) if x in axis]
+
+        out = self.axis(a[0])[slic[a[0]]]
+        if out._relative_to is not None:
+            out.relative_to = out.relative_to[slic[b[0]], slic[b[1]]]
 
         return out
 
@@ -305,8 +309,15 @@ class RectilinearMesh3D(RectilinearMesh2D):
     @property
     def z_edges(self):
 
+        if self._z_edges is None:
+            self._z_edges = self.get_generic_z_edges()
+
+        return self._z_edges
+
+    def get_generic_z_edges(self):
         re_tmp = None
         if self.z._relative_to is not None:
+
             nd = ndim(self.z.relative_to)
             if nd == 2:
                 re_tmp = deepcopy(self.z.relative_to)
@@ -347,14 +358,26 @@ class RectilinearMesh3D(RectilinearMesh2D):
                         edges=values.get('z_edges'),
                         log=values.get('z_log'),
                         relative_to=values.get('z_relative_to'),
-                        dimension=2)
+                        dimension=self.z_axis)
 
         assert isinstance(values, RectilinearMesh1D), TypeError('z must be a RectilinearMesh1D')
         assert values.dimension == 2
         self._z = values
 
-        # if self.z._relative_to is not None:
-        #     assert all(self.z.relative_to.shape == self.shape[:2]), "z axis relative to must have shape {}".format(self.shape[:2])
+    def check_x_relative_to(self):
+        if self.x.relative_to is not None:
+            if ndim(self.x.relative_to) == 2:
+                assert npall(self.x.relative_to.shape == self.shape[1:]), ValueError(f"2D relative_to on x has shape {self.x.relative_to.shape} but needs shape {self.shape[:2]}")
+
+    def check_y_relative_to(self):
+        if self.y.relative_to is not None:
+            if ndim(self.y.relative_to) == 2:
+                assert npall(self.y.relative_to.shape == self.shape[0::2]), ValueError(f"2D relative_to on y has shape {self.y.relative_to.shape} but needs size {self.shape[0::2]}")
+
+    def check_z_relative_to(self):
+        if self.y.relative_to is not None:
+            if ndim(self.z.relative_to) == 2:
+                assert npall(self.z.relative_to.shape == self.shape[:2]), ValueError(f"2D relative_to on z has shape {self.z.relative_to.shape} but needs size {self.shape[0::2]}")
 
     def other_axis(self, axis):
 
@@ -382,6 +405,14 @@ class RectilinearMesh3D(RectilinearMesh2D):
             return self.y
         elif axis == 2:
             return self.z
+
+    def set_axis(self, axis, value):
+        if axis == 0:
+            self.x = value
+        elif axis == 1:
+            self.y = value
+        elif axis == 2:
+            self.z = value
 
     def other_axis_indices(self, axis):
         if axis == 0:
@@ -457,7 +488,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         def animate(i):
             plt.title('{:.2f}'.format(self.axis(axis).centres[i]))
             slic[axis] = i
-            tmp, _ = utilities._log(values[tuple(slic)].T.flatten(), kwargs.get('log', None))
+            tmp, _ = utilities._log(values[tuple(slic)].flatten(), kwargs.get('log', None))
             pc.set_array(tmp)
 
         anim = FuncAnimation(fig, animate, interval=300, frames=self.axis(axis).nCells.item())
@@ -493,10 +524,12 @@ class RectilinearMesh3D(RectilinearMesh2D):
             j.insert(axis, s_[:])
             j = tuple(j)
             p = distribution.probability(centres[j], log_probability)
-            probability[j] = dot(p, pdf[j])
+
+            probability[j] = dot(p.T, pdf[j])
+
         probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
-        return DataArray(probability, name='marginal_probability')
+        return DataArray(probability, name='Marginal Probability')
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
@@ -647,7 +680,7 @@ class RectilinearMesh3D(RectilinearMesh2D):
         """
         assert (size(x) == size(y) == size(z)), ValueError("x, y, z must have the same size")
         if trim:
-            flag = self.x.inBounds(x) & self.y.inBounds(y) & self.z.inBounds(z)
+            flag = self.x.in_bounds(x) & self.y.in_bounds(y) & self.z.in_bounds(z)
             i = where(flag)[0]
             out = empty([3, i.size], dtype=int32)
             out[0, :] = self.x.cellIndex(x[i])
@@ -764,65 +797,38 @@ class RectilinearMesh3D(RectilinearMesh2D):
 
         return unravel_index(index, self.shape, order=order)
 
+    def pcolor(self, axis, index=None, **kwargs):
 
-    # def pcolor(self, values, x='x', **kwargs):
-    #     """Create a pseudocolour plot.
+        values = kwargs['values']
+        kwargs['axis'] = axis
 
-    #     Can take any other matplotlib arguments and keyword arguments e.g. cmap etc.
+        if index is not None:
+            slic = [s_[:] for i in range(self.ndim)]
+            slic[axis] = index
+            slic = tuple(slic)
 
-    #     Parameters
-    #     ----------
-    #     values : array_like
-    #         2D array of colour values
-    #     location : float
-    #         location of axis aligned slice to pcolor
-    #     xAxis : str
-    #         If xAxis is 'x', the horizontal axis uses self.x
-    #         If xAxis is 'y', the horizontal axis uses self.y
-    #         If xAxis is 'r', the horizontal axis uses cumulative distance along the line
+            tmp = self[slic]
+            kwargs['values'] = values[slic]
 
-    #     Other Parameters
-    #     ----------------
-    #     alpha : scalar or array_like, optional
-    #         If alpha is scalar, behaves like standard matplotlib alpha and opacity is applied to entire plot
-    #         If array_like, each pixel is given an individual alpha value.
-    #     log : 'e' or float, optional
-    #         Take the log of the colour to a base. 'e' if log = 'e', and a number e.g. log = 10.
-    #         Values in c that are <= 0 are masked.
-    #     equalize : bool, optional
-    #         Equalize the histogram of the colourmap so that all colours have an equal amount.
-    #     nbins : int, optional
-    #         Number of bins to use for histogram equalization.
-    #     xscale : str, optional
-    #         Scale the x axis? e.g. xscale = 'linear' or 'log'
-    #     yscale : str, optional
-    #         Scale the y axis? e.g. yscale = 'linear' or 'log'.
-    #     flipX : bool, optional
-    #         Flip the X axis
-    #     flipY : bool, optional
-    #         Flip the Y axis
-    #     grid : bool, optional
-    #         Plot the grid
-    #     noColorbar : bool, optional
-    #         Turn off the colour bar, useful if multiple plotting plotting routines are used on the same figure.
-    #     trim : bool, optional
-    #         Set the x and y limits to the first and last non zero values along each axis.
+            return tmp.pcolor(**kwargs)
 
-    #     See Also
-    #     --------
-    #     geobipy.plotting.pcolor : For non matplotlib keywords.
-    #     matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
+        mesh = self.remove_axis(axis)
 
-    #     """
 
-    #     assert all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+        x_mask = kwargs.get('x_mask', None); y_mask = kwargs.get('y_mask', None)
+        mask = (x_mask is not None) or (y_mask is not None)
 
-    #     xtmp = self.axis(x)
+        masked = mesh
+        if mask:
+            masked, x_indices, y_indices, _ = mesh.mask_cells(x_mask, y_mask, None)
 
-    #     ax, pm, cb = cP.pcolor(values, x = xtmp, y = self.z.edges, **kwargs)
+            kwargs['values'] = values.expand(x_indices, y_indices, masked.shape, axis=axis)
+            if 'classes' in kwargs:
+                if 'id' in kwargs['classes']:
+                    kwargs['classes']['id'] = kwargs['classes']['id'].expand(x_indices, y_indices, masked.shape)
 
-    #     return ax, pm, cb
 
+        return masked.pcolor(**kwargs)
 
     def pyvista_mesh(self, **kwargs):
         """Creates a pyvista plotting object linked to VTK.
@@ -846,12 +852,11 @@ class RectilinearMesh3D(RectilinearMesh2D):
     def _reorder_for_pyvista(self, values):
         return utilities.reorder_3d_for_pyvista(values)
 
-
     @property
     def summary(self):
         """ Display a summary of the 3D Point Cloud """
         msg = ("3D Rectilinear Mesh: \n"
-              "Shape: : {} \nx\n{}y\n{}z\n{}").format(self.shape, self.x.summary, self.y.summary, self.z.summary)
+              "Shape: : {} \nx\n{}y\n{}z\n{}").format(self.shape, self.x_edges.summary, self.y_edges.summary, self.z_edges.summary)
         # if not self.relative_to is None:
         #     msg += self.relative_to.summary
         return msg
@@ -1030,3 +1035,48 @@ class RectilinearMesh3D(RectilinearMesh2D):
     #             vtk.cell_data.append(Scalars(cellData.reshape(self.nCells), cellData.getNameUnits()))
 
     #     vtk.tofile(fileName, format)
+
+    @classmethod
+    def generate_from_rasters(cls, rasters:list, edges=True, absolute=True, **kwargs):
+
+        import numpy as np
+        import rioxarray as rio
+        from ..model.Model import Model
+        from ...base.utilities import nodata_value
+
+        n_layers = len(rasters) - 1
+
+        ds = rio.open_rasterio(rasters[0], from_disk=True)
+        mod = Model.from_tif(ds)
+        ds.close()
+
+        # Replace finite null values with nan
+        mod.values[mod.values == nodata_value(mod.values.dtype)] = np.nan
+
+        mod = mod.fill_nans_with_extrapolation()
+
+        self = cls(x=mod.mesh.x, y=mod.mesh.y, z_edges=np.arange(len(rasters), dtype=np.float64))
+
+        self._z_edges = StatArray(np.zeros(np.asarray(self.shape)+1, dtype=np.float64))
+        thickness = StatArray(np.zeros(np.asarray(self.shape), dtype=np.float64), name='thickness', units='m')
+
+        d = mod.interpolate_centres_to_nodes()
+        self._z_edges[:, :, -1] = d
+
+        # Loop over layer thickness files
+        for i, tif in enumerate(rasters[1:]):
+            ds = rio.open_rasterio(tif, from_disk=True)
+            mod = Model.from_tif(ds)
+            ds.close()
+
+            if np.all(mod.values.shape[::-1] == self.shape[:-1]):
+                thickness[:, :, i] = mod.values.T
+            else:
+                thickness[:, :, i] = mod.values
+
+            mod = mod.fill_nans_with_extrapolation()
+
+            self._z_edges[:, :, i+1] = self._z_edges[:, :, i] - mod.interpolate_centres_to_nodes()
+
+
+        return self, thickness

@@ -106,33 +106,20 @@ class Inference3D(myObject):
 
         """
 
-        h5_files = Inference3D._get_h5Files(directory)
+        # h5_files = Inference3D._get_h5Files(directory)
 
-        if world is None:
-            lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in h5_files]
+        # if world is None:
+        #     lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in h5_files]
+        # else:
+        # lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in h5_files]
 
-        else:
-            if global_access:
-                lines = [Inference2D.fromHdf(file, prng=prng, world = world, **kwargs) for file in h5_files]
-            else:
-                start, chunk = loadBalance1D_shrinkingArrays(len(h5_files), world.size)
-                my_files = h5_files[start[world.rank]:start[world.rank]+chunk[world.rank]]
-                lines = [Inference2D.fromHdf(file, prng=prng, **kwargs) for file in my_files]
+        self = cls(None, world=world, prng=prng, global_access=global_access)
+        self.open(directory=directory, **kwargs)
 
-        data = deepcopy(lines[0].data)
-
-        for line in lines[1:]:
-            t = line.data
-            data = data.append(line.data)
-
-        self = cls(data, world=world, prng=prng, global_access=global_access)
-        self.mode = kwargs.get('mode', 'r')
-        self._lines = lines
         return self
 
     def open(self, directory, **kwargs):
         assert kwargs.get('mode', 'r') in ('r', 'r+', 'a', 'w'), ValueError("mode must be in ('r', 'r+', 'a', 'w')")
-
         self._lines = [Inference2D.fromHdf(file, prng=self.prng, world=self.world, **kwargs) for file in Inference3D._get_h5Files(directory)]
 
     @staticmethod
@@ -154,16 +141,16 @@ class Inference3D(myObject):
 
     def _set_inference2d(self, mode='r+', world=None):
         lines = []
-        lineNumber = empty(self.nLines)
+        line_number = empty(self.nLines)
 
         for i, file in enumerate(self.h5files):
             LR = Inference2D()
             LR.open(filename=file, mode=mode, world=world)
             lines.append(LR)
-            lineNumber[i] = LR.line_number
+            line_number[i] = LR.line_number
 
         self.lines = lines
-        self.lineNumber = lineNumber
+        self.line_number = line_number
 
     @property
     def data(self):
@@ -171,7 +158,7 @@ class Inference3D(myObject):
 
     @data.setter
     def data(self, value):
-        assert isinstance(value, Data), TypeError("data must have type geobipy.Data")
+        # assert isinstance(value, Data), TypeError("data must have type geobipy.Data")
         self._data = value
 
     @property
@@ -330,7 +317,7 @@ class Inference3D(myObject):
         self.print('Files are being created for data files {} and system files {}'.format(kwargs['data_filename'], kwargs['system_filename']))
 
         # No need to create and close the files like in parallel, so create and keep them open
-        for line in self.lineNumber:
+        for line in self.line_number:
 
             subset = self.data.line(line)
 
@@ -379,31 +366,26 @@ class Inference3D(myObject):
             The inversion results for the line.
 
         """
-        index = self.lineIndex(lineNumber=line_number)
+        index = self.line_index(line_number=line_number)
         return self.lines[index]
 
     @property
     def lines(self):
         if self.parallel_access:
-            if self.global_access:
-                start, chunk = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
-                return self._lines[start[self.rank] : start[self.rank]+chunk[self.rank]]
-            else:
-                return self._lines
+            start, chunk = loadBalance1D_shrinkingArrays(self.nLines, self.world.size)
+            return self._lines[start[self.rank] : start[self.rank]+chunk[self.rank]]
+            # else:
+            #     return self._lines
         else:
             return self._lines
 
-    @property
-    def lineNumber(self):
-        return sort(unique(self.data.lineNumber))
-
-    # @lineNumber.setter
-    # def lineNumber(self, values):
-    #     self._lineNumber = unique(values)
+    @cached_property
+    def line_number(self):
+        return unique(self.data.line_number)
 
     @property
     def nLines(self):
-        return self.data.nLines
+        return size(self._lines)
 
     def _get(self, variable, reciprocateParameter=False, **kwargs):
 
@@ -414,7 +396,7 @@ class Inference3D(myObject):
             if reciprocateParameter:
                 vals = divide(1.0, self.meanParameters)
                 vals.name = 'Resistivity'
-                vals.units = '$\\Omega m$'
+                vals.units = r'$\Omega m$'
                 return vals
             else:
                 return self.meanParameters
@@ -423,7 +405,7 @@ class Inference3D(myObject):
             if reciprocateParameter:
                 vals = 1.0 / self.meanParameters
                 vals.name = 'Resistivity'
-                vals.units = '$\\Omega m$'
+                vals.units = r'$\Omega m$'
                 return vals
             else:
                 return self.bestParameters
@@ -467,8 +449,8 @@ class Inference3D(myObject):
 
                 tmp = (self.data.fiducial == fiducial)
 
-                if unique(self.data.lineNumber).size > 1:
-                    tmp = tmp & (self.data.lineNumber == line_number)
+                if unique(self.data.line_number).size > 1:
+                    tmp = tmp & (self.data.line_number == line_number)
 
                 index = squeeze(argwhere(tmp))
 
@@ -483,13 +465,16 @@ class Inference3D(myObject):
             datapoint = self.data._read_record(record = i)
 
             # Pass through the line results file object if a parallel file system is in use.
-            iLine = self.lineNumber.searchsorted(datapoint.lineNumber)[0]
+            iLine = self.line_number.searchsorted(datapoint.line_number)[0]
 
             inference = Inference1D(prng=self.prng, **options)
 
             inference.initialize(datapoint)
 
-            inference.infer(hdf_file_handle=self.lines[iLine].hdf_file)
+            file_handle = None
+            if options['save_hdf5']:
+                file_handle = self.lines[iLine].hdf_file
+            inference.infer(hdf_file_handle=file_handle)
 
             e = time.time() - t0
             elapsed = str(timedelta(seconds=e))
@@ -590,7 +575,7 @@ class Inference3D(myObject):
         # Import here so serial code still works...
         from ..base import MPI as myMPI
 
-        lineNumber = self.lineNumber
+        line_number = self.line_number
         Inference2D = self._lines
         world = self.world
 
@@ -612,7 +597,7 @@ class Inference3D(myObject):
             # paras.check(datapoint)
 
             # Pass through the line results file object if a parallel file system is in use.
-            iLine = lineNumber.searchsorted(datapoint.lineNumber)[0]
+            iLine = line_number.searchsorted(datapoint.line_number)[0]
 
             inference = Inference1D(prng=self.prng, world=self.world, **options)
             inference.initialize(datapoint)
@@ -620,7 +605,7 @@ class Inference3D(myObject):
             failed = inference.infer(hdf_file_handle=self._lines[iLine].hdf_file)
 
             if failed and inference.datapoint.n_active_channels > 0:
-                myMPI.print(f"datapoint --line={datapoint.lineNumber.item()} --fiducial={datapoint.fiducial.item()} failed to converge")
+                myMPI.print(f"datapoint --line={datapoint.line_number.item()} --fiducial={datapoint.fiducial.item()} failed to converge")
 
             # Ping the head rank to request a new index
             world.send('requesting', dest=0)
@@ -856,7 +841,7 @@ class Inference3D(myObject):
             hdf_file.close()
 
         else:
-            return StatArray(vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, **kwargs) for line in self.lines]))
+            return StatArray(vstack([line.compute_probability(distribution, log=log, log_probability=log_probability, axis=axis, save=True, **kwargs) for line in self.lines]))
 
     def cluster_fits_gmm(self, n_clusters, plot=False):
 
@@ -979,7 +964,7 @@ class Inference3D(myObject):
         geobipy.Hitmap : Parameter posterior.
 
         """
-        iLine, index = self.lineIndex(fiducial=fiducial, index=index)
+        iLine, index = self.line_index(fiducial=fiducial, index=index)
         return self.lines[iLine].parameter_posterior(index=index)
 
 
@@ -1241,22 +1226,22 @@ class Inference3D(myObject):
             The inversion results for the data point.
 
         """
-        lineIndex, fidIndex = self.lineIndex(fiducial=fiducial, index=index)
+        line_index, fidIndex = self.line_index(fiducial=fiducial, index=index)
         if size(fidIndex) > 1:
-            assert line_index is not None, ValueError("Multiple fiducials found, please specify which line_index out of {}".format(lineIndex))
-            lineIndex = line_index
-        return self.lines[lineIndex].inference_1d(fidIndex)
+            assert line_index is not None, ValueError("Multiple fiducials found, please specify which line_index out of {}".format(line_index))
+            line_index = line_index
+        return self.lines[line_index].inference_1d(fidIndex)
 
-    def lineIndex(self, lineNumber=None, fiducial=None, index=None):
+    def line_index(self, line_number=None, fiducial=None, index=None):
         """Get the line index """
-        tmp = sum([not x is None for x in [lineNumber, fiducial, index]])
-        assert tmp == 1, Exception("Please specify one argument, lineNumber, fiducial, or index")
+        tmp = sum([not x is None for x in [line_number, fiducial, index]])
+        assert tmp == 1, Exception("Please specify one argument, line_number, fiducial, or index")
 
         index = atleast_1d(index)
 
-        if lineNumber is not None:
-            assert lineNumber in self.lineNumber, ValueError("line {} not found in data set".format(lineNumber))
-            return squeeze(where(self.lineNumber == lineNumber)[0])
+        if line_number is not None:
+            assert line_number in self.line_number, ValueError("line {} not found in data set".format(line_number))
+            return squeeze(where(self.line_number == line_number)[0])
 
         if fiducial is not None:
             return squeeze(self.fiducialIndex(fiducial))
@@ -1302,7 +1287,7 @@ class Inference3D(myObject):
 
     def fiducial(self, index):
         """ Get the fiducial of the given data point """
-        iLine, index = self.lineIndex(index=index)
+        iLine, index = self.line_index(index=index)
         iLine = atleast_1d(iLine)
         index = atleast_1d(index)
 
@@ -1323,27 +1308,34 @@ class Inference3D(myObject):
 
         Returns
         -------
-        lineIndex : ints
-            lineIndex for each fiducial
+        line_index : ints
+            line_index for each fiducial
         index : ints
             Index of each fiducial in their respective line
 
         """
 
-        lineIndex = []
+        line_index = []
         index = []
 
         for i, line in enumerate(self.lines):
             ids = line.fiducialIndex(fiducial)
             nIds = size(ids)
             if nIds > 0:
-                lineIndex.append(full(nIds, fill_value=i))
+                line_index.append(full(nIds, fill_value=i))
                 index.append(ids)
 
         if size(index) > 0:
-            return squeeze(hstack(lineIndex)), squeeze(hstack(index))
+            return squeeze(hstack(line_index)), squeeze(hstack(index))
 
         assert False, ValueError("fiducial not present in this data set")
+
+    def fit_mixture_to_pdf(self, intervals=None, **kwargs):
+
+        if self.parallel_access:
+            return self.fit_mixture_to_pdf_mpi(intervals, **kwargs)
+        else:
+            return self.fit_mixture_to_pdf_serial(intervals, **kwargs)
 
     def fit_mixture_to_pdf_mpi(self, intervals=None, **kwargs):
 
@@ -1451,15 +1443,6 @@ class Inference3D(myObject):
                 else:
                     Go = False
 
-
-    def fit_mixture_to_pdf(self, intervals=None, **kwargs):
-
-        if self.parallel_access:
-            return self.fit_mixture_to_pdf_mpi(intervals, **kwargs)
-        else:
-            return self.fit_mixture_to_pdf_serial(intervals, **kwargs)
-
-
     def fit_mixture_to_pdf_serial(self, intervals, **kwargs):
         """Uses Mixture modelling to fit disrtibutions to the hitmaps for the specified intervals.
 
@@ -1540,7 +1523,7 @@ class Inference3D(myObject):
     #     i0 = starts[self.rank]
     #     i1 = i0 + chunk
 
-    #     iLine, index = self.lineIndex(index=arange(i0, i1))
+    #     iLine, index = self.line_index(index=arange(i0, i1))
 
     #     tBase = MPI.Wtime()
     #     t0 = tBase
@@ -1570,7 +1553,7 @@ class Inference3D(myObject):
 
     #         counter += 1
     #         if counter == nUpdate:
-    #             print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.lineNumber[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
+    #             print('rank {}, line/fiducial {}/{}, iteration {}/{},  time/dp {} h:m:s'.format(world.rank, self.line_number[iL], line.fiducials[ind], i+1, chunk, str(timedelta(seconds=MPI.Wtime()-t0)/nUpdate)), flush=True)
     #             t0 = MPI.Wtime()
     #             counter = 0
 
@@ -1855,12 +1838,18 @@ class Inference3D(myObject):
 
         bar = self.progress_bar(lines)
 
+        output = kwargs.pop('output_directory', '.')
+
         for this in bar:
-            fig = this.plot_summary(**kwargs)
-            fig.savefig(f"{this.line_number}.png")
-            plt.close(fig)
-            this.close()
-            del this
+            plt.close('all')
+            try:
+                fig = this.plot_summary(**kwargs)
+                fig.savefig(f"{output}//{this.line_number}.png")
+                plt.close(fig)
+            except:
+                pass
+            # this.close()
+            # del this
 
 
     def scatter_z_slice_animate(self, variable, filename, **kwargs):
@@ -2014,7 +2003,7 @@ class Inference3D(myObject):
         return  self.map(dx = dx, dy = dy, mask = mask, clip = clip, values = self.relativeError[system, :], **kwargs)
 
     def plot_cross_section(self, line_number, values, **kwargs):
-        line_index = self.lineNumber.searchsorted(line_number)
+        line_index = self.line_number.searchsorted(line_number)
         indices = self.lineIndices[line_index]
 
         return self.lines[line_index].plot_cross_section(values=values[indices, :], **kwargs)

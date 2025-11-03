@@ -208,7 +208,6 @@ class Mesh(myObject):
         i[i == values.shape[axis]] = values.shape[axis]-1
 
         # Obtain the values at those locations
-        # ax = self.axis(axis)
         if self.ndim == 1:
             return self.centres_absolute[i]
         else:

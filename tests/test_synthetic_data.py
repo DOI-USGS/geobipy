@@ -22,7 +22,7 @@ def test_resolve(model_type):
 
     model.mesh.y_edges = model.mesh.y_edges / 10.0
 
-    ds = FdemData(system=data_path+'//resolve.stm')
+    ds = FdemData(system=data_path+'resolve.stm')
     ds, _ = ds.create_synthetic_data(model, prng)
 
     ds_check = FdemData.read_csv("data_checks/{}_clean.csv".format(title), system=ds.system)
@@ -30,7 +30,7 @@ def test_resolve(model_type):
     assert np.allclose(ds.data, ds_check.data), ValueError("{} doesn't match".format(title))
 
 def test_skytem(model_type):
-    from geobipy import TdemData, CircularLoops
+    from geobipy import TdemData
 
     model = Model.create_synthetic_model(model_type)
 
@@ -38,7 +38,7 @@ def test_skytem(model_type):
 
     prng = get_prng(seed=0)
 
-    ds = TdemData(system=[data_path+'//SkytemHM.stm'.format(title), data_path+'//SkytemLM.stm'])
+    ds = TdemData(system=[data_path+'SkytemHM.stm', data_path+'SkytemLM.stm'])
     ds, _ = ds.create_synthetic_data(model, prng)
 
     clean_data = 'data_checks//{}_clean.csv'.format(title)
@@ -56,7 +56,7 @@ def test_tempest(model_type):
     title = 'tempest_'+ model_type
     prng = get_prng(seed=0)
 
-    ds = TempestData(system=[data_path+'//Tempest.stm'])
+    ds = TempestData(system=[data_path+'tempest.stm'])
     ds, _ = ds.create_synthetic_data(model, prng)
 
     ds_check = TempestData.read_csv("data_checks//{}_clean.csv".format(title),

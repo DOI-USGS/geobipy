@@ -22,6 +22,7 @@ from geobipy import RectilinearMesh1D, RectilinearMesh2D, RectilinearMesh3D
 import matplotlib.pyplot as plt
 import numpy as np
 
+p=0;
 
 #%%
 # Specify some cell centres in x and y
@@ -29,18 +30,38 @@ x = StatArray(np.arange(10.0), 'Easting', 'm')
 y = StatArray(np.arange(20.0), 'Depth', 'm')
 rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 
+rm1 = rm[:5, :5]
+rm2 = rm[5, :]
+rm3 = rm[:, 5]
+
+plt.figure(p); p += 1
+plt.subplot(211)
+rm2.plot_grid()
+plt.subplot(212)
+rm3.plot_grid()
+
 #%%
 # We can plot the grid lines of the mesh.
-p=0;
-plt.figure(p)
+
+plt.figure(p); p += 1
 _  = rm.plot_grid(flipY=True, linewidth=0.5)
 
 # Intersecting multisegment lines with a mesh
 arr = np.zeros(rm.shape)
 i = rm.line_indices([0.0, 3.0, 6.0, 9], [2.0, 6.0, 0.0, 10])
 arr[i[:, 0], i[:, 1]] = 1
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 rm.pcolor(values = arr)
+
+#%%
+with h5py.File('rm2d.h5', 'w') as f:
+    rm.createHdf(f, 'test')
+    rm.writeHdf(f, 'test')
+
+with h5py.File('rm2d.h5', 'r') as f:
+    rm2 = RectilinearMesh2D.fromHdf(f['test'])
+
+rm.pyvista_mesh().save('rm2d.vtk')
 
 #%%
 # We can pcolor the mesh by providing cell values.
@@ -49,28 +70,25 @@ arr = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "Values")
 
 rm2, values2 = rm.resample(0.5, 0.5, arr, method='linear')
 
-
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 _ = rm.pcolor(arr, grid=True, flipY=True, linewidth=0.5)
-
-
 
 #%%
 # Mask the x axis cells by a distance
 rm_masked, x_indices, z_indices, arr2 = rm.mask_cells(x_distance=0.4, values=arr)
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 _ = rm_masked.pcolor(StatArray(arr2), grid=True, flipY=True)
 
 #%%
 # Mask the z axis cells by a distance
 rm_masked, x_indices, z_indices, arr2 = rm.mask_cells(y_distance=0.2, values=arr)
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 _ = rm_masked.pcolor(StatArray(arr2), grid=True, flipY=True)
 
 #%%
 # Mask axes by a distance
 rm_masked, x_indices, z_indices, arr2 = rm.mask_cells(x_distance=0.4, y_distance=0.2, values=arr)
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 _ = rm_masked.pcolor(StatArray(arr2), grid=True, flipY=True)
 
 x = StatArray(np.arange(10.0), 'Easting', 'm')
@@ -98,25 +116,11 @@ rm.intervalStatistic(a, intervals=[2.8, 4.2], axis=1, statistic='mean')
 rm.intervalStatistic(a, intervals=[2.8, 4.2, 5.1, 8.4], axis=1, statistic='mean')
 
 #%%
-# Slice the 2D mesh to retrieve either a 2D mesh or 1D mesh
-rm2 = rm[:5, :5]
-rm3 = rm[:5, 5]
-rm4 = rm[5, :5]
-
-p += 1; plt.figure(p)
-plt.subplot(131)
-rm2.plot_grid()
-plt.subplot(132)
-rm3.plot_grid()
-plt.subplot(133)
-rm4.plot_grid(transpose=True)
-
-#%%
 # Resample a grid
 values = StatArray(np.random.randn(*rm.shape))
 rm2, values2 = rm.resample(0.5, 0.5, values)
 
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 plt.subplot(121)
 rm.pcolor(values)
 plt.subplot(122)
@@ -126,11 +130,11 @@ rm2.pcolor(values2)
 # Axes in log space
 # +++++++++++++++++
 x = StatArray(np.logspace(-1, 4, 10), 'x')
-y = StatArray(np.logspace(0, 3, 10), 'y')
-rm = RectilinearMesh2D(x_edges=x, x_log=10, y_edges=y, y_log=10)
+y = StatArray(np.logspace(0, 3, 20), 'y')
+rm = RectilinearMesh2D(x_centres=x, x_log=10, y_centres=y, y_log=10)
 
 # We can plot the grid lines of the mesh.
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 _  = rm.plot_grid(linewidth=0.5)
 
 #%%
@@ -140,8 +144,8 @@ with h5py.File('rm2d.h5', 'w') as f:
 with h5py.File('rm2d.h5', 'r') as f:
     rm2 = RectilinearMesh2D.fromHdf(f['test'])
 
-arr = np.random.randn(*rm.shape)
-p += 1; plt.figure(p)
+# arr = np.random.randn(*rm.shape)
+plt.figure(p); p += 1
 plt.subplot(211)
 rm.pcolor(arr)
 plt.subplot(212)
@@ -150,15 +154,19 @@ rm2.pcolor(arr)
 #%%
 # relative_to
 # ++++++++++
-x = StatArray(np.arange(10.0), 'Northing', 'm')
+x = StatArray(np.arange(10.0), 'Easting', 'm')
 y = StatArray(np.arange(20.0), 'Depth', 'm')
 
 rm = RectilinearMesh2D(x_centres=x, y_centres=y)
 
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 plt.subplot(121)
 _  = rm.plot_grid(linewidth=0.5, flipY=True)
-rm = RectilinearMesh2D(x_centres=x, x_relative_to=0.2*np.random.randn(y.size), y_centres=y, y_relative_to=0.2*np.random.randn(x.size))
+
+x_re = StatArray(np.sin(np.abs(y)), "x_re")
+y_re = StatArray(np.sin(np.abs(x)), "x_re")
+
+rm = RectilinearMesh2D(x_centres=x, x_relative_to=x_re, y_centres=y, y_relative_to=y_re)
 plt.subplot(122)
 _  = rm.plot_grid(linewidth=0.5, flipY=True)
 
@@ -169,8 +177,8 @@ with h5py.File('rm2d.h5', 'w') as f:
 with h5py.File('rm2d.h5', 'r') as f:
     rm2 = RectilinearMesh2D.fromHdf(f['test'])
 
-arr = np.random.randn(*rm.shape)
-p += 1; plt.figure(p)
+# arr = np.random.randn(*rm.shape)
+plt.figure(p); p += 1
 plt.subplot(211)
 rm.pcolor(arr, flipY=True)
 plt.subplot(212)
@@ -190,13 +198,13 @@ with h5py.File('rm2d.h5', 'r') as f:
 with h5py.File('rm2d.h5', 'r') as f:
     rm3 = RectilinearMesh3D.fromHdf(f['test'])
 
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 plt.subplot(311)
 rm.pcolor(arr, flipY=True)
 plt.subplot(312)
 rm2.pcolor(arr, flipY=True)
 
-p += 1; plt.figure(p)
+plt.figure(p); p += 1
 arr = np.random.randn(*rm3.shape)
 plt.subplot(311)
 mesh = rm3[0, :, :]

@@ -180,7 +180,7 @@ plt.show()
 #   YUTM=
 #   Elevation=
 #   StationNumber=
-#   LineNumber=
+#   line_number=
 #   Current=
 #
 # Line 2 :: first integer, sourceType

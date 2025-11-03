@@ -1,3 +1,4 @@
+from copy import deepcopy
 import numpy as np
 import h5py
 from ...classes.core.myObject import myObject
@@ -11,39 +12,36 @@ from ...base import utilities as cF
 
 class Mixture(myObject):
 
-    # def __init__(self, mixture_type=None):
+    def __deepcopy__(self, memo={}):
+        out = type(self)()
+        out._params = deepcopy(self._params, memo=memo)
+        return out
 
-    #     if mixture_type is None:
-    #         return
+    @property
+    def amplitudes(self):
+        return DataArray(self._params[0::self.n_solvable_parameters], "Amplitude")
 
-    #     mixture = mixture_type.lower()
-    #     if mixture == 'gaussian':
-    #         lmfit_model = models.GaussianModel
-    #     elif mixture == 'lorentzian':
-    #         lmfit_model = models.LorentzianModel
-    #     elif mixture == 'splitlorentzian':
-    #         lmfit_model = models.SplitLorentzianModel
-    #     elif mixture == 'voigt':
-    #         lmfit_model = models.VoigtModel
-    #     elif mixture == 'moffat':
-    #         lmfit_model = models.MoffatModel
-    #     elif mixture == 'pearson':
-    #         return mixPearson.mixPearson
-    #     elif mixture == 'studentst':
-    #         lmfit_model = models.StudentsTModel
-    #     # elif mixture == 'exponentialgaussian':
-    #     #     from lmfit.models import ExponentialGaussianModel as lmfit_model
-    #     # elif mixture == 'skewedgaussian':
-    #     #     from lmfit.models import SkewedGaussianModel as lmfit_model
-    #     # elif mixture == 'exponential':
-    #     #     from lmfit.models import ExponentialModel as lmfit_model
-    #     # elif mixture == 'powerlaw':
-    #     #     from lmfit.models import PowerLawModel as lmfit_model
+    @amplitudes.setter
+    def amplitudes(self, values):
+        if values is None:
+            values = np.ones(self.ndim)
+        assert np.size(values) == self.n_components, ValueError("Must provide {} amplitudes".format(self.n_components))
+        self._params[0::self.n_solvable_parameters] = values
 
-    #     else:
-    #         raise ValueError("mixture must be one of [gaussian, lorentzian, splitlorentzian, voigt, moffat, pearson, studentst]")
+    @property
+    def labels(self):
+        return self._labels
 
-    #     # self.model = lmfit_model
+    @labels.setter
+    def labels(self, values):
+        if values is None:
+            values = [str(x) for x in range(self.ndim)]
+        assert np.size(values) == self.n_components, ValueError("Must provide {} labels".format(self.n_components))
+        self._labels = values
+
+    @property
+    def ndim(self):
+        return self.n_components
 
     @property
     def params(self):
@@ -53,8 +51,31 @@ class Mixture(myObject):
     def params(self, values):
         self._params = DataArray(values)
 
+    def plot_components(self, x, log, **kwargs):
+        probability = self.amplitudes * self.probability(x, log)
+        return probability.plot(x=x, **kwargs)
+
     def fit_to_curve(self, x, y, n_components=None, plot=False, debug=False, verbose=False, final=False, **kwargs):
         """Iteratively fits the histogram with an increasing number of distributions until the fit changes by less than a tolerance.
+
+        Other Parameters
+        ----------------
+        norm : float
+            Norm to use to measure fit.  1, 2, or np.inf
+        epsilon : float
+            Tolerance for the fit to change.
+        mu : float
+            Tolerance for the gradient of the fit to change.
+        log : 'e' or float
+            Take the log of x before fitting
+        max_distributions : int
+            Maximum number of distributions to fit.
+        method : str
+            Method to use for fitting.  'leastsq' or 'lbfgsb'
+        masking : float
+            Masking factor to ignore data around peaks.
+        max_variance : float
+            Maximum variance for a distribution.
 
         """
         import warnings
@@ -72,12 +93,12 @@ class Mixture(myObject):
                 fig = plt.gcf()
                 ax = plt.gca()
 
-        norm = kwargs.pop('norm', np.inf)
+        norm = kwargs.pop('norm', np.inf) 
         epsilon = kwargs.pop('epsilon', 0.05)
         mu = kwargs.pop('mu', 0.1)
         log = kwargs.pop('log', None)
         maxDistributions = kwargs.pop('max_distributions', np.inf)
-        kwargs['method'] = kwargs.get('method', 'lbfgsb')
+        kwargs['method'] = kwargs.get('method', 'leastsq')#'lbfgsb')
 
         masking = kwargs.pop('masking', 1.67)
         dynamic_weighting = kwargs.pop('dynamic_weighting', False)
@@ -91,7 +112,7 @@ class Mixture(myObject):
         cdf = np.cumsum(y) / np.max(np.cumsum(y))
         i05 = cdf.searchsorted(0.1)
         i95 = cdf.searchsorted(0.90)
-        kwargs['max_variance'] = np.minimum(1.0, centres[i95] - centres[i05])
+        kwargs['max_variance'] = kwargs.get('max_variance', np.minimum(1.0, centres[i95] - centres[i05]))
 
         fit_denominator = np.r_[np.linalg.norm(y, ord=np.inf), np.linalg.norm(y, ord=2.0)]
 
@@ -330,11 +351,13 @@ class Mixture(myObject):
 
             weights[k-window:k+window+1] = 1.0
 
-            pars['g{}_center'.format(i)].set(value=x_guess[j], min=le, max=ue)
-            pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
-            pars['g{}_amplitude'.format(i)].set(value=1.0, min=0.0)
-            tmp = 10.5 #if expon_guess is None else expon_guess
-            pars['g{}_expon'.format(i)].set(value=tmp, vary=False)
+            pars[f'g{i}_center'].set(value=x_guess[j], min=le, max=ue)
+            pars[f'g{i}_sigma'].set(value=init, min=mn_var, max=mx_var)
+            pars[f'g{i}_amplitude'].set(value=1.0, min=0.0)
+            key = f'g{i}_expon'
+            if key in pars:
+                tmp = 10.5 #if expon_guess is None else expon_guess
+                pars[key].set(value=tmp, vary=False)
 
         kwargs['weights'] = weights
 
@@ -375,19 +398,18 @@ class Mixture(myObject):
 
             weights[k-window:k+window+1] = 1.0
 
-            pars['g{}_center'.format(i)].set(value=x_guess[ix[i]], min=le, max=ue)
-            pars['g{}_sigma'.format(i)].set(value=init, min=mn_var, max=mx_var)
-            pars['g{}_amplitude'.format(i)].set(value=1.0, min=0.0)
-            tmp = 10.5 if expon_guess is None else expon_guess
-            pars['g{}_expon'.format(i)].set(value=tmp, vary=False)
+            pars[f'g{i}_center'].set(value=x_guess[ix[i]], min=le, max=ue)
+            pars[f'g{i}_sigma'].set(value=init, min=mn_var, max=mx_var)
+            pars[f'g{i}_amplitude'].set(value=1.0, min=0.0)
+            key = f'g{i}_expon'
+            if key in pars:
+                tmp = 10.5 if expon_guess is None else expon_guess
+                pars[key].set(value=tmp, vary=False)
 
         kwargs['weights'] = weights
 
         if verbose:
             print('fitting with', pars)
-
-        print(pars)
-
 
         init = mod.eval(pars, x=centres)
         out = mod.fit(y, pars, x=centres, **kwargs)
@@ -447,3 +469,12 @@ class Mixture(myObject):
 
         self.params = DataArray.fromHdf(grp['params'], index=index)
         return self.squeeze()
+
+    def plot_components(self, x, log, ax=None, **kwargs):
+
+        if not ax is None:
+            plt.sca(ax)
+
+        probability = np.squeeze(self.amplitudes * self.probability(x, log))
+
+        return probability.plot(x=x, **kwargs)

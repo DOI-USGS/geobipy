@@ -902,7 +902,7 @@ class Point(myObject):
         # Use distance masking
         if mask:
             kdt = cKDTree(column_stack((x, y)))
-            xi = _ndim_coords_from_arrays(tuple(meshgrid(mesh.x.centres, mesh.y.centres)), ndim=2)
+            xi = cf._ndim_coords_from_arrays(tuple(meshgrid(mesh.x.centres, mesh.y.centres)), ndim=2)
             dists, indexes = kdt.query(xi)
             vals[dists > mask] = nan
 

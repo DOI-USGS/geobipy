@@ -110,7 +110,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   1
-    Address:['0x164367c50']
+    Address:['0x164bdafd0']
     Shape:  (1,)
     Values: [0.]
     Min:    0.0
@@ -119,7 +119,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   10
-    Address:['0x164367250']
+    Address:['0x164bdad50']
     Shape:  (10,)
     Values: [0. 0. 0. ... 0. 0. 0.]
     Min:    0.0
@@ -128,7 +128,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   (2, 10)
-    Address:['0x1643666d0']
+    Address:['0x164bd89d0']
     Shape:  (2, 10)
     Values: [[0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]]
@@ -138,7 +138,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   (2, 10)
-    Address:['0x164366450']
+    Address:['0x164bd8150']
     Shape:  (2,)
     Values: [ 2 10]
     Min:    2
@@ -147,7 +147,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   45.454
-    Address:['0x164364850']
+    Address:['0x164bd8f50']
     Shape:  (1,)
     Values: [45.454]
     Min:    45.454
@@ -156,7 +156,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   45.454
-    Address:['0x164365e50']
+    Address:['0x164bda650']
     Shape:  (1,)
     Values: [45.454]
     Min:    45.454
@@ -165,16 +165,16 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x1643657d0']
+    Address:['0x164bd8ad0']
     Shape:  (1,)
-    Values: [0.28613692]
-    Min:    0.28613691597121504
-    Max:    0.28613691597121504
+    Values: [-0.08266592]
+    Min:    -0.08266592442198512
+    Max:    -0.08266592442198512
     has_posterior: False
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x164364cd0']
+    Address:['0x164bd86d0']
     Shape:  (10,)
     Values: [0. 1. 2. ... 7. 8. 9.]
     Min:    0.0
@@ -183,7 +183,7 @@ Instantiating a new StatArray class
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x1643657d0']
+    Address:['0x164bd8ad0']
     Shape:  (10,)
     Values: [0. 1. 2. ... 7. 8. 9.]
     Min:    0.0
@@ -263,8 +263,8 @@ We can also attach a proposal distribution
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x164367550' '0x164520ec0' '0x1643d18f0' ... '0x164523fe0' '0x1643d1bf0'
-     '0x1643d1c50']
+    Address:['0x15ac821d0' '0x164da1970' '0x164d4b7b0' ... '0x164da1940' '0x164d4bc30'
+     '0x164d4bb70']
     Shape:  (1,)
     Values: [10.]
     Min:    10.0
@@ -379,8 +379,8 @@ We can perturb the variable by drawing from the attached proposal distribution.
 
     StatArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x164367550' '0x164520ec0' '0x1643d18f0' ... '0x164523fe0' '0x1643d1bf0'
-     '0x1643d1c50']
+    Address:['0x15ac821d0' '0x164da1970' '0x164d4b7b0' ... '0x164da1940' '0x164d4bc30'
+     '0x164d4bb70']
     Shape:  (1,)
     Values: [0.38188467]
     Min:    0.38188466718060166
@@ -522,7 +522,7 @@ This produces a single probability.
 
  .. code-block:: none
 
-    0.3865034288373199
+    [0.39370446]
 
 
 
@@ -1655,7 +1655,7 @@ We can also define a 2D array
  .. code-block:: none
 
 
-    "StatArray\nName:   Density ($\\frac{g}{cc}$)\nAddress:['0x15abbb5d0']\nShape:  (50, 100)\nValues: [[ 0.36285142 -1.45926241 -1.99018616 ...  0.5120016  -0.09939725\n   0.34190296]\n [ 1.63234194  0.83149504 -0.79399095 ... -1.41783437 -0.5618095\n   0.09735701]\n [-1.35818096  0.04230022  0.7493373  ... -2.36089817  0.41162449\n  -0.95753703]\n ...\n [ 0.75872936  0.11271041  1.92135862 ... -1.71396947  0.36126637\n   1.28428028]\n [ 0.28017354 -0.01762853 -0.08438573 ...  0.31977915 -1.81485406\n  -0.24001704]\n [-0.19700963  1.40366952 -2.17161654 ... -1.09729843 -0.33771638\n  -2.03100392]]\nMin:    -3.991157603243882\nMax:    3.6682397222771446\nhas_posterior: False\n"
+    "StatArray\nName:   Density ($\\frac{g}{cc}$)\nAddress:['0x164ffe3d0']\nShape:  (50, 100)\nValues: [[-0.78669068  0.20711335 -0.28633863 ... -0.1493006  -0.83965731\n  -0.47177445]\n [-0.34141055  0.06454071 -0.17952501 ...  0.21121963  1.59046485\n   1.4593409 ]\n [ 0.04881459  1.27405408  1.40889459 ...  1.8367144  -0.2983935\n   0.42284896]\n ...\n [-0.37531355 -0.0080368   0.20401897 ...  0.40544635  0.15434523\n  -0.49907248]\n [-0.7400653   0.59653441 -0.35976702 ...  0.62654162  1.58647151\n   1.34138897]\n [ 0.99980639  0.58150029  0.00534019 ... -1.50977997  1.94348526\n  -0.01625448]]\nMin:    -4.163305032643216\nMax:    3.4316492029427654\nhas_posterior: False\n"
 
 
 
@@ -1931,7 +1931,7 @@ Create a stacked area plot of a 2D StatArray
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.117 seconds)
+   **Total running time of the script:** (0 minutes 3.251 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_StatArray.py:

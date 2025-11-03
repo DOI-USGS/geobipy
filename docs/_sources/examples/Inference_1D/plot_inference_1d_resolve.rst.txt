@@ -149,60 +149,12 @@ The directory where HDF files will be stored
     Output files will be produced at Resolve/glacial
     Creating HDF5 files, this may take a few minutes...
     Files are being created for data files ..//..//supplementary////data//Resolve_glacial.csv and system files ..//..//supplementary////data//..//data/FdemSystem2.stm
-    RectilinearMesh1D
-    Number of Cells:
-    |   StatArray
-    |   Name:   Number of cells
-    |   Address:['0x13f2ddfd0' '0x14dd80fe0' '0x14c433990' '0x14c4324f0']
-    |   Shape:  (1,)
-    |   Values: [30]
-    |   Min:    30
-    |   Max:    30
-    |   Prior:
-    |   |   Uniform Distribution: 
-    |   |   Min: 1
-    |   |   Max: 30
-    |   has_posterior: True
-
-    Cell Centres:
-    |   StatArray
-    |   Name:   Depth (m)
-    |   Address:['0x14c277ad0']
-    |   Shape:  (30,)
-    |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   Min:    0.0
-    |   Max:    0.0
-    |   has_posterior: False
-
-    Cell Edges:
-    |   StatArray
-    |   Name:   Depth (m)
-    |   Address:['0x14c274350']
-    |   Shape:  (31,)
-    |   Values: [0. 0. 0. ... 0. 0. 0.]
-    |   Min:    0.0
-    |   Max:    0.0
-    |   has_posterior: True
-
-    log:
-    |   None
-    relative_to:
-    |   StatArray
-    |   Name:   
-    |   Address:['0x13f2dced0']
-    |   Shape:  (1,)
-    |   Values: [0.]
-    |   Min:    0.0
-    |   Max:    0.0
-    |   has_posterior: False
-
-
     Created hdf5 file for line 0.0 with 79 data points
     Created hdf5 files 79 total data points
-    Created hdf5 files in 0:00:06.184965 h:m:s
-    i=5000, k=1, acc=*49.200, 0.006 s/Model, 30.223 s Elapsed, eta=--:--:-- h:m:s
+    Created hdf5 files in 0:00:06.535216 h:m:s
+    i=5000, k=2, acc=*35.040, 0.006 s/Model, 30.771 s Elapsed, eta=--:--:-- h:m:s
 
-    Remaining Points -30/1 || Elapsed Time: 0:00:31.353168 h:m:s || ETA 0:00:01.011393 h:m:s
+    Remaining Points -30/1 || Elapsed Time: 0:00:31.892123 h:m:s || ETA 0:00:01.028778 h:m:s
 
 
 
@@ -210,7 +162,7 @@ The directory where HDF files will be stored
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 37.843 seconds)
+   **Total running time of the script:** (0 minutes 42.723 seconds)
 
 
 .. _sphx_glr_download_examples_Inference_1D_plot_inference_1d_resolve.py:

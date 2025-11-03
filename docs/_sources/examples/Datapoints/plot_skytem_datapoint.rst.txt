@@ -91,19 +91,6 @@ Prepare the dataset so that we can read a point at a time.
 
 
 
-.. rst-class:: sphx-glr-script-out
-
- .. code-block:: none
-
-    self.n_components=1, self.nTimes=array([26, 19])
-    self.n_components=1, self.nTimes=array([26, 19])
-    self.n_components=1, self.nTimes=array([26, 19])
-    self.n_components=1, self.nTimes=array([26, 19])
-    self.n_components=1, self.nTimes=array([26, 19])
-    self.n_components=1, self.nTimes=array([26, 19])
-    self.n_components=1, self.nTimes=array([26, 19])
-    self.n_components=1, self.nTimes=array([26, 19])
-
 
 
 
@@ -172,7 +159,7 @@ Forward model the data
 
  .. code-block:: none
 
-    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:363: RuntimeWarning: divide by zero encountered in log
+    /Users/nfoks/codes/repositories/geobipy/geobipy/src/classes/data/datapoint/TdemDataPoint.py:365: RuntimeWarning: divide by zero encountered in log
       additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
 
 
@@ -278,8 +265,8 @@ This allows us to evaluate the likelihood of the predicted data
 
  .. code-block:: none
 
-    -320327.7331520335
-    643134.8665683016
+    [-323883.49922548]
+    650247.3809087153
 
 
 
@@ -365,7 +352,7 @@ Compute the misfit between observed and predicted data
 
  .. code-block:: none
 
-    19656.315144677585
+    19781.220411566053
 
 
 
@@ -501,7 +488,7 @@ Line 1 :: string
   YUTM=
   Elevation=
   StationNumber=
-  LineNumber=
+  line_number=
   Current=
 
 Line 2 :: first integer, sourceType
@@ -567,7 +554,7 @@ Example data files are contained in
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 4.415 seconds)
+   **Total running time of the script:** (0 minutes 15.182 seconds)
 
 
 .. _sphx_glr_download_examples_Datapoints_plot_skytem_datapoint.py:

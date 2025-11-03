@@ -3,11 +3,13 @@ Module defining a multivariate normal distribution with statistical procedures
 """
 from copy import deepcopy
 from numpy import all, atleast_1d, diag, diag_indices, dot, empty, exp, float64, full, hstack
-from numpy import int32, linspace, maximum, pi, prod, repeat, size, squeeze, sqrt, zeros
+from numpy import int32, linspace, maximum, newaxis, pi, prod, r_, repeat, size, squeeze, sqrt, zeros
 from numpy import ndim as npndim
 from numpy import log as nplog
 from numpy.linalg import inv, slogdet
+from scipy.stats import multivariate_normal
 from ...base import utilities as cf
+from ...base import plotting as cP
 from .baseDistribution import baseDistribution
 from .NormalDistribution import Normal
 from ..core.DataArray import DataArray
@@ -47,9 +49,6 @@ class MvNormal(baseDistribution):
 
         """
 
-        if (type(variance) is float):
-            variance = float64(variance)
-
         super().__init__(prng)
 
         if ndim is None:
@@ -67,7 +66,7 @@ class MvNormal(baseDistribution):
             ndim = int32(maximum(1, ndim))
             self._constant = True
             self._mean = full(ndim, fill_value=mean)
-            self._variance = diag(full(ndim, fill_value=variance))
+            self._variance = full(ndim, fill_value=variance)
 
     @property
     def address(self):
@@ -108,13 +107,10 @@ class MvNormal(baseDistribution):
         else:
             mean = self._mean[0]
 
-        # if ndim(self.variance) == 0:
-        #     variance = self.variance
-        # else:
         variance = self.variance[0, 0]
 
         self._mean = full(newDimension, fill_value=mean)
-        self._variance = diag(full(newDimension, fill_value=variance))
+        self._variance = full(newDimension, fill_value=variance)
 
     @property
     def std(self):
@@ -122,28 +118,31 @@ class MvNormal(baseDistribution):
 
     @property
     def variance(self):
+
+        if npndim(self._variance) < 2:
+            return diag(self._variance)
         return self._variance
 
     @variance.setter
     def variance(self, values):
+        self._variance = atleast_1d(values).copy()
+        # self._variance = zeros((self.ndim, self.ndim))
 
-        self._variance = zeros((self.ndim, self.ndim))
+        # # Variance
+        # nd = npndim(values)
+        # if nd == 0:
+        #     self._variance[diag_indices(self.ndim)] = values
 
-        # Variance
-        nd = npndim(values)
-        if nd == 0:
-            self._variance[diag_indices(self.ndim)] = values
+        # elif nd == 1:
+        #     assert size(values) == self.ndim, Exception('Mismatch in size of mean and variance')
+        #     self._variance[diag_indices(self.ndim)] = values
 
-        elif nd == 1:
-            assert size(values) == self.ndim, Exception('Mismatch in size of mean and variance')
-            self._variance[diag_indices(self.ndim)] = values
-
-        elif nd == 2:
-            self._variance[:, :] = values
+        # elif nd == 2:
+        #     self._variance[:, :] = values
 
     @property
     def precision(self):
-        return inv(self.variance)
+        return cf.inv(self._variance)
 
     def __deepcopy__(self, memo={}):
         """ Define a deepcopy routine """
@@ -178,7 +177,16 @@ class MvNormal(baseDistribution):
 
     def rng(self, size=1):
         """  """
+
         return atleast_1d(squeeze(self.prng.multivariate_normal(self._mean, self.variance, size=size)))
+
+    def plot_pdf(self, log=False, **kwargs):
+        bins = self.bins()
+        t = r"$\tilde{N}(\mu="+str(self.mean)+r", \sigma^{2}="+str(self.variance)+")$"
+
+        p = self.probability(bins, log=log)
+
+        cP.plot(bins, p, label=t, **kwargs)
 
     def probability(self, x, log, axis=None, **kwargs):
         """ For a realization x, compute the probability """
@@ -187,54 +195,21 @@ class MvNormal(baseDistribution):
             d = Normal(mean=self._mean[axis], variance=self.variance[axis, axis])
             return d.probability(x, log)
 
-        N = size(x)
-        nD = size(self.mean)
+        import numpy as np
+        N = size(x); nsd = np.ndim(x)
+        nD = self.ndim
 
-        if N != nD:
-            probability = empty((nD, *x.shape))
-            for i in range(nD):
-                d = Normal(mean=self._mean[i], variance=self.variance[i, i])
-
-                probability[i, :] = d.probability(x, log)
-            return probability
-
-        if log:
-            # assert (N == nD), TypeError(
-            #     'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
-
-            mean = self._mean
-            if (nD == 1):
-                mean = repeat(self._mean, N)
-
-            dv = 0.5 * prod(slogdet(self.variance))
-            # subtract the mean from the samples
-            xMu = x - mean
-            # Start computing the exponent term
-            # e^(-0.5*(x-mu)'*inv(cov)*(x-mu))                        (1)
-            # Compute the multiplication on the right of equation 1
-            # Probability Density Function
-            return -(0.5 * N) * nplog(2.0 * pi) - dv - 0.5 * dot(xMu, dot(self.precision, xMu))
-
-        else:
-
+        if nsd != nD:
             if N != nD:
-                probability = empty((nD, *x.shape))
-                for i in range(nD):
-                    probability[i, :] = self.probability(x, log, axis=i)
-                return probability
+                x = np.repeat(x[:, np.newaxis], nD, 1)
 
+        mean = self._mean
+        if (nD == 1):
+            mean = repeat(self._mean, N)
 
-            # assert (N == nD), TypeError(
-            #     'size of samples {} must equal number of distribution dimensions {} for a multivariate distribution'.format(N, nD))
-            # For a diagonal matrix, the determinant is the product of the diagonal
-            # entries
-            # subtract the mean from the samples.
-            xMu = x - self._mean
-            # Take the inverse of the variance
-            expo = exp(-0.5 * dot(xMu, dot(self.precision, xMu)))
-            # Probability Density Function
-            prob = (1.0 / sqrt(((2.0 * pi)**N) * cf.Det(self.variance))) * expo
-            return prob
+        pdf = multivariate_normal.logpdf if log else multivariate_normal.pdf
+
+        return DataArray(pdf(x, mean=mean, cov=self.variance, allow_singular=True), name='Probability Density')
 
     @property
     def summary(self):
@@ -247,9 +222,9 @@ class MvNormal(baseDistribution):
         """ Pads the mean and variance to the given size
         N: Padded size
         """
-        if (self.variance.ndim == 1):
+        if (self._variance.ndim == 1):
             return MvNormal(zeros(N, dtype=self.mean.dtype), zeros(N, dtype=self.variance.dtype), prng=self.prng)
-        if (self.variance.ndim == 2):
+        if (self._variance.ndim == 2):
             return MvNormal(zeros(N, dtype=self.mean.dtype), zeros([N, N], dtype=self.variance.dtype), prng=self.prng)
 
     def bins(self, nBins=99, nStd=4.0, axis=None, relative=False):
@@ -270,20 +245,21 @@ class MvNormal(baseDistribution):
             The bin edges.
 
         """
+        import numpy as np
         nStd = float64(nStd)
         nD = self.ndim
         if (nD > 1):
+            std = diag(self.std)
             if axis is None:
-                bins = empty([nD, nBins+1])
-                for i in range(nD):
-                    tmp = squeeze(nStd * self.std[axis, axis])
-                    t = linspace(-tmp, tmp, nBins+1)
-                    if not relative:
-                        t += self._mean[i]
-                    bins[i, :] = t
+                tmp = np.outer(r_[-1.0, 1.0], (nStd*std))
+                if not relative:
+                    tmp += self._mean
+                tmp = np.r_[np.min(tmp), np.max(tmp)]
+                bins = linspace(*tmp, nBins+1)
+
             else:
                 bins = empty(nBins+1)
-                tmp = squeeze(nStd * self.std[axis, axis])
+                tmp = squeeze(nStd * std[axis])
                 t = linspace(-tmp, tmp, nBins+1)
                 if not relative:
                     t += self._mean[axis]

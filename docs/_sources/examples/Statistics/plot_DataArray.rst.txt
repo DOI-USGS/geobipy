@@ -36,7 +36,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
     DataArray
     Name:   1
-    Address:['0x14d9773d0']
+    Address:['0x153fc52d0']
     Shape:  (1,)
     Values: [0.]
     Min:    0.0
@@ -44,7 +44,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
     DataArray
     Name:   10
-    Address:['0x14d976150']
+    Address:['0x153fc69d0']
     Shape:  (10,)
     Values: [0. 0. 0. ... 0. 0. 0.]
     Min:    0.0
@@ -52,7 +52,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
     DataArray
     Name:   (2, 10)
-    Address:['0x14d976cd0']
+    Address:['0x153fc7250']
     Shape:  (2, 10)
     Values: [[0. 0. 0. ... 0. 0. 0.]
      [0. 0. 0. ... 0. 0. 0.]]
@@ -61,7 +61,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
     DataArray
     Name:   (2, 10)
-    Address:['0x14d975150']
+    Address:['0x153fc7c50']
     Shape:  (2,)
     Values: [ 2 10]
     Min:    2
@@ -69,7 +69,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
     DataArray
     Name:   45.454
-    Address:['0x14d975650']
+    Address:['0x1540084d0']
     Shape:  (1,)
     Values: [45.454]
     Min:    45.454
@@ -77,7 +77,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
     DataArray
     Name:   45.454
-    Address:['0x14d975150']
+    Address:['0x153fc7cd0']
     Shape:  (1,)
     Values: [45.454]
     Min:    45.454
@@ -85,15 +85,15 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
     DataArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x14d975650']
+    Address:['0x153fc7c50']
     Shape:  (1,)
-    Values: [-0.31168333]
-    Min:    -0.31168332950286554
-    Max:    -0.31168332950286554
+    Values: [2.30277203]
+    Min:    2.3027720312053948
+    Max:    2.3027720312053948
 
     DataArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x14d975150']
+    Address:['0x153fc7cd0']
     Shape:  (10,)
     Values: [0. 1. 2. ... 7. 8. 9.]
     Min:    0.0
@@ -101,7 +101,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
     DataArray
     Name:   test ($\frac{g}{cc}$)
-    Address:['0x14d9756d0']
+    Address:['0x1540083d0']
     Shape:  (10,)
     Values: [0. 1. 2. ... 7. 8. 9.]
     Min:    0.0
@@ -159,7 +159,7 @@ The direct extension to numpy maintains speed and functionality of numpy arrays.
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** (0 minutes 0.004 seconds)
+   **Total running time of the script:** (0 minutes 3.557 seconds)
 
 
 .. _sphx_glr_download_examples_Statistics_plot_DataArray.py:

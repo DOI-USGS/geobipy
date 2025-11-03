@@ -28,7 +28,7 @@ class FdemDataPoint(EmDataPoint):
 
     Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.
 
-    FdemDataPoint(x, y, z, elevation, data, std, system, lineNumber, fiducial)
+    FdemDataPoint(x, y, z, elevation, data, std, system, line_number, fiducial)
 
     Parameters
     ----------
@@ -50,14 +50,14 @@ class FdemDataPoint(EmDataPoint):
         Describes the acquisition system with loop orientation and frequencies.
         * If str should be the path to a system file to read in.
         * If geobipy.FdemSystem, will be deepcopied.
-    lineNumber : float, optional
+    line_number : float, optional
         The line number associated with the datapoint
     fiducial : float, optional
         The fiducial associated with the datapoint
 
     """
 
-    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predictedData=None, system=None, lineNumber=0.0, fiducial=0.0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predicted_data=None, system=None, line_number=0.0, fiducial=0.0):
         """Define initializer. """
 
         # self._system = None
@@ -69,8 +69,8 @@ class FdemDataPoint(EmDataPoint):
         super().__init__(x=x, y=y, z=z, elevation=elevation,
                          components=self.components,
                          channels_per_system=2*self.nFrequencies,
-                         data=data, std=std, predictedData=predictedData,
-                         lineNumber=lineNumber, fiducial=fiducial)
+                         data=data, std=std, predicted_data=predicted_data,
+                         line_number=line_number, fiducial=fiducial)
 
         self._data.name = 'Frequency domain data'
 
@@ -211,10 +211,10 @@ class FdemDataPoint(EmDataPoint):
     #     return int32(0.5*self.nChannelsPerSystem)
 
     def predictedInphase(self, system=0):
-        return self.predictedData[self._inphaseIndices(system)]
+        return self.predicted_data[self._inphaseIndices(system)]
 
     def predictedQuadrature(self, system=0):
-        return self.predictedData[self._quadratureIndices(system)]
+        return self.predicted_data[self._quadratureIndices(system)]
 
     def quadrature(self, system=0):
         return self.data[self._quadratureIndices(system)]
@@ -264,7 +264,7 @@ class FdemDataPoint(EmDataPoint):
 
 
     def set_predicted_data_posterior(self):
-        if self.predictedData.hasPrior:
+        if self.predicted_data.hasPrior:
             freqs = log10(self.frequencies())
             xbuf = 0.05*(freqs[-1] - freqs[0])
             xbins = DataArray(logspace(freqs[0]-xbuf, freqs[-1]+xbuf, 200), freqs.name, freqs.units)
@@ -276,7 +276,7 @@ class FdemDataPoint(EmDataPoint):
             ybins = DataArray(logspace(a-buf, b+buf, 200), data.name, data.units)
 
             mesh = RectilinearMesh2D(x_edges=xbins, x_log=10, y_edges=ybins, y_log=10)
-            self.predictedData.posterior = Histogram(mesh=mesh)
+            self.predicted_data.posterior = Histogram(mesh=mesh)
 
 
     def createHdf(self, parent, name, withPosterior=True, add_axis=None, fillvalue=None):
@@ -303,7 +303,6 @@ class FdemDataPoint(EmDataPoint):
             # from ..dataset.FdemData import FdemData
             # return FdemData.fromHdf(grp, **kwargs)
 
-
         system = FdemSystem.fromHdf(grp['sys'])
         out = super(FdemDataPoint, cls).fromHdf(grp, index, system=system)
 
@@ -313,7 +312,7 @@ class FdemDataPoint(EmDataPoint):
         """ Apply calibration factors to the data point """
         # Make complex numbers from the data
         if (Predicted):
-            tmp = cf.mergeComplex(self._predictedData)
+            tmp = cf.mergeComplex(self._predicted_data)
         else:
             tmp = cf.mergeComplex(self._data)
 
@@ -336,7 +335,7 @@ class FdemDataPoint(EmDataPoint):
 
         # Split the complex numbers back out
         if (Predicted):
-            self._predictedData[:] = cf.splitComplex(tmp)
+            self._predicted_data[:] = cf.splitComplex(tmp)
         else:
             self._data[:] = cf.splitComplex(tmp)
 
@@ -454,10 +453,10 @@ class FdemDataPoint(EmDataPoint):
     def update_posteriors(self):
         super().update_posteriors()
 
-    #     if self.predictedData.hasPosterior:
+    #     if self.predicted_data.hasPosterior:
     #         x = self.frequencies()
-    #         self.predictedData.posterior.update_with_line(x, self.predictedInphase())
-    #         self.predictedData.posterior.update_with_line(x, self.predictedQuadrature())
+    #         self.predicted_data.posterior.update_with_line(x, self.predictedInphase())
+    #         self.predicted_data.posterior.update_with_line(x, self.predictedQuadrature())
 
 
     def updateSensitivity(self, model):
@@ -465,60 +464,6 @@ class FdemDataPoint(EmDataPoint):
         self.J = self.sensitivity(model)
 
 
-    # def FindBestHalfSpace(self, minConductivity=1e-6, maxConductivity=1e2, percentThreshold=1.0, maxIterations=100):
-    #     """Uses the bisection approach to find a half space conductivity that best matches the EM data by minimizing the data misfit
-
-    #     Parameters
-    #     ----------
-    #     minConductivity : float
-    #         Minimum conductivity to start the search
-    #     maxConductivity : float
-    #         Maximum conductivity to start the search
-    #     percentThreshold : float, optional
-    #         Stopping criteria for the relative change in data fit
-    #     maxIterations : int, optional
-    #         Stop after this number of iterations
-
-    #     Returns
-    #     -------
-    #     out : geobipy.Model1D
-    #         Best fitting halfspace model
-
-    #     """
-    #     percentThreshold = 0.01 * percentThreshold
-    #     c0 = log10(minConductivity)
-    #     c1 = log10(maxConductivity)
-    #     cnew = 0.5 * (c0 + c1)
-    #     # Initialize a single layer model
-    #     p = DataArray(1, 'Conductivity', r'$\frac{S}{m}$')
-    #     model = Model(mesh=RectilinearMesh1D(edges=asarray([0.0, inf])), values=p)
-    #     # Initialize the first conductivity
-    #     model._values[0] = 10.0**c0
-    #     self.forward(model)  # Forward model the EM data
-    #     PhiD1 = self.data_misfit()  # Compute the measure between observed and predicted data
-    #     # Initialize the second conductivity
-    #     model._values[0] = 10.0**c1
-    #     self.forward(model)  # Forward model the EM data
-    #     PhiD2 = self.data_misfit()  # Compute the measure between observed and predicted data
-    #     # Compute a relative change in the data misfit
-    #     dPhiD = abs(PhiD2 - PhiD1) / PhiD2
-    #     i = 1
-    #     # Continue until there is less than 1% change
-    #     while (dPhiD > percentThreshold and i < maxIterations):
-    #         cnew = 0.5 * (c0 + c1)  # Bisect the conductivities
-    #         model._values[0] = 10.0**cnew
-    #         self.forward(model)  # Forward model the EM data
-    #         PhiDnew = self.data_misfit()
-    #         if (PhiD2 > PhiDnew):
-    #             c1 = cnew
-    #             PhiD2 = PhiDnew
-    #         elif (PhiD1 > PhiDnew):
-    #             c0 = cnew
-    #             PhiD1 = PhiDnew
-    #         dPhiD = abs(PhiD2 - PhiD1) / PhiD2
-    #         i += 1
-
-    #     return model
 
 
     def forward(self, mod):
@@ -530,7 +475,7 @@ class FdemDataPoint(EmDataPoint):
     def sensitivity(self, mod, **kwargs):
         """ Compute the sensitivty matrix for the given model """
         assert isinstance(mod, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        return DataArray(self._sensitivity1D(mod), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        return DataArray(self._sensitivity1D(mod), 'Sensitivity', r'$\frac{ppm.m}{S}$')
 
     def fm_dlogc(self, mod):
         self.forward(mod)
@@ -541,15 +486,15 @@ class FdemDataPoint(EmDataPoint):
         assert isinf(mod.mesh.edges[-1]), ValueError('mod.edges must have last entry be infinity for forward modelling.')
         for i, s in enumerate(self.system):
             tmp = fdem1dfwd(s, mod, self.z[0])
-            self._predictedData[:self.nFrequencies[i]] = tmp.real
-            self._predictedData[self.nFrequencies[i]:] = tmp.imag
+            self._predicted_data[:self.nFrequencies[i]] = tmp.real
+            self._predicted_data[self.nFrequencies[i]:] = tmp.imag
 
 
     def _sensitivity1D(self, mod):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
-        self._sensitivity_matrix = DataArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', '$\\frac{ppm.m}{S}$')
+        self._sensitivity_matrix = DataArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', r'$\frac{ppm.m}{S}$')
 
         for j, s in enumerate(self.system):
             Jtmp = fdem1dsen(s, mod, self.z.item())
@@ -569,7 +514,7 @@ class FdemDataPoint(EmDataPoint):
         super().Isend(dest, world)
 
         self.data.Isend(dest, world)
-        self.predictedData.Isend(dest, world)
+        self.predicted_data.Isend(dest, world)
 
     @classmethod
     def Irecv(cls, source, world, **kwargs):
@@ -581,6 +526,6 @@ class FdemDataPoint(EmDataPoint):
         out = super(FdemDataPoint, cls).Irecv(source, world, **kwargs)
 
         out._data = StatArray.Irecv(source, world)
-        out._predictedData = StatArray.Irecv(source, world)
+        out._predicted_data = StatArray.Irecv(source, world)
 
         return out

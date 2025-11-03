@@ -2,7 +2,7 @@
 """
 from copy import deepcopy
 
-from numpy import allclose, any, asarray, cumsum, empty, float64, full
+from numpy import allclose, any, asarray, atleast_2d, cumsum, empty, float64, full
 from numpy import hstack, int32, int64, isnan, nan, nanmax, nanmean, nanmedian, nanmin, nanstd
 from numpy import ravel_multi_index, repeat, s_, shape, size, sqrt, squeeze, unique, vstack, zeros
 from numpy import printoptions
@@ -129,7 +129,7 @@ class TdemData(Data):
     @Data.data.getter
     def data(self):
         if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
-            self._data = DataArray((self.nPoints, self.nChannels), "Data", self.units)
+            self._data = DataArray((self.nPoints, self.n_data_channels), "Data", self.units)
 
         for j in range(self.nSystems):
             for i in range(self.n_components):
@@ -202,6 +202,7 @@ class TdemData(Data):
     @predicted_secondary_field.setter
     def predicted_secondary_field(self, values):
         if values is not None:
+            values = atleast_2d(values)
             self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
             shp = (self.nPoints, self.nChannels)
@@ -250,15 +251,16 @@ class TdemData(Data):
     def secondary_field(self):
         """The data. """
         if size(self._secondary_field, 0) == 0:
-            self._secondary_field = DataArray((self.nPoints, self.nChannels), "Secondary field", self.units)
+            self._secondary_field = DataArray((self.nPoints, self.n_data_channels), "Secondary field", self.units)
         return self._secondary_field
 
     @secondary_field.setter
     def secondary_field(self, values):
         if values is not None:
-            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+            values = atleast_2d(values)
+            self.nPoints, n_data_channels = size(values, 0), size(values, 1)
 
-            shp = (self.nPoints, self.nChannels)
+            shp = (self.nPoints, n_data_channels)
             if not allclose(self._secondary_field.shape, shp):
                 self._secondary_field = DataArray(values, "Secondary field", self.units)
                 return
@@ -268,7 +270,7 @@ class TdemData(Data):
     @Data.std.getter
     def std(self):
         if (size(self._std, 0) == 0) or (self._std.shape[0] != self.nPoints):
-            self._std = DataArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+            self._std = DataArray((self.nPoints, self.n_data_channels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
             for i in range(self.nSystems):
@@ -459,7 +461,7 @@ class TdemData(Data):
         df = df.replace('NaN', nan)
 
         # Assign columns to variables
-        self.lineNumber = df[iC[0]].values
+        self.line_number = df[iC[0]].values
         self.fiducial = df[iC[1]].values
         self.x = df[iC[2]].values
         self.y = df[iC[3]].values
@@ -672,7 +674,6 @@ class TdemData(Data):
 
     @property
     def channels_per_system(self):
-        print(f'{self.n_components=}, {self.nTimes=}')
         return self.n_components * self.nTimes
 
     def _read_record(self, record=None, mpi_enabled=False):
@@ -686,6 +687,7 @@ class TdemData(Data):
             if record is None:
                 df = self._file.get_chunk()
             else:
+                assert record < self.nPoints, Exception(f"Record index {record} is out of bounds for data set with {self.n_points} points.")
                 df = self._file.get_chunk()
                 if not mpi_enabled:
                     i = 1
@@ -730,12 +732,13 @@ class TdemData(Data):
                          pitch=rloop[0], roll=rloop[1], yaw=rloop[2],
                          radius=self.system[0].loopRadius())
 
-        return self.single(x=data[2], y=data[3], z=data[4], elevation=data[5],
-                        secondary_field=secondary_field, std=std,
+        out =  self.single(x=data[2], y=data[3], z=data[4], elevation=data[5],
+                        secondary_field=secondary_field,
                         primary_field=primary_field,
                         system=self.system,
-                        transmitter_loop=T, receiver_loop=R,
-                        lineNumber=data[0], fiducial=data[1])
+                        transmitter=T, receiver=R,
+                        line_number=data[0], fiducial=data[1])
+        return out
 
     def check(self):
         if (any(self._data[~isnan(self._data)] <= 0.0)):
@@ -818,8 +821,8 @@ class TdemData(Data):
                              relative_error=self.relative_error[i, :], additive_error=self.additive_error[i, :], std = self.std[i, :],
                              predicted_primary_field=None, predicted_secondary_field=None,
                              system = self.system,
-                             transmitter_loop = self.transmitter[i], receiver_loop = self.receiver[i],
-                             lineNumber = self.lineNumber[i], fiducial = self.fiducial[i])
+                             transmitter = self.transmitter[i], receiver = self.receiver[i],
+                             line_number = self.line_number[i], fiducial = self.fiducial[i])
 
     def off_time(self, system=0):
         """ Obtain the times from the system file """
@@ -831,21 +834,25 @@ class TdemData(Data):
         if not isinstance(i, slice):
             i = unique(i)
 
-        return type(self)(self.system,
-                        x=self.x[i],
-                        y=self.y[i],
-                        z=self.z[i],
-                        elevation=self.elevation[i],
-                        lineNumber=self.lineNumber[i],
-                        fiducial=self.fiducial[i],
-                        transmitter=self.transmitter[i],
-                        receiver=self.receiver[i],
-                        secondary_field=self.secondary_field[i, :],
-                        primary_field=self.primary_field[i, :],
-                        std=self.std[i, :],
-                        predicted_secondary_field=self.predicted_secondary_field[i, :],
-                        predicted_primary_field=self.predicted_primary_field[i, :],
-                        channel_names=self.channel_names)
+        if size(i) == 1:
+            cls = TdemData.single
+        else:
+            cls = type(self)
+
+        return cls(system=self.system,
+                    x=self.x[i],
+                    y=self.y[i],
+                    z=self.z[i],
+                    elevation=self.elevation[i],
+                    line_number=self.line_number[i],
+                    fiducial=self.fiducial[i],
+                    transmitter=self.transmitter[i],
+                    receiver=self.receiver[i],
+                    secondary_field=self.secondary_field[i, :],
+                    primary_field=self.primary_field[i, :],
+                    predicted_secondary_field=self.predicted_secondary_field[i, :],
+                    predicted_primary_field=self.predicted_primary_field[i, :],
+                    channel_names=self.channel_names)
 
     @staticmethod
     def fileInformation():
@@ -1160,7 +1167,7 @@ class TdemData(Data):
         return out
 
 
-    # def write(self, fileNames, std=False, predictedData=False):
+    # def write(self, fileNames, std=False, predicted_data=False):
 
     #     if isinstance(fileNames, str):
     #         fileNames = [fileNames]
@@ -1189,13 +1196,13 @@ class TdemData(Data):
     #             with printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
     #                 for j in range(self.nPoints):
 
-    #                     x = asarray([self.lineNumber[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
+    #                     x = asarray([self.line_number[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
     #                                     self.R[j].x-self.T[j].x, self.R[j].y-self.T[j].y, self.R[j].z-self.T[j].z,
     #                                     self.T[j].pitch, self.T[j].roll, self.T[j].yaw,
     #                                     self.R[j].pitch, self.R[j].roll, self.R[j].yaw])
 
-    #                     if predictedData:
-    #                         d[:] = self.predictedData[j, iSys]
+    #                     if predicted_data:
+    #                         d[:] = self.predicted_data[j, iSys]
     #                     else:
     #                         d[:] = self.data[j, iSys]
 

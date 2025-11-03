@@ -1,9 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=geobipy_synthetics
 #SBATCH -n 80
-#SBATCH -N 2
 #SBATCH --hint=nomultithread
-#SBATCH -p workq
+#SBATCH -p cpu
 #SBATCH --account=sas
 #SBATCH --time=02:00:00
 #SBATCH -o %j.out

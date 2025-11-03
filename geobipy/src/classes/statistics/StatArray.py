@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from numpy import abs, allclose, arange, argmax, array, asarray, atleast_1d, concatenate, delete, hstack
+from numpy import abs, allclose, arange, argmax, array, asarray, atleast_1d, concatenate, delete, hstack, diag
 from numpy import diff, divide, expand_dims, flip, float32, float64, histogram, inf, insert, int32, int64, isnan
 from numpy import mean, nan, nanmax, nanmin, ndarray, ndim, ones, r_, resize, s_, size, squeeze, sum, unique, where, zeros
 from numpy import shape as npshape
@@ -8,8 +8,6 @@ from numpy import shape as npshape
 from numpy import set_printoptions
 from matplotlib.axes import SubplotBase
 import h5py
-# import scipy.stats as st
-
 
 from ...base import utilities as cf
 from ...base import plotting as cP
@@ -147,7 +145,7 @@ class StatArray(DataArray):
 
         nP = size(value)
         if nP > 1:
-            assert nP == self.shape[-1] or (self.shape[-1]%nP == 0), ValueError("Number of posteriors must match size of StatArray's first dimension")
+            assert nP == self.shape[-1] or (self.shape[-1]%nP == 0), ValueError(f"Number of posteriors {nP} must match size of StatArray's first dimension {self.shape[-1]}")
 
         if nP == 1:
             if isinstance(value, list):
@@ -379,6 +377,9 @@ class StatArray(DataArray):
         if i is None:
             i = s_[:]
         out = self.prior.derivative(self[i], order)
+
+        if order == 2 and ndim(out) < 2:
+            return diag(out)
         return out
 
     def proposal_derivative(self, order, i=None):
@@ -433,6 +434,10 @@ class StatArray(DataArray):
         out = super().resize(new_shape)
         out.copyStats(self)
         return out
+
+    @property
+    def sorted(self):
+        return all(self[:-1] <= self[1:])
 
     @property
     def summary(self):
@@ -720,6 +725,8 @@ class StatArray(DataArray):
             self.posterior.plot(**kwargs)
 
     def overlay_on_posteriors(self, overlay, ax, **kwargs):
+
+        assert isinstance(overlay, StatArray), TypeError("overlay must have type StatArray")
 
         if size(ax) > 1:
             assert len(ax) == self.n_posteriors, ValueError("Length of ax {} must equal number of attached posteriors {}".format(size(ax), self.n_posteriors))

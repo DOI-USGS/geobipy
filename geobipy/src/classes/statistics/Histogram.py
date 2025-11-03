@@ -1,6 +1,6 @@
 from copy import deepcopy
-from numpy import cumsum, hstack, int32, int64, interp, isnan, minimum
-from numpy import nanmin, nanmax, ndim, s_, size, sqrt, sum, unique, var
+from numpy import arange, atleast_1d, cumsum, hstack, int32, int64, interp, isnan, minimum
+from numpy import nanmin, nanmax, ndim, s_, size, sqrt, squeeze, sum, unique, var
 from numpy import all as npall
 from numpy.random import rand
 import matplotlib as mpl
@@ -124,7 +124,8 @@ class Histogram(Model):
             Axis along which to get the marginal histogram.
 
         """
-        return self.mesh._credible_range(self.counts, percent=percent, log=log, axis=axis)
+        return Model(mesh=self.mesh.remove_axis(axis), values=self.mesh._credible_range(self.counts, percent=percent, log=log, axis=axis))
+
 
     def entropy(self, log=2, axis=None):
 
@@ -350,7 +351,7 @@ class Histogram(Model):
         """
         out = self.transparency(percent=percent, log=log, axis=axis)
         out.values = 1.0 - out.values
-        out.name = 'Opacity'
+        out.values.name = 'Opacity'
         return out
 
     def opacity_level(self, percent=95.0, log=None, axis=0):
@@ -451,20 +452,22 @@ class Histogram(Model):
         self.mesh.plot_line(value, **kwargs)
 
 
-    def plotCredibleIntervals(self, percent=95.0, axis=0, **kwargs):
+    def plotCredibleIntervals(self, percent=[95.0], axis=0, **kwargs):
 
-        med, low, high = self.credible_intervals(percent=percent, axis=axis)
+        percent = atleast_1d(percent)
+        for p in percent:
+            med, low, high = self.credible_intervals(percent=p, axis=axis)
 
-        kwargs['color'] = '#5046C8'
-        kwargs['linestyle'] = 'dashed'
-        kwargs['linewidth'] = 1
-        kwargs['alpha'] = 0.6
+            kwargs['color'] = '#5046C8'
+            kwargs['linestyle'] = 'dashed'
+            kwargs['linewidth'] = 1
+            kwargs['alpha'] = 0.6
 
-        p = 0.5 * minimum(percent, 100.0-percent)
-        kwargs['label'] = '{}%'.format(p)
-        self.mesh.plot_line(low, axis=axis, **kwargs)
-        kwargs['label'] = '{}%'.format(100.0 - p)
-        self.mesh.plot_line(high, axis=axis, **kwargs)
+            p = 0.5 * minimum(p, 100.0-p)
+            kwargs['label'] = '{}%'.format(p)
+            self.mesh.plot_line(low, axis=axis, **kwargs)
+            kwargs['label'] = '{}%'.format(100.0 - p)
+            self.mesh.plot_line(high, axis=axis, **kwargs)
 
     def plotMean(self, log=None, axis=0, **kwargs):
 
@@ -528,21 +531,23 @@ class Histogram(Model):
 
         """
 
-        out = DataArray(self.credible_range(percent=percent, log=log, axis=axis, **kwargs), 'Transparency')
-        mn = nanmin(out)
-        mx = nanmax(out)
+        out = self.credible_range(percent=percent, log=log, axis=axis, **kwargs)
+        mn = nanmin(out.values)
+        mx = nanmax(out.values)
         t = mx - mn
         if t > 0.0:
-            out = (out - mn) / t
+            out.values = (out.values - mn) / t
         else:
-            out -= mn
+            out.values -= mn
 
-        out[isnan(out)] = 1.0
+        out.values[isnan(out.values)] = 1.0
 
-        return Model(self.mesh.remove_axis(axis), values=out)
+        out.values.name = 'Transparency'
 
-    def update(self, *args, **kwargs):
-        iBin = self.mesh.cellIndices(*args, clip=True, **kwargs)
+        return out
+
+    def update(self, *args, clip=False, trim=True, **kwargs):
+        iBin = self.mesh.cellIndices(*args, clip=clip, trim=trim, **kwargs)
 
         axis = None if iBin.size == 1 else ndim(iBin)-1
 

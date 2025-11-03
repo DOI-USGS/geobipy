@@ -4,7 +4,7 @@ Module describing a 2D Rectilinear Mesh class with x and y axes specified
 from copy import deepcopy
 
 from numpy import abs, arange, asarray
-from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float32, float64, full, int_, int32, integer, interp
+from numpy import cumsum, diff, dot, dstack, empty, expand_dims, float32, float64, full, int_, int32, integer, interp, isnan
 from numpy import max, maximum, meshgrid, min, minimum, nan, ndim, outer, r_, ravel_multi_index
 from numpy import repeat, s_, searchsorted, shape, size, sqrt, squeeze, tile, unravel_index
 from numpy import where, zeros
@@ -12,6 +12,7 @@ from numpy import all as npall
 
 from .Mesh import Mesh
 from ..core.DataArray import DataArray
+from ..statistics.StatArray import StatArray
 from .RectilinearMesh1D import RectilinearMesh1D
 from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
@@ -80,6 +81,9 @@ class RectilinearMesh2D(Mesh):
         The 2D mesh.
 
     """
+    x_axis = 0
+    y_axis = 1
+
     def __init__(self, x=None, y=None, **kwargs):
         """ Initialize a 2D Rectilinear Mesh"""
 
@@ -89,11 +93,9 @@ class RectilinearMesh2D(Mesh):
         self.x = kwargs if x is None else x
         self.y = kwargs if y is None else y
 
-        # if self.x._relative_to is not None:
-        #     assert any([s == self.shape[1] for s in self.x.relative_to.shape]), "x axis relative to must have shape {}".format(self.shape[1])
+        self.check_x_relative_to()
+        self.check_y_relative_to()
 
-        # if self.y._relative_to is not None:
-        #     assert any([s == self.shape[0] for s in self.y.relative_to.shape]), "y axis relative to must have shape {}".format(self.shape[0])
 
     def __getitem__(self, slic):
         """Allow slicing of the histogram.
@@ -123,6 +125,17 @@ class RectilinearMesh2D(Mesh):
 
         out = self.axis(1-axis)[slic[1-axis]]
         return out
+
+    def check_x_relative_to(self):
+        if self.x.relative_to is not None:
+            if ndim(self.x.relative_to) == 1 and self.x.relative_to.size > 1:
+                assert self.x.relative_to.size == self.y.size, ValueError(f"1D relative_to on x needs size {self.y.size}")
+
+    def check_y_relative_to(self):
+        if self.y.relative_to is not None:
+            if ndim(self.y.relative_to) == 1 and self.y.relative_to.size > 1:
+                assert self.y.relative_to.size == self.x.size, ValueError(f"1D relative_to on y needs size {self.x.size}")
+
 
     @property
     def addressof(self):
@@ -250,10 +263,9 @@ class RectilinearMesh2D(Mesh):
                         edges=values.get('x_edges'),
                         log=values.get('x_log'),
                         relative_to=values.get('x_relative_to'),
-                        dimension=0)
+                        dimension=self.x_axis)
 
         assert isinstance(values, RectilinearMesh1D), TypeError('x must be a RectilinearMesh1D')
-        assert values.dimension == 0
         self._x = values
 
     @property
@@ -269,7 +281,7 @@ class RectilinearMesh2D(Mesh):
                         edges=values.get('y_edges'),
                         log=values.get('y_log'),
                         relative_to=values.get('y_relative_to'),
-                        dimension=1)
+                        dimension=self.y_axis)
         assert isinstance(values, RectilinearMesh1D), TypeError('y must be a RectilinearMesh1D')
         self._y = values
 
@@ -316,12 +328,12 @@ class RectilinearMesh2D(Mesh):
 
         ax = self.other_axis(axis)
 
-        a = [x for x in (0, 1) if not x == axis]
-        b = [x for x in (0, 1) if x == axis]
-
         shp = list(self.shape)
-        shp[axis] = distribution.ndim
 
+        n_dim = distribution.ndim
+        if distribution.multivariate:
+            n_dim = 1
+        shp[axis] = n_dim
         probability = zeros(shp)
 
         track = kwargs.pop('track', True)
@@ -331,21 +343,48 @@ class RectilinearMesh2D(Mesh):
             Bar = progressbar.ProgressBar()
             r = Bar(r)
 
-        mesh_1d = self.remove_axis(axis)
-
+        # Loop over the axis and compute the probability of each dimension in the
+        # distribution with the pdf of the histogram
         for i in r:
-            j = [i]
-            j.insert(axis, s_[:])
-            j = tuple(j)
+            j = [i]; j.insert(axis, s_[:]); j = tuple(j)
             p = distribution.probability(centres[j], log_probability)
             probability[j] = dot(p, pdf[j])
-        probability = probability / expand_dims(sum(probability, axis), axis=axis)
 
-        return DataArray(probability, name='marginal_probability')
+        # Normalize probabilities along the dims of the distribution
+        if n_dim > 1:
+            probability = probability / expand_dims(sum(probability, axis), axis=axis)
+
+        mesh = deepcopy(self)
+        if n_dim > 1:
+            mesh.set_axis(axis, RectilinearMesh1D(centres=DataArray(np.arange(n_dim), name='component')))
+        else:
+            mesh = mesh.remove_axis(axis)
+
+        from ..model.Model import Model
+        return Model(mesh=mesh, values=DataArray(squeeze(probability.T), name='Marginal Probability'))
 
     def __deepcopy__(self, memo={}):
         """ Define the deepcopy for the StatArray """
         return RectilinearMesh2D(x=self.x, y=self.y)
+
+    def add_axis(self, axis, ax=None, **kwargs):
+        from .RectilinearMesh3D import RectilinearMesh3D
+
+        assert 0 <= axis <= 2, ValueError("Invalid axis 0 <= axis <= 2")
+
+        if ax is None:
+            ax = RectilinearMesh1D(**kwargs)
+
+        match axis:
+            case 0:
+                self.x.dimension += 1
+                self.y.dimension += 1
+                return RectilinearMesh3D(x=ax, y=self.x, z=self.y)
+            case 1:
+                self.y.dimension += 1
+                return RectilinearMesh3D(x=self.x, y=ax, z=self.y)
+            case 2:
+                return RectilinearMesh3D(x=self.x, y=self.y, z=ax)
 
     def edges(self, axis):
         """ Gets the cell edges in the given dimension """
@@ -375,6 +414,12 @@ class RectilinearMesh2D(Mesh):
             return self.x
         elif axis == 1:
             return self.y
+
+    def set_axis(self, axis, value):
+        if axis == 0:
+            self.x = value
+        elif axis == 1:
+            self.y = value
 
     @property
     def centres_bounds(self):
@@ -481,28 +526,46 @@ class RectilinearMesh2D(Mesh):
         if self.y._relative_to is not None:
             mesh.y.relative_to = self.x.resample(dy, self.y.relative_to)
 
-        print(self.x.centres, self.y.centres)
-        print(mesh.x.centres, mesh.y.centres)
-
-        print(values.shape)
-
         f = interpolate.RegularGridInterpolator((self.x.centres, self.y.centres), values, method=method, bounds_error=False)
 
         xx, yy = meshgrid(mesh.x.centres, mesh.y.centres, indexing='ij', sparse=True)
-
-        print(xx)
-        print(xx.shape)
-        print(yy)
-        print(yy.shape)
 
         return mesh, f((xx, yy))
 
     def interpolate_centres_to_nodes(self, values, method='cubic'):
         if self.x.nCells <= 3 or self.y.nCells <= 3:
             method = 'linear'
+
         f = interpolate.RegularGridInterpolator((self.x.centres, self.y.centres), values, method=method, bounds_error=False)
         xx, yy = meshgrid(self.x.edges, self.y.edges, indexing='ij', sparse=True)
-        return f((xx, yy))
+
+        out = f((xx, yy))
+
+        out[0, 1:-1] = out[1, 1:-1] - (abs(out[2, 1:-1] - out[1, 1:-1]))
+        out[-1, 1:-1] = out[-2, 1:-1] - (abs(out[-3, 1:-1] - out[-2, 1:-1]))
+        out[:, 0] = out[:, 1] - (abs(out[:, 2] - out[:, 1]))
+        out[:, -1] = out[:, -2] - (abs(out[:, -3] - out[:, 2]))
+
+        return out
+
+    def fill_nans_with_extrapolation(self, values, **kwargs):
+
+        from ..pointcloud.Point import Point
+
+        if npall(values.shape[::-1] == self.shape):
+            values = values.T
+        assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
+
+        i = ~isnan(values)
+        x = self.x_centres[i]
+        y = self.y_centres[i]
+        v = values[i]
+
+        p2d = Point(x, y, z=v)
+
+        out, _ = p2d.interpolate(values=v, mesh=self, method='sibson', **kwargs)
+        return out
+
 
     def intervalStatistic(self, arr, intervals, axis=0, statistic='mean'):
         """Compute a statistic of the array between the intervals given along dimension dim.
@@ -558,7 +621,7 @@ class RectilinearMesh2D(Mesh):
         return res, intervals
 
 
-    def mask_cells(self, axis=None, x_distance=None, y_distance=None, values=None):
+    def mask_cells(self, x_distance=None, y_distance=None, values=None):
         """Mask cells by a distance.
 
         If the edges of the cell are further than distance away, extra cells are inserted such that
@@ -594,7 +657,7 @@ class RectilinearMesh2D(Mesh):
         if not values is None:
             out_values = values
 
-        x_indices = None
+        x_indices = s_[:]
         x = deepcopy(self.x)
         if not x_distance is None:
             x, x_indices = self.x.mask_cells(x_distance)
@@ -603,7 +666,7 @@ class RectilinearMesh2D(Mesh):
                 for i in range(self.x.nCells.item()):
                     out_values[x_indices[i], :] = values[i, :]
 
-        y_indices = None
+        y_indices = s_[:]
         y = deepcopy(self.y)
         if not y_distance is None:
             y, y_indices = self.y.mask_cells(y_distance)
@@ -698,7 +761,7 @@ class RectilinearMesh2D(Mesh):
 
         assert (size(x) == size(y)), ValueError("x and y must have the same size")
         if trim:
-            flag = self.x.inBounds(x) & self.y.inBounds(y)
+            flag = self.x.in_bounds(x) & self.y.in_bounds(y)
             i = where(flag)[0]
             out = empty([2, i.size], dtype=int32)
             out[0, :] = self.x.cellIndex(x[i])
@@ -752,7 +815,7 @@ class RectilinearMesh2D(Mesh):
 
         return unravel_index(indices, self.shape, order=order)
 
-    def pcolor(self, values, axis=None, yAxis='absolute', **kwargs):
+    def pcolor(self, values, yAxis='absolute', **kwargs):
         """Create a pseudocolour plot of a 2D array using the mesh.
 
         Parameters
@@ -804,58 +867,38 @@ class RectilinearMesh2D(Mesh):
         matplotlib.pyplot.pcolormesh : For additional keyword arguments you may use.
 
         """
-        # assert isinstance(values, StatArray), TypeError("values must be a StatArray")
-        assert npall(values.shape == self.shape), ValueError("values must have shape {} but have shape {}".format(self.shape, values.shape))
+        if self.x.log is not None:
+            kwargs['xscale'] = 'log'
+        if self.y.log is not None:
+            kwargs['yscale'] = 'log'
 
-        x_mask = kwargs.pop('x_mask', None)
-        y_mask = kwargs.pop('y_mask', None)
+        x_mask = kwargs.pop('x_mask', None); y_mask = kwargs.pop('y_mask', None)
+        mask = (x_mask is not None) & (y_mask is not None)
+
+        masked = self
+        if mask:
+            masked, x_indices, z_indices, values = self.mask_cells(x_mask, y_mask, values)
+            if 'alpha' in kwargs:
+                kwargs['alpha'] = kwargs['alpha'].expand(x_indices, z_indices, masked.shape)
+                # _, _, _, kwargs['alpha'] = self.mask_cells(x_mask, y_mask, kwargs['alpha'])
 
         if (self.x._relative_to is None) and (self.y._relative_to is None):
 
-            masked = self
-            if sum([x is None for x in [x_mask, y_mask]]) < 2:
-                masked, x_indices, z_indices, values = self.mask_cells(axis, x_mask, y_mask, values)
-                xAxis='x'
-
-            xm = masked.x_edges
-            ym = masked.y_edges
-
-            if self.x.log is not None:
-                kwargs['xscale'] = 'log'
-            if self.y.log is not None:
-                kwargs['yscale'] = 'log'
-
-            if npall(values.shape != xm.shape) and npall(values.shape != (r_[*xm.shape]-1)):
-                values = values.T
+            xm = masked.x_edges; ym = masked.y_edges
 
             ax, pm, cb = cP.pcolormesh(xm, ym, values, **kwargs)
-            ax.set_xlabel(xm.label)
-            ax.set_ylabel(ym.label)
+            ax.set_xlabel(xm.label); ax.set_ylabel(ym.label)
         else:
             # Need to expand the yaxis edges since they could be draped.
-            if (x_mask is not None) or (y_mask is not None):
-                masked, x_indices, z_indices, values = self.mask_cells(axis, x_mask, y_mask, values)
-                if 'alpha' in kwargs:
-                    _, _, _, kwargs['alpha'] = self.mask_cells(axis, x_mask, y_mask, kwargs['alpha'])
+            if mask:
                 ax, pm, cb = masked.pcolor(values, **kwargs)
             else:
-                x = self.x_edges
-                y = self.y_edges
-
-                if self.x.log is not None:
-                    kwargs['xscale'] = 'log'
-                if self.y.log is not None:
-                    kwargs['yscale'] = 'log'
-
-                if y.shape[0] != x.shape[0]:
-                    x = x.T
-
-                if npall(values.shape == asarray(x.shape[::-1]) - 1):
-                    values = values.T
+                x = self.x_edges; y = self.y_edges
 
                 ax, pm, cb = cP.pcolor(x=x, y=y, values=values, **kwargs)
 
         return ax, pm, cb
+
 
     def plot(self, *args, **kwargs):
         return self.pcolor(*args, **kwargs)
@@ -1094,7 +1137,7 @@ class RectilinearMesh2D(Mesh):
                 return cls(x=x, y=y)
 
     def fromHdf_cell_values(self, grp, key, index=None, skip_posterior=False):
-        return DataArray.fromHdf(grp, key, index=index, skip_posterior=skip_posterior)
+        return StatArray.fromHdf(grp[key], index=index, skip_posterior=skip_posterior)
 
 
     def range(self, axis):

@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 from numpy import float64, int32, s_, integer
-from numpy import arange, argmax, argsort, asarray, divide, empty, full, isnan, linspace, logspace
-from numpy import log10, minimum, mean, min,max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
+from numpy import arange, argmax, argsort, argwhere, asarray, divide, empty, full, isnan, linspace, logspace
+from numpy import log10, maximum, minimum, mean, min, max, nan, nanmin, nanmax, ones, repeat, sum, sqrt
 from numpy import searchsorted, size, shape, sort, squeeze, unique, where, zeros
 from numpy import all as npall
 from numpy.random import Generator
@@ -21,6 +21,7 @@ from ..classes.statistics.Histogram import Histogram
 # from ..classes.statistics.Hitmap2D import Hitmap2D
 from ..classes.mesh.RectilinearMesh1D import RectilinearMesh1D
 from ..classes.mesh.RectilinearMesh2D import RectilinearMesh2D
+from ..classes.data.datapoint.DataPoint import DataPoint
 from ..classes.data.dataset.Data import Data
 from ..classes.data.dataset.FdemData import FdemData
 from ..classes.data.dataset.TdemData import TdemData
@@ -70,7 +71,7 @@ class Inference2D(myObject):
 
     @cached_property
     def acceptance(self):
-        return StatArray.fromHdf(self.hdf_file['rate'])
+        return StatArray.fromHdf(self.hdf_file['acceptance_rate'])
 
     @cached_property
     def additiveError(self):
@@ -102,7 +103,7 @@ class Inference2D(myObject):
 
     @data.setter
     def data(self, value):
-        assert isinstance(value, Data), TypeError("data must have type geobipy.Data, instead has type {}".format(type(value)))
+        assert isinstance(value, (Data, DataPoint)), TypeError("data must have type geobipy.Data, instead has type {}".format(type(value)))
         assert value.nPoints > 0, ValueError("Data has no value. nPoints is 0.")
         self._data = value
 
@@ -190,7 +191,7 @@ class Inference2D(myObject):
 
     @cached_property
     def line_number(self):
-        return self.data.lineNumber[0]
+        return self.data.line_number[0]
 
     @property
     def longest_coordinate(self):
@@ -331,6 +332,10 @@ class Inference2D(myObject):
         self.hdf_file = h5py.File(filename, mode, **kwargs)
         self.mode = mode
 
+    @property
+    def writable(self):
+        return self.mode in ('w', 'r+', 'a')
+
     def close(self):
         """ Check whether the file is open """
         try:
@@ -424,17 +429,20 @@ class Inference2D(myObject):
         # Read in the opacity if present
         key = "percentile_{}".format(percent)
         if key in self.hdf_file.keys():
-            return StatArray.fromHdf(self.hdf_file[key], index=slic)
-        else:
-            h = self.parameter_posterior()
-            ci = h.percentile(percent=percent, axis=1)
+            try:
+                return StatArray.fromHdf(self.hdf_file[key], index=slic)
+            except:
+                pass
 
-            if self.mode == 'r+':
-                if key in self.hdf_file.keys():
-                    ci.writeHdf(self.hdf_file, key)
-                else:
-                    ci.toHdf(self.hdf_file, key)
-            return ci
+        h = self.parameter_posterior()
+        ci = h.percentile(percent=percent, axis=1)
+
+        if self.mode == 'r+':
+            if key in self.hdf_file.keys():
+                ci.writeHdf(self.hdf_file, key)
+            else:
+                ci.toHdf(self.hdf_file, key)
+        return ci
 
     def credible_interval(self, percent=90.0):
         percent = 0.5 * minimum(percent, 100.0 - percent)
@@ -459,18 +467,18 @@ class Inference2D(myObject):
     def compute_median_parameter(self, log=None, track=True):
 
         posterior = self.parameter_posterior()
-        mean = posterior.median(axis=1)
+        median = posterior.median(axis=1)
 
-        # if self.mode == 'r+':
-        #     key = 'mean_parameter'
-        #     if key in self.hdf_file.keys():
-        #         mean.writeHdf(self.hdf_file, key)
-        #     else:
-        #         mean.toHdf(self.hdf_file, key)
-        #     self.hdf_file[key].attrs['name'] = mean.values.name
-        #     self.hdf_file[key].attrs['units'] = mean.values.units
+        if self.mode == 'r+':
+            key = 'median_parameter'
+            if key in self.hdf_file.keys():
+                median.writeHdf(self.hdf_file, key)
+            else:
+                median.toHdf(self.hdf_file, key)
+            self.hdf_file[key].attrs['name'] = median.values.name
+            self.hdf_file[key].attrs['units'] = median.values.units
 
-        return mean
+        return median
 
     def compute_mode_parameter(self, log=None, track=True):
 
@@ -478,14 +486,14 @@ class Inference2D(myObject):
 
         mode = posterior.mode(axis=1)
 
-        # if self.mode == 'r+':
-        #     key = 'mean_parameter'
-        #     if key in self.hdf_file.keys():
-        #         mean.writeHdf(self.hdf_file, key)
-        #     else:
-        #         mean.toHdf(self.hdf_file, key)
-        #     self.hdf_file[key].attrs['name'] = mean.values.name
-        #     self.hdf_file[key].attrs['units'] = mean.values.units
+        if self.mode == 'r+':
+            key = 'mode_parameter'
+            if key in self.hdf_file.keys():
+                mode.writeHdf(self.hdf_file, key)
+            else:
+                mode.toHdf(self.hdf_file, key)
+            self.hdf_file[key].attrs['name'] = mode.values.name
+            self.hdf_file[key].attrs['units'] = mode.values.units
 
         return mode
 
@@ -587,7 +595,7 @@ class Inference2D(myObject):
     def _get(self, variable, reciprocateParameter=False, slic=None, **kwargs):
 
         variable = variable.lower()
-        assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highestmarginal', 'marginal_probability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highestMarginal', 'marginal_probability']")
+        assert variable in ['mean', 'best', 'interfaces', 'opacity', 'highest_marginal', 'marginal_probability'], ValueError("variable must be ['mean', 'best', 'interfaces', 'opacity', 'highest_marginal', 'marginal_probability']")
 
         if variable == 'mean':
 
@@ -614,8 +622,8 @@ class Inference2D(myObject):
         if variable == 'opacity':
             return self.opacity(slic)
 
-        if variable == 'highestmarginal':
-            return self.highestMarginal(slic)
+        if variable == 'highest_marginal':
+            return self.highest_marginal(slic)
 
         if variable == 'marginal_probability':
             assert "index" in kwargs, ValueError('Please specify keyword "index" when requesting marginal_probability')
@@ -1022,9 +1030,17 @@ class Inference2D(myObject):
 
         return opacity
 
-    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, **kwargs):
-        return self.parameter_posterior().compute_probability(distribution, log, log_probability, axis, **kwargs)
+    def compute_probability(self, distribution, log=None, log_probability=False, axis=0, save=False, **kwargs):
 
+        p = self.parameter_posterior().compute_probability(distribution, log, log_probability, axis, **kwargs)
+
+        if save and self.writable:
+            if 'probabilities' in self.hdf_file.keys():
+                p.writeHdf(self.hdf_file, 'probabilities')
+            else:
+                p.toHdf(self.hdf_file, 'probabilities')
+
+        return p
 
     # def percentageParameter(self, value, depth=None, depth2=None, progress=False):
 
@@ -1077,8 +1093,7 @@ class Inference2D(myObject):
         if out.mesh.z.name == "Depth":
             out.mesh.z.edges = StatArray(-out.mesh.z.edges, name='elevation', units=out.mesh.z.units)
 
-        out.mesh.z.relative_to = repeat(self.data.elevation[:, None], out.mesh.shape[1], 1)
-
+        out.mesh.z.relative_to = self.data.elevation
         out.mesh.y.relative_to = self.halfspace
 
         return out
@@ -1292,28 +1307,19 @@ class Inference2D(myObject):
         """ Plot the opacity """
         kwargs['cmap'] = kwargs.get('cmap', 'plasma')
 
-        opacity = self.opacity()
-        opacity.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(opacity, **kwargs); kwargs['alpha'] = mask
-
-        ax, pm, cb = opacity.pcolor(ticks=[0.0, 0.5, 1.0], **kwargs)
+        ax, pm, cb = self.plot_x_section(self.opacity(), ticks=[0.0, 0.5, 1.0], **kwargs)
 
         if cb is not None:
             labels = ['Less', '', 'More']
             cb.ax.set_yticklabels(labels)
             cb.set_label("Confidence")
 
+        return ax, pm, cb
+
 
     def plot_entropy(self, **kwargs):
         kwargs['cmap'] = kwargs.get('cmap', 'hot')
-
-        entropy = self.entropy
-        entropy.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(entropy, **kwargs); kwargs['alpha'] = mask
-
-        entropy.pcolor(**kwargs)
+        return self.plot_x_section(self.entropy, **kwargs)
 
     # def plotError2DJointProbabilityDistribution(self, index, system=0, **kwargs):
     #     """ For a given index, obtains the posterior distributions of relative and additive error and creates the 2D joint probability distribution """
@@ -1330,16 +1336,8 @@ class Inference2D(myObject):
 
     def plot_interfaces(self, cut=0.0, **kwargs):
         """ Plot a cross section of the layer depth histograms. Truncation is optional. """
-
         kwargs['cmap'] = kwargs.get('cmap', 'gray_r')
-
-        interfaces = self.interface_probability()
-        interfaces.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(interfaces, **kwargs); kwargs['alpha'] = mask
-
-        interfaces.pcolor(**kwargs)
-
+        return self.plot_x_section(self.interface_probability(), **kwargs)
 
     def plot_relative_error_posterior(self, system=0, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
@@ -1485,90 +1483,33 @@ class Inference2D(myObject):
         # for i in Bar(range(self.nPoints)):
         for i in range(self.nPoints):
             p = RectilinearMesh1D(edges=parameters.edges[i, :])
-
             pj = out.cellIndex(p.centres, clip=True)
-
             cTmp = counts[i, :, :]
-
             out.counts[pj] += sum(cTmp, axis=0)
 
         return out
 
     def plot_best_model(self, **kwargs):
-        self.model.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
         kwargs['mask_by_confidence'] = False
         kwargs['mask_by_doi'] = False
+        return self.plot_x_section(self.model, **kwargs)
 
-        mask, kwargs = self.mask(self.model, **kwargs); kwargs['alpha'] = mask
 
-        return self.model.pcolor(**kwargs);
+    def plot_highest_marginal(self, **kwargs):
+        return self.plot_x_section(self.highest_marginal(), **kwargs)
 
-    # def plot_cross_section(self, values, **kwargs):
-    #     """ Plot a cross-section of the parameters """
-    #     mesh = self.mesh
-    #     if 'x_axis' in kwargs:
-    #         mesh = self.change_mesh_axis(kwargs.pop('x_axis'))
-
-    #     if kwargs.pop('useVariance', False):
-    #         opacity = deepcopy(self.opacity())
-    #         # opacity = deepcopy(self.entropy)
-    #         # opacity = 1.0 - opacity.normalize()
-    #         kwargs['alpha'] = opacity
-
-    #     if kwargs.pop('mask_below_doi', False):
-    #         opacity = kwargs.get('alpha')
-    #         if kwargs.get('alpha') is None:
-    #             opacity = ones(mesh.shape)
-
-    #         indices = mesh.y.cellIndex(self.doi + mesh.y.relative_to)
-
-    #         for i in range(self.nPoints):
-    #             opacity[i, indices[i]:] = 0.0
-    #         kwargs['alpha'] = opacity
-
-    #     return mesh.pcolor(values = values, **kwargs)
-
-    def plotHighestMarginal(self, useVariance=True, **kwargs):
-
-        values = self.highestMarginal
-        return self.plot_cross_section(values = values, **kwargs)
 
     def plot_marginal_probabilities(self, **kwargs):
 
-        nClusters = self.marginal_probability.shape[-1]
+        mp = self.marginal_probability()
 
-        gs1 = gridspec.GridSpec(nrows=nClusters+1, ncols=1, left=0.15, right=0.91, bottom=0.06, top=0.95, wspace=0.06, hspace=0.175)
+        classes = kwargs.pop("classes", {})
+        classes['id'] = self.highest_marginal().values
 
-        ax = None
-        axes = []
-        for i in range(nClusters):
-            if ax is None:
-                ax = plt.subplot(gs1[i, 0])
-            else:
-                axTmp = plt.subplot(gs1[i, 0], sharex=ax, sharey=ax)
+        kwargs['vmin'] = kwargs.get('vmin', 1.0 / mp.shape[1])
 
-            ax1, pm1, cb1 = self.plot_cross_section(self.marginal_probability[:, :, i].T, vmin=0.0, vmax=1.0, **kwargs)
-            # self.plotElevation(alpha=0.3, **kwargs)
-            # self.plotDataElevation(**kwargs)
-            axes.append(ax1)
-            axes[-1].xaxis.set_tick_params(which='both', labelbottom=False)
-            axes[-1].set_xlabel('')
+        return self.plot_x_section(mp, axis=1, classes = classes, **kwargs)
 
-        cbar_a = axes[-1].get_position().bounds[1] - 0.01
-        cbar_b = cbar_a + 0.01
-
-        plt.subplot(gs1[nClusters, 0])
-        kwargs['cmap'] = 'jet'
-        ax, pm, cb = self.plot_cross_section(self.highestMarginal.T, vmin=0, vmax=nClusters-1, **kwargs)
-        axes.append(ax)
-        # self.plotElevation(**kwargs)
-        # self.plotDataElevation(**kwargs)
-
-        cbar_a = axes[-1].get_position().bounds[1] - 0.01
-        cbar_b = cbar_a + 0.01
-        gs2 = gridspec.GridSpec(nrows=1, ncols=1, left=0.92, right=0.93, bottom=cbar_b, top=0.95, wspace=0.01)
-        gs3 = gridspec.GridSpec(nrows=1, ncols=1, left=0.92, right=0.93, bottom=0.06, top=cbar_a, wspace=0.01)
 
     def mask(self, model, **kwargs):
 
@@ -1577,11 +1518,11 @@ class Inference2D(myObject):
         if kwargs.pop('mask_by_confidence', False):
             mask = self.opacity().values
 
-        if kwargs.pop('mask_by_burned_in', True):
+        if kwargs.pop('mask_by_burned_in', False):
             if mask is not None:
-                mask *= self.burned_in_mask(model)
+                mask *= self.burned_in_mask
             else:
-                mask = self.burned_in_mask(model)
+                mask = self.burned_in_mask
 
         if kwargs.pop('mask_by_doi', False):
             if mask is not None:
@@ -1589,83 +1530,90 @@ class Inference2D(myObject):
             else:
                 mask = self.doi_mask(model)
 
+        if kwargs.pop('mask_by_probability', False):
+            if mask is not None:
+                mask *= self.probability_mask()
+            else:
+                mask = self.probability_mask()
+
         return mask, kwargs
+
+    def plot_x_section(self, model, **kwargs):
+        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
+        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
+        return model.pcolor(**kwargs)
 
 
     def plot_mean_model(self, **kwargs):
-
-        model = self.mean_parameters()
-
-        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
-
-        return model.pcolor(**kwargs)
+        return self.plot_x_section(self.mean_parameters(), **kwargs)
 
     def plot_median_model(self, **kwargs):
-
-        model = self.compute_median_parameter()
-
-        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
-
-        return model.pcolor(**kwargs)
+        return self.plot_x_section(self.compute_median_parameter(), **kwargs)
 
     def plot_mode_model(self, **kwargs):
+        return self.plot_x_section(self.compute_mode_parameter(), **kwargs)
 
-        model = self.compute_mode_parameter()
+    @property
+    def doi_mask(self):
 
-        model.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
-
-        mask, kwargs = self.mask(model, **kwargs); kwargs['alpha'] = mask
-
-        return model.pcolor(**kwargs)
-
-    def doi_mask(self, model):
-
-        mask = ones(model.shape)
-        indices = model.mesh.y.cellIndex(self.doi + model.mesh.y.relative_to)
+        mask = ones(self.mesh.shape)
+        indices = self.mesh.y.cellIndex(self.doi + self.mesh.y.relative_to)
 
         for i in range(self.nPoints):
             mask[i, indices[i]:] = 0.0
 
         return mask
 
-    def burned_in_mask(self, model):
-        mask = ones(model.shape)
+    @property
+    def burned_in_mask(self):
+        mask = ones(self.mesh.shape)
         mask[~self.burned_in, :] = 0.0
 
         return mask
 
+    @property
+    def probability_mask(self):
+        p = self.marginal_probability()
+        hm = self.highest_marginal()
 
-    # def plotModeModel(self, **kwargs):
+        mask = p.apply_along_axis(nanmax, axis=1).values
 
-    #     values = self.modeParameter()
-    #     if (kwargs.pop('reciprocateParameter', False)):
-    #         values = 1.0 / values
-    #         values.name = 'Resistivity'
-    #         values.units = '$Omega m$'
+        n_classes = p.shape[1]
 
-    #     return self.plot_cross_section(values = values.T, **kwargs)
+        # for i in range(n_classes):
+        #     j = argwhere(hm.values == i)
+        #     subset = p.values[:, i, :]
+        #     vmin, vmax = nanmin(subset), nanmax(subset)
+        #     mask[j[:, 0], j[:, 1]] = (mask[j[:, 0], j[:, 1]] - vmin) / (vmax - vmin)
+
+        mask[isnan(mask)] = 0.0
+
+        return mask
+
 
     def plot_percentile(self, percent, **kwargs):
+        return self.plot_x_section(self.parameter_posterior().percentile(percent, axis=1), **kwargs)
+
+    def plot_percentiles(self, ax, **kwargs):
+
+        assert len(ax) == 3, ValueError("Must provide 3 axes")
         posterior = self.parameter_posterior()
 
         posterior.mesh.x.centres = self.data.axis(kwargs.pop('x', 'x'))
 
-        percentile = posterior.percentile(percent, axis=1)
+        percentile = posterior.percentile(np.r_[0.05, 0.5, 0.95], axis=1)
 
         mask, kwargs = self.mask(percentile, **kwargs); kwargs['alpha'] = mask
 
         return percentile.pcolor(**kwargs)
 
+
     def marginal_probability(self, slic=None):
 
-        assert 'probabilities' in self.hdf_file.keys(), Exception("Marginal probabilities need computing, use Inference_2D.computeMarginalProbability_X()")
+        assert 'probabilities' in self.hdf_file.keys(), Exception("Marginal probabilities need computing, use Inference_2D.compute_probabilities()")
 
         if 'probabilities' in self.hdf_file.keys():
-            marginal_probability = StatArray.fromHdf(self.hdf_file['probabilities'], index=slic)
+            marginal_probability = Model.fromHdf(self.hdf_file['probabilities'], index=slic)
 
         return marginal_probability
 
@@ -1679,7 +1627,7 @@ class Inference2D(myObject):
         degrees = None
         with h5py.File(fit_file, 'r') as f:
             if 'm' in components:
-                means = StatArray(asarray(f['means/data']), 'Conductivity', '$\\frac{S}{m}$')
+                means = StatArray(asarray(f['means/data']), 'Conductivity', r'$\frac{S}{m}$')
             if 'a' in components:
                 amplitudes = StatArray(asarray(f['amplitudes/data']), 'Amplitude')
             if 'v' in components:
@@ -1736,7 +1684,7 @@ class Inference2D(myObject):
         if 'a' in components:
             amplitudes = StatArray(d[:, :, 0::4], 'Amplitude')
         if 'm' in components:
-            means = StatArray(d[:, :, 1::4], 'Conductivity', '$\\frac{S}{m}$')
+            means = StatArray(d[:, :, 1::4], 'Conductivity', r'$\frac{S}{m}$')
         if 's' in components:
             stds = StatArray(d[:, :, 2::4]**2.0, 'Standard deviation')
         if 'e' in components:
@@ -1827,8 +1775,10 @@ class Inference2D(myObject):
     #     # self.marginal_probability.toHdf('line_{}_marginal_probability.h5'.format(self.line), 'marginal_probability')
 
 
-    def highestMarginal(self, slic=None):
-        return StatArray(argmax(self.marginal_probability(slic), axis=-1), name='Highest marginal')
+    def highest_marginal(self, slic=None):
+        out = self.marginal_probability(slic).apply_along_axis(argmax, axis=1)
+        out.values.name = 'Highest marginal'
+        return out
 
     def plot_inference_1d(self, fiducial, **kwargs):
         """ Plot the geobipy results for the given data point """
@@ -2003,14 +1953,15 @@ class Inference2D(myObject):
         parent: HDF object to create a group inside
         myName: Name of the group
         """
-        parent = inference1d.createHdf(parent, add_axis=self.data.fiducial)
 
-        # Write the line number
-        self.data.lineNumber.writeHdf(parent, 'data/line_number')
+        parent = inference1d.createHdf(parent, add_axis=self.data.fiducial)
 
         # Write the sorted fiducials
         fiducials = sort(self.data.fiducial)
         fiducials.writeHdf(parent, 'data/fiducial')
+
+        # Write the line number
+        self.data.line_number.writeHdf(parent, 'data/line_number')
 
         return parent
 
@@ -2038,7 +1989,6 @@ class Inference2D(myObject):
 
         pp = self.parameter_posterior()
         mm = self.mean_parameters()
-
 
         kwargs['x'] = kwargs.get('x', 'x')
 
@@ -2082,6 +2032,14 @@ class Inference2D(myObject):
 
         ax = fig.add_subplot(gs[3, 1], sharex=ax0, sharey=ax0) if axes is None else axes.pop(0)
         plt.title('5%')
+        # a = self.percentile(0.05)
+        # b = self.percentile(0.95)
+
+        # kwargs['vmin'] = minimum(nanmin(a.values), nanmin(b.values))
+        # kwargs['vmax'] = maximum(nanmax(a.values), nanmax(b.values))
+
+
+
         self.plot_percentile(percent=0.05, ax=ax, wrap_clabel=True, **kwargs)
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
@@ -2097,6 +2055,9 @@ class Inference2D(myObject):
         self.plot_percentile(percent=0.95, ax=ax, wrap_clabel=True, **kwargs)
         self.plot_data_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
         self.plot_elevation(linewidth=0.3, x = kwargs['x'], ax=ax);
+
+        # del kwargs['vmin']
+        # del kwargs['vmax']
 
         ################################################################################
         # Now we can start plotting some more interesting posterior properties.

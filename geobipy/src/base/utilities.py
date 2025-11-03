@@ -3,13 +3,14 @@ from copy import deepcopy
 from textwrap import wrap
 
 from numpy import abs, arange, arctan2, argsort, argwhere, asarray, atleast_1d, ceil, complex128, cos, diag, diff, divide, dot, empty
-from numpy import exp, flip, floor, full, longdouble, float64, histogram, inf, int32, integer, interp, imag, isfinite, isnan
+from numpy import exp, flip, floor, full, longdouble, finfo, float64, histogram, iinfo, inf, int32, integer, interp, imag, isfinite, isnan, issubdtype
 from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim, max, min, pi, power, prod
 from numpy import real, s_, shape, sign, sin, size, squeeze, where, zeros
 from numpy import all as npall
 from numpy import log as nplog
 
-from numpy.linalg import cholesky, det, inv, slogdet
+from numpy.linalg import cholesky, det, slogdet
+from numpy.linalg import inv as npinv
 from numpy.lib.stride_tricks import as_strided
 
 from numpy.ma import masked_array
@@ -262,6 +263,13 @@ def flood_fill(values, x, y, new_value):
 world_rank = 0
 print_rank = 0
 
+def nodata_value(dtype):
+    """
+    Returns a nodata value for a given numpy dtype.
+    """
+    info = iinfo(dtype) if issubdtype(dtype, integer) else finfo(dtype)
+    return info.min
+
 def init_debug_print(world=None, print_from=0):
     global world_rank
     global print_rank
@@ -273,6 +281,11 @@ def debug_print(*args, **kwargs):
     # if world_rank == print_rank:
     #     print(*args, flush=True, **kwargs)
     return None
+
+def inv(values):
+    if ndim(values) < 2:
+        return diag(1.0 / values)
+    return npinv(values)
 
 def interleave(a, b):
         """Interleave two arrays together like zip
@@ -1101,7 +1114,7 @@ def histogramEqualize(values, nBins=256):
     # Scaling to the needed amplitude
     equalized = (equalized * (b2 - b1)) + b1
 
-    res = StatArray.StatArray(equalized.reshape(values.shape), getName(values), getUnits(values))
+    res = equalized.reshape(values.shape)
 
     return res, cdf
 
@@ -1282,3 +1295,29 @@ def reslice(slic, start=None, stop=None, step=None):
 
 def wrap_string(this, length=20):
     return "\n".join(wrap(this, length, break_long_words=False))
+
+def _ndim_coords_from_arrays(points, ndim=None):
+    """
+    Convert a tuple of coordinate arrays to a (..., ndim)-shaped array.
+
+    """
+    if isinstance(points, tuple) and len(points) == 1:
+        # handle argument tuple
+        points = points[0]
+    if isinstance(points, tuple):
+        p = np.broadcast_arrays(*points)
+        n = len(p)
+        for j in range(1, n):
+            if p[j].shape != p[0].shape:
+                raise ValueError("coordinate arrays do not have the same shape")
+        points = np.empty(p[0].shape + (len(points),), dtype=float)
+        for j, item in enumerate(p):
+            points[...,j] = item
+    else:
+        points = np.asanyarray(points)
+        if points.ndim == 1:
+            if ndim is None:
+                points = points.reshape(-1, 1)
+            else:
+                points = points.reshape(-1, ndim)
+    return points

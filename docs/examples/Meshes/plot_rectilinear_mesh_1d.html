@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>1D Rectilinear Mesh &mdash; GeoBIPy 1.0.0 documentation</title>
+  <title>1D Rectilinear Mesh &mdash; GeoBIPy 2.3.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
@@ -20,14 +20,14 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/documentation_options.js?v=c3c8ae58"></script>
         <script src="../../_static/doctools.js?v=9a2dae69"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="2D Rectilinear Mesh" href="plot_rectilinear_mesh_2d.html" />
-    <link rel="prev" title="StatArray Class" href="../Statistics/plot_StatArray.html" /> 
+    <link rel="prev" title="&lt;no title&gt;" href="../Statistics/plot_Distributions.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,7 +42,7 @@
             GeoBIPy
           </a>
               <div class="version">
-                1.0.0
+                2.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -386,10 +386,7 @@ Here we force the creation of a layer.</p>
     <span class="n">tmp</span> <span class="o">=</span> <span class="n">rm</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">max_cells</span><span class="p">)</span>
     <span class="n">tmp</span><span class="o">.</span><span class="n">createHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">add_axis</span><span class="o">=</span><span class="n">DataArray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">3.0</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Easting&#39;</span><span class="p">,</span> <span class="n">units</span><span class="o">=</span><span class="s2">&quot;m&quot;</span><span class="p">))</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;rm1d&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-
     <span class="n">rm</span><span class="o">.</span><span class="n">relative_to</span> <span class="o">=</span> <span class="mf">5.0</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
     <span class="n">rm</span><span class="o">.</span><span class="n">writeHdf</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rm1d&#39;</span><span class="p">,</span> <span class="n">withPosterior</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="n">rm</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">rm0</span><span class="p">)</span>
@@ -431,114 +428,7 @@ Here we force the creation of a layer.</p>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_014.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_014.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-multi-img"/></li>
 <li><img src="../../_images/sphx_glr_plot_rectilinear_mesh_1d_015.png" srcset="../../_images/sphx_glr_plot_rectilinear_mesh_1d_015.png" alt="plot rectilinear mesh 1d" class = "sphx-glr-multi-img"/></li>
 </ul>
-<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>RectilinearMesh1D
-Number of Cells:
-|   StatArray
-|   Name:   Number of cells
-|   Address:[&#39;0x1651307d0&#39; &#39;0x164d369c0&#39; &#39;0x1648182d0&#39; &#39;0x16481a250&#39;]
-|   Shape:  (1,)
-|   Values: [30]
-|   Min:    30
-|   Max:    30
-|   Prior:
-|   |   Uniform Distribution:
-|   |   Min: 1
-|   |   Max: 30
-|   has_posterior: True
-
-Cell Centres:
-|   StatArray
-|   Name:   test
-|   Address:[&#39;0x1648f8cd0&#39;]
-|   Shape:  (30,)
-|   Values: [0. 0. 0. ... 0. 0. 0.]
-|   Min:    0.0
-|   Max:    0.0
-|   has_posterior: False
-
-Cell Edges:
-|   StatArray
-|   Name:   test
-|   Address:[&#39;0x1648f9450&#39;]
-|   Shape:  (31,)
-|   Values: [0. 0. 0. ... 0. 0. 0.]
-|   Min:    0.0
-|   Max:    0.0
-|   has_posterior: True
-
-log:
-|   None
-relative_to:
-|   StatArray
-|   Name:
-|   Address:[&#39;0x1648fa050&#39;]
-|   Shape:  (1,)
-|   Values: [0.]
-|   Min:    0.0
-|   Max:    0.0
-|   has_posterior: False
-
-
-[&#39;nCells&#39;, &#39;x&#39;, &#39;y&#39;]
-RectilinearMesh1D
-Number of Cells:
-|   StatArray
-|   Name:   Number of cells
-|   Address:[&#39;0x164736bd0&#39; &#39;0x15a50a3c0&#39; &#39;0x164d4b150&#39; &#39;0x164d49bf0&#39;]
-|   Shape:  (1,)
-|   Values: [15]
-|   Min:    15
-|   Max:    15
-|   Prior:
-|   |   Uniform Distribution:
-|   |   Min: 1
-|   |   Max: 30
-|   has_posterior: True
-
-Cell Centres:
-|   StatArray
-|   Name:   test
-|   Address:[&#39;0x1646147d0&#39;]
-|   Shape:  (15,)
-|   Values: [  1.22331766   3.28906551   6.36608642 ...  66.85590133 108.99206549
-|    148.449825  ]
-|   Min:    1.2233176602046558
-|   Max:    148.4498250024555
-|   has_posterior: False
-
-Cell Edges:
-|   StatArray
-|   Name:   test
-|   Address:[&#39;0x164614dd0&#39; &#39;0x15c97a960&#39; &#39;0x164d4af70&#39; &#39;0x164795bb0&#39; &#39;0x16466b4f0&#39;
-|    &#39;0x16466a930&#39;]
-|   Shape:  (16,)
-|   Values: [  0.           2.44663532   4.13149571 ...  70.19008745 147.79404353
-|    149.10560647]
-|   Min:    0.0
-|   Max:    149.1056064716983
-|   Prior:
-|   |   Order Statistics:
-|   |   None
-|   Proposal:
-|   |   Uniform Distribution:
-|   |   Min: 1.0
-|   |   Max: 149.99999999999997
-|   has_posterior: True
-
-log:
-|   None
-relative_to:
-|   StatArray
-|   Name:
-|   Address:[&#39;0x164774f50&#39;]
-|   Shape:  (1,)
-|   Values: [5.]
-|   Min:    5.0
-|   Max:    5.0
-|   has_posterior: False
-</pre></div>
-</div>
-<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 5.945 seconds)</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 4.968 seconds)</p>
 <div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-meshes-plot-rectilinear-mesh-1d-py">
 <div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
 <p><a class="reference download internal" download="" href="../../_downloads/16ec1efc89ed8eeea10bd844b92557de/plot_rectilinear_mesh_1d.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_rectilinear_mesh_1d.ipynb</span></code></a></p>
@@ -558,7 +448,7 @@ relative_to:
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../Statistics/plot_StatArray.html" class="btn btn-neutral float-left" title="StatArray Class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../Statistics/plot_Distributions.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="plot_rectilinear_mesh_2d.html" class="btn btn-neutral float-right" title="2D Rectilinear Mesh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

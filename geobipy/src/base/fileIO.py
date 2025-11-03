@@ -350,7 +350,7 @@ def get_column_name(filename):
     channels = read_csv(filename, nrows=0).columns
 
     if len(channels) == 1:
-        channels = read_csv(filename, nrows=0, sep="\s+").columns
+        channels = read_csv(filename, nrows=0, sep=r"\s+").columns
 
     channels = [c.strip() for c in channels]
 

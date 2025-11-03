@@ -10,7 +10,7 @@ from copy import deepcopy
 
 class mixNormal(Mixture):
 
-    def __init__(self, means=None, sigmas=None, amplitudes=1.0):
+    def __init__(self, means=None, sigmas=None, amplitudes=None, labels=None):
 
         if np.all([means, sigmas] is None):
             return
@@ -20,27 +20,12 @@ class mixNormal(Mixture):
         self.amplitudes = amplitudes
         self.means = means
         self.sigmas = sigmas
+        self.labels = labels
 
-    def __deepcopy__(self, memo={}):
-        out = type(self)()
-        out._params = deepcopy(self._params, memo=memo)
-
-    @property
-    def amplitudes(self):
-        return self._params[0::self.n_solvable_parameters]
-
-    @amplitudes.setter
-    def amplitudes(self, values):
-        assert np.size(values) == self.n_components, ValueError("Must provide {} amplitudes".format(self.n_components))
-        self._params[0::self.n_solvable_parameters] = values
-
-    # @property
-    # def lmfit_model(self):
-    #     return Pearson7Model
 
     @property
     def means(self):
-        return self._params[1::self.n_solvable_parameters]
+        return DataArray(self._params[1::self.n_solvable_parameters], 'Mean')
 
     @means.setter
     def means(self, values):
@@ -79,13 +64,6 @@ class mixNormal(Mixture):
     @property
     def n_components(self):
         return np.size(self.means)
-
-
-    def fit_to_curve(self, *args, **kwargs):
-        fit = super().fit_to_curve(*args, **kwargs)
-        self.params = np.asarray(list(fit.best_values.values()))
-        return self
-
 
     def plot_components(self, x, log, ax=None, **kwargs):
 

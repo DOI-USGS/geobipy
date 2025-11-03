@@ -58,8 +58,8 @@ Dataset._file.close()
 
 #%%
 # We can define a 1D layered earth model, and use it to predict some data
-par = StatArray(np.r_[500.0, 20.0], "Conductivity", "$\frac{S}{m}$")
-mod = Model(RectilinearMesh1D(edges=np.r_[0, 75.0, np.inf]), values=par)
+par = StatArray(np.r_[1e-2, 1e-1, 1.0], "Conductivity", "$\frac{S}{m}$")
+mod = Model(RectilinearMesh1D(edges=np.r_[0, 50.0, 75.0, np.inf]), values=par)
 
 #%%
 # Forward model the data
@@ -132,7 +132,7 @@ print(tdp.data_misfit())
 # the relative error multiplier, and the additive error noise floor
 
 # Define the distributions used as priors.
-z_prior = Distribution('Uniform', min=np.float64(tdp.z) - 2.0, max=np.float64(tdp.z) + 2.0, prng=prng)
+z_prior = Distribution('Uniform', min=tdp.z - 2.0, max=tdp.z + 2.0, prng=prng)
 relativePrior = Distribution('Uniform', min=np.r_[0.01, 0.01], max=np.r_[0.5, 0.5], prng=prng)
 additivePrior = Distribution('Uniform', min=np.r_[1e-16, 1e-16], max=np.r_[1e-10, 1e-10], log=True, prng=prng)
 tdp.set_priors(relative_error_prior=relativePrior, additive_error_prior=additivePrior, z_prior=z_prior, prng=prng)
@@ -140,8 +140,8 @@ tdp.set_priors(relative_error_prior=relativePrior, additive_error_prior=additive
 #%%
 # In order to perturb our solvable parameters, we need to attach proposal distributions
 z_proposal = Distribution('Normal', mean=tdp.z, variance = 0.01, prng=prng)
-relativeProposal = Distribution('MvNormal', mean=tdp.relative_error, variance=2.5e-7, prng=prng)
-additiveProposal = Distribution('MvLogNormal', mean=tdp.additive_error, variance=2.5e-3, linearSpace=True, prng=prng)
+relativeProposal = Distribution('MvNormal', mean=tdp.relative_error, variance=1e-6, prng=prng)
+additiveProposal = Distribution('MvLogNormal', mean=tdp.additive_error, variance=1e-5, linearSpace=True, prng=prng)
 tdp.set_proposals(relativeProposal, additiveProposal, z_proposal=z_proposal, prng=prng)
 
 #%%
@@ -151,10 +151,11 @@ tdp.set_posteriors()
 #%%
 # Perturb the datapoint and record the perturbations
 # Note we are not using the priors to accept or reject perturbations.
-for i in range(10):
+for i in range(1000):
     tdp.perturb()
     tdp.update_posteriors()
 
+plt.close('all')
 
 #%%
 # Plot the posterior distributions
@@ -180,7 +181,7 @@ plt.show()
 #   YUTM=
 #   Elevation=
 #   StationNumber=
-#   LineNumber=
+#   line_number=
 #   Current=
 #
 # Line 2 :: first integer, sourceType

@@ -5,11 +5,11 @@ from copy import deepcopy
 
 from numpy import abs, any, arange, argpartition, argsort, argwhere, asarray, column_stack
 from numpy import cumsum, diag, diff, dot, empty, exp, hstack, inf, isinf, maximum, mean, meshgrid
-from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, unique, vstack, zeros
+from numpy import ones, ravel_multi_index, s_, sign, size, squeeze, sum, unique, vstack, zeros
+from numpy import all as npall
 from numpy import log as nplog
-from numpy.linalg import inv
 from matplotlib.pyplot import gcf
-from ...base.utilities import reslice, expReal
+from ...base.utilities import reslice, expReal, nodata_value, Ax, inv
 from ...base.utilities import debug_print as dprint
 from ...base import plotting
 from ..core.myObject import myObject
@@ -72,9 +72,12 @@ class Model(myObject):
 
     @property
     def gradient(self):
-        """Compute the gradient
+        return self._gradient
 
-        Parameter gradient :math:"\\nabla_{z}\\sigma" at the ith layer is computed via
+    def compute_gradient(self):
+        r"""Compute the gradient
+
+        Parameter gradient :math:"\nabla_{z}\sigma" at the ith layer is computed via
 
         """
         # if self._gradient is None:
@@ -134,7 +137,7 @@ class Model(myObject):
             self._values = StatArray(self.shape)
             return
 
-        # assert all(values.shape == self.shape), ValueError("values must have shape {}".format(self.shape))
+        assert npall(values.shape == self.shape), ValueError(f"values have shape {values.shape} but must have shape {self.shape}")
         self._values = StatArray(values)
 
     @property
@@ -161,6 +164,27 @@ class Model(myObject):
 
     def animate(self, axis, filename, slic=None, **kwargs):
         return self.mesh._animate(self.values, axis, filename, slic, **kwargs)
+
+    def apply_along_axis(self, method, axis=0):
+        """Get the marginal histogram along an axis
+
+        Parameters
+        ----------
+        intervals : array_like
+            Array of size 2 containing lower and upper limits between which to count.
+        log : 'e' or float, optional
+            Entries are given in linear space, but internally bins and values are logged.
+            Plotting is in log space.
+        axis : int
+            Axis along which to get the marginal histogram.
+
+        Returns
+        -------
+        out : geobipy.Histogram1D
+
+        """
+        assert 0 <= axis <= self.mesh.ndim, ValueError("0 <= axis <= {}".format(self.mesh.ndim))
+        return Model(mesh=self.mesh.remove_axis(axis), values=method(self.values, axis=axis))
 
     def axis(self, *args, **kwargs):
         return self.mesh.axis(*args, **kwargs)
@@ -194,19 +218,11 @@ class Model(myObject):
 
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
-        # if (self.mesh.action[0] in ['insert', 'delete']):
-            # Propose new layer conductivities
         return self.local_variance(observation)
-        # else:
-        #     return self.values.proposal.variance
 
     def delete_edge(self, i):
         out, values = self.mesh.delete_edge(i, values=self.values)
         out = type(self)(mesh=out, values=values)
-
-        # if len(values) > 1:
-        #     for k, v in zip(self.__values, values[1:]):
-        #         out.setattr(k, v)
 
         return out
 
@@ -226,11 +242,12 @@ class Model(myObject):
         """
         # if not self.gradient.hasPrior:
         #     return 0.0 if log else 1.0
-
         if self.nCells.item() == 1:
             tmp = self.insert_edge(nplog(self.mesh.min_edge) + (0.5 * (self.mesh.max_edge - self.mesh.min_edge)))
+            tmp.compute_gradient()
             return tmp.gradient.probability(log=log)
         else:
+            self.compute_gradient()
             return self.gradient.probability(log=log)
 
     def insert_edge(self, edge, value=None):
@@ -244,8 +261,11 @@ class Model(myObject):
 
         return out
 
-    def interpolate_centres_to_nodes(self, kind='cubic', **kwargs):
-        return self.mesh.interpolate_centres_to_nodes(self.values, kind=kind, **kwargs)
+    def interpolate_centres_to_nodes(self, method='cubic', **kwargs):
+        return self.mesh.interpolate_centres_to_nodes(self.values, method=method, **kwargs)
+
+    def fill_nans_with_extrapolation(self, **kwargs):
+        return self.mesh.fill_nans_with_extrapolation(self.values, **kwargs)
 
     def local_precision(self, observation=None):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
@@ -286,7 +306,18 @@ class Model(myObject):
             Inverse Hessian matrix
 
         """
-        return inv(self.local_precision(observation))
+        tries = 0
+        while tries < 10:
+            # Try to invert the local Hessian using data.
+            try:
+                return inv(self.local_precision(observation))
+            except:
+                # If the Hessian is singular, we need to increase the variance of the prior to stabilize the inversion.
+                self.values.prior.variance *= 2.0
+                tries += 1
+                print(f'Increased prior variance to {self.values.prior.variance}', flush=True)
+
+        return self.prior_derivative(order=2)
 
     def pad(self, shape):
         """Copies the properties of a model including all priors or proposals, but pads memory to the given size
@@ -365,7 +396,7 @@ class Model(myObject):
 
         return fk
 
-    def stochastic_newton_perturbation(self, observation=None, low_variance=-inf, high_variance=inf, alpha=1.0):
+    def stochastic_newton_perturbation(self, observation=None, alpha=1.0):
 
         # repeat = True
         # n_tries = 0
@@ -381,15 +412,7 @@ class Model(myObject):
             # Only J should be updated here.  The predicted data needs to be centered
             # on the previous dimensional model.
             if remapped_model.mesh.action[0] != 'none':
-                observation.fm_dlogc(remapped_model)
-
-        # remapped_model.values.prior.variance = np.diag(np.full(remapped_model.nCells, fill_value=remapped_model.values.prior.variance[0,0]+remapped_model.value_weight.rng(1)))
-
-        # if remapped_model.nCells > 1:
-        #     v = remapped_model.gradient.prior.variance[0,0] + remapped_model.gradient_weight.rng(1)
-        #     remapped_model.gradient.prior.variance = np.diag(np.full(remapped_model.nCells.item()-1, fill_value=v))
-
-        # dprint('perturbed sensitivity', diag(observation.sensitivity_matrix))
+                observation.sensitivity(remapped_model, model_changed=True)
 
         # Update the local Hessian around the current model.
         # B^-1 = H = inv(J'Wd'WdJ + Wm'Wm)
@@ -420,12 +443,12 @@ class Model(myObject):
 
     def prior_derivative(self, order):
         # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ws)(m - mref)
-        operator = self.values.priorDerivative(order=2)
+        operator = self.value_weight * self.values.priorDerivative(order=2)
         # operator *= self.mesh.cell_weights
 
         if self.gradient.hasPrior:
             Wz = self.mesh.gradient_operator
-            operator += dot(Wz.T, dot(self.gradient.priorDerivative(order=2), Wz))
+            operator += self.gradient_weight * dot(Wz.T, Ax(self.gradient.priorDerivative(order=2), Wz))
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
@@ -446,9 +469,6 @@ class Model(myObject):
             remapped_model.gradient_weight = deepcopy(self.gradient_weight)
 
         return remapped_model
-
-    def pcolor(self, **kwargs):
-        return self.mesh.pcolor(values=self.values, **kwargs)
 
     def plot(self, **kwargs):
         ### DO NOT CHANGE THIS TO PCOLOR
@@ -477,7 +497,7 @@ class Model(myObject):
         if axes is None:
             axes = kwargs.pop('fig', gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
         self.mesh.plot_posteriors(axes, axis=axis, values=self.values, values_kwargs=values_kwargs, **kwargs)
@@ -487,8 +507,8 @@ class Model(myObject):
                                                    reciprocateX=values_kwargs.get('reciprocateX', None),
                                                    labels=False,
                                                    linewidth=1,
-                                                   color='#5046C8',
-                                                   ax=axes[-1])
+                                                   color='#1a8bff',
+                                                   ax=axes['values'])
         # self.values.posterior.mode(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
         #                                            flipY=False,
         #                                            reciprocateX=values_kwargs.get('reciprocateX', None),
@@ -553,7 +573,7 @@ class Model(myObject):
 
         # Check that the parameters are within the limits if they are bound
         if not self.value_bounds is None:
-            pInBounds = self.value_bounds.probability(x=self.values, log=True)
+            pInBounds = sum(self.value_bounds.probability(x=self.values, log=True))
             if any(isinf(pInBounds)):
                 return -inf
 
@@ -566,30 +586,30 @@ class Model(myObject):
 
         # Probability of parameter
         if solve_value: # if self.values.hasPrior
-            probability += self.values.probability(log=True)
+            probability += self.values.probability(log=True).item()
 
         # Probability of model gradient
         if solve_gradient: # if self.gradient.hasPrior
-            probability += self.gradient_probability(log=True)
+            probability += self.gradient_probability(log=True).item()
 
         return probability
 
     def proposal_probabilities(self, remapped_model, observation=None, structure_only=False, alpha=1.0):
-        """Return the forward and reverse proposal probabilities for the model
+        r"""Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
 
         .. math::
             :label: proposal numerator
 
-            q(k, \\boldsymbol{z} | \\boldsymbol{m}^{'})
+            q(k, \boldsymbol{z} | \boldsymbol{m}^{'})
 
         and
 
         .. math::
             :label: proposal denominator
 
-            q(k^{'}, \\boldsymbol{z}^{'} | \\boldsymbol{m})
+            q(k^{'}, \boldsymbol{z}^{'} | \boldsymbol{m})
 
         Each component is dependent on the event that was chosen during perturbation.
 
@@ -631,7 +651,6 @@ class Model(myObject):
 
             log_values = nplog(self.values) - alpha * (pk)
             mean = expReal(log_values)
-            # mean = self.values
 
             if any(mean == inf) or any(mean == 0.0):
                 return -inf, -inf
@@ -642,7 +661,6 @@ class Model(myObject):
             # # our perturbed parameters to the unperturbed parameters. This is the crux of the reversible jump.
             # tmp = Distribution('MvLogNormal', mean, self.values.proposal.variance, linearSpace=True, prng=prng)
             tmp = Distribution('MvLogNormal', mean, H, linearSpace=True, prng=prng)
-            # tmp = Distribution('MvLogNormal', self.values, self.values.proposal.variance, linearSpace=True, prng=prng)
             # Probability of jumping from our perturbed parameter values to the unperturbed values.
             proposal = tmp.probability(x=remapped_model.values, log=True)
 
@@ -728,7 +746,8 @@ class Model(myObject):
             if kwargs.get('solve_value', False):
                 assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
                 # Assign the initial prior to the parameters
-                variance = nplog(1.0 + kwargs.get('factor', 10.0))**2.0 #self.mesh.cell_weights /
+                variance = kwargs.get('parameter_standard_deviation', 2.3978952727983707)**2.0
+                assert variance > 0.0, ValueError("parameter_standard_deviation must be greater than 0.0")
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
                                                 variance=variance,
                                                 ndim=self.mesh.nCells,
@@ -743,6 +762,7 @@ class Model(myObject):
                                             prng=kwargs.get('prng'))
 
         self.set_values_prior(values_prior)
+        self.compute_gradient()
         self.set_gradient_prior(gradient_prior)
 
     def set_values_prior(self, prior):
@@ -787,15 +807,46 @@ class Model(myObject):
 
         self.values.proposal = proposal
 
-        self.value_weight = Distribution("Normal",
-                                         mean=0.0,
-                                         variance=0.01,
-                                         prng=kwargs.get('prng', None))
-        self.gradient_weight = Distribution("Normal",
-                                         mean=0.0,
-                                         variance=0.01,
-                                         prng=kwargs.get('prng', None))
+        self.set_proposal_weights(**kwargs)
 
+        # self.value_weight = Distribution("Normal",
+        #                                  mean=0.0,
+        #                                  variance=0.01,
+        #                                  prng=kwargs.get('prng', None))
+        # self.gradient_weight = Distribution("Normal",
+        #                                  mean=0.0,
+        #                                  variance=0.01,
+        #                                  prng=kwargs.get('prng', None))
+
+    def set_proposal_weights(self, **kwargs):
+        value_weight = kwargs.get('parameter_weight', 1.0)
+        gradient_weight = kwargs.get('gradient_weight', 1.0)
+
+        mx = maximum(value_weight, gradient_weight)
+        self.value_weight = value_weight / mx
+        self.gradient_weight = gradient_weight / mx
+
+    def sum(self, axis=0):
+        """Gets the mean along the given axis.
+
+        This is not the true mean of the original samples. It is the best estimated mean using the binned counts multiplied by the axis bin centres.
+
+        Parameters
+        ----------
+        log : 'e' or float, optional.
+            Take the log of the mean to base "log"
+        axis : int
+            Axis to take the mean along.
+
+        Returns
+        -------
+        out : geobipy.DataArray
+            The means along the axis.
+
+        """
+        values = sum(self.values, axis=axis)
+        out = self.mesh.remove_axis(axis)
+        return Model(mesh=out, values=values)
 
     def take_along_axis(self, i, axis):
         s = [s_[:] for j in range(self.ndim)]
@@ -865,12 +916,34 @@ class Model(myObject):
     @classmethod
     def from_tif(cls, rio_dataset, **kwargs):
 
+        from ..mesh.RectilinearMesh2D import RectilinearMesh2D
+
         if 'comm' in kwargs:
             print("DO STUFF IN PARALLEL")
         else:
-            mesh = Mesh(x_centres = rio_dataset.x.values,
-                        y_centres = rio_dataset.y.values)
-            return cls(mesh, values=np.squeeze(rio_dataset.values))
+            x = rio_dataset.x.values
+            y = rio_dataset.y.values
+
+            x_flipped = False
+            if not np.all(x[:-1] <= x[1:]):
+                x = x[::-1]
+                x_flipped = True
+            y_flipped = False
+            if not np.all(y[:-1] <= y[1:]):
+                y = y[::-1]
+                y_flipped = True
+
+            mesh = RectilinearMesh2D(x_centres = x,
+                                     y_centres = y)
+            v = np.squeeze(rio_dataset.values)
+            if x_flipped:
+                v = v[:, ::-1]
+            if y_flipped:
+                v = v[::-1, :]
+
+            v[v == nodata_value(v.dtype)] = np.nan
+
+            return cls(mesh, values=v)
 
 
     @classmethod
@@ -889,25 +962,13 @@ class Model(myObject):
         from ..mesh.RectilinearMesh2D_stitched import RectilinearMesh2D_stitched
 
         n_points = 79
-        zwedge = np.linspace(50.0, 1.0, n_points)
-        zdeep = np.linspace(75.0, 500.0, n_points)
 
-        resistivities = {'glacial' : np.r_[100, 10, 30],   # Glacial sediments, sands and tills
-                        'saline_clay' : np.r_[100, 10, 1],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
-                        'resistive_dolomites' : np.r_[50, 500, 50],   # Glacial sediments, resistive dolomites, marine shale.
-                        'resistive_basement' : np.r_[100, 10, 10000],# Resistive Basement
-                        'coastal_salt_water' : np.r_[1, 100, 20],    # Coastal salt water upper layer
-                        'ice_over_salt_water' : np.r_[10000, 100, 1] # Antarctica glacier ice over salt water
-        }
-        conductivities = {'glacial' : np.r_[1e-2, 1e-1, 0.03333333],   # Glacial sediments, sands and tills
-                        'saline_clay' : np.r_[1e-2, 1e-1, 1.  ],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
-                        'resistive_dolomites' : np.r_[2e-2, 2e-3, 2e-2],   # Glacial sediments, resistive dolomites, marine shale.
-                        'resistive_basement' : np.r_[1e-2, 1e-1, 1e-4],# Resistive Basement
-                        'coastal_salt_water' : np.r_[1., 1e-2, 5e-2],    # Coastal salt water upper layer
-                        'ice_over_salt_water' : np.r_[1e-4, 1e-2, 1] # Antarctica glacier ice over salt water
-        }
-
-        conductivity = DataArray(conductivities[model_type], name="Conductivity", units='$\\frac{S}{m}$')
+        if model_type == 'water_into_basalt':
+            zwedge = np.linspace(1.0, 100.0, n_points)
+            zdeep = np.linspace(150.0, 102.0, n_points)
+        else:
+            zwedge = np.linspace(50.0, 1.0, n_points)
+            zdeep = np.linspace(75.0, 500.0, n_points)
 
         x = RectilinearMesh1D(centres=DataArray(np.arange(n_points, dtype=np.float64), name='x'))
         mesh = RectilinearMesh2D_stitched(3, x=x)
@@ -917,4 +978,33 @@ class Model(myObject):
         mesh.y_edges[:, 3] = -np.inf
         mesh.y_edges.name, mesh.y_edges.units = 'Height', 'm'
 
-        return cls(mesh=mesh, values=np.repeat(conductivity[None, :], n_points, 0))
+
+        resistivities = {'glacial' : np.r_[100, 10, 30],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[100, 10, 1],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                        'resistive_dolomites' : np.r_[50, 500, 50],   # Glacial sediments, resistive dolomites, marine shale.
+                        'resistive_basement' : np.r_[100, 10, 10000],# Resistive Basement
+                        'coastal_salt_water' : np.r_[1, 100, 20],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[10000, 100, 1], # Antarctica glacier ice over salt water
+                        'water_into_basalt' : np.r_[1000, 1, 1000]
+        }
+        conductivities = {'glacial' : np.r_[1e-2, 1e-1, 0.03333333],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[1e-2, 1e-1, 1.  ],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                        'resistive_dolomites' : np.r_[2e-2, 2e-3, 2e-2],   # Glacial sediments, resistive dolomites, marine shale.
+                        'resistive_basement' : np.r_[1e-2, 1e-1, 1e-4],# Resistive Basement
+                        'coastal_salt_water' : np.r_[1., 1e-2, 5e-2],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[1e-4, 1e-2, 1], # Antarctica glacier ice over salt water
+                        'water_into_basalt' : np.r_[1e-3, 1, 1e-3]
+        }
+
+        conductivity = DataArray(conductivities[model_type], name="Conductivity", units=r'$\frac{S}{m}$')
+        conductivity = np.repeat(conductivity[None, :], n_points, 0)
+
+        if model_type == 'water_into_basalt':
+            conductivity[:, 1] = np.linspace(10.0, 1.0, n_points)
+
+        return cls(mesh=mesh, values=conductivity)
+
+    @classmethod
+    def generate_from_rasters(cls, geometry_rasters:list, variable_rasters:list=None):
+        from ..mesh.RectilinearMesh3D import RectilinearMesh3D
+        return cls(*RectilinearMesh3D.generate_from_rasters(geometry_rasters))

@@ -139,8 +139,6 @@ with h5py.File('h2d.h5', 'w') as f:
 with h5py.File('h2d.h5', 'r') as f:
     H1 = Histogram.fromHdf(f['h2d'])
 
-plt.close('all')
-
 x = StatArray(5.0 + np.linspace(-4.0, 4.0, 100), 'Variable 1')
 y = StatArray(10.0 + np.linspace(-4.0, 4.0, 105), 'Variable 2')
 

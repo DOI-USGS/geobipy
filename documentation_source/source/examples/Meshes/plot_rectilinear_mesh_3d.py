@@ -109,7 +109,6 @@ pv = rm.pyvista_plotter()
 # We can plot the mesh in 3D!
 mesh = rm.pyvista_mesh().save('rm3d_re2.vtk')
 
-
 xx, yy = np.meshgrid(rm.z.centres, rm.y.centres)
 x_re = StatArray(np.sin(np.sqrt(xx ** 2.0 + yy ** 2.0)), "x_re")
 

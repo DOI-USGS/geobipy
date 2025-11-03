@@ -1,0 +1,808 @@
+{
+ "Inference3D": [
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion.Inference3D",
+   "module_short": "geobipy.src.inversion.Inference3D",
+   "name": "Inference3D"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion",
+   "module_short": "geobipy.src.inversion",
+   "name": "Inference3D"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Inference3D"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Inference3D"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Inference3D"
+  }
+ ],
+ "argparse.ArgumentDefaultsHelpFormatter": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "argparse",
+   "module_short": "argparse",
+   "name": "ArgumentDefaultsHelpFormatter"
+  }
+ ],
+ "argparse.ArgumentParser": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "argparse",
+   "module_short": "argparse",
+   "name": "ArgumentParser"
+  }
+ ],
+ "args": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "argparse",
+   "module_short": "argparse",
+   "name": "Namespace"
+  }
+ ],
+ "args.index": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "int"
+  }
+ ],
+ "checkCommandArguments": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  }
+ ],
+ "data": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.data.dataset.FdemData",
+   "module_short": "geobipy.src.classes.data.dataset.FdemData",
+   "name": "FdemData"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.data.dataset",
+   "module_short": "geobipy.src.classes.data.dataset",
+   "name": "FdemData"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.data",
+   "module_short": "geobipy.src.classes.data",
+   "name": "FdemData"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "FdemData"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "FdemData"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "FdemData"
+  }
+ ],
+ "data_filename": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "data_type": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "file_path": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "filename": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "get_prng": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "get_prng"
+  }
+ ],
+ "inference3d": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion.Inference3D",
+   "module_short": "geobipy.src.inversion.Inference3D",
+   "name": "Inference3D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion",
+   "module_short": "geobipy.src.inversion",
+   "name": "Inference3D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Inference3D"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Inference3D"
+  }
+ ],
+ "inference3d.create_hdf5": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion.Inference3D",
+   "module_short": "geobipy.src.inversion.Inference3D",
+   "name": "Inference3D.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion",
+   "module_short": "geobipy.src.inversion",
+   "name": "Inference3D.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Inference3D.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Inference3D.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.create_hdf5"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.create_hdf5"
+  }
+ ],
+ "inference3d.infer": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion.Inference3D",
+   "module_short": "geobipy.src.inversion.Inference3D",
+   "name": "Inference3D.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion",
+   "module_short": "geobipy.src.inversion",
+   "name": "Inference3D.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "Inference3D.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "Inference3D.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core.myObject",
+   "module_short": "geobipy.src.classes.core.myObject",
+   "name": "myObject.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes.core",
+   "module_short": "geobipy.src.classes.core",
+   "name": "myObject.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.classes",
+   "module_short": "geobipy.src.classes",
+   "name": "myObject.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "myObject.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "myObject.infer"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "abc",
+   "module_short": "abc",
+   "name": "ABC.infer"
+  }
+ ],
+ "inputFile": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PosixPath"
+  }
+ ],
+ "inputFile.exists": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PosixPath.exists"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "Path.exists"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PurePosixPath.exists"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PurePath.exists"
+  }
+ ],
+ "kwargs": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion.user_parameters",
+   "module_short": "geobipy.src.inversion.user_parameters",
+   "name": "user_parameters"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion",
+   "module_short": "geobipy.src.inversion",
+   "name": "user_parameters"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "user_parameters"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "user_parameters"
+  }
+ ],
+ "model_type": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "models": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "list"
+  }
+ ],
+ "np.random.seed": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "_cython_3_0_11",
+   "module_short": "_cython_3_0_11",
+   "name": "cython_function_or_method"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy.random",
+   "module_short": "numpy.random",
+   "name": "seed"
+  }
+ ],
+ "os.getcwd": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "builtin_function_or_method"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "os",
+   "module_short": "os",
+   "name": "getcwd"
+  }
+ ],
+ "os.listdir": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "builtin_function_or_method"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "os",
+   "module_short": "os",
+   "name": "listdir"
+  }
+ ],
+ "os.path.isfile": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "os.path",
+   "module_short": "os.path",
+   "name": "isfile"
+  }
+ ],
+ "os.path.islink": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "os.path",
+   "module_short": "os.path",
+   "name": "islink"
+  }
+ ],
+ "os.path.join": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "function"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "os.path",
+   "module_short": "os.path",
+   "name": "join"
+  }
+ ],
+ "os.unlink": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "builtin_function_or_method"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "os",
+   "module_short": "os",
+   "name": "unlink"
+  }
+ ],
+ "output_directory": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PosixPath"
+  }
+ ],
+ "output_directory.exists": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PosixPath.exists"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "Path.exists"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PurePosixPath.exists"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PurePath.exists"
+  }
+ ],
+ "parameter_file": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "pathlib.Path": [
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "Path"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "PurePath"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "pathlib",
+   "module_short": "pathlib",
+   "name": "Path"
+  }
+ ],
+ "prng": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy.random._generator",
+   "module_short": "numpy.random",
+   "name": "Generator"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy.random",
+   "module_short": "numpy.random",
+   "name": "Generator"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "Generator"
+  }
+ ],
+ "seed": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "int"
+  }
+ ],
+ "supplementary": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "str"
+  }
+ ],
+ "sys.path.append": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "builtin_function_or_method"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "sys.path",
+   "module_short": "sys.path",
+   "name": "append"
+  }
+ ],
+ "t0": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "float"
+  }
+ ],
+ "time.time": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "builtin_function_or_method"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "time",
+   "module_short": "time",
+   "name": "time"
+  }
+ ],
+ "timedelta": [
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "datetime",
+   "module_short": "datetime",
+   "name": "timedelta"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "datetime",
+   "module_short": "datetime",
+   "name": "timedelta"
+  }
+ ],
+ "user_parameters.read": [
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion.user_parameters",
+   "module_short": "geobipy.src.inversion.user_parameters",
+   "name": "user_parameters.read"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src.inversion",
+   "module_short": "geobipy.src.inversion",
+   "name": "user_parameters.read"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy.src",
+   "module_short": "geobipy.src",
+   "name": "user_parameters.read"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "geobipy",
+   "module_short": "geobipy",
+   "name": "user_parameters.read"
+  },
+  {
+   "is_class": true,
+   "is_explicit": false,
+   "module": "builtins",
+   "module_short": "builtins",
+   "name": "dict.read"
+  },
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "geobipy.user_parameters",
+   "module_short": "geobipy.user_parameters",
+   "name": "read"
+  }
+ ]
+}
