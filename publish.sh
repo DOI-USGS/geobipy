@@ -75,14 +75,14 @@ git commit -m "update version"
 # git add docs/
 # git commit -m "docs"
 
-# git tag $NEW_TAG
-# git push --tags
-# git push origin master develop
+git tag $NEW_TAG
+git push --tags
+git push origin master develop
 
-# gh release create $NEW_TAG --notes-from-tag --verify-tag --title $NEW_TAG
+gh release create $NEW_TAG --notes-from-tag --verify-tag --title $NEW_TAG
 
-# # Pypi
-# python -m build
-# twine upload --skip-existing dist/*
+# Pypi
+python -m build
+twine upload --skip-existing dist/*
 
 # exit 0
