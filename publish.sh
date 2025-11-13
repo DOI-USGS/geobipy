@@ -11,7 +11,6 @@
 # ./publish -v major
 # to increment each of those by just 1.
 
-
 VERSION=""
 
 #get parameters
@@ -22,6 +21,7 @@ do
   esac
 done
 
+#get highest tag number, and add 1.0.0 if doesn't exist
 #Go online and get the latest tag number assoc with a "release"
 CURRENT_VERSION=`git describe --abbrev=0 --tags 2>/dev/null`
 
@@ -75,14 +75,14 @@ git commit -m "update version"
 # git add docs/
 # git commit -m "docs"
 
-# git tag $NEW_TAG
-# git push --tags
-# git push origin master develop
+git tag $NEW_TAG
+git push --tags
+git push origin master develop
 
-# gh release create $NEW_TAG --notes-from-tag --verify-tag --title $NEW_TAG
+gh release create $NEW_TAG --notes-from-tag --verify-tag --title $NEW_TAG
 
-# # Pypi
-# python -m build
-# twine upload --skip-existing dist/*
+# Pypi
+python -m build
+twine upload --skip-existing dist/*
 
 # exit 0
