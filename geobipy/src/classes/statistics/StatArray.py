@@ -578,7 +578,7 @@ class StatArray(DataArray):
         if not i is None:
             samples = samples[i]
 
-        return self.prior.probability(x=samples, log=log, i=active)
+        return squeeze(self.prior.probability(x=samples, log=log, i=active))
 
     def propose(self, i=s_[:], relative=False, imposePrior=False, log=False):
         """Propose new values using the attached proposal distribution
