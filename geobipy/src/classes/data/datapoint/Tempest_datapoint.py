@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+import numpy as np
 from numpy import any, atleast_2d, diag, diag_indices, dot
 from numpy import full, linspace, log10, logspace
 from numpy import ones, s_, size, sqrt, sum, squeeze, zeros
@@ -93,15 +94,22 @@ class Tempest_datapoint(TdemDataPoint):
     @reference_additive_error.setter
     def reference_additive_error(self, values):
         if values is None:
-            values = self.n_data_channels
+            values = self.n_channels
         else:
-            assert size(values) == self.n_data_channels, ValueError(("additive_error must have size {}").format(self.n_data_channels))
+            assert size(values) == self.n_channels, ValueError(("reference additive_error must have size {}").format(self.n_channels))
 
-        self._reference_additive_error = StatArray(values, r'$epsilon_{additive}$', self.units)
+        self._reference_additive_error = StatArray(values, r'Reference $\epsilon_{additive}$', self.units)
 
     @property
     def additive_error(self):
-        self._additive_error[:] = self.additive_error_multiplier * self.reference_additive_error
+        self._additive_error[...] = 0.0
+        for j in range(self.n_systems):
+            isys = self.system_indices[j]
+            for i in range(self.n_components):
+                ic = self._indices(i, j)
+                self._additive_error[isys] += self.reference_additive_error[ic]**2.0
+            self._additive_error[isys] = self.additive_error_multiplier[j] * np.sqrt(self._additive_error[isys])
+
         return self._additive_error
 
     @additive_error.setter
@@ -275,12 +283,12 @@ class Tempest_datapoint(TdemDataPoint):
     #     return model
 
     def initialize(self, **kwargs):
+        self.reference_additive_error = kwargs.pop('initial_additive_error')
         super().initialize(**kwargs)
 
         if 'initial_receiver_pitch' in kwargs:
             self.receiver.pitch = kwargs['initial_receiver_pitch']
 
-        self.reference_additive_error = kwargs['initial_additive_error']
 
     def _init_posterior_plots(self, gs=None):
         """Initialize axes for posterior plots

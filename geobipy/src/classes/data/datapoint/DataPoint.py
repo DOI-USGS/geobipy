@@ -294,7 +294,7 @@ class DataPoint(Point):
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
-        self._relative_error = StatArray(values, r'$\epsilon_{Relative}x10^{2}$', '%')
+        self._relative_error = StatArray(values, r'$\epsilon_{relative}x10^{2}$', '%')
 
     @property
     def sensitivity_matrix(self):
@@ -569,8 +569,8 @@ class DataPoint(Point):
         return misfit
 
     def initialize(self, **kwargs):
-        self.relative_error = kwargs['initial_relative_error']
-        self.additive_error = kwargs['initial_additive_error']
+        self.relative_error = kwargs.get('initial_relative_error', None)
+        self.additive_error = kwargs.get('initial_additive_error', None)
         # _ = self.std
 
     def perturb(self):

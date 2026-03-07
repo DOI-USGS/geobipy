@@ -5,6 +5,7 @@ from os.path import join
 from copy import deepcopy
 import matplotlib.pyplot as plt
 
+import numpy as np
 from numpy import allclose, arange, asarray, atleast_1d, atleast_2d, float64, full, hstack, int32
 from numpy import nan, ones, r_, repeat, sqrt
 from numpy import s_, shape, size, vstack, zeros
@@ -54,21 +55,36 @@ class TempestData(TdemData):
 
     single = Tempest_datapoint
 
-    __slots__ = ('_additive_error_multiplier')
+    __slots__ = ('_additive_error_multiplier', '_reference_additive_error')
 
     def __init__(self, *args, **kwargs):
 
-        super().__init__(*args, total_field=True, **kwargs)
+        super().__init__(*args, total_field=True, has_primary_field=True, **kwargs)
 
         self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", "%")
         self._relative_error = DataArray((self.n_points, self.n_systems), "Relative error", "%")
 
+        self._reference_additive_error = DataArray((self.n_points, self.n_channels), r"Referece $\epsilon_{additive}$", "%")
         self._additive_error_multiplier = DataArray(ones((self.n_points, self.n_systems)), "multiplier")
+
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+        out._reference_additive_error = deepcopy(self._reference_additive_error, memo)
+        return out
 
     @property
     def additive_error(self):
         if size(self._additive_error, 0) == 0:
-            self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", "%")
+            self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", self.units)
+
+        self._additive_error[...] = 0.0
+        for j in range(self.n_systems):
+            isys = self.system_indices[j]
+            for i in range(self.n_components):
+                ic = self._indices(i, j)
+                self._additive_error[:, isys] += self.reference_additive_error[:, ic]**2.0
+            self._additive_error[isys] = self.additive_error_multiplier[j] * np.sqrt(self._additive_error[isys])
+
         return self._additive_error
 
     @additive_error.setter
@@ -76,8 +92,7 @@ class TempestData(TdemData):
         if values is not None:
             values = atleast_2d(values)
 
-            self.n_points, n_data_channels = size(values, 0), size(values, 1)
-            shp = (self.n_points, n_data_channels)
+            shp = (self.n_points, self.n_data_channels)
             if not allclose(self._additive_error.shape, shp):
                 self._additive_error = DataArray(values, "Additive error", self.units)
                 return
@@ -88,7 +103,7 @@ class TempestData(TdemData):
     def additive_error_multiplier(self):
         """ """
         if size(self._additive_error_multiplier, 0) == 0:
-            self._additive_error_multiplier = DataArray((self.n_points, self.n_systems), "multiplier")
+            self._additive_error_multiplier = DataArray(full((self.n_points, self.n_systems), fill_value=1.0), "multiplier")
         return self._additive_error_multiplier
 
     @additive_error_multiplier.setter
@@ -96,12 +111,29 @@ class TempestData(TdemData):
         if values is not None:
             self.n_points = size(values, 0)
             shp = (self.n_points, self.n_systems)
-            if not allclose(self._additive_error_multiplier.shape, shp):
+            if not np.all(self._additive_error_multiplier.shape == shp):
                 self._additive_error_multiplier = DataArray(values, "multiplier")
                 return
 
             self._additive_error_multiplier[:, :] = values
 
+    @property
+    def reference_additive_error(self):
+        if size(self._reference_additive_error, 0) == 0:
+            self._reference_additive_error = DataArray((self.n_points, self.n_channels), r'reference $\epsilon_{additive}$', self.units)
+        return self._reference_additive_error
+
+    @reference_additive_error.setter
+    def reference_additive_error(self, values):
+        if values is not None:
+            values = atleast_2d(values)
+
+            shp = (self.n_points, self.n_channels)
+            if not allclose(self._reference_additive_error.shape, shp):
+                self._reference_additive_error = DataArray(values, r'reference $\epsilon_{additive}$', self.units)
+                return
+
+            self._reference_additive_error[:, :] = values
 
     @TdemData.std.getter
     def std(self):
@@ -229,12 +261,6 @@ class TempestData(TdemData):
         n_systems = len(system)
 
         self = cls(system=system)
-
-        print(f"{self.total_field=}")
-        print(f"{self.channels_per_system=}")
-        print(f"{self.components=}")
-        print(f"{self.n_channels=}")
-        print(f"{self.n_data_channels=}")
 
         self._n_points, iC, iR, iT, iOffset, iSecondary, iStd, iPrimary = TempestData._csv_channels(data_filename)
 
@@ -689,11 +715,14 @@ class TempestData(TdemData):
         ds.loop_pair = Loop_pair(transmitter, receiver)
 
         ds.relative_error = full((model.x.nCells, 1), fill_value=0.001)
-        # add_error = asarray([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
-        #                      [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]])
+        ref_add_error = asarray([[0.011474, 0.012810, 0.008507, 0.005154, 0.004742, 0.004477, 0.004168, 0.003539, 0.003352, 0.003213, 0.003161, 0.003122, 0.002587, 0.002038, 0.002201],
+                                 [0.007383, 0.005693, 0.005178, 0.003659, 0.003426, 0.003046, 0.003095, 0.003247, 0.002775, 0.002627, 0.002460, 0.002178, 0.001754, 0.001405, 0.001283]]).flatten()
+        ds.reference_additive_error = repeat(ref_add_error[None, :], model.x.nCells, 0)
         # add_error = (add_error**2.0).sum(axis=0)**0.5  # Convert to RMS error
-        add_error = r_[0.0136441 , 0.01401807, 0.00995895, 0.00632076, 0.00585013, 0.00541495, 0.00519146, 0.00480287, 0.00435161, 0.00415024, 0.00400544, 0.00380665, 0.00312555, 0.00247537, 0.00254764]
-        ds.additive_error = repeat(add_error[None, :], model.x.nCells, 0)
+        # add_error = r_[0.0136441 , 0.01401807, 0.00995895, 0.00632076, 0.00585013, 0.00541495, 0.00519146, 0.00480287, 0.00435161, 0.00415024, 0.00400544, 0.00380665, 0.00312555, 0.00247537, 0.00254764]
+        # ds.additive_error = repeat(add_error[None, :], model.x.nCells, 0)
+
+        print(ds.additive_error.shape)
 
         ds.primary_field; ds.secondary_field; ds.data
         ds.std
@@ -722,11 +751,22 @@ class TempestData(TdemData):
         # ds.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
         # ds.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
 
-
-
-        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.n_data_channels))
+        # ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.n_data_channels))
+        ds_noisy.add_noise_to_secondary_field(prng, predicted=False)
 
         return ds, ds_noisy
+
+    def add_noise_to_secondary_field(self, prng, predicted=False):
+
+        data = self.predicted_secondary_field if predicted else self.secondary_field
+        std = DataArray((self.n_points, self.n_channels))
+
+        for j in range(self.n_systems):
+            for i in range(self.n_components):
+                ic = self._indices(i, j)
+                std[:, ic] = sqrt((self.relative_error[:, j][:, None] * data[:, ic])**2 + (self.reference_additive_error[:, ic]**2))
+
+        data += prng.normal(scale=std, size=(self.n_points, self.n_channels))
 
     def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
         """ Create the hdf group metadata in file
