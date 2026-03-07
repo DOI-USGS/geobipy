@@ -5,10 +5,9 @@ from copy import deepcopy
 from os.path import join
 import traceback
 from datetime import timedelta
+from pprint import pprint
 
-from numpy import argwhere, asarray, reshape, size, int64, sum, linspace, float64, int32, uint8
-from numpy import arange, inf, isclose, mod, s_, maximum, any, isnan, sort, nan
-from numpy import max, min, log, log10, array, full, longdouble, exp, maximum, sqrt
+import numpy as np
 
 from numpy.random import Generator
 from numpy.linalg import norm
@@ -79,20 +78,20 @@ class Inference1D(myObject):
 
     def __init__(self,
                  covariance_scaling:float = 1.0,
-                 high_variance:float = inf,
+                 high_variance:float = np.inf,
                  ignore_likelihood:bool = False,
                  interactive_plot:bool = True,
-                 low_variance:float = -inf,
+                 low_variance:float = -np.inf,
                  multiplier:float = 1.0,
                  n_markov_chains:int = 100000,
-                 parameter_limits = None,
+                 value_limits = np.r_[1e-20, 1e20],
                  prng=None,
-                 reciprocate_parameters:bool = False,
+                 reciprocate_value:bool = False,
                  reset_limit:int = 1,
                  save_hdf5:bool = True,
                  save_png:bool = False,
                  solve_gradient:bool = True,
-                 solve_parameter:bool = False,
+                 solve_value:bool = False,
                  update_plot_every:int = 5000,
                  minimum_burn_in:int = 5000,
                  world = None,
@@ -108,13 +107,13 @@ class Inference1D(myObject):
         self.n_markov_chains = n_markov_chains
         self.multiplier = multiplier
         self.solve_gradient = solve_gradient
-        self.solve_parameter = solve_parameter
+        self.solve_value = solve_value
         self.save_hdf5 = save_hdf5
         self.interactive_plot = interactive_plot
         self.save_png = save_png
         self.update_plot_every = update_plot_every
-        self.limits = parameter_limits
-        self.reciprocate_parameter = reciprocate_parameters
+        self.value_limits = value_limits
+        self.reciprocate_value = reciprocate_value
         self.reset_limit = reset_limit
         self.low_variance = low_variance
         self.high_variance = high_variance
@@ -132,9 +131,9 @@ class Inference1D(myObject):
     @property
     def acceptance_percent(self):
         if self.iteration > self.update_plot_every:
-            s = sum(self.acceptance_v[self.iteration-self.update_plot_every:self.iteration]) / float64(self.update_plot_every)
+            s = np.sum(self.acceptance_v[self.iteration-self.update_plot_every:self.iteration]) / np.float64(self.update_plot_every)
         else:
-            s = sum(self.acceptance_v[:self.iteration]) / float64(self.iteration)
+            s = np.sum(self.acceptance_v[:self.iteration]) / np.float64(self.iteration)
         return 100.0 * s
 
     @property
@@ -143,7 +142,9 @@ class Inference1D(myObject):
 
     @covariance_scaling.setter
     def covariance_scaling(self, value):
-        self.options['covariance_scaling'] = float64(value)
+        if value is None:
+            value = 0.5
+        self.options['covariance_scaling'] = np.float64(value)
 
     @property
     def observed_datapoint(self):
@@ -169,11 +170,11 @@ class Inference1D(myObject):
 
     @high_variance.setter
     def high_variance(self, value):
-        self.options['high_variance'] = float64(value)
+        self.options['high_variance'] = np.float64(value)
 
     @cached_property
     def iz(self):
-        return arange(self.model.values.posterior.y.nCells.item())
+        return np.arange(self.model.values.posterior.y.nCells.item())
 
     @property
     def ignore_likelihood(self):
@@ -196,15 +197,15 @@ class Inference1D(myObject):
         self.options['interactive_plot'] = value
 
     @property
-    def limits(self):
-        return self.options['limits']
+    def value_limits(self):
+        return self.options['value_limits']
 
-    @limits.setter
-    def limits(self, values):
+    @value_limits.setter
+    def value_limits(self, values):
         if values is not None:
-            assert size(values) == 2, ValueError("Limits must have length 2")
-            values = sort(asarray(values, dtype=float64))
-        self.options['limits'] = values
+            assert np.size(values) == 2, ValueError("value_limits must have length 2")
+            values = np.sort(np.asarray(values, dtype=np.float64))
+        self.options['value_limits'] = values
 
     @property
     def low_variance(self):
@@ -212,7 +213,16 @@ class Inference1D(myObject):
 
     @low_variance.setter
     def low_variance(self, value):
-        self.options['low_variance'] = float64(value)
+        self.options['low_variance'] = np.float64(value)
+
+    @property
+    def minimum_burn_in(self):
+        return self.options['minimum_burn_in']
+    @minimum_burn_in.setter
+    def minimum_burn_in(self, value):
+        if value is None:
+            value = 5000
+        self.options['minimum_burn_in'] = value
 
     @property
     def model(self):
@@ -233,7 +243,9 @@ class Inference1D(myObject):
 
     @multiplier.setter
     def multiplier(self, value):
-        self.options['multiplier'] = float64(value)
+        if value is None:
+            value = 1.0
+        self.options['multiplier'] = np.float64(value)
 
     @property
     def n_markov_chains(self):
@@ -241,24 +253,46 @@ class Inference1D(myObject):
 
     @n_markov_chains.setter
     def n_markov_chains(self, value):
-        self.options['n_markov_chains'] = int64(value)
+        if value is None:
+            value = 1e5
+        self.options['n_markov_chains'] = np.int64(value)
 
-    @property
-    def reset_limit(self):
-        return self.options['reset_limit']
-
-    @reset_limit.setter
-    def reset_limit(self, value):
-        self.options['reset_limit'] = int64(value)
 
     @property
     def options(self):
         return self._options
 
     @options.setter
-    def options(self, value):
-        assert isinstance(value, dict), TypeError("options must have type dict")
-        self._options = value
+    def options(self, kwargs):
+        assert isinstance(kwargs, dict), TypeError("options must have type dict")
+
+        def rename(names, **kwargs):
+            for this, that in names.items():
+                if this in kwargs:
+                    kwargs[that] = kwargs.pop(this)
+            return kwargs
+
+        def assign_default(key, value, **kwargs):
+            kwargs[key] = value if kwargs.get(key) is None else kwargs.get(key)
+            return kwargs
+
+        # kwargs = self.assign_default('value_standard_deviation', float64(2.39), **kwargs)
+        # kwargs = self.assign_default('gradient_standard_deviation', float64(1.5), **kwargs)
+        # kwargs = self.assign_default('multiplier', float64(1.0), **kwargs)
+        # kwargs = self.assign_default('factor', float64(10.0), **kwargs)
+        # kwargs = self.assign_default('covariance_scaling', float64(1.0), **kwargs)
+        # kwargs = self.assign_default('value_weight', float64(1.0), **kwargs)
+        # kwargs = assign_default('gradient_weight', float64(0.0), **kwargs)
+        # kwargs = self.assign_default('minimum_burn_in', float64(5000.0), **kwargs)
+        # kwargs = assign_default('value_limits', np.r_[1e-20, 1e20], **kwargs)
+        # kwargs = assign_default('stochastic_newton', True, **kwargs)
+
+        # kwargs = rename(dict(number_of_depth_bins="number_of_edge_bins",
+        #                         value_weight="value_weight",
+        #                         value_mean="value_mean"),
+        #                         **kwargs)
+
+        self._options = kwargs
 
     @property
     def prng(self):
@@ -283,13 +317,21 @@ class Inference1D(myObject):
             return 1
 
     @property
-    def reciprocate_parameters(self):
-        return self.options['reciprocate_parameters']
+    def reciprocate_value(self):
+        return self.options['reciprocate_value']
 
-    @reciprocate_parameters.setter
-    def reciprocate_parameters(self, value:bool):
-        assert isinstance(value, bool), ValueError('reciprocate_parameters must have type bool')
-        self.options['reciprocate_parameters'] = value
+    @reciprocate_value.setter
+    def reciprocate_value(self, value:bool):
+        assert isinstance(value, bool), ValueError('reciprocate_value must have type bool')
+        self.options['reciprocate_value'] = value
+
+    @property
+    def reset_limit(self):
+        return self.options['reset_limit']
+
+    @reset_limit.setter
+    def reset_limit(self, value):
+        self.options['reset_limit'] = np.int64(value)
 
     @property
     def save_hdf5(self):
@@ -320,13 +362,13 @@ class Inference1D(myObject):
         self._seed = value
 
     @property
-    def solve_parameter(self):
-        return self.options['solve_parameter']
+    def solve_value(self):
+        return self.options['solve_value']
 
-    @solve_parameter.setter
-    def solve_parameter(self, value:bool):
-        assert isinstance(value, bool), ValueError('solve_parameter must have type bool')
-        self.options['solve_parameter'] = value
+    @solve_value.setter
+    def solve_value(self, value:bool):
+        assert isinstance(value, bool), ValueError('solve_value must have type bool')
+        self.options['solve_value'] = value
 
     @property
     def solve_gradient(self):
@@ -347,7 +389,7 @@ class Inference1D(myObject):
 
     @update_plot_every.setter
     def update_plot_every(self, value):
-        self.options['update_plot_every'] = int32(value)
+        self.options['update_plot_every'] = np.int32(value)
 
     @property
     def world(self):
@@ -386,15 +428,15 @@ class Inference1D(myObject):
         self.data_misfit_v = StatArray(2 * self.n_markov_chains, name='Data Misfit')
         self.data_misfit_v[0] = self.data_misfit
         self._n_target_hits = 0
-        self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
+        self.data_misfit_v.prior = Distribution('chi2', df=np.sum(self.datapoint.active), prng=self.prng)
 
         # # Calibrate the response if it is being solved for
         # if (self.kwargs.solveCalibration):
         #     self.datapoint.calibrate()
 
         # Evaluate the prior for the current model
-        self.prior = self.model.probability(self.solve_parameter,
-                                            self.solve_gradient)
+        self.prior = self.model.probability(solve_value=self.solve_value,
+                                            solve_gradient=self.solve_gradient)
 
         self.prior += self.datapoint.probability
 
@@ -407,24 +449,24 @@ class Inference1D(myObject):
         if not self.ignore_likelihood:
             self.likelihood = self.datapoint.likelihood(log=True)
             self.burned_in = False
-            self.burned_in_iteration = int64(0)
+            self.burned_in_iteration = np.int64(0)
 
         self.posterior = self.likelihood + self.prior
 
         # Initialize the current iteration number
         # Current iteration number
-        self.iteration = int64(0)
+        self.iteration = np.int64(0)
 
         # Initialize the vectors to save results
         # StatArray of the data misfit
         self.relative_chi_squared_fit = 100.0
 
-        edges = DataArray(linspace(1, 2*sum(self.datapoint.active)))
+        edges = DataArray(np.linspace(1, 2*np.sum(self.datapoint.active)))
         self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
 
         # Initialize a stopwatch to keep track of time
         self.clk = Stopwatch()
-        self.invTime = float64(0.0)
+        self.invTime = np.float64(0.0)
 
         # Return none if important parameters are not used (used for hdf 5)
         if datapoint is None:
@@ -444,28 +486,28 @@ class Inference1D(myObject):
         # Logical whether to take the reciprocal of the parameters
 
         # Multiplier for discrepancy principle
-        self.multiplier = float64(1.0)
+        self.multiplier = np.float64(1.0)
 
         # Initialize the acceptance level
         # Model acceptance rate
         self.accepted = 0
 
-        self.acceptance_v = DataArray(full(2 * self.n_markov_chains, fill_value=0, dtype=uint8), name='% Acceptance')
+        self.acceptance_v = DataArray(np.full(2 * self.n_markov_chains, fill_value=0, dtype=np.uint8), name='% Acceptance')
 
-        n = 2 * int32(self.n_markov_chains / self.update_plot_every)
-        self.acceptance_x = DataArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
-        self.acceptance_rate = DataArray(full(n, fill_value=nan), name='% Acceptance')
+        n = 2 * np.int32(self.n_markov_chains / self.update_plot_every)
+        self.acceptance_x = DataArray(np.arange(1, n + 1) * self.update_plot_every, name='Iteration #')
+        self.acceptance_rate = DataArray(np.full(n, fill_value=np.nan), name='% Acceptance')
 
-        self.iRange = DataArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
+        self.iRange = DataArray(np.arange(2 * self.n_markov_chains), name="Iteration #", dtype=np.int64)
 
         # Initialize time in seconds
-        self.inference_time = float64(0.0)
+        self.inference_time = np.float64(0.0)
 
         # Initialize the best data, current data and best model
         self.best_model = deepcopy(self.model)
         self.best_datapoint = deepcopy(self.datapoint)
         self.best_posterior = self.posterior
-        self.best_iteration = int64(0)
+        self.best_iteration = np.int64(0)
 
         # if self.interactive_plot:
         #     self._init_posterior_plots()
@@ -487,28 +529,30 @@ class Inference1D(myObject):
         self.datapoint.set_posteriors()
 
     def initialize_model(self, **kwargs):
+
         # Find the conductivity of a half space model that best fits the data
         halfspace = self.datapoint.find_best_halfspace()
 
         # dprint('halfspace', halfspace.values)
         self.halfspace = halfspace.values
 
+        kwargs['value_mean'] = kwargs.pop('value_mean', halfspace.values.item()),
+
         # Create an initial model for the first iteration
         # Initialize a 1D model with the half space conductivity
         # Assign the depth to the interface as half the bounds
         self.model = deepcopy(halfspace)
 
+        print(f"Best fitting halfspace {halfspace.values.item()}", flush=True)
+
+        kwargs.pop('solve_value', None)
         # Setup the model for perturbation
         self.model.set_priors(
-            value_mean=kwargs.pop('value_mean', halfspace.values.item()),
+            solve_value = True,
             min_edge=kwargs['minimum_depth'],
             max_edge=kwargs['maximum_depth'],
             max_cells=kwargs['maximum_number_of_layers'],
-            solve_value=True, #self.solve_parameter,
-            # solve_gradient=self.solve_gradient,
-            parameter_limits=self.limits,
             min_width=kwargs.get('minimum_thickness', None),
-            # factor=kwargs.get('factor', 10.0),
             **kwargs
         )
 
@@ -529,15 +573,15 @@ class Inference1D(myObject):
 
         local_variance = self.model.local_variance(observation)
 
-        # Instantiate the proposal for the parameters.
-        parameterProposal = Distribution('MvLogNormal', mean=self.model.values, variance=local_variance, linearSpace=True, prng=self.prng)
+        # Instantiate the proposal for the values.
+        value_proposal = Distribution('MvLogNormal', mean=self.model.values, variance=local_variance, linearSpace=True, prng=self.prng)
 
         probabilities = [kwargs['probability_of_birth'],
                          kwargs['probability_of_death'],
                          kwargs['probability_of_perturb'],
                          kwargs['probability_of_no_change']]
 
-        self.model.set_proposals(probabilities=probabilities, proposal=parameterProposal, **kwargs)
+        self.model.set_proposals(probabilities=probabilities, proposal=value_proposal, **kwargs)
 
         self.model.set_posteriors(**kwargs)
 
@@ -565,15 +609,19 @@ class Inference1D(myObject):
         #     print(traceback.format_exc())
         #     return True
 
+        dprint(f"{test_model.values=}")
+
         if remapped_model is None:
             self.accepted = False
             return
 
-        # # Propose a new data point, using assigned proposal distributions
+        # Propose a new data point, using assigned proposal distributions
         test_datapoint.perturb()
 
         # Forward model the data from the candidate model
         test_datapoint.forward(test_model)
+
+        dprint(f"{test_datapoint.predicted_data=}")
 
         # J is now centered on the perturbed
         test_data_misfit = test_datapoint.data_misfit()
@@ -582,17 +630,19 @@ class Inference1D(myObject):
         # Evaluate the prior for the current data
         test_prior = test_datapoint.probability
         # Test for early rejection
-        if (test_prior == -inf):
+        if (test_prior == -np.inf):
             self.accepted = False
             return
+        dprint(f"data - {test_prior=}")
 
         # Evaluate the prior for the current model
-        test_prior += test_model.probability(self.solve_parameter, self.solve_gradient)
-
+        test_prior += test_model.probability(solve_value=self.solve_value,
+                                             solve_gradient=self.solve_gradient)
         # Test for early rejection
-        if (test_prior == -inf):
+        if (test_prior == -np.inf):
             self.accepted = False
             return
+        dprint(f"model - {test_prior=}")
 
         # Compute the components of each acceptance ratio
         test_likelihood = 1.0
@@ -601,9 +651,13 @@ class Inference1D(myObject):
             test_likelihood = test_datapoint.likelihood(log=True)
             observation = test_datapoint
 
+        dprint(f"{test_likelihood=}")
+
         proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation, alpha = self.covariance_scaling)
+        dprint(f"{proposal=} {test_proposal=}")
 
         test_posterior = test_prior + test_likelihood
+        dprint(f"{test_posterior=}")
 
         prior_ratio = test_prior - self.prior
 
@@ -611,8 +665,14 @@ class Inference1D(myObject):
 
         proposal_ratio = proposal - test_proposal
 
+        dprint(f"{prior_ratio=}")
+        dprint(f"{likelihood_ratio=}")
+        dprint(f"{proposal_ratio=}")
+
         log_acceptance_ratio = prior_ratio + likelihood_ratio + proposal_ratio
         acceptance_probability = expReal(log_acceptance_ratio)
+
+        dprint(f"{acceptance_probability=}")
 
         # If we accept the model
         self.accepted = acceptance_probability > self.prng.uniform()
@@ -628,9 +688,10 @@ class Inference1D(myObject):
             # Reset the sensitivity locally to the newly accepted model
             # self.datapoint.sensitivity(self.model, model_changed=False)
 
-        dprint('accepted', self.accepted)
+        dbg = dprint('accepted', self.accepted)
 
-        # input('NEXT')
+        if dbg:
+            input('NEXT')
 
         return False
 
@@ -660,7 +721,7 @@ class Inference1D(myObject):
 
             if self.interactive_plot:
                 self.plot_posteriors(axes=self.posterior_ax,
-                                     title="Fiducial {}".format(self.datapoint.fiducial),
+                                     title=f"Fiducial {self.datapoint.fiducial}",
                                      increment=self.update_plot_every)
 
             Go = not failed and (self.iteration <= self.n_markov_chains + self.burned_in_iteration)
@@ -703,11 +764,13 @@ class Inference1D(myObject):
     def hitmap(self):
         return self.model.values.posterior
 
-    @cached_property
+    # @cached_property
+    @property
     def chisquare_pdf(self):
         return self.data_misfit_v.prior.probability(self.data_misfit_v.posterior.mesh.centres, log=False)
 
-    @cached_property
+    # @cached_property
+    @property
     def norm_chisquare(self):
         return norm(self.chisquare_pdf)
 
@@ -719,11 +782,11 @@ class Inference1D(myObject):
         self.data_misfit_v[self.iteration - 1] = self.data_misfit
 
         # Check the fit of the chi square distribution with theoretical
-        self.relative_chi_squared_fit = norm(self.data_misfit_v.posterior.pdf.values - self.chisquare_pdf)/self.norm_chisquare
+        self.relative_chi_squared_fit = norm(self.data_misfit_v.posterior.pdf.values - self.chisquare_pdf) / self.norm_chisquare
 
         # Determine if we are burning in
         if (not self.burned_in):
-            target_misfit = sum(self.datapoint.active)
+            target_misfit = np.sum(self.datapoint.active)
 
             # # if self.data_misfit < target_misfit:
             # if (self.iteration > 10000) and (isclose(self.data_misfit, self.multiplier*target_misfit, rtol=1e-1, atol=1e-2)):
@@ -752,12 +815,12 @@ class Inference1D(myObject):
             self.best_datapoint = deepcopy(self.datapoint)
             self.best_posterior = self.posterior
 
-        self.acceptance_v[self.iteration] = self.accepted
+        self.acceptance_v[self.iteration.item()] = self.accepted
 
-        if ((self.iteration > 0) and (mod(self.iteration, self.update_plot_every) == 0)):
-            self.acceptance_rate[int32(self.iteration / self.update_plot_every)-1] = self.acceptance_percent
+        if ((self.iteration > 0) and (np.mod(self.iteration, self.update_plot_every) == 0)):
+            self.acceptance_rate[np.int32(self.iteration / self.update_plot_every)-1] = self.acceptance_percent
 
-        if (mod(self.iteration, self.update_plot_every) == 0):
+        if (np.mod(self.iteration, self.update_plot_every) == 0):
             time_per_model = self.clk.lap() / self.update_plot_every
             elapsed = self.clk.timeinSeconds()
             burned_in = "" if self.burned_in else "*"
@@ -766,7 +829,7 @@ class Inference1D(myObject):
             if self.burned_in:
                 eta = str(timedelta(seconds=int(time_per_model * (self.n_markov_chains + self.burned_in_iteration - self.iteration))))
 
-            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed, eta=%s h:m:s\n" % (self.iteration, float64(self.model.nCells[0]), burned_in, self.acceptance_percent, time_per_model, elapsed, eta)
+            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed, eta=%s h:m:s\n" % (self.iteration, np.float64(self.model.nCells[0]), burned_in, self.acceptance_percent, time_per_model, elapsed, eta)
             if (self.rank == 1):
                 print(tmp, flush=True)
 
@@ -839,7 +902,7 @@ class Inference1D(myObject):
 
         plot = True
         if increment is not None:
-            if (mod(self.iteration, increment) != 0):
+            if (np.mod(self.iteration, increment) != 0):
                 plot = False
 
         if not plot:
@@ -915,7 +978,7 @@ class Inference1D(myObject):
         kwargs['linestyle'] = kwargs.get('linestyle', 'none')
         kwargs['markeredgecolor'] = kwargs.get('markeredgecolor', 'k')
 
-        i = s_[:int64(self.iteration / self.update_plot_every)]
+        i = np.s_[:np.int64(self.iteration / self.update_plot_every)]
 
         self.acceptance_rate.plot(x=self.acceptance_x, i=i, color='k', **kwargs)
         kwargs['ax'].axhline(y=23.4, color='#C92641', linestyle='dashed')
@@ -931,7 +994,7 @@ class Inference1D(myObject):
 
         ax = self.posterior_ax['misfit']
         ax.cla()
-        tmp_ax = self.data_misfit_v.plot(self.iRange, i=s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, ax=ax, **kwargs)
+        tmp_ax = self.data_misfit_v.plot(self.iRange, i=np.s_[:self.iteration], marker=m, alpha=a, linestyle=ls, color=c, ax=ax, **kwargs)
         ax.set_ylabel('Data Misfit')
 
         dum = self.multiplier * self.data_misfit_v.prior.df
@@ -947,7 +1010,7 @@ class Inference1D(myObject):
         if not self.burned_in:
             self.data_misfit_v.reset_posteriors()
 
-        self.data_misfit_v.posterior.update(self.data_misfit_v[maximum(0, self.iteration-self.update_plot_every):self.iteration], trim=True)
+        self.data_misfit_v.posterior.update(self.data_misfit_v[np.maximum(0, self.iteration-self.update_plot_every):self.iteration], trim=True)
 
         ax = self.posterior_ax['chisq']
         ax.cla()
@@ -1025,42 +1088,42 @@ class Inference1D(myObject):
         assert self.datapoint is not None, ValueError("Inference needs a datapoint before creating HDF5 files.")
 
         if add_axis is not None:
-            if not isinstance(add_axis, (int, int32, int64)):
-                add_axis = size(add_axis)
+            if not isinstance(add_axis, (int, np.integer)):
+                add_axis = np.size(add_axis)
 
-        self.datapoint.createHdf(parent, 'data', add_axis=add_axis, fillvalue=nan)
+        self.datapoint.createHdf(parent, 'data', add_axis=add_axis, fillvalue=np.nan)
 
         # Initialize and write the attributes that won't change
         parent.create_dataset('update_plot_every', data=self.update_plot_every)
         parent.create_dataset('interactive_plot', data=self.interactive_plot)
-        parent.create_dataset('reciprocate_parameter', data=self.reciprocate_parameter)
+        parent.create_dataset('reciprocate_value', data=self.reciprocate_value)
 
-        if not self.limits is None:
-            parent.create_dataset('limits', data=self.limits)
+        if not self.value_limits is None:
+            parent.create_dataset('value_limits', data=self.value_limits)
 
         parent.create_dataset('n_markov_chains', data=self.n_markov_chains)
-        parent.create_dataset('nsystems', data=self.datapoint.nSystems)
+        parent.create_dataset('nsystems', data=self.datapoint.n_systems)
 
         # Initialize the attributes that will be written later
         s = add_axis
         if add_axis is None:
             s = 1
 
-        parent.create_dataset('iteration', shape=(s), dtype=self.iteration.dtype, fillvalue=nan)
-        parent.create_dataset('burned_in_iteration', shape=(s), dtype=self.burned_in_iteration.dtype, fillvalue=nan)
-        parent.create_dataset('best_iteration', shape=(s), dtype=self.best_iteration.dtype, fillvalue=nan)
+        parent.create_dataset('iteration', shape=(s), dtype=self.iteration.dtype, fillvalue=np.nan)
+        parent.create_dataset('burned_in_iteration', shape=(s), dtype=self.burned_in_iteration.dtype, fillvalue=np.nan)
+        parent.create_dataset('best_iteration', shape=(s), dtype=self.best_iteration.dtype, fillvalue=np.nan)
         parent.create_dataset('burned_in', shape=(s), dtype=type(self.burned_in), fillvalue=0)
-        parent.create_dataset('multiplier',  shape=(s), dtype=self.multiplier.dtype, fillvalue=nan)
-        parent.create_dataset('invtime',  shape=(s), dtype=float, fillvalue=nan)
-        parent.create_dataset('savetime',  shape=(s), dtype=float, fillvalue=nan)
+        parent.create_dataset('multiplier',  shape=(s), dtype=self.multiplier.dtype, fillvalue=np.nan)
+        parent.create_dataset('invtime',  shape=(s), dtype=float, fillvalue=np.nan)
+        parent.create_dataset('savetime',  shape=(s), dtype=float, fillvalue=np.nan)
 
-        self.acceptance_v.createHdf(parent, 'acceptance_rate', add_axis=add_axis, fillvalue=nan)
-        self.data_misfit_v.createHdf(parent, 'phids', add_axis=add_axis, fillvalue=nan)
-        self.halfspace.createHdf(parent, 'halfspace', add_axis=add_axis, fillvalue=nan)
+        self.acceptance_v.createHdf(parent, 'acceptance_rate', add_axis=add_axis, fillvalue=np.nan)
+        self.data_misfit_v.createHdf(parent, 'phids', add_axis=add_axis, fillvalue=np.nan)
+        self.halfspace.createHdf(parent, 'halfspace', add_axis=add_axis, fillvalue=np.nan)
 
         # Since the 1D models change size adaptively during the inversion, we need to pad the HDF creation to the maximum allowable number of layers.
         tmp = self.model.pad(self.model.mesh.max_cells)
-        tmp.createHdf(parent, 'model', add_axis=add_axis, fillvalue=nan)
+        tmp.createHdf(parent, 'model', add_axis=add_axis, fillvalue=np.nan)
 
         return parent
 
@@ -1129,19 +1192,19 @@ class Inference1D(myObject):
         self = cls(
                 interactive_plot = True,
                 multiplier = hdfRead.readKeyFromFile(hdfFile, '', '/', 'multiplier', index=index),
-                n_markov_chains = array(hdfFile.get('n_markov_chains', 100000)),
-                parameter_limits = None if not 'limits' in hdfFile else hdfFile.get('limits'),
-                reciprocate_parameters = array(hdfFile.get('reciprocate_parameter', False)),
+                n_markov_chains = np.array(hdfFile.get('n_markov_chains', 100000)),
+                value_limits = None if not 'value_limits' in hdfFile else hdfFile.get('value_limits'),
+                reciprocate_value = np.array(hdfFile.get('reciprocate_value', False)),
                 save_hdf5 = False,
                 save_png = False,
-                update_plot_every = array(hdfFile.get('update_plot_every', 5000)),
+                update_plot_every = np.array(hdfFile.get('update_plot_every', 5000)),
                 dont_initialize = True,
                 prng=prng)
         self.datapoint = hdfRead.readKeyFromFile(hdfFile, '', '/', 'data', index=index)
 
-        s = s_[index, :]
+        s = np.s_[index, :]
 
-        self.nSystems = array(hdfFile.get('nsystems'))
+        self.n_systems = np.array(hdfFile.get('nsystems'))
 
         key = 'iteration' if 'iteration' in hdfFile else 'i'
         self.iteration = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=index)
@@ -1156,14 +1219,14 @@ class Inference1D(myObject):
         self.acceptance_rate = hdfRead.readKeyFromFile(hdfFile, '', '/', key, index=s)
 
         # Compute the x axis for acceptance since its every X iterations.
-        n = 2 * int32(self.n_markov_chains / self.update_plot_every)
-        self.acceptance_x = DataArray(arange(1, n + 1) * self.update_plot_every, name='Iteration #')
+        n = 2 * np.int32(self.n_markov_chains / self.update_plot_every)
+        self.acceptance_x = DataArray(np.arange(1, n + 1) * self.update_plot_every, name='Iteration #')
 
         self.best_datapoint = self.datapoint
 
         self.data_misfit_v = StatArray(hdfRead.readKeyFromFile(hdfFile, '', '/', 'phids', index=s))
-        self.data_misfit_v.prior = Distribution('chi2', df=sum(self.datapoint.active), prng=self.prng)
-        edges = DataArray(linspace(1, 2*sum(self.datapoint.active)))
+        self.data_misfit_v.prior = Distribution('chi2', df=np.sum(self.datapoint.active), prng=self.prng)
+        edges = DataArray(np.linspace(1, 2*np.sum(self.datapoint.active)))
         self.data_misfit_v.posterior = Histogram(mesh = RectilinearMesh1D(edges=edges))
 
 
@@ -1175,11 +1238,11 @@ class Inference1D(myObject):
 
         self.Hitmap = self.model.values.posterior
 
-        self.invTime = array(hdfFile.get('invtime')[index])
-        self.saveTime = array(hdfFile.get('savetime')[index])
+        self.invTime = np.array(hdfFile.get('invtime')[index])
+        self.saveTime = np.array(hdfFile.get('savetime')[index])
 
         # Initialize a list of iteration number
-        self.iRange = DataArray(arange(2 * self.n_markov_chains), name="Iteration #", dtype=int64)
+        self.iRange = DataArray(np.arange(2 * self.n_markov_chains), name="Iteration #", dtype=np.int64)
 
         self.verbose = False
 
