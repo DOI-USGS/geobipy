@@ -1,46 +1,56 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+build-backend = "hatchling.build"
+requires = ["hatchling", "hatch-requirements-txt", "hatch-vcs"]
 
 [project]
 name = "geobipy"
-version = "2.3.2"
-description = "McMC inversion of airborne electromagnetic data"
-readme = { file = "README.rst", content-type = "text/x-rst" }
-requires-python = ">=3.10"
 authors = [{ name = "Leon Foks",     email = "nfoks@contractor.usgs.gov" },
            { name = "Burke Minsley", email = "bminsley@usgs.gov" }]
-keywords = ["inversion", "bayesian"]
-dependencies = [
-            "numpy",
-            "scipy >= 1.15.3",
-            "h5py",
-            "numba",
-            "pandas",
-            "netcdf4",
-            "matplotlib",
-            "pyvista",
-            "progressbar2",
-            "cached-property",
-            "scikit-learn",
-            "pygmt",
-            "numba_kdtree",
-            "lmfit",
-            "mpi4py_utilities"]
+description = "McMC inversion of airborne electromagnetic data"
+dynamic = ["version", "dependencies", "urls"]
+keywords = ["inversion", "bayesian", "geophysics"]
 classifiers = [
     'License :: OSI Approved',
-    'License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication',
     'License :: OSI Approved :: GNU General Public License v2 (GPLv2)',
     'License :: OSI Approved :: BSD License',
     'Programming Language :: Python :: 3',
     'Topic :: Scientific/Engineering'
 ]
 
+readme = { file = "README.rst", content-type = "text/x-rst" }
+requires-python = ">=3.14"
+
 [project.optional-dependencies]
-docs = ["sphinx_gallery", "sphinx_rtd_theme"]
+docs = ["sphinx_gallery",
+        "sphinx_rtd_theme"]
 
 [project.scripts]
 geobipy = "geobipy:geobipy"
 
-[tool.setuptools.packages.find]
-where = ["."]
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["geobipy"]
+
+# Version control
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+version_scheme = "no-guess-dev"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "geobipy/_version.py"
+
+[tool.hatch.metadata.hooks.vcs]
+
+[tool.hatch.metadata.hooks.vcs.urls]
+Documentation = "https://doi-usgs.github.io/geobipy/"
+Issues = "https://github.com/DOI-USGS/geobipy/issues"
+Source = "https://github.com/DOI-USGS/geobipy"
+Homepage = "https://github.com/DOI-USGS/geobipy"
+source_archive = "https://github.com/DOI-USGS/geobipy/archive/{commit_hash}.zip"

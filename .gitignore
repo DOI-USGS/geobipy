@@ -18,3 +18,4 @@ build
 *.vtk
 *.egg
 *.out
+_version.py
