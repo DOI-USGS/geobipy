@@ -13,3 +13,4 @@ pygmt
 numba_kdtree
 lmfit
 mpi4py_utilities
+numpy-quaddtype

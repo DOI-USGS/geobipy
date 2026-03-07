@@ -9,6 +9,7 @@ from numpy import real, s_, shape, sign, sin, size, squeeze, where, zeros
 from numpy import all as npall
 from numpy import log as nplog
 import numpy as np
+import numpy_quaddtype as npq
 
 from numpy.linalg import cholesky, det, slogdet
 from numpy.linalg import inv as npinv
@@ -807,9 +808,9 @@ def expReal(this):
     if np.size(this) == 1:
         if this > tol:
             return np.inf
-        return np.exp(this)
+        return np.exp(npq.QuadPrecision(this))
 
-    out = np.full(np.size(this), fill_value=np.inf)
+    out = np.full(np.size(this), fill_value=np.inf, dtype=npq.QuadPrecision)
     i = squeeze(np.argwhere(this <= tol))
     out[i] = np.exp(this[i])
     return out
