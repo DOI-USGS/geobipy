@@ -143,7 +143,7 @@ class DataArray(ndarray, myObject):
 
         # Can pass in a numpy function call like arange(10) as the first argument
         elif isinstance(shape, ndarray):
-            self = shape.view(cls)
+            self = shape.copy().view(cls)
 
         elif isinstance(shape, (float, float32, float64)):
             self = ndarray.__new__(cls, 1, **kwargs)
