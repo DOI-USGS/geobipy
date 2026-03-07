@@ -308,13 +308,13 @@ class DataArray(ndarray, myObject):
     #     values = self.flatten()
     #     return st.t.interval(interval, self.size - 1, loc=mean(values), scale=st.sem(values))
 
-    def copy(self, order='F'):
-        return type(self)(self)
+    # def copy(self, order='F'):
+    #     return type(self)(self)
 
-    def __deepcopy__(self, memo={}):
+    # def __deepcopy__(self, memo={}):
 
-        other = type(self)(self, dtype=self.dtype)
-        return other
+    #     other = type(self)(self, dtype=self.dtype)
+    #     return other
 
     def delete(self, i, axis=None):
         """Delete elements
