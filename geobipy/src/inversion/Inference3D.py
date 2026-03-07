@@ -58,7 +58,7 @@ class Inference3D(myObject):
 
         # self.directory = directory
         # self._h5files = None
-        # self._nPoints = None
+        # self._n_points = None
         # self.cumNpoints = None
         # self.bounds = None
 
@@ -81,7 +81,7 @@ class Inference3D(myObject):
         # self.best3D = None
         # self._facies = None
         # self.system_file_path = system_file_path
-        # self.nPoints
+        # self.n_points
 
     def __deepcopy__(self, memo={}):
         return None
@@ -186,9 +186,9 @@ class Inference3D(myObject):
     def point_chunks(self):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         if self.parallel_access:
-            _, _point_chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+            _, _point_chunks = loadBalance1D_shrinkingArrays(self.n_points, self.world.size)
         else:
-            _point_chunks = full(1, fill_value=self.nPoints, dtype=int32)
+            _point_chunks = full(1, fill_value=self.n_points, dtype=int32)
         return _point_chunks
 
     @property
@@ -200,7 +200,7 @@ class Inference3D(myObject):
     def point_starts(self):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         if self.parallel_access:
-            _point_starts, _ = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+            _point_starts, _ = loadBalance1D_shrinkingArrays(self.n_points, self.world.size)
         else:
             _point_starts = zeros(1, dtype=int32)
         return _point_starts
@@ -329,8 +329,8 @@ class Inference3D(myObject):
             with h5py.File(join(directory, '{}.h5'.format(line)), 'w', **kwargs) as f:
                 Inference2D(subset, prng=self.prng).createHdf(f, inference1d)
 
-            self.print('Created hdf5 file for line {} with {} data points'.format(line, subset.nPoints))
-        self.print('Created hdf5 files {} total data points'.format(self.data.nPoints))
+            self.print('Created hdf5 file for line {} with {} data points'.format(line, subset.n_points))
+        self.print('Created hdf5 files {} total data points'.format(self.data.n_points))
 
         if self.parallel_access:
             self.world.barrier()
@@ -424,7 +424,7 @@ class Inference3D(myObject):
             return self.marginalProbability[:, :, kwargs["index"]].T
 
     def additiveError(self, slic=None):
-        op = vstack if self.nSystems > 1 else hstack
+        op = vstack if self.n_systems > 1 else hstack
         out = StatArray(op([line.additiveError for line in self.lines]), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units)
         for line in self.lines:
             line.uncache('additiveError')
@@ -442,8 +442,8 @@ class Inference3D(myObject):
         t0 = time.time()
         self.data = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
-        nPoints = self.data.nPoints
-        r = range(nPoints)
+        n_points = self.data.n_points
+        r = range(n_points)
         if index is None:
             if fiducial is not None:
 
@@ -454,14 +454,14 @@ class Inference3D(myObject):
 
                 index = squeeze(argwhere(tmp))
 
-                nPoints = 1
+                n_points = 1
                 r = range(index, index+1)
         else:
-            nPoints = 1
+            n_points = 1
             r = range(index, index+1)
 
         for i in r:
-            rec = i if nPoints == 1 else None
+            rec = i if n_points == 1 else None
             datapoint = self.data._read_record(record = i)
 
             # Pass through the line results file object if a parallel file system is in use.
@@ -479,8 +479,8 @@ class Inference3D(myObject):
             e = time.time() - t0
             elapsed = str(timedelta(seconds=e))
 
-            eta = str(timedelta(seconds=(float64(nPoints) / float64(i+1)) * e))
-            print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nPoints-i-1, nPoints, elapsed, eta))
+            eta = str(timedelta(seconds=(float64(n_points) / float64(i+1)) * e))
+            print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(n_points-i-1, n_points, elapsed, eta))
 
         self.data.close()
 
@@ -510,7 +510,7 @@ class Inference3D(myObject):
         self.data = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
 
         # Set the total number of data points
-        nPoints = self.data.nPoints
+        n_points = self.data.n_points
 
         nFinished = 0
         nSent = 0
@@ -537,7 +537,7 @@ class Inference3D(myObject):
         myMPI.print("Initial data points sent. Head rank is now waiting for requests")
 
         # Now wait to send indices out to the workers as they finish until the entire data set is finished
-        while nFinished < nPoints:
+        while nFinished < n_points:
             # Wait for a worker to request the next data point
             status = MPI.Status()
             dummy = world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
@@ -546,7 +546,7 @@ class Inference3D(myObject):
             nFinished += 1
 
             # Read the next data point from the file
-            if nSent == nPoints:
+            if nSent == n_points:
                 datapoint = None
             else:
                 datapoint = self.data._read_record(nSent, mpi_enabled=True)
@@ -561,13 +561,13 @@ class Inference3D(myObject):
 
                 nSent += 1
 
-            report = ((nFinished % (world.size - 1)) == 0) or (nFinished >= nPoints)
+            report = ((nFinished % (world.size - 1)) == 0) or (nFinished >= n_points)
 
             if report:
                 e = MPI.Wtime() - t0
                 elapsed = str(timedelta(seconds=e))
-                eta = str(timedelta(seconds=(nPoints / nFinished-1) * e))
-                myMPI.print("Points sent {} || Remaining {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nSent, nPoints-nFinished, nPoints, elapsed, eta))
+                eta = str(timedelta(seconds=(n_points / nFinished-1) * e))
+                myMPI.print("Points sent {} || Remaining {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(nSent, n_points-nFinished, n_points, elapsed, eta))
 
     def _infer_mpi_worker_task(self, **options):
         """ Define a wait run ping procedure for each worker """
@@ -622,7 +622,7 @@ class Inference3D(myObject):
     # @cached_property
     # def additiveError(self):
 
-    #     additiveError = StatArray((self.nSystems, self.nPoints), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
+    #     additiveError = StatArray((self.n_systems, self.n_points), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
 
     #     print("Reading Additive Errors Posteriors", flush=True)
     #     bar = self.loop_over(self.nLines)
@@ -670,7 +670,7 @@ class Inference3D(myObject):
     def marginalProbability(self):
 
         mp = self.lines[0].marginal_probability()
-        marginalProbability = StatArray((self.nPoints, self.zGrid.nCells.item(), mp.shape[-1]), name=mp.name, units=mp.units)
+        marginalProbability = StatArray((self.n_points, self.zGrid.nCells.item(), mp.shape[-1]), name=mp.name, units=mp.units)
         marginalProbability[self.lineIndices[0], :, :] = mp
 
         print('Reading marginal probability', flush=True)
@@ -732,7 +732,7 @@ class Inference3D(myObject):
         """
         for line in self.lines:
             if not 'doi' in line.hdf_file:
-                doi = StatArray(line.nPoints, 'Depth of investigation', line.height.units)
+                doi = StatArray(line.n_points, 'Depth of investigation', line.height.units)
                 doi.createHdf(line.hdf_file, 'doi')
 
         if self.parallel_access:
@@ -776,7 +776,7 @@ class Inference3D(myObject):
             local_mixture_h5 = h5py.File(local_mixture_hdf5, 'r', driver='mpio', comm=self.world)
             probabilities_h5 = h5py.File('P_class.h5', 'w', driver='mpio', comm=self.world)
 
-            starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+            starts, chunks = loadBalance1D_shrinkingArrays(self.n_points, self.world.size)
             r = range(starts[self.rank], starts[self.rank] + chunks[self.rank])
 
             if self.rank == 0:
@@ -789,13 +789,13 @@ class Inference3D(myObject):
             probabilities_h5 = h5py.File('P_class.h5', 'w')
 
             Bar = progressbar.ProgressBar()
-            r = Bar(range(self.nPoints))
+            r = Bar(range(self.n_points))
 
 
 
         # Create the space in HDF5
         probabilities = StatArray((z.nCells.value, global_mixture.n_components), name='probabilities')
-        probabilities.createHdf(probabilities_h5, 'probabilities', nRepeats=self.nPoints)
+        probabilities.createHdf(probabilities_h5, 'probabilities', nRepeats=self.n_points)
 
         for i in r:
             # Read the local fits
@@ -823,7 +823,7 @@ class Inference3D(myObject):
 
             hdf_file = h5py.File(filename, 'w', driver='mpio', comm=self.world)
 
-            StatArray().createHdf(hdf_file, 'probabilities', shape=(self.nPoints, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=nan)
+            StatArray().createHdf(hdf_file, 'probabilities', shape=(self.n_points, distribution.ndim, self.lines[0].mesh.y.nCells), fillvalue=nan)
 
             r = range(self.line_starts[self.rank], self.line_ends[self.rank])
             self.world.barrier()
@@ -1014,7 +1014,7 @@ class Inference3D(myObject):
 
     @cached_property
     def interface_probability(self):
-        interfaces = StatArray((self.nPoints, self.zGrid.nCells.item()), name='P(interface)')
+        interfaces = StatArray((self.n_points, self.zGrid.nCells.item()), name='P(interface)')
 
         print("Reading Depth Posteriors", flush=True)
         Bar=progressbar.ProgressBar()
@@ -1030,7 +1030,7 @@ class Inference3D(myObject):
         lineIndices = []
         i0 = 0
         for i in range(self.nLines):
-            i1 = i0 + self.lines[i].nPoints
+            i1 = i0 + self.lines[i].n_points
             lineIndices.append(s_[i0:i1])
             i0 = i1
 
@@ -1073,21 +1073,21 @@ class Inference3D(myObject):
         return nActive
 
     @property
-    def nPoints(self):
+    def n_points(self):
         """ Get the total number of data points """
-        tmp = asarray([line.nPoints for line in self.lines])
+        tmp = asarray([line.n_points for line in self.lines])
         self._cumNpoints = cumsum(tmp)
         return sum(tmp)
 
     @property
-    def nSystems(self):
+    def n_systems(self):
         """ Get the number of systems """
-        return self.lines[0].nSystems
+        return self.lines[0].n_systems
 
     @cached_property
     def opacity(self):
 
-        opacity = StatArray((self.zGrid.nCells.item(), self.nPoints), order = 'F')
+        opacity = StatArray((self.zGrid.nCells.item(), self.n_points), order = 'F')
 
         print("Reading opacity", flush=True)
         Bar = progressbar.ProgressBar()
@@ -1113,10 +1113,10 @@ class Inference3D(myObject):
     @cached_property
     def pointcloud(self):
 
-        x = StatArray(self.nPoints, name=self.lines[0].x.name, units=self.lines[0].x.units)
-        y = StatArray(self.nPoints, name=self.lines[0].y.name, units=self.lines[0].y.units)
-        z = StatArray(self.nPoints, name=self.lines[0].height.name, units=self.lines[0].height.units)
-        e = StatArray(self.nPoints, name=self.lines[0].elevation.name, units=self.lines[0].elevation.units)
+        x = StatArray(self.n_points, name=self.lines[0].x.name, units=self.lines[0].x.units)
+        y = StatArray(self.n_points, name=self.lines[0].y.name, units=self.lines[0].y.units)
+        z = StatArray(self.n_points, name=self.lines[0].height.name, units=self.lines[0].height.units)
+        e = StatArray(self.n_points, name=self.lines[0].elevation.name, units=self.lines[0].elevation.units)
         # Loop over the lines in the data set and get the attributes
         print('Reading co-ordinates', flush=True)
         bar = self.loop_over(self.nLines)
@@ -1148,7 +1148,7 @@ class Inference3D(myObject):
             if 'e' in components:
                 exp_3D = asarray(f['/fits/params/data'][s, :, 3::4])
 
-        assert amp_3D.shape[0] == self.nPoints, Exception("fit file {} has {} fits, but the dataset has {} points".format(fit_file, amp_3D.shape[0], self.nPoints))
+        assert amp_3D.shape[0] == self.n_points, Exception("fit file {} has {} fits, but the dataset has {} points".format(fit_file, amp_3D.shape[0], self.n_points))
 
         z = self.zGrid.centres
         # d2D = repeat(d1D[None, :], mean_3D.shape[0], axis=0)
@@ -1197,7 +1197,7 @@ class Inference3D(myObject):
         return self.fits
 
     def relativeError(self):
-        op = vstack if self.nSystems > 1 else hstack
+        op = vstack if self.n_systems > 1 else hstack
         out = StatArray(op([line.relativeError for line in self.lines]), name=self.lines[0].relativeError.name, units=self.lines[0].relativeError.units)
         for line in self.lines:
             line.uncache('relativeError')
@@ -1246,7 +1246,7 @@ class Inference3D(myObject):
         if fiducial is not None:
             return squeeze(self.fiducialIndex(fiducial))
 
-        assert npall(index <= self.nPoints-1), IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.nPoints))
+        assert npall(index <= self.n_points-1), IndexError('index {} is out of bounds for data point index with size {}'.format(index, self.n_points))
 
         cumPoints = self._cumNpoints - 1
 
@@ -1351,7 +1351,7 @@ class Inference3D(myObject):
 
         a = zeros(kwargs['max_distributions'])
         mixture = mixPearson(a, a, a, a)
-        mixture.createHdf(hdf_file, 'fits', add_axis=(self.nPoints, self.lines[0].mesh.y.nCells))
+        mixture.createHdf(hdf_file, 'fits', add_axis=(self.n_points, self.lines[0].mesh.y.nCells))
 
         if rank == 0:  ## Head rank
             nFinished = 0
@@ -1360,7 +1360,7 @@ class Inference3D(myObject):
             # Send out the first indices to the workers
             for iWorker in range(1, self.world.size):
                 # Get a datapoint from the file.
-                if nSent < self.nPoints:
+                if nSent < self.n_points:
                     continueRunning = True
                     self.world.send(True, dest=iWorker)
                     self.world.send(nSent, dest=iWorker)
@@ -1375,7 +1375,7 @@ class Inference3D(myObject):
             myMPI.print("Initial posteriors sent. Head rank is now waiting for requests")
 
             # Now wait to send indices out to the workers as they finish until the entire data set is finished
-            while nFinished < self.nPoints:
+            while nFinished < self.n_points:
                 # Wait for a worker to request the next data point
                 status = MPI.Status()
                 dummy = self.world.recv(source = MPI.ANY_SOURCE, tag = MPI.ANY_TAG, status = status)
@@ -1384,7 +1384,7 @@ class Inference3D(myObject):
                 nFinished += 1
 
                 # If DataPoint is None, then we reached the end of the file and no more points can be read in.
-                if nSent < self.nPoints:
+                if nSent < self.n_points:
                     # Send the kill switch to the worker to shut down.
                     continueRunning = True
                     self.world.send(True, dest=requestingRank)
@@ -1396,13 +1396,13 @@ class Inference3D(myObject):
                     self.world.send(False, dest=requestingRank)
 
 
-                report = (nFinished % (self.world.size - 1)) == 0 or nFinished == self.nPoints
+                report = (nFinished % (self.world.size - 1)) == 0 or nFinished == self.n_points
 
                 if report:
                     e = MPI.Wtime() - t0
                     elapsed = str(timedelta(seconds=e))
-                    eta = str(timedelta(seconds=(self.nPoints / nFinished-1) * e))
-                    myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(self.nPoints-nFinished, self.nPoints, elapsed, eta))
+                    eta = str(timedelta(seconds=(self.n_points / nFinished-1) * e))
+                    myMPI.print("Remaining Points {}/{} || Elapsed Time: {} h:m:s || ETA {} h:m:s".format(self.n_points-nFinished, self.n_points, elapsed, eta))
 
         else:
             # Initialize the worker process to go
@@ -1501,8 +1501,8 @@ class Inference3D(myObject):
 
     #     for i in range(self.nLines):
 
-    #         means = StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit means")
-    #         variances = StatArray((self.lines[i].nPoints, nIntervals, maxClusters), "fit variances")
+    #         means = StatArray((self.lines[i].n_points, nIntervals, maxClusters), "fit means")
+    #         variances = StatArray((self.lines[i].n_points, nIntervals, maxClusters), "fit variances")
 
     #         if 'mixture_fits' in self.lines[i].hdf_file:
     #             saved_command = self.lines[i].hdf_file['/mixture_fits'].attrs['command']
@@ -1516,7 +1516,7 @@ class Inference3D(myObject):
     #                 self.lines[i].hdf_file['/mixture_fits'].attrs['command'] = command
 
     #     # Distribute the points amongst cores.
-    #     starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+    #     starts, chunks = loadBalance1D_shrinkingArrays(self.n_points, self.world.size)
 
     #     chunk = chunks[self.rank]
     #     chunk = 10
@@ -1680,7 +1680,7 @@ class Inference3D(myObject):
     def map(self, dx, dy, values, method='ct', mask = None, clip = True, **kwargs):
         """ Create a map of a parameter """
 
-        assert values.size == self.nPoints, ValueError("values must have size {}".format(self.nPoints))
+        assert values.size == self.n_points, ValueError("values must have size {}".format(self.n_points))
 
         values, kwargs = self.interpolate(dx=dx, dy=dy, values=values, method=method, mask=mask, clip=clip, **kwargs)
 
@@ -1704,7 +1704,7 @@ class Inference3D(myObject):
 
     def percentageParameter(self, value, depth, depth2=None):
 
-        percentage = StatArray(empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
+        percentage = StatArray(empty(self.n_points), name="Probability of {} > {:0.2f}".format(self.meanParameters.name, value), units = self.meanParameters.units)
 
         print('Calculating percentages', flush = True)
         bar = self.loop_over(self.nLines)
@@ -1715,7 +1715,7 @@ class Inference3D(myObject):
 
     def depth_slice(self, depth, variable, reciprocateParameter=False, **kwargs):
 
-        out = empty(self.nPoints)
+        out = empty(self.n_points)
 
         for i, line in enumerate(self.lines):
             values = line.depth_slice(depth, variable, reciprocateParameter=reciprocateParameter, **kwargs)
@@ -2102,7 +2102,7 @@ class Inference3D(myObject):
     def getParVsZ(self, bestModel=False, withDoi=True, reciprocateParameter=True, log10=True, clipNan=True):
         """ Get the depth and parameters, optionally within the doi """
         # Get the depths
-        z = tile(self.zGrid,self.nPoints)
+        z = tile(self.zGrid,self.n_points)
 
         if (bestModel):
             self.getAttribute(best=True, doi=withDoi)
@@ -2114,7 +2114,7 @@ class Inference3D(myObject):
             model[:,:] = self.mean
 
         if (withDoi):
-            zTmp = repeat(self.zGrid[:,newaxis],self.nPoints,axis=1)
+            zTmp = repeat(self.zGrid[:,newaxis],self.n_points,axis=1)
             model[zTmp > self.doi] = nan
 
         model = model.reshape(model.size, order='F')
@@ -2177,7 +2177,7 @@ class Inference3D(myObject):
 #         my = y.size
 #         mz = z.nCells
 
-#         nPoints = mx * my * mz
+#         n_points = mx * my * mz
 #         nCells = (mx-1)*(my-1)*(mz-1)
 
 #         # Interpolate the elevation to the grid nodes
@@ -2190,13 +2190,13 @@ class Inference3D(myObject):
 #         vals = vals.reshape(mx*my)
 
 #         # Set up the nodes and voxel indices
-#         points = zeros([nPoints,3], order='F')
+#         points = zeros([n_points,3], order='F')
 #         points[:,0] = tile(x, my*mz)
 #         points[:,1] = tile(y.repeat(mx), mz)
 #         points[:,2] = tile(vals, mz) - z.centres.repeat(mx*my)
 
 #         # Create the cell indices into the points
-#         p = arange(nPoints).reshape((mz, my, mx))
+#         p = arange(n_points).reshape((mz, my, mx))
 #         voxels = zeros([nCells, 8], dtype=int)
 #         iCell = 0
 #         for k in range(mz-1):
@@ -2209,7 +2209,7 @@ class Inference3D(myObject):
 #                     iCell += 1
 
 #         # Create the various point data
-#         pointID = Scalars(arange(nPoints), name='Point iD')
+#         pointID = Scalars(arange(n_points), name='Point iD')
 #         pointElev = Scalars(points[:,2], name='Point Elevation (m)')
 
 #         tmp = self.mean3D.reshape(size(self.mean3D))
@@ -2224,7 +2224,7 @@ class Inference3D(myObject):
 
 #         pointCon = Scalars(tmp1, name = 'log10(Conductivity) (S/m)')
 
-#         print(nPoints, tmp.size)
+#         print(n_points, tmp.size)
 
 #         PData = PointData(pointID, pointElev, pointRes)#, pointCon)
 #         CData = CellData(Scalars(arange(nCells),name='Cell iD'))

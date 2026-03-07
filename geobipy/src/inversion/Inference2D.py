@@ -104,7 +104,7 @@ class Inference2D(myObject):
     @data.setter
     def data(self, value):
         assert isinstance(value, (Data, DataPoint)), TypeError("data must have type geobipy.Data, instead has type {}".format(type(value)))
-        assert value.nPoints > 0, ValueError("Data has no value. nPoints is 0.")
+        assert value.n_points > 0, ValueError("Data has no value. n_points is 0.")
         self._data = value
 
 
@@ -232,11 +232,11 @@ class Inference2D(myObject):
         return StatArray.fromHdf(self.hdf_file['model/nCells'])
 
     @property
-    def nPoints(self):
+    def n_points(self):
         return self.fiducials.size
 
     @cached_property
-    def nSystems(self):
+    def n_systems(self):
         """ Get the number of systems """
         return self.getAttribute('# of systems')
 
@@ -370,8 +370,8 @@ class Inference2D(myObject):
     #     kwargs['linestyle'] = kwargs.pop('linestyle','none')
     #     kwargs['linewidth'] = kwargs.pop('linewidth',0.0)
 
-    #     if (self.nSystems > 1):
-    #         r = range(self.nSystems)
+    #     if (self.n_systems > 1):
+    #         r = range(self.n_systems)
     #         for i in r:
     #             fc = cP.wellSeparated[i+2]
     #             cP.plot(x=self.relativeError[:,i], y=self.additiveError[:,i], c=fc,
@@ -405,9 +405,9 @@ class Inference2D(myObject):
         self.relative_error_opacity = self.compute_posterior_opacity(self.relativeErrorPosteriors, percent, log)
 
     # def compute_posterior_opacity(self, posterior, percent=95.0, log=None):
-    #     opacity = StatArray(zeros(self.nPoints))
+    #     opacity = StatArray(zeros(self.n_points))
 
-    #     for i in range(self.nPoints):
+    #     for i in range(self.n_points):
     #         h = Histogram1D(edges = self.additiveErrorPosteriors._edges + self.additiveErrorPosteriors.relative_to[i])
     #         h._counts[:] = self.additiveErrorPosteriors.counts[i, :]
     #         opacity[i] = h.credibleRange(percent, log)
@@ -508,7 +508,7 @@ class Inference2D(myObject):
 
         p = 0.01 * percent
 
-        r = range(self.nPoints)
+        r = range(self.n_points)
         if track:
             print('Computing Depth of Investigation', flush=True)
             r = progressbar.progressbar(r)
@@ -567,7 +567,7 @@ class Inference2D(myObject):
         idx = searchsorted(self.fiducials, fiducial)
 
         # Take care of out of bounds cases
-        idx[idx==self.nPoints] = 0
+        idx[idx==self.n_points] = 0
 
         return idx[fiducial == self.fiducials[idx]]
 
@@ -639,7 +639,7 @@ class Inference2D(myObject):
     #     counts = asarray(self.hdf_file['model/values/posterior/arr/data'])
 
     #     # Bar = progressbar.ProgressBar()
-    #     for i in range(self.nPoints):
+    #     for i in range(self.n_points):
 
     #         try:
     #             dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
@@ -667,7 +667,7 @@ class Inference2D(myObject):
     #     counts = asarray(self.hdf_file['model/values/posterior/arr/data'])
 
     #     # Bar = progressbar.ProgressBar()
-    #     for i in range(self.nPoints):
+    #     for i in range(self.n_points):
 
     #         try:
     #             dpDistributions = hm.fitMajorPeaks(intervals, **kwargs)
@@ -712,7 +712,7 @@ class Inference2D(myObject):
 
         a = zeros(max_distributions)
         mixture = mixPearson(a, a, a, a)
-        mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
+        mixture.createHdf(hdfFile, 'fits', nRepeats=(self.n_points, nIntervals))
 
 
         nUpdate = 1
@@ -744,7 +744,7 @@ class Inference2D(myObject):
     # def fit_interface_posterior(self, **kwargs):
 
     #     fit_interfaces = zeros(self.interfacePosterior.shape)
-    #     for i in progressbar.progressbar(range(self.nPoints)):
+    #     for i in progressbar.progressbar(range(self.n_points)):
     #         h1 = self.interfacePosterior[:, i]
     #         vest = h1.estimateVariance(100000, log=10)
     #         fit, f, p = h1.fit_estimated_pdf(mixture_type='pearson', smooth=vest, mask=0.5, epsilon=1e-1, mu=1e-5, method='lbfgsb', max_distributions=self.nLayers[i]-1)
@@ -788,12 +788,12 @@ class Inference2D(myObject):
         a = zeros(max_distributions)
         mixture = mixPearson(a, a, a, a)
         try:
-            mixture.createHdf(hdfFile, 'fits', nRepeats=(self.nPoints, nIntervals))
+            mixture.createHdf(hdfFile, 'fits', nRepeats=(self.n_points, nIntervals))
         except:
             pass
 
         # Distribute the points amongst cores.
-        starts, chunks = loadBalance1D_shrinkingArrays(self.nPoints, self.world.size)
+        starts, chunks = loadBalance1D_shrinkingArrays(self.n_points, self.world.size)
         chunk = chunks[self.world.rank]
         i0 = starts[self.world.rank]
         i1 = i0 + chunk
@@ -906,11 +906,11 @@ class Inference2D(myObject):
 
         assert npall(shape(values) == self.mesh.shape), ValueError("values must have shape {}".fomat(self.mesh.shape))
 
-        out = full(self.nPoints, fill_value=nan)
+        out = full(self.n_points, fill_value=nan)
 
         if size(elevation) > 1:
 
-            for i in range(self.nPoints):
+            for i in range(self.n_points):
                 tmp = self.elevation[i] - elevation
                 if tmp[1] < self.mesh.z.edges[-1] and tmp[0] > self.mesh.z.edges[0]:
                     cell1 = self.mesh.z.cellIndex(tmp[1], clip=True)
@@ -920,7 +920,7 @@ class Inference2D(myObject):
 
         else:
 
-            for i in range(self.nPoints):
+            for i in range(self.n_points):
                 tmp = self.elevation[i] - elevation
                 if tmp > self.mesh.z.edges[0] and tmp < self.mesh.z.edges[-1]:
                     cell1 = self.mesh.z.cellIndex(tmp, clip=True)
@@ -953,7 +953,7 @@ class Inference2D(myObject):
     #     parameter = zeros(0)
 
     #     # # Bar = progressbar.ProgressBar()
-    #     # # for i in Bar(range(self.nPoints)):
+    #     # # for i in Bar(range(self.n_points)):
     #     for i in range(tmp.y.nCells):
     #         peaks, _ = find_peaks(tmp.counts[i, :],  width=width)
     #         values = tmp.x.centres[peaks]
@@ -1054,7 +1054,7 @@ class Inference2D(myObject):
     #             assert depth <= depth2, 'Depth2 must be >= depth'
     #             k = self.mesh.z.cellIndex(depth2)
 
-    #     percentage = StatArray(empty(self.nPoints), name="Probability of {} > {:0.2f}".format(self.parameterName, value), units = self.parameterUnits)
+    #     percentage = StatArray(empty(self.n_points), name="Probability of {} > {:0.2f}".format(self.parameterName, value), units = self.parameterUnits)
 
     #     if depth:
     #         counts = self.hdf_file['model/values/posterior/arr/data'][:, j:k, :]
@@ -1066,7 +1066,7 @@ class Inference2D(myObject):
 
     #     Bar = progressbar.ProgressBar()
     #     print('Computing P(X > value)', flush=True)
-    #     for i in Bar(range(self.nPoints)):
+    #     for i in Bar(range(self.n_points)):
     #         p = RectilinearMesh1D(edges=parameters.edges[i, :])
     #         pj = p.cellIndex(value)
 
@@ -1126,7 +1126,7 @@ class Inference2D(myObject):
 
     # def axis(self, axis):
     #     if axis == 'index':
-    #         ax = StatArray(arange(self.nPoints, dtype=float64), 'Index')
+    #         ax = StatArray(arange(self.n_points, dtype=float64), 'Index')
     #     elif axis == 'fiducial':
     #         ax = self.fiducial
     #     elif axis == 'x':
@@ -1142,7 +1142,7 @@ class Inference2D(myObject):
     # def x_axis(self, axis, centres=False):
 
     #     if axis == 'index':
-    #         ax = StatArray(arange(self.nPoints, dtype=float64), 'Index')
+    #         ax = StatArray(arange(self.n_points, dtype=float64), 'Index')
     #     elif axis == 'fiducial':
     #         ax = self.fiducial
     #     elif axis == 'distance':
@@ -1276,8 +1276,8 @@ class Inference2D(myObject):
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
 
-        if (self.nSystems > 1):
-            r = range(self.nSystems)
+        if (self.n_systems > 1):
+            r = range(self.n_systems)
             for i in r:
                 fc = cP.wellSeparated[i+2]
                 self.data.plot(values=self.additiveError[:, i],
@@ -1294,7 +1294,7 @@ class Inference2D(myObject):
     def plot_additive_error_posterior(self, system=0, **kwargs):
         """ Plot the distributions of additive errors as an image for all data points in the line """
 
-        if self.nSystems > 1:
+        if self.n_systems > 1:
             post = self.additiveErrorPosteriors[system]
         else:
             post = self.additiveErrorPosteriors
@@ -1342,7 +1342,7 @@ class Inference2D(myObject):
     def plot_relative_error_posterior(self, system=0, **kwargs):
         """ Plot the distributions of relative errors as an image for all data points in the line """
 
-        if self.nSystems > 1:
+        if self.n_systems > 1:
             post = self.relativeErrorPosteriors[system]
         else:
             post = self.relativeErrorPosteriors
@@ -1365,8 +1365,8 @@ class Inference2D(myObject):
         kwargs['linestyle'] = kwargs.pop('linestyle','-')
         kwargs['linewidth'] = kwargs.pop('linewidth',1.0)
 
-        if (self.nSystems > 1):
-            r = range(self.nSystems)
+        if (self.n_systems > 1):
+            r = range(self.n_systems)
             for i in r:
                 kwargs['c'] = cP.wellSeparated[i+2]
                 self.data.plot(values=self.relativeError[:, i],
@@ -1480,8 +1480,8 @@ class Inference2D(myObject):
         out = Histogram1D(edges=bins, log=log)
 
         # Bar = progressbar.ProgressBar()
-        # for i in Bar(range(self.nPoints)):
-        for i in range(self.nPoints):
+        # for i in Bar(range(self.n_points)):
+        for i in range(self.n_points):
             p = RectilinearMesh1D(edges=parameters.edges[i, :])
             pj = out.cellIndex(p.centres, clip=True)
             cTmp = counts[i, :, :]
@@ -1559,7 +1559,7 @@ class Inference2D(myObject):
         mask = ones(self.mesh.shape)
         indices = self.mesh.y.cellIndex(self.doi + self.mesh.y.relative_to)
 
-        for i in range(self.nPoints):
+        for i in range(self.n_points):
             mask[i, indices[i]:] = 0.0
 
         return mask
@@ -1640,16 +1640,16 @@ class Inference2D(myObject):
         if mask_by_doi:
             indices = intervals.searchsorted(self.doi)
             if 'a' in components:
-                for i in range(self.nPoints):
+                for i in range(self.n_points):
                     amplitudes[i, indices[i]:, :] = nan
             if 'm' in components:
-                for i in range(self.nPoints):
+                for i in range(self.n_points):
                     means[i, indices[i]:, :] = nan
             if 'v' in components:
-                for i in range(self.nPoints):
+                for i in range(self.n_points):
                     variances[i, indices[i]:, :] = nan
             if 'd' in components:
-                for i in range(self.nPoints):
+                for i in range(self.n_points):
                     degrees[i, indices[i]:, :] = nan
 
         iWhere = argsort(means, axis=-1)
@@ -1697,12 +1697,12 @@ class Inference2D(myObject):
 
     #     amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi=False)
 
-    #     # self.marginal_probability = StatArray(zeros([self.nPoints, self.mesh.z.nCells, gmm.n_components]), 'Marginal probability')
+    #     # self.marginal_probability = StatArray(zeros([self.n_points, self.mesh.z.nCells, gmm.n_components]), 'Marginal probability')
 
     #     iSort = argsort(squeeze(gmm.means_))
 
     #     print('Computing marginal probability', flush=True)
-    #     for i in progressbar.progressbar(range(self.nPoints)):
+    #     for i in progressbar.progressbar(range(self.n_points)):
     #         hm = self.get_hitmap(i)
     #         for j in range(self.mesh.z.nCells):
     #             m = means[i, j, :]
@@ -1750,10 +1750,10 @@ class Inference2D(myObject):
     # def compute_marginal_probability_from_fits(self, fit_file, mask_by_doi=True):
 
     #     amplitudes, means, variances, degrees = self.read_fit_distributions(fit_file, mask_by_doi)
-    #     self.marginal_probability = StatArray(zeros([self.nPoints, self.mesh.z.nCells, means.shape[-1]]), 'Marginal probability')
+    #     self.marginal_probability = StatArray(zeros([self.n_points, self.mesh.z.nCells, means.shape[-1]]), 'Marginal probability')
 
     #     print('Computing marginal probability', flush=True)
-    #     for i in progressbar.progressbar(range(self.nPoints)):
+    #     for i in progressbar.progressbar(range(self.n_points)):
     #         hm = self.get_hitmap(i)
     #         mixtures = []
     #         for j in range(means.shape[1]):
