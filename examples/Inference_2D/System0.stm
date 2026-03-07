@@ -1,0 +1,61 @@
+System Begin
+	Name = Tempest-30.0Hz
+	Type = Time Domain
+
+	Transmitter Begin
+		NumberOfTurns = 1
+		PeakCurrent   = 0.5
+		LoopArea      = 1
+		BaseFrequency = 30
+		WaveFormCurrent Begin
+			-0.0166666667    0.0
+			-0.0166612413    1.0
+			-0.0000054255    1.0
+			 0.0000000000    0.0
+			 0.0000054255   -1.0
+			 0.0166612413   -1.0
+			 0.0166666667    0.0
+		WaveFormCurrent End
+		WaveformDigitisingFrequency = 1200000
+	Transmitter End
+
+	Receiver Begin
+
+		NumberOfWindows = 15
+		WindowWeightingScheme = Boxcar
+
+		WindowTimes Begin
+			0.00000543	0.00001628
+			0.00002713	0.00003798
+			0.00004883	0.00005968
+			0.00007053	0.00010308
+			0.00011394	0.00016819
+			0.00017904	0.00027670
+			0.00028755	0.00045032
+			0.00046117	0.00071074
+			0.00072159	0.00110138
+			0.00111223	0.00170903
+			0.00171988	0.00266392
+			0.00267477	0.00416136
+			0.00417221	0.00650517
+			0.00651603	0.01008600
+			0.01009686	0.01666171
+		WindowTimes End
+
+	Receiver End
+
+	ForwardModelling Begin
+
+		OutputType = B
+
+		XOutputScaling = 1e15
+		YOutputScaling = 0.0
+		ZOutputScaling = 1e15
+		SecondaryFieldNormalisation  =  none
+
+		FrequenciesPerDecade = 6
+		NumberOfAbsiccaInHankelTransformEvaluation = 21
+
+	ForwardModelling End
+
+System End
