@@ -76,16 +76,20 @@ class Data(Point):
                  '_system',
                  '_data_filename', '_file', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_units')
 
-    def __init__(self, components=None, channels_per_system=0, x=None, y=None, z=None, elevation=None, data=None, std=None, predicted_data=None, fiducial=None, line_number=None, units=None, channel_names=None, total_field=False, **kwargs):
+    def __init__(self, components=None, channels_per_system=0, x=None, y=None, z=None, elevation=None,
+                 data=None, std=None, predicted_data=None,
+                 fiducial=None, line_number=None, units=None, channel_names=None,
+                 total_field=False, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
         self.units = units
         self.components = components
         self._channels_per_system = atleast_1d(asarray(channels_per_system, dtype=int32)).copy()
-        self.total_field = total_field
 
         super().__init__(x, y, z, elevation)
+
+        self.total_field = total_field
 
         self._fiducial = DataArray(arange(self.n_points, dtype=float64), "Fiducial")
         self._line_number = DataArray(self.n_points, "Line number")
@@ -150,8 +154,8 @@ class Data(Point):
         out, order = super()._as_dict()
         out[self.fiducial.name.replace(' ', '_')] = self.fiducial
         out[self.line_number.name.replace(' ', '_')] = self.line_number
-        for i, name in enumerate(self.channel_names):
-            out[name.replace(' ', '_')] = self.data[:, i]
+        # for i, name in enumerate(self.channel_names):
+        #     out[name.replace(' ', '_')] = self.data[:, i]
 
         return out, [self.line_number.name.replace(' ', '_'),
                      self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channel_names]]
@@ -467,7 +471,10 @@ class Data(Point):
 
     @property
     def system_offset(self):
-        return r_[0, cumsum(self.n_components * self.channels_per_system)]
+        if self.total_field:
+            return r_[0, cumsum(self.channels_per_system)]
+        else:
+            return r_[0, cumsum(self.n_components * self.channels_per_system)]
 
     @property
     def total_field(self):
@@ -495,6 +502,7 @@ class Data(Point):
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
+        out._total_field = deepcopy(self.total_field, memo)
         out._fiducial = deepcopy(self.fiducial, memo)
         out._line_number = deepcopy(self.line_number, memo)
         out._channel_names = deepcopy(self.channel_names, memo)
