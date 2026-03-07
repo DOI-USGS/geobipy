@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 from geobipy import StatArray
 
-data_path = '..//source//supplementary//data'
+data_path = '..//..//examples//data//data'
 
 def make_figure(ds, model, title):
     from pathlib import Path
