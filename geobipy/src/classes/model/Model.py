@@ -442,7 +442,7 @@ class Model(myObject):
 
     def prior_derivative(self, order):
         # Wm'Wm(m - mref) = (Wz'Wz + Ws'Ws)(m - mref)
-        operator = self.value_weight * self.values.priorDerivative(order=2)
+        operator = self.value_weight * self.values.prior_derivative(order=2)
         # operator *= self.mesh.cell_weights
 
         if self.gradient.hasPrior and self.gradient_weight > 0.0:
