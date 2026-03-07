@@ -3,6 +3,7 @@ Module describing a 1D Rectilinear Mesh class
 """
 from copy import deepcopy
 
+import numpy as np
 from numpy import arange, argwhere, array, asarray, atleast_1d
 from numpy import cumsum, diag, diff, dot, exp,expand_dims, float64, full, hstack, inf, int_
 from numpy import int32, int64, integer, interp, isclose, isinf, isnan, linspace, logical_not, kron
@@ -29,7 +30,7 @@ from scipy import interpolate
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
-brodie = False
+brodie = True
 
 class RectilinearMesh1D(Mesh):
     """Class defining a 1D rectilinear mesh with cell centres and edges.
@@ -199,7 +200,7 @@ class RectilinearMesh1D(Mesh):
     @centres.setter
     def centres(self, values):
 
-        values = StatArray(values)
+        values = StatArray(values.copy())
 
         # assert values.sorted, ValueError("centres must be monotonically increasing")
 
@@ -258,7 +259,7 @@ class RectilinearMesh1D(Mesh):
         if self.relative_to.size == 1:
             values -= self.relative_to
 
-        self._edges = values
+        self._edges = values.copy()
         self._centres = values.internalEdges()
         self._widths = values.diff()
 
@@ -592,7 +593,7 @@ class RectilinearMesh1D(Mesh):
 
         """
 
-        edges = self.edges
+        edges = self.edges.copy()
 
         values, dum = utilities._log(atleast_1d(values).flatten(), self.log)
 
@@ -606,7 +607,7 @@ class RectilinearMesh1D(Mesh):
         reversed = False
         if self.edges[-1] < self.edges[0]:
             reversed = True
-            edges = self.edges[::-1]
+            edges = self.edges[::-1].copy()
 
         # Get the bin indices for all values
         iBin = atleast_1d(edges.searchsorted(values, side='right') - 1)
@@ -720,7 +721,7 @@ class RectilinearMesh1D(Mesh):
 
         return out
 
-    def gradient(self, values):
+    def gradient(self, values, penalize_thin_layers=True):
         r"""Compute the gradient
 
         Parameter gradient :math:`\nabla_{z}\sigma` at the ith layer is computed via
@@ -741,8 +742,10 @@ class RectilinearMesh1D(Mesh):
 
         """
         if self.nCells.item() > 1:
-            # return diff(nplog(values)) / (nplog(self.widths[:-1]) - nplog(self.min_width))
-            return diff(nplog(values)) / (nplog(self.widths[:-1]))# - nplog(self.min_width))
+            if penalize_thin_layers:
+                return diff(nplog(values)) / (nplog(self.widths[:-1]) - nplog(self.min_width))
+            else:
+                return diff(nplog(values)) / (nplog(self.widths[:-1]))
 
     @property
     def cell_weights(self):
@@ -773,7 +776,7 @@ class RectilinearMesh1D(Mesh):
                     x[-1] = x[-2] + e2e
 
         out = x/(self.nCells * mean(x)) if brodie else x/(x.sum())
-        return diag(out)
+        return diag(1/out)
 
     @property
     def gradient_operator(self):
@@ -905,6 +908,7 @@ class RectilinearMesh1D(Mesh):
         iBig = where(w >= distance)
         n_large = size(iBig)
         new_edges = full((self.nEdges + 2*n_large), fill_value=nan)
+
         indices = zeros(self.nCells.item(), dtype=int32)
 
         k = 0
