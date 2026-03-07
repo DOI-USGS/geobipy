@@ -1058,8 +1058,9 @@ class Point(myObject):
             Gridspec to split
         """
         n_posteriors = self.x.hasPosterior + self.y.hasPosterior + self.z.hasPosterior
+        ax = {}
         if n_posteriors == 0:
-            return []
+            return ax
 
         if gs is None:
             gs = Figure()
@@ -1069,11 +1070,10 @@ class Point(myObject):
 
         splt = gs.subgridspec(n_posteriors, 1, wspace=0.3, hspace=1.0)
 
-        ax = []
         i = 0
-        for c in [self.x, self.y, self.z]:
+        for k, c in zip(['x', 'y', 'z'], [self.x, self.y, self.z]):
             if c.hasPosterior:
-                ax.append(c._init_posterior_plots(splt[i]))
+                ax[k] = c._init_posterior_plots(splt[i])
                 i += 1
 
         return ax
@@ -1087,10 +1087,10 @@ class Point(myObject):
         if axes is None:
             axes = kwargs.pop('fig', gcf())
 
-        if not isinstance(axes, list):
+        if not isinstance(axes, dict):
             axes = self._init_posterior_plots(axes)
 
-        assert len(axes) == n_posteriors, ValueError("Must have length {} list of axes for the posteriors. self._init_posterior_plots can generate them.".format(n_posteriors))
+        # assert len(axes) == n_posteriors, ValueError("Must have length {} list of axes for the posteriors. self._init_posterior_plots can generate them.".format(n_posteriors))
 
         x_kwargs = kwargs.pop('x_kwargs', {})
         y_kwargs = kwargs.pop('y_kwargs', {})
@@ -1105,11 +1105,9 @@ class Point(myObject):
         if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
             z_kwargs['transpose'] = z_kwargs.get('transpose', True)
 
-        i = 0
-        for c, kw in zip([self.x, self.y, self.z], [x_kwargs, y_kwargs, z_kwargs]):
+        for k, c, kw in zip(['x', 'y', 'z'], [self.x, self.y, self.z], [x_kwargs, y_kwargs, z_kwargs]):
             if c.hasPosterior:
-                c.plot_posteriors(ax = axes[i], **kw)
-                i += 1
+                c.plot_posteriors(ax = axes[k], **kw)
 
         if overlay is not None:
             axes = self.overlay_on_posteriors(overlay, axes)
@@ -1119,11 +1117,9 @@ class Point(myObject):
         if (not self.x.hasPosterior) & (not self.y.hasPosterior) & self.z.hasPosterior:
             z_kwargs['transpose'] = z_kwargs.get('transpose', True)
 
-        i = 0
-        for s, o, kw in zip([self.x, self.y, self.z], [overlay.x, overlay.y, overlay.z], [x_kwargs, y_kwargs, z_kwargs]):
+        for k, s, o, kw in zip(['x', 'y', 'z'], [self.x, self.y, self.z], [overlay.x, overlay.y, overlay.z], [x_kwargs, y_kwargs, z_kwargs]):
             if s.hasPosterior:
-                s.posterior.plot_overlay(value = o, ax = axes[i], **kw, **kwargs)
-                i += 1
+                s.posterior.plot_overlay(value = o, ax = axes[k], **kw, **kwargs)
         return axes
 
 
