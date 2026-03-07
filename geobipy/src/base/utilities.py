@@ -8,6 +8,7 @@ from numpy import log2, log10, nan, nanmax, nanmin, nanpercentile, ndarray, ndim
 from numpy import real, s_, shape, sign, sin, size, squeeze, where, zeros
 from numpy import all as npall
 from numpy import log as nplog
+import numpy as np
 
 from numpy.linalg import cholesky, det, slogdet
 from numpy.linalg import inv as npinv
@@ -24,12 +25,12 @@ from numba import (njit, jit, float64)
 _njit_settings = {'nogil': False, 'fastmath': True, 'cache': True}
 _nan_njit_settings = {'nogil': False, 'fastmath': False, 'cache': True}
 
-from numba.pycc import CC
+# from numba.pycc import CC
 
-cc = CC('test')
-cc.verbose = True
+# cc = CC('test')
+# cc.verbose = True
 @njit(**_njit_settings)
-@cc.export('bresenham', 'f8[:, :](f8[:], f8[:])')
+# @cc.export('bresenham', 'f8[:, :](f8[:], f8[:])')
 def bresenham(x, y):
     n_segments = int32(len(x) - 1)
     nTmp = int32(0)
@@ -110,7 +111,7 @@ def bresenham(x, y):
     return points[:j, :]
 
 @njit(**_njit_settings)
-@cc.export('fast_march', 'f8[:, :](f8[:], f8[:])')
+# @cc.export('fast_march', 'f8[:, :](f8[:], f8[:])')
 def fast_march(x, y):
     n_segments = int32(x.size - 1)
 
@@ -180,7 +181,7 @@ def fast_march(x, y):
 # Function that returns true if
 # the given pixel is valid
 @njit(**_njit_settings)
-@cc.export('is_valid', 'boolean(f8[:, :], i4, i4, f8)')
+# @cc.export('is_valid', 'boolean(f8[:, :], i4, i4, f8)')
 def is_valid(values, x, y, value):
     m = values.shape[1]
     out = (0 <= x < m)
@@ -195,7 +196,7 @@ def is_valid(values, x, y, value):
     return out
 
 @njit(**_nan_njit_settings)
-@cc.export('is_valid_nan', 'boolean(f8[:, :], i4, i4, f8)')
+# @cc.export('is_valid_nan', 'boolean(f8[:, :], i4, i4, f8)')
 def is_valid_nan(values, x, y, value):
     m = values.shape[1]
     out = (0 <= x < m)
@@ -210,7 +211,7 @@ def is_valid_nan(values, x, y, value):
     return out
 
 @njit(**_nan_njit_settings)
-@cc.export('flood_fill', 'f8[:, :](f8[:, :], i8, i8, f8)')
+# @cc.export('flood_fill', 'f8[:, :](f8[:, :], i8, i8, f8)')
 def flood_fill(values, x, y, new_value):
 
     queue = empty((values.size, 2), dtype=int32)
@@ -280,7 +281,8 @@ def init_debug_print(world=None, print_from=0):
 def debug_print(*args, **kwargs):
     # if world_rank == print_rank:
     #     print(*args, flush=True, **kwargs)
-    return None
+    #     return True
+    return False
 
 def inv(values):
     if ndim(values) < 2:
@@ -309,45 +311,6 @@ def interleave(a, b):
         out[1::2] = b
         return out
 
-
-def isInt(this):
-    """Check whether an entry is a subtype of an int
-
-    Parameters
-    ----------
-    this : variable
-        Variable to check whether an int or not
-
-    Returns
-    -------
-    out : bool
-        Is or is not an int
-
-    """
-    return isinstance(this, (int, integer))
-
-
-def isIntorSlice(this):
-    """Check whether an entry is a subtype of an int or a slice
-
-    Parameters
-    ----------
-    this : variable
-        Variable to check whether an int/slice or not
-
-    Returns
-    -------
-    out : bool
-        Is or is not an int/slice
-
-    """
-    if (isInt(this)):
-        return True
-    if isinstance(this, slice):
-        return True
-    return any([isinstance(x,slice) for x in this])
-
-
 def str_to_raw(s):
     """Helper function for latex
 
@@ -365,21 +328,6 @@ def str_to_raw(s):
     raw_map = {8:r'\b', 7:r'\a', 12:r'\f', 10:r'\n', 13:r'\r', 9:r'\t', 11:r'\v'}
     return r''.join(i if ord(i) > 32 else raw_map.get(ord(i), i) for i in s)
 
-
-#def is_Numeric(num):
-#    """Checks whether num is a number
-#
-#    Parameters
-#    ----------
-#    num: str
-#        A string that could potentially contain a number
-#
-#    """
-#    try:
-#        float(num)
-#        return True
-#    except ValueError:
-#        return False
 
 def findNotNans(this):
     """Find the indicies to non NaN values.
@@ -856,16 +804,14 @@ def expReal(this):
 
     tol = 11356.0
 
-    if size(this) == 1:
+    if np.size(this) == 1:
         if this > tol:
-            return inf
+            return np.inf
+        return np.exp(this)
 
-        return exp(longdouble(this))
-
-    out = full(size(this), fill_value=inf, dtype=longdouble)
-    i = squeeze(argwhere(this <= tol))
-    tmp = longdouble(this[i])
-    out[i] = exp(tmp)
+    out = np.full(np.size(this), fill_value=np.inf)
+    i = squeeze(np.argwhere(this <= tol))
+    out[i] = np.exp(this[i])
     return out
 
 def tanh(this):
