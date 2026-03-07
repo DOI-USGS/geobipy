@@ -303,18 +303,19 @@ class Model(myObject):
             Inverse Hessian matrix
 
         """
-        tries = 0
-        while tries < 10:
-            # Try to invert the local Hessian using data.
-            try:
-                return inv(self.local_precision(observation))
-            except:
-                # If the Hessian is singular, we need to increase the variance of the prior to stabilize the inversion.
-                self.values.prior.variance *= 2.0
-                tries += 1
-                print(f'Increased prior variance to {self.values.prior.variance}', flush=True)
+        return inv(self.local_precision(observation))
+        # tries = 0
+        # while tries < 10:
+        #     # Try to invert the local Hessian using data.
+        #     try:
+        #         return inv(self.local_precision(observation))
+        #     except:
+        #         # If the Hessian is singular, we need to increase the variance of the prior to stabilize the inversion.
+        #         self.values.prior.variance *= 2.0
+        #         tries += 1
+        #         print(f'Increased prior variance to {self.values.prior.variance}', flush=True)
 
-        return self.prior_derivative(order=2)
+        # return self.prior_derivative(order=2)
 
     def pad(self, shape):
         """Copies the properties of a model including all priors or proposals, but pads memory to the given size
@@ -433,6 +434,7 @@ class Model(myObject):
                                                        variance=H,
                                                        linearSpace=True,
                                                        prng=perturbed_model.values.proposal.prng)
+
         # Generate new conductivities
         perturbed_model.values.perturb()
 
@@ -443,9 +445,9 @@ class Model(myObject):
         operator = self.value_weight * self.values.priorDerivative(order=2)
         # operator *= self.mesh.cell_weights
 
-        if self.gradient.hasPrior:
+        if self.gradient.hasPrior and self.gradient_weight > 0.0:
             Wz = self.mesh.gradient_operator
-            operator += self.gradient_weight * dot(Wz.T, Ax(self.gradient.priorDerivative(order=2), Wz))
+            operator += self.gradient_weight * dot(Wz.T, Ax(self.gradient.prior_derivative(order=2), Wz))
 
         return dot(operator, self.values.prior.deviation(self.values)) if order == 1 else operator
 
@@ -506,13 +508,6 @@ class Model(myObject):
                                                    linewidth=1,
                                                    color='#1a8bff',
                                                    ax=axes['values'])
-        # self.values.posterior.mode(axis=axis).plot(xscale=values_kwargs.get('xscale', 'linear'),
-        #                                            flipY=False,
-        #                                            reciprocateX=values_kwargs.get('reciprocateX', None),
-        #                                            labels=False,
-        #                                            linewidth=1,
-        #                                            color='#6046C8',
-        #                                            ax=axes[-1])
 
     def pcolor(self, **kwargs):
         """Plot like an image
@@ -640,8 +635,8 @@ class Model(myObject):
             dfk = self.local_gradient(observation=observation)
 
             # inv(J'Wd'WdJ + Wm'Wm)
-            # H = self.local_inverse_hessian(observation)
-            H = self.values.proposal.variance
+            H = self.local_inverse_hessian(observation)
+            # H = self.values.proposal.variance
 
             # Compute the stochastic newton offset at the new location.
             pk = -dot(H, dfk)
@@ -659,12 +654,12 @@ class Model(myObject):
             # tmp = Distribution('MvLogNormal', mean, self.values.proposal.variance, linearSpace=True, prng=prng)
             tmp = Distribution('MvLogNormal', mean, H, linearSpace=True, prng=prng)
             # Probability of jumping from our perturbed parameter values to the unperturbed values.
-            proposal = tmp.probability(x=remapped_model.values, log=True)
+            proposal = tmp.probability(x=remapped_model.values, log=True).item()
 
             # This is the forward proposal. Evaluate the new proposed values given a mean of the old values
             # and variance using perturbed data
             tmp = Distribution('MvLogNormal', remapped_model.values, self.values.proposal.variance, linearSpace=True, prng=prng)
-            proposal1 = tmp.probability(x=self.values, log=True)
+            proposal1 = tmp.probability(x=self.values, log=True).item()
 
         # p0, p1 = self.mesh.proposal_probability()
 
@@ -733,9 +728,12 @@ class Model(myObject):
         self.mesh.set_priors(**kwargs)
 
         self.value_bounds = None
-        if kwargs.get('parameter_limits') is not None:
+
+        value_limits = kwargs.get('value_limits', np.r_[1e-20, 1e20])
+
+        if kwargs.get('value_limits') is not None:
             self.value_bounds = Distribution('Uniform',
-                                             *kwargs['parameter_limits'],
+                                             *value_limits,
                                              log=True,
                                              prng=kwargs.get('prng'))
 
@@ -743,18 +741,19 @@ class Model(myObject):
             if kwargs.get('solve_value', False):
                 assert 'value_mean' in kwargs, ValueError("No value_prior given, must specify keywords 'value_mean'")
                 # Assign the initial prior to the parameters
-                variance = kwargs.get('parameter_standard_deviation', 2.3978952727983707)**2.0
-                assert variance > 0.0, ValueError("parameter_standard_deviation must be greater than 0.0")
+                std = value if (value := kwargs.get('value_standard_deviation', np.log(11.0))) is not None else np.log(11.0)
+                assert std > 0.0, ValueError("value_standard_deviation must be greater than 0.0")
                 values_prior = Distribution('MvLogNormal', mean=kwargs['value_mean'],
-                                                variance=variance,
+                                                variance=std**2.0,
                                                 ndim=self.mesh.nCells,
                                                 linearSpace=True,
                                                 prng=kwargs.get('prng'))
 
         if gradient_prior is None:
             if kwargs.get('solve_gradient', False):
+                std = value if (value := kwargs.get('gradient_standard_deviation', 1.5)) is not None else 1.5
                 gradient_prior = Distribution('MvNormal', mean=0.0,
-                                            variance=kwargs.get('gradient_standard_deviation', 1.5)**2.0,
+                                            variance=std**2.0,
                                             ndim=maximum(1, self.mesh.nCells-1),
                                             prng=kwargs.get('prng'))
 
@@ -815,11 +814,8 @@ class Model(myObject):
         #                                  variance=0.01,
         #                                  prng=kwargs.get('prng', None))
 
-    def set_proposal_weights(self, **kwargs):
-        value_weight = kwargs.get('parameter_weight', 1.0)
-        gradient_weight = kwargs.get('gradient_weight', 1.0)
-
-        mx = maximum(value_weight, gradient_weight)
+    def set_proposal_weights(self, value_weight=1.0, gradient_weight=0.0, **kwargs):
+        mx = value_weight + gradient_weight
         self.value_weight = value_weight / mx
         self.gradient_weight = gradient_weight / mx
 
@@ -862,9 +858,9 @@ class Model(myObject):
         """
         self.mesh.update_posteriors(values=self.values, ratio=ratio)
         # Update the hitmap posterior
-        self.update_parameter_posterior(axis=0)
+        self.update_value_posterior(axis=0)
 
-    def update_parameter_posterior(self, axis=0):
+    def update_value_posterior(self, axis=0):
         """ Imposes a model's parameters with depth onto a 2D Hitmap.
 
         The cells that the parameter-depth profile passes through are accumulated by 1.
@@ -976,21 +972,21 @@ class Model(myObject):
         mesh.y_edges.name, mesh.y_edges.units = 'Height', 'm'
 
 
-        resistivities = {'glacial' : np.r_[100, 10, 30],   # Glacial sediments, sands and tills
-                        'saline_clay' : np.r_[100, 10, 1],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
-                        'resistive_dolomites' : np.r_[50, 500, 50],   # Glacial sediments, resistive dolomites, marine shale.
-                        'resistive_basement' : np.r_[100, 10, 10000],# Resistive Basement
-                        'coastal_salt_water' : np.r_[1, 100, 20],    # Coastal salt water upper layer
-                        'ice_over_salt_water' : np.r_[10000, 100, 1], # Antarctica glacier ice over salt water
-                        'water_into_basalt' : np.r_[1000, 1, 1000]
+        resistivities = {'glacial' : np.r_[1e2, 1e1, 3e1],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[1e2, 1e1, 1e0],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+                        'resistive_dolomites' : np.r_[5e1, 5e2, 5e1],   # Glacial sediments, resistive dolomites, marine shale.
+                        'resistive_basement' : np.r_[1e2, 1e1, 1e4],# Resistive Basement
+                        'coastal_salt_water' : np.r_[1e0, 1e2, 2e1],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[1e4, 1e2, 1e0], # Antarctica glacier ice over salt water
+                        'water_into_basalt' : np.r_[1e3, 1e0, 1e3]
         }
-        conductivities = {'glacial' : np.r_[1e-2, 1e-1, 0.03333333],   # Glacial sediments, sands and tills
-                        'saline_clay' : np.r_[1e-2, 1e-1, 1.  ],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
+        conductivities = {'glacial' : np.r_[1e-2, 1e-1, 3e-2],   # Glacial sediments, sands and tills
+                        'saline_clay' : np.r_[1e-2, 1e-1, 1e0],    # Easier bottom target, uncommon until high salinity clay is 5-10 ish
                         'resistive_dolomites' : np.r_[2e-2, 2e-3, 2e-2],   # Glacial sediments, resistive dolomites, marine shale.
                         'resistive_basement' : np.r_[1e-2, 1e-1, 1e-4],# Resistive Basement
-                        'coastal_salt_water' : np.r_[1., 1e-2, 5e-2],    # Coastal salt water upper layer
-                        'ice_over_salt_water' : np.r_[1e-4, 1e-2, 1], # Antarctica glacier ice over salt water
-                        'water_into_basalt' : np.r_[1e-3, 1, 1e-3]
+                        'coastal_salt_water' : np.r_[1e0, 1e-2, 5e-2],    # Coastal salt water upper layer
+                        'ice_over_salt_water' : np.r_[1e-4, 1e-2, 1e0], # Antarctica glacier ice over salt water
+                        'water_into_basalt' : np.r_[1e-3, 1e0, 1e-3]
         }
 
         conductivity = DataArray(conductivities[model_type], name="Conductivity", units=r'$\frac{S}{m}$')
