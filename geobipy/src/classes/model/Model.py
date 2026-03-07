@@ -74,16 +74,13 @@ class Model(myObject):
     def gradient(self):
         return self._gradient
 
-    def compute_gradient(self):
+    def compute_gradient(self, penalize_thin_layers=True):
         r"""Compute the gradient
 
         Parameter gradient :math:"\nabla_{z}\sigma" at the ith layer is computed via
 
         """
-        # if self._gradient is None:
-        #     self._gradient = DataArray(self.mesh.nCells.item()-1, 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
-
-        gradient = StatArray(self.mesh.gradient(values=self.values), 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
+        gradient = StatArray(self.mesh.gradient(values=self.values, penalize_thin_layers=penalize_thin_layers), 'Derivative', r"$\frac{"+self.values.units+"}{"+self.mesh.edges.units+"}$")
         if self._gradient is not None:
             gradient.copyStats(self._gradient)
 
