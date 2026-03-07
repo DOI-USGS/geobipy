@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import atleast_1d, ndim, s_, size, integer
 def write_nd(arr, h5obj, myName, index=None):
     """Writes a numpy array to a preallocated dataset in a h5py group object
@@ -66,6 +67,8 @@ def write_nd_indexed(arr, h5obj, myName, index):
     if (nda == 0):
         ds[i, 0] = arr
     else:
-        i = i.item() if i.size == 1 else i
+        if isinstance(i, np.ndarray):
+            i = i.item() if size(i) == 1 else i
+
         slic = tuple([i] + [s_[:size(arr, axis=j)] for j in range(nda)])
         ds[slic] = arr
