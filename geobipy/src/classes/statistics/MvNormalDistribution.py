@@ -7,7 +7,7 @@ from numpy import int32, linspace, maximum, newaxis, pi, prod, r_, repeat, size,
 from numpy import ndim as npndim
 from numpy import log as nplog
 from numpy.linalg import inv, slogdet
-from scipy.stats import multivariate_normal
+from scipy.stats import multivariate_normal, Covariance
 from ...base import utilities as cf
 from ...base import plotting as cP
 from .baseDistribution import baseDistribution
@@ -118,27 +118,16 @@ class MvNormal(baseDistribution):
 
     @property
     def variance(self):
-
         if npndim(self._variance) < 2:
             return diag(self._variance)
         return self._variance
 
     @variance.setter
     def variance(self, values):
+        if self.ndim > 1:
+            if size(values) == 1:
+                values = full(self.ndim, fill_value =values)
         self._variance = atleast_1d(values).copy()
-        # self._variance = zeros((self.ndim, self.ndim))
-
-        # # Variance
-        # nd = npndim(values)
-        # if nd == 0:
-        #     self._variance[diag_indices(self.ndim)] = values
-
-        # elif nd == 1:
-        #     assert size(values) == self.ndim, Exception('Mismatch in size of mean and variance')
-        #     self._variance[diag_indices(self.ndim)] = values
-
-        # elif nd == 2:
-        #     self._variance[:, :] = values
 
     @property
     def precision(self):
@@ -155,7 +144,7 @@ class MvNormal(baseDistribution):
 
         assert order in [1, 2], ValueError("Order must be 1 or 2.")
         if order == 1:
-            return cf.Ax(self.precision, x - self._mean)
+            return cf.Ax(self.precision, self.deviation(x))
 
         elif order == 2:
             return self.precision
@@ -163,21 +152,12 @@ class MvNormal(baseDistribution):
     def deviation(self, x):
         return x - self._mean
 
-    # def derivative(self, x, order):
-
-    #     assert order in [1, 2], ValueError("Order must be 1 or 2.")
-    #     if order == 1:
-    #         return cf.Ax(self.inverseVariance, (x - self._mean)) * self.probability(x)
-    #     elif order == 2:
-    #         return cf.Ax(self.inverseVariance, self.probability(x))
-
     def mahalanobis(self, x):
-        tmp = x - self.mean
+        tmp = self.deviation(x)
         return sqrt(dot(tmp, dot(self.precision, tmp)))
 
     def rng(self, size=1):
         """  """
-
         return atleast_1d(squeeze(self.prng.multivariate_normal(self._mean, self.variance, size=size)))
 
     def plot_pdf(self, log=False, **kwargs):
@@ -209,13 +189,17 @@ class MvNormal(baseDistribution):
 
         pdf = multivariate_normal.logpdf if log else multivariate_normal.pdf
 
-        return DataArray(pdf(x, mean=mean, cov=self.variance, allow_singular=True), name='Probability Density')
+        cov = self._variance
+        if npndim(cov) == 1:
+            cov = Covariance.from_diagonal(cov)
+
+        return DataArray(pdf(x, mean=mean, cov=cov), name='Probability Density')
 
     @property
     def summary(self):
         msg =  "{}\n".format(type(self).__name__)
-        msg += '    Mean:{}\n'.format(self._mean)
-        msg += 'Variance:{}\n'.format(self._variance)
+        msg += '    Mean:{}\n'.format(DataArray(self._mean).summary)
+        msg += 'Variance:{}\n'.format(DataArray(self._variance).summary)
         return msg
 
     def pad(self, N):
