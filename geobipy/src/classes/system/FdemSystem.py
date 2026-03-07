@@ -119,7 +119,7 @@ class FdemSystem(myObject):
             return
 
         assert isinstance(values, CircularLoop), ValueError('receiver must have type geobipy.CircularLoop, not {}'.format(type(values)))
-        assert values.nPoints == self.nFrequencies, ValueError("Must have {} receivers, one for each frequency".format(self.nFrequencies))
+        assert values.n_points == self.nFrequencies, ValueError("Must have {} receivers, one for each frequency".format(self.nFrequencies))
 
         self._receiver = values
 
@@ -134,7 +134,7 @@ class FdemSystem(myObject):
             return
 
         assert isinstance(values, CircularLoop), ValueError('transmitter must have type geobipy.CircularLoop, not {}'.format(type(values)))
-        assert values.nPoints == self.nFrequencies, ValueError("Must have {} transmitters, one for each frequency".format(self.nFrequencies))
+        assert values.n_points == self.nFrequencies, ValueError("Must have {} transmitters, one for each frequency".format(self.nFrequencies))
 
         self._transmitter = values
 

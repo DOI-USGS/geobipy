@@ -39,7 +39,7 @@ class CircularLoop(EmLoop):
         """ Initialize a loop in an EM system """
 
         super().__init__(x=x, y=y, z=z, elevation=elevation, orientation=orientation, moment=moment, pitch=pitch, roll=roll, yaw=yaw, **kwargs)
-        self._radius = StatArray.StatArray(self._nPoints, "Radius", "m")
+        self._radius = StatArray.StatArray(self._n_points, "Radius", "m")
 
         # Radius of the loop
         self.radius = radius
@@ -51,15 +51,15 @@ class CircularLoop(EmLoop):
     @property
     def radius(self):
         if size(self._radius) == 0:
-            self._radius = StatArray.StatArray(self.nPoints, "Radius", "m")
+            self._radius = StatArray.StatArray(self.n_points, "Radius", "m")
         return self._radius
 
     @radius.setter
     def radius(self, values):
         if (values is not None):
-            self.nPoints = size(values)
+            self.n_points = size(values)
 
-            if self._radius.size != self._nPoints:
+            if self._radius.size != self._n_points:
                 self._radius = StatArray.StatArray(values, "Radius", "m")
                 return
 

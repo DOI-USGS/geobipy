@@ -34,14 +34,14 @@ class TdemData(Data):
 
     A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.
 
-    TdemData(nPoints=1, nTimes=[1], nSystems=1)
+    TdemData(n_points=1, n_times=[1], n_systems=1)
 
     Parameters
     ----------
-    nPoints : int, optional
+    n_points : int, optional
         Number of soundings in the data file
-    nTimes : array of ints, optional
-        Array of size nSystemsx1 containing the number of time gates in each system
+    n_times : array of ints, optional
+        Array of size n_systemsx1 containing the number of time gates in each system
     nSystem : int, optional
         Number of measurement systems
 
@@ -70,7 +70,7 @@ class TdemData(Data):
         self.system = system
 
         kwargs['components'] = kwargs.get('components', self.components)
-        kwargs['channels_per_system'] = kwargs.get('channels_per_system', self.n_components * self.nTimes)
+        kwargs['channels_per_system'] = kwargs.get('channels_per_system', self.n_components * self.n_times)
         # kwargs['components_per_channel'] = kwargs.get('components_per_channel', self.system[0].components)
         kwargs['units'] = r"$\frac{V}{m^{2}}$"
 
@@ -79,10 +79,10 @@ class TdemData(Data):
         # Data Class containing xyz and channel values
         super().__init__(**kwargs)
 
-        self._secondary_field           = DataArray((self.nPoints, self.nChannels), "Secondary field", self.units)
-        self._predicted_secondary_field = DataArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
-        self._primary_field             = DataArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
-        self._predicted_primary_field   = DataArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
+        self._secondary_field           = DataArray((self.n_points, self.n_channels), "Secondary field", self.units)
+        self._predicted_secondary_field = DataArray((self.n_points, self.n_channels), "Predicted secondary field", self.units)
+        self._primary_field             = DataArray((self.n_points, self.n_components * self.n_systems), "Primary field", self.units)
+        self._predicted_primary_field   = DataArray((self.n_points, self.n_components * self.n_systems), "Predicted Primary field", self.units)
 
         self.primary_field = kwargs.get('primary_field')
         self.secondary_field = kwargs.get('secondary_field')
@@ -115,27 +115,34 @@ class TdemData(Data):
     def channel_names(self, values):
         if values is None:
             self._channel_names = []
-            for i in range(self.nSystems):
+            for i in range(self.n_systems):
                 # Set the channel names
                 for ic in range(self.n_components):
-                    for iTime in range(self.nTimes[i]):
+                    for iTime in range(self.n_times[i]):
                         s = 'S{}{} time {:.3e}'.format(i, self.components[ic].upper(), self.system[i].windows.centre[iTime])
                         self._channel_names.append(s)
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            assert len(values) == self.n_channels, Exception("Length of channel_names must equal total number of channels {}".format(self.n_channels))
             self._channel_names = values
 
     @Data.data.getter
     def data(self):
-        if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
-            self._data = DataArray((self.nPoints, self.n_data_channels), "Data", self.units)
+        if size(self._data, 0) == 0 or (self._data.shape[0] != self.n_points):
+            self._data = DataArray((self.n_points, self.n_data_channels), "Data", self.units)
 
-        for j in range(self.nSystems):
+        if self.total_field:
+            self._data[...] = 0.0
             for i in range(self.n_components):
-                ic = self._component_indices(i, j)
-                self._data[:, ic] = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
-
+                ic = self._component_indices(i, 0)
+                # Compute Sum(Pc + Sc) for c in x, y, z
+                self._data[:] += (self.primary_field[:, i][:, None] + self.secondary_field[:, ic])**2.0
+            self._data[:] = sqrt(self._data)
+        else:
+            for j in range(self.n_systems):
+                for i in range(self.n_components):
+                    ic = self._component_indices(i, j)
+                    self._data[:, ic] = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
         return self._data
 
     @property
@@ -151,41 +158,60 @@ class TdemData(Data):
     # def loopOffset(self, values):
     #     if (values is None):
     #         self._loopOffset = DataArray(
-    #             (self.nPoints, 3), "Loop Offset")
+    #             (self.n_points, 3), "Loop Offset")
     #     else:
-    #         if self.nPoints == 0:
-    #             self.nPoints = size(values)
-    #         assert npall(shape(values) == (self.nPoints, 3)), ValueError(
-    #             "loopOffset must have shape {}".format((self.nPoints, 3)))
+    #         if self.n_points == 0:
+    #             self.n_points = size(values)
+    #         assert npall(shape(values) == (self.n_points, 3)), ValueError(
+    #             "loopOffset must have shape {}".format((self.n_points, 3)))
     #         if (isinstance(values, DataArray)):
     #             self._loopOffset = deepcopy(values)
     #         else:
     #             self._loopOffset = DataArray(values, "Loop Offset")
 
-    @Point.nPoints.setter
-    def nPoints(self, value):
-        if self._nPoints == 0 and value > 0:
-            self._nPoints = int32(value)
+    @Point.n_points.setter
+    def n_points(self, value):
+        if self._n_points == 0 and value > 0:
+            self._n_points = int32(value)
 
-        self.loop_pair.nPoints = value
+        self.loop_pair.n_points = value
 
     @property
-    def nTimes(self):
-        return asarray([x.nTimes for x in self.system])
+    def n_times(self):
+        return asarray([x.n_times for x in self.system])
+
+    @Data.predicted_data.getter
+    def predicted_data(self):
+        if size(self._predicted_data, 0) == 0 or (self._predicted_data.shape[0] != self.n_points):
+            self._predicted_data = DataArray((self.n_points, self.n_data_channels), "Predicted Data", self.units)
+
+        if self.total_field:
+            self._predicted_data[...] = 0.0
+            for i in range(self.n_components):
+                ic = self._component_indices(i, 0)
+                # Compute Sum(Pc + Sc) for c in x, y, z
+                self._predicted_data[:] += (self.predicted_primary_field[:, i][:, None] + self.predicted_secondary_field[:, ic])**2.0
+            self._predicted_data[:] = sqrt(self._predicted_data)
+        else:
+            for j in range(self.n_systems):
+                for i in range(self.n_components):
+                    ic = self._component_indices(i, j)
+                    self._predicted_data[:, ic] = self.predicted_primary_field[:, i][:, None] + self.predicted_secondary_field[:, ic]
+        return self._predicted_data
 
     @property
     def predicted_primary_field(self):
         """The data. """
         if size(self._predicted_primary_field, 0) == 0:
-            self._predicted_primary_field = DataArray((self.nPoints, self.n_components * self.nSystems), "Predicted Primary field", self.units)
+            self._predicted_primary_field = DataArray((self.n_points, self.n_components * self.n_systems), "Predicted Primary field", self.units)
         return self._predicted_primary_field
 
     @predicted_primary_field.setter
     def predicted_primary_field(self, values):
         if values is not None:
-            self.nPoints = size(values, 0)
+            self.n_points = size(values, 0)
 
-            shp = (self.nPoints, self.n_components * self.nSystems)
+            shp = (self.n_points, self.n_components * self.n_systems)
             if not allclose(self._predicted_primary_field.shape, shp):
                 self._predicted_primary_field = DataArray(values, "Predicted primary field", self.units)
                 return
@@ -196,35 +222,34 @@ class TdemData(Data):
     def predicted_secondary_field(self):
         """The data. """
         if size(self._predicted_secondary_field, 0) == 0:
-            self._predicted_secondary_field = DataArray((self.nPoints, self.nChannels), "Predicted secondary field", self.units)
+            self._predicted_secondary_field = DataArray((self.n_points, self.n_channels), "Predicted secondary field", self.units)
         return self._predicted_secondary_field
 
     @predicted_secondary_field.setter
     def predicted_secondary_field(self, values):
         if values is not None:
             values = atleast_2d(values)
-            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
 
-            shp = (self.nPoints, self.nChannels)
+            shp = (self.n_points, self.n_channels)
             if not allclose(self._predicted_secondary_field.shape, shp):
                 self._predicted_secondary_field = DataArray(values, "Predicted secondary field", self.units)
                 return
 
-            self._predicted_secondary_field[:, :] = values
+            self._predicted_secondary_field[...] = values
 
     @property
     def primary_field(self):
         """The data. """
         if size(self._primary_field, 0) == 0:
-            self._primary_field = DataArray((self.nPoints, self.n_components * self.nSystems), "Primary field", self.units)
+            self._primary_field = DataArray((self.n_points, self.n_components * self.n_systems), "Primary field", self.units)
         return self._primary_field
 
     @primary_field.setter
     def primary_field(self, values):
         if values is not None:
-            self.nPoints = size(values, 0)
+            self.n_points = size(values, 0)
 
-            shp = (self.nPoints, self.n_components * self.nSystems)
+            shp = (self.n_points, self.n_components * self.n_systems)
             if not allclose(self._primary_field.shape, shp):
                 self._primary_field = DataArray(values, "Primary field", self.units)
                 return
@@ -241,9 +266,9 @@ class TdemData(Data):
     #         self._receiver = CircularLoop()
     #     else:
     #         assert isinstance(values, CircularLoop), ValueError('receiver must have type geobipy.CircularLoop')
-    #         if self.nPoints == 0:
-    #             self.nPoints = values.nPoints
-    #         assert values.nPoints == self.nPoints, ValueError("receiver must have size {}".format(self.nPoints))
+    #         if self.n_points == 0:
+    #             self.n_points = values.n_points
+    #         assert values.n_points == self.n_points, ValueError("receiver must have size {}".format(self.n_points))
 
     #         self._receiver = values
 
@@ -251,33 +276,33 @@ class TdemData(Data):
     def secondary_field(self):
         """The data. """
         if size(self._secondary_field, 0) == 0:
-            self._secondary_field = DataArray((self.nPoints, self.n_data_channels), "Secondary field", self.units)
+            self._secondary_field = DataArray((self.n_points, self.n_channels), "Secondary field", self.units)
         return self._secondary_field
 
     @secondary_field.setter
     def secondary_field(self, values):
         if values is not None:
             values = atleast_2d(values)
-            self.nPoints, n_data_channels = size(values, 0), size(values, 1)
+            self.n_points, n_channels = size(values, 0), size(values, 1)
 
-            shp = (self.nPoints, n_data_channels)
+            shp = (self.n_points, n_channels)
             if not allclose(self._secondary_field.shape, shp):
                 self._secondary_field = DataArray(values, "Secondary field", self.units)
                 return
 
             self._secondary_field[:, :] = values
 
-    @Data.std.getter
-    def std(self):
-        if (size(self._std, 0) == 0) or (self._std.shape[0] != self.nPoints):
-            self._std = DataArray((self.nPoints, self.n_data_channels), "Standard deviation", self.units)
+    # @Data.std.getter
+    # def std(self):
+    #     if (size(self._std, 0) == 0) or (self._std.shape[0] != self.n_points):
+    #         self._std = DataArray((self.n_points, self.n_data_channels), "Standard deviation", self.units)
 
-        if self.relative_error.max() > 0.0:
-            for i in range(self.nSystems):
-                j = self._systemIndices(i)
-                self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
+    #     if self.relative_error.max() > 0.0:
+    #         for i in range(self.n_systems):
+    #             j = self._systemIndices(i)
+    #             self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
 
-        return self._std
+    #     return self._std
 
     @property
     def system(self):
@@ -293,11 +318,11 @@ class TdemData(Data):
 
         if isinstance(values, (str, TdemSystem)):
             values = [values]
-        nSystems = len(values)
+        n_systems = len(values)
         # Make sure that list contains strings or TdemSystem classes
         assert all([isinstance(x, (str, TdemSystem)) for x in values]), TypeError("system must be str or list of either str or geobipy.TdemSystem")
 
-        self._system = [None] * nSystems
+        self._system = [None] * n_systems
 
         for i, s in enumerate(values):
             if isinstance(s, str):
@@ -312,18 +337,6 @@ class TdemData(Data):
     def transmitter(self):
         return self.loop_pair.transmitter
 
-    # @transmitter.setter
-    # def transmitter(self, values):
-
-    #     if (values is None):
-    #         self._transmitter = CircularLoop()
-    #     else:
-    #         assert isinstance(values, CircularLoop), ValueError('transmitter must have type geobipy.CircularLoop')
-    #         if self.nPoints == 0:
-    #             self.nPoints = values.nPoints
-    #         assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
-
-    #         self._transmitter = values
     def _as_dict(self):
         out, order = super()._as_dict()
         tmp, o = self.loop_pair._as_dict()
@@ -342,16 +355,12 @@ class TdemData(Data):
         return self
 
 
-    # def _component_indices(self, component=0, system=0):
-    #     assert component < self.n_components, ValueError("component must be < {}".format(self.n_components))
-    #     return s_[((self.nTimes*component)+(system*self.nChannels))[0]:(self.nTimes*(component+1)+(system*self.nChannels))[0]]
-
     @property
     def _ravel_index(self):
-        return cumsum(hstack([0, repeat(self.nTimes, self.n_components)]))
+        return cumsum(hstack([0, repeat(self.n_times, self.n_components)]))
 
     def _component_indices(self, component=0, system=0):
-        i = ravel_multi_index((component, system), (self.n_components, self.nSystems))
+        i = ravel_multi_index((component, system), (self.n_components, self.n_systems))
         return s_[self._ravel_index[i]:self._ravel_index[i+1]]
 
     @classmethod
@@ -430,16 +439,15 @@ class TdemData(Data):
         if (isinstance(system, str)):
             system = [system]
 
-        nSystems = len(system)
+        n_systems = len(system)
 
-        # assert nDatafiles == nSystems, Exception("Number of data files must match number of system files.")
-
+        # assert nDatafiles == n_systems, Exception("Number of data files must match number of system files.")
         self = cls(system=system)
 
-        self._nPoints, iC, iR, iT, iOffset, iData, iStd, iPrimary = self._csv_channels(data_filename)
+        self._n_points, iC, iR, iT, iOffset, iData, iStd, iPrimary = self._csv_channels(data_filename)
 
-        assert len(iData) == self.nChannels, Exception("Number of off time columns {} in {} does not match total number of times {} in system files \n {}".format(
-            len(iData), data_filename, self.nChannels, self.fileInformation()))
+        assert len(iData) == self.n_channels, Exception("Number of off time columns {} in {} does not match total number of times {} in system files \n {}".format(
+            len(iData), data_filename, self.n_channels, self.fileInformation()))
 
         if len(iStd) > 0:
             assert len(iStd) == len(iData), Exception(
@@ -472,7 +480,7 @@ class TdemData(Data):
                                     y=self.y,
                                     z=self.z,
                                     pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
-                                    radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                    radius=full(self.n_points, fill_value=self.system[0].loopRadius()))
 
         loopOffset = df[iOffset].values
 
@@ -481,7 +489,7 @@ class TdemData(Data):
                                  y = transmitter.y + loopOffset[:, 1],
                                  z = transmitter.z + loopOffset[:, 2],
                                  pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
-                                 radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                 radius=full(self.n_points, fill_value=self.system[0].loopRadius()))
 
         self.loop_pair = Loop_pair(transmitter, receiver)
         # Get the data values
@@ -500,9 +508,9 @@ class TdemData(Data):
         # if len(data_filename) == 1:
         #     return self
 
-        # for i in range(1, self.nSystems):
+        # for i in range(1, self.n_systems):
 
-        #     nPoints, iC, iR, iT, iOffset, iData, iStd = self._csv_channels(data_filename[i])
+        #     n_points, iC, iR, iT, iOffset, iData, iStd = self._csv_channels(data_filename[i])
 
         #     # Assign the columns to read
         #     channels = iData
@@ -543,14 +551,14 @@ class TdemData(Data):
     #     for i in range(nSys):
     #         self.system[i] = TdemSystem().read(systemFilename[i])
 
-    #     # self.nSystems = nSys
-    #     self.nChannelsPerSystem = asarray([int32(x.nwindows()) for x in self.system])
+    #     # self.n_systems = nSys
+    #     self.n_channelsPerSystem = asarray([int32(x.nwindows()) for x in self.system])
 
-    #     self._systemOffset = append(0, cumsum(self.nChannelsPerSystem))
+    #     self._systemOffset = append(0, cumsum(self.n_channelsPerSystem))
 
     def csv_channels(self, data_filename):
 
-        self.nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
+        self.n_points, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
 
         self._channels = self._iC + self._iR + self._iT + self._iOffset + self._iData
         if len(self._iStd) > 0:
@@ -595,7 +603,7 @@ class TdemData(Data):
         # Get the column headers of the data file
         channels = fIO.get_column_name(data_filename)
 
-        nPoints, location_channels = Data._csv_channels(data_filename)
+        n_points, location_channels = Data._csv_channels(data_filename)
 
         nr = 0
         nt = 0
@@ -643,7 +651,7 @@ class TdemData(Data):
         assert no == 3, Exception(
             'Must have all three txrx_dx, txrx_dy, and txrx_dz headers in data file {} if transmitter-reciever loop separation is specified. \n {}'.format(data_filename, TdemData.fileInformation()))
 
-        return nPoints, location_channels, rLoop_channels, tLoop_channels, offset_channels, off_channels, off_error_channels, primary_channels
+        return n_points, location_channels, rLoop_channels, tLoop_channels, offset_channels, off_channels, off_error_channels, primary_channels
 
     @classmethod
     def _initialize_sequential_reading(cls, data_filename, system_filename):
@@ -669,12 +677,12 @@ class TdemData(Data):
         self.csv_channels(filename)
 
     @property
-    def nSystems(self):
+    def n_systems(self):
         return size(self.channels_per_system)
 
     @property
     def channels_per_system(self):
-        return self.n_components * self.nTimes
+        return self.n_times
 
     def _read_record(self, record=None, mpi_enabled=False):
         """Reads a single data point from the data file.
@@ -687,7 +695,7 @@ class TdemData(Data):
             if record is None:
                 df = self._file.get_chunk()
             else:
-                assert record < self.nPoints, Exception(f"Record index {record} is out of bounds for data set with {self.n_points} points.")
+                assert record < self.n_points, Exception(f"Record index {record} is out of bounds for data set with {self.n_points} points.")
                 df = self._file.get_chunk()
                 if not mpi_enabled:
                     i = 1
@@ -746,7 +754,7 @@ class TdemData(Data):
 
     def estimateAdditiveError(self):
         """ Uses the late times after 1ms to estimate the additive errors and error bounds in the data. """
-        for i in range(self.nSystems):
+        for i in range(self.n_systems):
             h = 'System {} \n'.format(i)
             iS = self._systemIndices(i)
             D = self._data[:, iS]
@@ -765,7 +773,7 @@ class TdemData(Data):
                     h += 'All data values for times > 1ms are NaN \nUsing the last time gate with non-NaN values.\n'
                 else:
                     d = lateD
-                    h += 'Using {} time gates after 1ms\n'.format(self.nTimes[i] - i1ms)
+                    h += 'Using {} time gates after 1ms\n'.format(self.n_times[i] - i1ms)
 
             else:
                 h = 'System {} has no time gates after 1ms \nUsing the last time gate with non-NaN values. \n'.format(i)
@@ -818,7 +826,8 @@ class TdemData(Data):
 
         return self.single(self.x[i], self.y[i], self.z[i], self.elevation[i],
                              self.primary_field[i, :], self.secondary_field[i, :],
-                             relative_error=self.relative_error[i, :], additive_error=self.additive_error[i, :], std = self.std[i, :],
+                             relative_error=self.relative_error[i, :], additive_error=self.additive_error[i, :],
+                             std = self.std[i, :],
                              predicted_primary_field=None, predicted_secondary_field=None,
                              system = self.system,
                              transmitter = self.transmitter[i], receiver = self.receiver[i],
@@ -826,7 +835,7 @@ class TdemData(Data):
 
     def off_time(self, system=0):
         """ Obtain the times from the system file """
-        assert 0 <= system < self.nSystems, ValueError('system must be in (0, {}]'.format(self.nSystems))
+        assert 0 <= system < self.n_systems, ValueError('system must be in (0, {}]'.format(self.n_systems))
         return self.system[system].off_time
 
     def __getitem__(self, i):
@@ -900,8 +909,8 @@ class TdemData(Data):
 
     def find_best_halfspace(self, minConductivity=1e-4, maxConductivity=1e4, nSamples=100):
 
-        conductivity = zeros(self.nPoints)
-        for i in range(self.nPoints):
+        conductivity = zeros(self.n_points)
+        for i in range(self.n_points):
             dp = self.datapoint(i)
             mod = dp.find_best_halfspace(minConductivity, maxConductivity, nSamples)
             conductivity[i] = mod.values.item()
@@ -963,8 +972,8 @@ class TdemData(Data):
 
         x = self.x_axis(xAxis)
 
-        for i in range(self.nSystems):
-            plt.subplot(self.nSystems, 1, i + 1)
+        for i in range(self.n_systems):
+            plt.subplot(self.n_systems, 1, i + 1)
             j = self._systemIndices(i)
             kwargs['labels'] = line.channel_names[j]
             line.data[:, j].plot(x=x, **kwargs)
@@ -974,11 +983,11 @@ class TdemData(Data):
         return super().plot_predicted(*args, **kwargs)
 
     def plotWaveform(self, **kwargs):
-        for i in range(self.nSystems):
-            plt.subplot(self.nSystems, 1, i + 1)
+        for i in range(self.n_systems):
+            plt.subplot(self.n_systems, 1, i + 1)
             plt.plot(self.system[i].waveform.time,
                      self.system[i].waveform.current, **kwargs)
-            if (i == self.nSystems-1):
+            if (i == self.n_systems-1):
                 cP.xlabel('Time (s)')
             cP.ylabel('Normalized Current (A)')
             plt.margins(0.1, 0.1)
@@ -1006,8 +1015,8 @@ class TdemData(Data):
         # create a new group inside h5obj
         grp = super().createHdf(parent, myName, withPosterior, fillvalue)
 
-        grp.create_dataset('nSystems', data=self.nSystems)
-        for i in range(self.nSystems):
+        grp.create_dataset('n_systems', data=self.n_systems)
+        for i in range(self.n_systems):
             self.system[i].toHdf(grp, 'System{}'.format(i))
 
         self.loop_pair.createHdf(grp, 'loop_pair', fillvalue=fillvalue)
@@ -1057,14 +1066,14 @@ class TdemData(Data):
 
     @staticmethod
     def read_systems_from_h5(grp, **kwargs):
-        nSystems = int32(asarray(grp.get('nSystems')))
+        n_systems = int32(asarray(grp.get('n_systems')))
         if 'system_filename' in kwargs:
             system_filename = kwargs['system_filename']
             if not isinstance(system_filename, list): system_filename = [system_filename]
-            nSystems = len(system_filename)
+            n_systems = len(system_filename)
 
-        systems = [None]*nSystems
-        for i in range(nSystems):
+        systems = [None]*n_systems
+        for i in range(n_systems):
             if 'system_filename' in kwargs:
                 systems[i] = TdemSystem(system_filename=system_filename[i])
             else:
@@ -1093,10 +1102,10 @@ class TdemData(Data):
             else:
                 sfnTmp = None
             systemFilename = world.bcast(sfnTmp, root=root)
-            nSystems = len(systemFilename)
+            n_systems = len(systemFilename)
 
-            system = [None] * nSystems
-            for i in range(nSystems):
+            system = [None] * n_systems
+            for i in range(n_systems):
                 system[i] = TdemSystem.read(systemFilename[i])
 
         return system
@@ -1114,7 +1123,7 @@ class TdemData(Data):
 
         transmitter = CircularLoop()
         # Broadcast the Transmitter Loops.
-        for i in range(out.nPoints):
+        for i in range(out.n_points):
             if (world.rank == 0):
                 transmitter = self.transmitter[i]
             out.transmitter[i] = transmitter.Bcast(world, root)
@@ -1122,7 +1131,7 @@ class TdemData(Data):
 
         receiver = CircularLoop()
         # Broadcast the Transmitter Loops.
-        for i in range(out.nPoints):
+        for i in range(out.n_points):
             if (world.rank == 0):
                 receiver = self.receiver[i]
             out.receiver[i] = receiver.Bcast(world, root)
@@ -1144,19 +1153,19 @@ class TdemData(Data):
         # Scatterv the Transmitter Loops.
         lTmp = []
         if (world.rank == 0):
-            lTmp = [self.transmitter[i] for i in range(self.nPoints)]
+            lTmp = [self.transmitter[i] for i in range(self.n_points)]
 
         lTmp = myMPI.Scatterv_list(lTmp, starts, chunks, world)
-        for i in range(out.nPoints):
+        for i in range(out.n_points):
             out.transmitter[i] = lTmp[i]
 
         # Scatterv the Reciever Loops.
         lTmp = []
         if (world.rank == 0):
-            lTmp = [self.receiver[i] for i in range(self.nPoints)]
+            lTmp = [self.receiver[i] for i in range(self.n_points)]
 
         lTmp = myMPI.Scatterv_list(lTmp, starts, chunks, world)
-        for i in range(out.nPoints):
+        for i in range(out.n_points):
             out.receiver[i] = lTmp[i]
 
         out.primary_field = self.primary_field.Scatterv(starts, chunks, world, root=root)
@@ -1172,29 +1181,29 @@ class TdemData(Data):
     #     if isinstance(fileNames, str):
     #         fileNames = [fileNames]
 
-    #     assert len(fileNames) == self.nSystems, ValueError(
-    #         "fileNames must have length equal to the number of systems {}".format(self.nSystems))
+    #     assert len(fileNames) == self.n_systems, ValueError(
+    #         "fileNames must have length equal to the number of systems {}".format(self.n_systems))
 
-    #     for i in range(self.nSystems):
+    #     for i in range(self.n_systems):
 
     #         iSys = self._systemIndices(i)
     #         # Create the header
     #         header = "Line Fid Easting Northing Elevation Height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw "
 
-    #         for x in range(self.nTimes[i]):
+    #         for x in range(self.n_times[i]):
     #             header += "Off[{}] ".format(x)
 
-    #         d = empty(self.nTimes[i])
+    #         d = empty(self.n_times[i])
 
     #         if std:
-    #             for x in range(self.nTimes[i]):
+    #             for x in range(self.n_times[i]):
     #                 header += "OffErr[{}] ".format(x)
-    #             s = empty(self.nTimes[i])
+    #             s = empty(self.n_times[i])
 
     #         with open(fileNames[i], 'w') as f:
     #             f.write(header+"\n")
     #             with printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
-    #                 for j in range(self.nPoints):
+    #                 for j in range(self.n_points):
 
     #                     x = asarray([self.line_number[j], self.id[j], self.x[j], self.y[j], self.elevation[j], self.z[j],
     #                                     self.R[j].x-self.T[j].x, self.R[j].y-self.T[j].y, self.R[j].z-self.T[j].z,
@@ -1251,6 +1260,6 @@ class TdemData(Data):
 
         ds_noisy = deepcopy(ds)
 
-        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.nChannels))
+        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.n_channels))
 
         return ds, ds_noisy

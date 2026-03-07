@@ -54,7 +54,7 @@ def tdem1dsen(datapoint, model1d, ix=None, model_changed=True):
 
 # def empymod_tdem1dfwd(datapoint, model1d):
 
-#     for i in range(datapoint.nSystems):
+#     for i in range(datapoint.n_systems):
 #         iSys = datapoint._systemIndices(i)
 #         fm = empymod_walktem(datapoint.system[i], model1d)
 #         datapoint._predictedData[iSys] = fm
@@ -68,7 +68,7 @@ def tdem1dsen(datapoint, model1d, ix=None, model_changed=True):
 #     else:  # Partial matrix for specified layers
 #         J = zeros((datapoint.nWindows, size(ix)))
 
-#     for j in range(datapoint.nSystems):  # For each system
+#     for j in range(datapoint.n_systems):  # For each system
 #         iSys = datapoint._systemIndices(j)
 
 #         d0 = empymod_walktem(datapoint.system[j], model1d)
@@ -94,7 +94,7 @@ def gaTdem1dfwd(datapoint, model1d):
     G = datapoint.loop_pair.Geometry
 
     # Forward model the data for each system
-    return [datapoint.system[i].forwardmodel(G, E) for i in range(datapoint.nSystems)]
+    return [datapoint.system[i].forwardmodel(G, E) for i in range(datapoint.n_systems)]
 
 def ga_fm_dlogc(datapoint, model1d):
     # Generate the Brodie Earth class
@@ -103,13 +103,13 @@ def ga_fm_dlogc(datapoint, model1d):
     G = datapoint.loop_pair.Geometry
 
     # Forward model and sensitivity from each system
-    values = [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.nSystems)]
+    values = [datapoint.system[i].fm_dlogc(G, E) for i in range(datapoint.n_systems)]
 
-    fm = [values[i][0] for i in range(datapoint.nSystems)]
+    fm = [values[i][0] for i in range(datapoint.n_systems)]
 
-    # J = zeros((datapoint.nChannels, model1d.mesh.nCells.item()))
+    # J = zeros((datapoint.n_channels, model1d.mesh.nCells.item()))
     comps = []
-    for i in range(datapoint.nSystems):  # For each system
+    for i in range(datapoint.n_systems):  # For each system
         iSys = datapoint._systemIndices(i)
         # Store the necessary component
         if 'x' in datapoint.components:
@@ -133,11 +133,11 @@ def gaTdem1dsen(datapoint, model1d, ix=None, model_changed=True):
 
     if (ix is None):  # Generate a full matrix if the layers are not specified
         ix = range(model1d.mesh.nCells.item())
-        J = zeros((datapoint.nChannels, model1d.mesh.nCells.item()))
+        J = zeros((datapoint.n_channels, model1d.mesh.nCells.item()))
     else:  # Partial matrix for specified layers
-        J = zeros((datapoint.nChannels, size(ix)))
+        J = zeros((datapoint.n_channels, size(ix)))
 
-    for j in range(datapoint.nSystems):  # For each system
+    for j in range(datapoint.n_systems):  # For each system
         iSys = datapoint._systemIndices(j)
         for i in range(size(ix)):  # For the specified layers
             tmp = datapoint.system[j].derivative(datapoint.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)

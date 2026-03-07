@@ -82,13 +82,13 @@ class Loop_pair(Point):
                         -self.receiver.pitch.item(),
                         -self.receiver.yaw.item())
 
-    @Point.nPoints.setter
-    def nPoints(self, value):
-        if self._nPoints == 0 and value > 0:
-            self._nPoints = int32(value)
+    @Point.n_points.setter
+    def n_points(self, value):
+        if self._n_points == 0 and value > 0:
+            self._n_points = int32(value)
 
-            self.receiver.nPoints = value
-            self.transmitter.nPoints = value
+            self.receiver.n_points = value
+            self.transmitter.n_points = value
 
     @property
     def offset(self):
@@ -100,7 +100,7 @@ class Loop_pair(Point):
 
     @property
     def receiver(self):
-        if self._receiver.nPoints == 0:
+        if self._receiver.n_points == 0:
             self._receiver = EmLoop()
         return self._receiver
 
@@ -108,8 +108,8 @@ class Loop_pair(Point):
     def receiver(self, values):
         if (values is not None):
             assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop')
-            self.nPoints = values.nPoints
-            assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
+            self.n_points = values.n_points
+            assert values.n_points == self.n_points, ValueError("transmitter must have size {}".format(self.n_points))
             values = deepcopy(values)
 
             self._receiver = values
@@ -120,7 +120,7 @@ class Loop_pair(Point):
 
     @property
     def transmitter(self):
-        if self._transmitter.nPoints == 0:
+        if self._transmitter.n_points == 0:
             self._transmitter = EmLoop()
         return self._transmitter
 
@@ -128,8 +128,8 @@ class Loop_pair(Point):
     def transmitter(self, values):
         if (values is not None):
             assert isinstance(values, (EmLoop)), TypeError('transmitter must be a geobipy.EmLoop')
-            if self.nPoints == 0: self.nPoints = values.nPoints
-            assert values.nPoints == self.nPoints, ValueError("transmitter must have size {}".format(self.nPoints))
+            if self.n_points == 0: self.n_points = values.n_points
+            assert values.n_points == self.n_points, ValueError("transmitter must have size {}".format(self.n_points))
             values = deepcopy(values)
 
             self._transmitter = values

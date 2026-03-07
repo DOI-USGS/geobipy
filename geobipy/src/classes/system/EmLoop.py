@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import asarray, ceil, float64, hstack, int8, int32, minimum, size, unique, unravel_index
 from copy import deepcopy
 from matplotlib.figure import Figure
@@ -25,11 +26,11 @@ class EmLoop(Point, ABC):
 
         super().__init__(x, y, z, elevation, **kwargs)
 
-        self._orientation = StatArray.StatArray(self.nPoints, "Orientation", "", dtype=int32)
-        self._moment = StatArray.StatArray(self.nPoints, "Moment", "")
-        self._pitch  = StatArray.StatArray(self.nPoints, "Pitch", "$^{o}$")
-        self._roll   = StatArray.StatArray(self.nPoints, "Roll", "$^{o}$")
-        self._yaw    = StatArray.StatArray(self.nPoints, "Yaw", "$^{o}$")
+        self._orientation = StatArray.StatArray(self.n_points, "Orientation", "", dtype=int32)
+        self._moment = StatArray.StatArray(self.n_points, "Moment", "")
+        self._pitch  = StatArray.StatArray(self.n_points, "Pitch", "$^{o}$")
+        self._roll   = StatArray.StatArray(self.n_points, "Roll", "$^{o}$")
+        self._yaw    = StatArray.StatArray(self.n_points, "Yaw", "$^{o}$")
 
         # Orientation of the loop dipole
         self.orientation = orientation
@@ -90,14 +91,14 @@ class EmLoop(Point, ABC):
     @property
     def moment(self):
         if size(self._moment) == 0:
-            self._moment = StatArray.StatArray(self.nPoints, "Moment", "")
+            self._moment = StatArray.StatArray(self.n_points, "Moment", "")
         return self._moment
 
     @moment.setter
     def moment(self, values):
         if (values is not None):
-            self.nPoints = size(values)
-            if self._moment.size != self._nPoints:
+            self.n_points = size(values)
+            if self._moment.size != self._n_points:
                 self._moment = StatArray.StatArray(values, "Moment", "")
                 return
 
@@ -106,14 +107,14 @@ class EmLoop(Point, ABC):
     @property
     def pitch(self):
         if size(self._pitch) == 0:
-            self._pitch = StatArray.StatArray(self.nPoints, "Pitch", "$^{o}$")
+            self._pitch = StatArray.StatArray(self.n_points, "Pitch", "$^{o}$")
         return self._pitch
 
     @pitch.setter
     def pitch(self, values):
         if (values is not None):
-            self.nPoints = size(values)
-            if self._pitch.size != self._nPoints:
+            self.n_points = size(values)
+            if self._pitch.size != self._n_points:
                 self._pitch = StatArray.StatArray(values, "Pitch", "$^{o}$")
                 return
 
@@ -126,14 +127,14 @@ class EmLoop(Point, ABC):
     @property
     def roll(self):
         if size(self._roll) == 0:
-            self._roll = StatArray.StatArray(self.nPoints, "Roll", "$^{o}$")
+            self._roll = StatArray.StatArray(self.n_points, "Roll", "$^{o}$")
         return self._roll
 
     @roll.setter
     def roll(self, values):
         if (values is not None):
-            self.nPoints = size(values)
-            if self._roll.size != self._nPoints:
+            self.n_points = size(values)
+            if self._roll.size != self._n_points:
                 self._roll = StatArray.StatArray(values, "Roll", "$^{o}$")
                 return
 
@@ -141,19 +142,19 @@ class EmLoop(Point, ABC):
 
     @property
     def size(self):
-        return self.nPoints
+        return self.n_points
 
     @property
     def yaw(self):
         if size(self._yaw) == 0:
-            self._yaw = StatArray.StatArray(self.nPoints, "Yaw", "$^{o}$")
+            self._yaw = StatArray.StatArray(self.n_points, "Yaw", "$^{o}$")
         return self._yaw
 
     @yaw.setter
     def yaw(self, values):
         if (values is not None):
-            self.nPoints = size(values)
-            if self._yaw.size != self._nPoints:
+            self.n_points = size(values)
+            if self._yaw.size != self._n_points:
                 self._yaw = StatArray.StatArray(values, "Yaw", "$^{o}$")
                 return
 
@@ -162,21 +163,22 @@ class EmLoop(Point, ABC):
     @property
     def orientation(self):
         if size(self._orientation) == 0:
-            self._orientation = StatArray.StatArray(self.nPoints, "Orientation", "", dtype=int32)
+            self._orientation = StatArray.StatArray(self.n_points, "Orientation", "", dtype=int32)
 
         tmp = ('x', 'y', 'z')
-        return [tmp[i] for i in self._orientation]
+        return StatArray.StatArray([tmp[i] for i in self._orientation], "Orientation", "")
 
     @orientation.setter
     def orientation(self, values):
         if (values is not None):
+
             tmp = {'x': 0, 'y':1, 'z':2}
 
-            self.nPoints = size(values)
+            self.n_points = size(values)
 
-            values = asarray([tmp[x.replace(" ", "")] for x in values])
+            values = asarray([tmp[x.replace(" ", "")] for x in np.atleast_1d(values)])
 
-            if self._orientation.size != self._nPoints:
+            if self._orientation.size != self._n_points:
                 self._orientation = StatArray.StatArray(values, "Orientation", dtype=int32)
                 return
 
@@ -190,7 +192,6 @@ class EmLoop(Point, ABC):
     def summary(self):
         """Print a summary"""
         msg = super().summary
-
         msg += "orientation:\n{}\n".format("|   "+(self._orientation.summary.replace("\n", "\n|   ")))
         msg += "moment:\n{}\n".format("|   "+(self.moment.summary.replace("\n", "\n|   "))[:-4])
         msg += "pitch:\n{}\n".format("|   "+(self.pitch.summary.replace("\n", "\n|   "))[:-4])

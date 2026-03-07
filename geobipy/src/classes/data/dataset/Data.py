@@ -3,9 +3,10 @@ Module describing a Data Set where values are associated with an xyz co-ordinate
 """
 from copy import copy, deepcopy
 
+import numpy as np
 from numpy import allclose, any, arange, asarray, atleast_1d, atleast_2d, cumsum, diff, float64, full
 from numpy import hstack, int32, isnan, nan, ndim
-from numpy import ones, r_, s_, shape, size, sqrt, sum, unique
+from numpy import ones, r_, ravel_multi_index, s_, shape, size, sqrt, sum, unique
 from numpy import vstack, where, zeros
 from numpy import all as npall
 
@@ -37,18 +38,18 @@ class Data(Point):
 
     Parameters
     ----------
-    nPoints : int
+    n_points : int
         Number of points in the data.
     channels_per_system : int or array_like
         Number of data channels in the data
         * If int, a single acquisition system is assumed.
         * If array_like, each item describes the number of points per acquisition system.
     x : geobipy.StatArray or array_like, optional
-        The x co-ordinates. Default is zeros of size nPoints.
+        The x co-ordinates. Default is zeros of size n_points.
     y : geobipy.StatArray or array_like, optional
-        The y co-ordinates. Default is zeros of size nPoints.
+        The y co-ordinates. Default is zeros of size n_points.
     z : geobipy.StatArrayor array_like, optional
-        The z co-ordinates. Default is zeros of size nPoints.
+        The z co-ordinates. Default is zeros of size n_points.
     data : geobipy.StatArrayor array_like, optional
         The values of the data.
         * If None, zeroes are assigned
@@ -69,29 +70,32 @@ class Data(Point):
         Data class
 
     """
-    __slots__ = ('_units', '_components', '_channel_names', '_channels_per_system', '_fiducial', '_file',
-                 '_data_filename', '_line_number', '_data', '_predicted_data', '_std', '_relative_error', '_additive_error',
-                 '_system', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_channels')
+    __slots__ = ('_components', '_channel_names', '_channels', '_channels_per_system',
+                 '_fiducial','_line_number', '_data', '_predicted_data',
+                 '_relative_error', '_additive_error', '_std', '_total_field',
+                 '_system',
+                 '_data_filename', '_file', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_units')
 
-    def __init__(self, components=None, channels_per_system=0, x=None, y=None, z=None, elevation=None, data=None, std=None, predicted_data=None, fiducial=None, line_number=None, units=None, channel_names=None, **kwargs):
+    def __init__(self, components=None, channels_per_system=0, x=None, y=None, z=None, elevation=None, data=None, std=None, predicted_data=None, fiducial=None, line_number=None, units=None, channel_names=None, total_field=False, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
         self.units = units
         self.components = components
         self._channels_per_system = atleast_1d(asarray(channels_per_system, dtype=int32)).copy()
+        self.total_field = total_field
 
         super().__init__(x, y, z, elevation)
 
-        self._fiducial = DataArray(arange(self.nPoints, dtype=float64), "Fiducial")
-        self._line_number = DataArray(self.nPoints, "Line number")
+        self._fiducial = DataArray(arange(self.n_points, dtype=float64), "Fiducial")
+        self._line_number = DataArray(self.n_points, "Line number")
 
-        shp = (self._nPoints, self.nChannels)
+        shp = (self._n_points, self.n_channels)
         self._data = DataArray(shp, "Data", self.units)
         self._predicted_data = DataArray(shp, "Predicted Data", self.units)
         self._std = DataArray(ones(shp), "std", self.units)
 
-        shp = (self.nPoints, self.nSystems)
+        shp = (self.n_points, self.n_systems)
         self._relative_error = DataArray(full(shp, fill_value=0.01), "Relative error", "%")
         self._additive_error = DataArray(shp, "Additive error", self.units)
 
@@ -105,6 +109,30 @@ class Data(Point):
         # self.additive_error = None
 
         # self.error_posterior = None
+
+    @property
+    def channels_per_system(self):
+        """Number of channels per system
+
+        The total number of channels per system is channels_per_system * n_components
+        """
+        return self._channels_per_system
+
+    @property
+    def data_channels_per_system(self):
+        out = self.channels_per_system
+        if not self.total_field:
+            out *= self.n_components
+        return out
+
+    @property
+    def n_channels(self):
+        return sum(self.n_components * self.channels_per_system)
+
+    @property
+    def n_data_channels(self):
+        return sum(self.data_channels_per_system)
+
 
     def _reconcile_channels(self, channels):
 
@@ -147,7 +175,7 @@ class Data(Point):
 
     @property
     def channel_saturation(self):
-        out = 100.0 * sum(self.active, axis=1) / self.nChannels
+        out = 100.0 * sum(self.active, axis=1) / self.n_channels
         out.name = '% of active channels'
         out.units = '%'
         return out
@@ -160,14 +188,14 @@ class Data(Point):
     def additive_error(self):
         """The data. """
         if size(self._additive_error, 0) == 0:
-            self._additive_error = DataArray((self.nPoints, self.nSystems), "Additive error", self.units)
+            self._additive_error = DataArray((self.n_points, self.n_systems), "Additive error", self.units)
         return self._additive_error
 
     @additive_error.setter
     def additive_error(self, values):
         if values is not None:
-            self.nPoints = size(values, 0)
-            shp = (self.nPoints, self.nSystems)
+            self.n_points = size(values, 0)
+            shp = (self.n_points, self.n_systems)
             if not allclose(self._additive_error.shape, shp):
                 self._additive_error = DataArray(values, "Additive error", self.units)
                 return
@@ -181,10 +209,10 @@ class Data(Point):
     @channel_names.setter
     def channel_names(self, values):
         if values is None:
-            self._channel_names = ['Channel {}'.format(i) for i in range(self.nChannels)]
+            self._channel_names = ['Channel {}'.format(i) for i in range(self.n_channels)]
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            assert len(values) == self.n_channels, Exception("Length of channel_names must equal total number of channels {}".format(self.n_channels))
             self._channel_names = values
 
     def channel_index(self, channel, system):
@@ -194,7 +222,7 @@ class Data(Point):
         ----------
         channel : int
             Index of the channel to return
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+            * If system is None, 0 <= channel < self.n_channels else 0 <= channel < self.n_channelsPerSystem[system]
         system : int, optional
             The system to obtain the channel from.
 
@@ -204,13 +232,13 @@ class Data(Point):
             The index of the channel
 
         """
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+        assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
         assert npall(channel < self.channels_per_system[system]), ValueError("channel must be < {} for system {}".format(self.channels_per_system[system], system))
         return self.systemOffset[system] + channel
 
-    @property
-    def channels_per_system(self):
-        return self._channels_per_system
+    # @property
+    # def channels_per_system(self):
+    #     return self._channels_per_system
 
     # @channels_per_system.setter
     # def channels_per_system(self, values):
@@ -229,9 +257,8 @@ class Data(Point):
     def components(self, values):
 
         if values is None:
-            values = ['z']
+            values = ['None']
         else:
-
             if isinstance(values, str):
                 values = [values]
 
@@ -242,17 +269,17 @@ class Data(Point):
     @property
     def data(self):
         """The data. """
-        if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
-            self._data = DataArray((self.nPoints, self.nChannels), "Data", self.units)
+        if size(self._data, 0) == 0 or (self._data.shape[0] != self.n_points):
+            self._data = DataArray((self.n_points, self.n_data_channels), "Data", self.units)
         return self._data
 
     @data.setter
     def data(self, values):
         if values is not None:
             values = atleast_2d(values)
-            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+            # self.n_points, self.n_data_channels = size(values, 0), size(values, 1)
 
-            shp = (self.nPoints, self.nChannels)
+            shp = (self.n_points, self.n_data_channels)
             if not allclose(self._data.shape, shp):
                 self._data = DataArray(values, "Data", self.units)
                 return
@@ -278,14 +305,14 @@ class Data(Point):
     @property
     def fiducial(self):
         if size(self._fiducial) == 0:
-            self._fiducial = DataArray(arange(self.nPoints, dtype=float64), "Fiducial")
+            self._fiducial = DataArray(arange(self.n_points, dtype=float64), "Fiducial")
         return self._fiducial
 
     @fiducial.setter
     def fiducial(self, values):
         if values is not None:
-            self.nPoints = size(values)
-            if self._fiducial.size != self.nPoints:
+            self.n_points = size(values)
+            if self._fiducial.size != self.n_points:
                 self._fiducial = DataArray(values.astype(float64), "Fiducial")
                 return
 
@@ -294,39 +321,39 @@ class Data(Point):
     @property
     def line_number(self):
         if size(self._line_number) == 0:
-            self._line_number = DataArray(self.nPoints, "Line number")
+            self._line_number = DataArray(self.n_points, "Line number")
         return self._line_number
 
     @line_number.setter
     def line_number(self, values):
         if values is not None:
-            self.nPoints = size(values)
-            if self._line_number.size != self.nPoints:
+            self.n_points = size(values)
+            if self._line_number.size != self.n_points:
                 self._line_number = DataArray(values, "Line number")
                 return
 
             self._line_number[:] = values
 
-    @property
-    def nActiveChannels(self):
-        return sum(self.active, axis=1)
+    # @property
+    # def nActiveChannels(self):
+    #     return sum(self.active, axis=1)
 
-    @property
-    def nChannels(self):
-        return sum(self.channels_per_system)
+    # @property
+    # def n_channels(self):
+    #     return sum(self.channels_per_system)
 
-    @nChannels.setter
-    def nChannels(self, value):
-        if (sum(self.channels_per_system) == 0) and (value > 0):
-            self._channels_per_system = int32(value)
+    # @n_channels.setter
+    # def n_channels(self, value):
+    #     if (sum(self.channels_per_system) == 0) and (value > 0):
+    #         self._channels_per_system = int32(value)
 
     @property
     def n_components(self):
         return size(self.components)
 
-    @property
-    def n_data_channels(self):
-        return self.nChannels
+    # @property
+    # def n_data_channels(self):
+    #     return self.n_channels
 
     @property
     def nLines(self):
@@ -337,14 +364,14 @@ class Data(Point):
         return super().n_posteriors + self.relative_error.n_posteriors + self.additive_error.n_posteriors + self.receiver.n_posteriors + self.transmitter.n_posteriors
 
     @property
-    def nSystems(self):
+    def n_systems(self):
         return size(self.channels_per_system)
 
     @property
     def predicted_data(self):
         """The predicted data. """
         if size(self._predicted_data, 0) == 0:
-            self._predicted_data = DataArray((self.nPoints, self.nChannels), "Predicted Data", self.units)
+            self._predicted_data = DataArray((self.n_points, self.n_data_channels), "Predicted Data", self.units)
         return self._predicted_data
 
     @predicted_data.setter
@@ -352,9 +379,9 @@ class Data(Point):
 
         if values is not None:
             values = atleast_2d(values)
-            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+            # self.n_points, self.n_data_channels = size(values, 0), size(values, 1)
 
-            shp = (self.nPoints, self.nChannels)
+            shp = (self.n_points, self.n_data_channels)
             if not allclose(self._predicted_data.shape, shp):
                 self._predicted_data = DataArray(values, "Predicted Data", self.units)
                 return
@@ -365,50 +392,65 @@ class Data(Point):
     def relative_error(self):
         """The data. """
         if size(self._relative_error, 0) == 0:
-            self._relative_error = DataArray(full((self.nPoints, self.nSystems), fill_value=0.01), "Relative error", "%")
+            self._relative_error = DataArray(full((self.n_points, self.n_systems), fill_value=0.01), "Relative error", "%")
         return self._relative_error
 
     @relative_error.setter
     def relative_error(self, values):
         if values is not None:
-            self.nPoints = size(values, 0)
-            shp = (self.nPoints, self.nSystems)
+            self.n_points = size(values, 0)
+            shp = (self.n_points, self.n_systems)
             if not allclose(self._relative_error.shape, shp):
                 self._relative_error = DataArray(values, "Relative error", "%")
                 return
 
             self._relative_error[:, :] = values
 
+    # @property
+    # def std(self):
+    #     shp = (self.n_points, self.n_data_channels)
+
+    #     if not allclose(self._std.shape, shp):
+    #         self._std = DataArray(shp, "Standard deviation", self.units)
+
+    #     relative_error = self.relative_error * self.data
+    #     self._std[:, :] = sqrt((relative_error**2.0) + (self.additive_error**2.0))
+
+    #     return self._std
+
     @property
     def std(self):
-        shp = (self.nPoints, self.nChannels)
-        if not allclose(self._std.shape, shp):
-            self._std = DataArray(shp, "Standard deviation", self.units)
+        if (size(self._std, 0) == 0) or (self._std.shape[0] != self.n_points):
+            self._std = DataArray((self.n_points, self.n_data_channels), "Standard deviation", self.units)
 
-        relative_error = self.relative_error * self.data
-        self._std[:, :] = sqrt((relative_error**2.0) + (self.additive_error**2.0))
+        if self.relative_error.max() > 0.0:
+            for i in range(self.n_systems):
+                j = self._systemIndices(i)
+                self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
 
         return self._std
+
 
     @std.setter
     def std(self, values):
         if values is not None:
             values = atleast_2d(values)
-            self.nPoints, self.nChannels = size(values, 0), size(values, 1)
+            # self.n_points, self.n_data_channels = size(values, 0), size(values, 1)
 
-            shp = (self.nPoints, self.nChannels)
+            shp = (self.n_points, self.n_data_channels)
             if not allclose(self._std.shape, shp):
                 self._std = DataArray(values, "Std", self.units)
                 return
 
             self._std[:, :] = values
 
+
     @property
     def summary(self):
         """ Display a summary of the Data """
         msg = super().summary
         names = copy(self.channel_names)
-        j = arange(5, self.nChannels, 5)
+        j = arange(5, self.n_channels, 5)
         for i in range(j.size):
             names.insert(j[i]+i, '\n')
 
@@ -428,6 +470,14 @@ class Data(Point):
         return r_[0, cumsum(self.channels_per_system)]
 
     @property
+    def total_field(self):
+        return self._total_field
+
+    @total_field.setter
+    def total_field(self, value: bool):
+        self._total_field = value
+
+    @property
     def units(self):
         return self._units
 
@@ -441,7 +491,7 @@ class Data(Point):
 
     @property
     def shape(self):
-        return (self.nPoints, self.nChannels)
+        return (self.n_points, self.n_channels)
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
@@ -484,9 +534,9 @@ class Data(Point):
                 tmp = self.std
 
             if system is None:
-                r = range(self.nChannels)
+                r = range(self.n_channels)
             else:
-                assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+                assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
                 r = range(self.systemOffset[system], self.systemOffset[system+1])
 
             for i in r:
@@ -503,7 +553,7 @@ class Data(Point):
 
         Returns
         -------
-        nPoints : int
+        n_points : int
             Number of measurements.
         columnIndex : ints
             The column indices for line, id, x, y, z, elevation, data, uncertainties.
@@ -513,7 +563,7 @@ class Data(Point):
 
         # Get the column headers of the data file
         channels = fIO.get_column_name(filename)
-        nChannels = len(channels)
+        n_channels = len(channels)
 
         line_names = ('line', 'line_number', 'line_number')
         fiducial_names = ('fid', 'fiducial', 'id')
@@ -532,8 +582,8 @@ class Data(Point):
 
         assert n == 2, Exception("File {} must contain columns for line and fiducial. \n {}".format(filename, Data.fileInformation()))
 
-        nPoints, ixyz = Point._csv_channels(filename)
-        return nPoints, labels + ixyz
+        n_points, ixyz = Point._csv_channels(filename)
+        return n_points, labels + ixyz
 
     def _open_csv_files(self, filename):
 
@@ -565,6 +615,25 @@ class Data(Point):
         self.line_number = df[channels[0]].values
         self.fiducial = df[channels[1]].values
 
+    @property
+    def _ravel_index(self):
+        return cumsum(hstack([0, np.repeat(self.channels_per_system, self.n_components)]))
+
+    def _indices(self, component=..., system=...):
+
+        if all([isinstance(x, type(Ellipsis)) for x in (component, system)]):
+            return np.s_[:]
+        component = range(self.n_components) if isinstance(component, type(Ellipsis)) else np.atleast_1d(component)
+        system = range(self.n_systems) if isinstance(system, type(Ellipsis)) else np.atleast_1d(system)
+
+        out = []
+        for sys in system:
+            for c in component:
+                i = ravel_multi_index((c, sys), (self.n_components, self.n_systems))
+                out.append(s_[self._ravel_index[i]:self._ravel_index[i+1]])
+
+        return np.r_[*out]
+
     def _systemIndices(self, system=None):
         """The slice indices for the requested system.
 
@@ -581,9 +650,9 @@ class Data(Point):
         """
 
         if system is None:
-            return [s_[self.systemOffset[x]:self.systemOffset[x+1]] for x in range(self.nSystems)]
+            return [s_[self.systemOffset[x]:self.systemOffset[x+1]] for x in range(self.n_systems)]
 
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+        assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
         return s_[self.systemOffset[system]:self.systemOffset[system+1]]
 
     def append(self, other):
@@ -644,27 +713,6 @@ class Data(Point):
                    predicted_data=self.predicted_data[i, :],
                    channel_names=self.channel_names)
 
-    # def dataChannel(self, channel, system=0):
-    #     """Gets the data in the specified channel
-
-    #     Parameters
-    #     ----------
-    #     channel : int
-    #         Index of the channel to return
-    #         * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
-    #     system : int, optional
-    #         The system to obtain the channel from.
-
-    #     Returns
-    #     -------
-    #     out : geobipy.StatArray
-    #         The data channel
-
-    #     """
-    #     assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-    #     assert channel < self.channels_per_system[system], ValueError("channel must be < {}".format(self.channels_per_system[system]))
-    #     return self.data[:, self.systemOffset[system] + channel]
-
 
     def datapoint(self, i):
         """Get the ith data point from the data set
@@ -681,7 +729,7 @@ class Data(Point):
 
         """
         assert size(i) == 1, ValueError("i must be a single integer")
-        assert 0 <= i <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
+        assert 0 <= i <= self.n_points, ValueError("Must have 0 <= i <= {}".format(self.n_points))
         return DataPoint(x=self.x[i], y=self.y[i], z=self.z[i], elevation=self.elevation[i],
                          data=self.data[i, :], std=self.std[i, :], predicted_data=self.predicted_data[i, :],
                          channel_names=self.channel_names)
@@ -705,11 +753,11 @@ class Data(Point):
         # Data axis
         ax.append(plt.subplot(splt[0, 1], sharex=ax[0]))
 
-        splt2 = splt[1, :].subgridspec(self.nSystems, 2, wspace=0.2)
+        splt2 = splt[1, :].subgridspec(self.n_systems, 2, wspace=0.2)
         # Relative error axes
-        ax.append([plt.subplot(splt2[i, 0], sharex=ax[0]) for i in range(self.nSystems)])
+        ax.append([plt.subplot(splt2[i, 0], sharex=ax[0]) for i in range(self.n_systems)])
         # Additive Error axes
-        ax.append([plt.subplot(splt2[i, 1], sharex=ax[0]) for i in range(self.nSystems)])
+        ax.append([plt.subplot(splt2[i, 1], sharex=ax[0]) for i in range(self.n_systems)])
 
         return ax
 
@@ -726,7 +774,7 @@ class Data(Point):
         return self[i]
 
 
-    def nPointsPerLine(self):
+    def n_pointsPerLine(self):
         """Gets the number of points in each line.
 
         Returns
@@ -735,11 +783,11 @@ class Data(Point):
             Number of points in each line
 
         """
-        nPoints = zeros(unique(self.line_number).size)
+        n_points = zeros(unique(self.line_number).size)
         lines = unique(self.line_number)
         for i, line in enumerate(lines):
-            nPoints[i] = sum(self.line_number == line)
-        return nPoints
+            n_points[i] = sum(self.line_number == line)
+        return n_points
 
 
     # def predicted_dataChannel(self, channel, system=None):
@@ -749,7 +797,7 @@ class Data(Point):
     #     ----------
     #     channel : int
     #         Index of the channel to return
-    #         * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+    #         * If system is None, 0 <= channel < self.n_channels else 0 <= channel < self.n_channelsPerSystem[system]
     #     system : int, optional
     #         The system to obtain the channel from.
 
@@ -763,7 +811,7 @@ class Data(Point):
     #     if system is None:
     #         return DataArray(self.predicted_data[:, channel], "Predicted data {}".format(self.channel_names[channel]), self.predicted_data.units)
     #     else:
-    #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+    #         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
     #         return DataArray(self.predicted_data[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channel_names[self.systemOffset[system] + channel]), self.predicted_data.units)
 
 
@@ -774,7 +822,7 @@ class Data(Point):
     #     ----------
     #     channel : int
     #         Index of the channel to return
-    #         * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+    #         * If system is None, 0 <= channel < self.n_channels else 0 <= channel < self.n_channelsPerSystem[system]
     #     system : int, optional
     #         The system to obtain the channel from.
 
@@ -788,19 +836,19 @@ class Data(Point):
     #     if system is None:
     #         return DataArray(self.std[:, channel], "Std {}".format(self.channel_names[channel]), self.std.units)
     #     else:
-    #         assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+    #         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
     #         return DataArray(self.std[:, self.systemOffset[system] + channel], "Std {}".format(self.channel_names[self.systemOffset[system] + channel]), self.std.units)
 
 
-    # def maketest(self, nPoints, nChannels):
+    # def maketest(self, n_points, n_channels):
     #     """ Create a test example """
-    #     Data.__init__(self, nPoints, nChannels)   # Initialize the Data array
+    #     Data.__init__(self, n_points, n_channels)   # Initialize the Data array
     #     # Use the PointCloud3D example creator
-    #     PointCloud3D.maketest(self, nPoints)
+    #     PointCloud3D.maketest(self, n_points)
     #     a = 1.0
     #     b = 2.0
     #     # Create different Rosenbrock functions as the test data
-    #     for i in range(nChannels):
+    #     for i in range(n_channels):
     #         tmp = cf.rosenbrock(self.x, self.y, a, b)
     #         # Put the tmp array into the data column
     #         self._data[:, i] = tmp[:]
@@ -814,16 +862,16 @@ class Data(Point):
         ----------
         channel : int
             Index of the channel to return
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+            * If system is None, 0 <= channel < self.n_channels else 0 <= channel < self.n_channelsPerSystem[system]
         system : int, optional
             The system to obtain the channel from.
 
         """
 
         if system is None:
-            assert 0 <= channel < self.nChannels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.nChannels))
+            assert 0 <= channel < self.n_channels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.n_channels))
         else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
             assert 0 <= channel < self.channels_per_system[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.channels_per_system[system]))
             channel = self.systemOffset[system] + channel
 
@@ -843,17 +891,17 @@ class Data(Point):
         ----------
         channel : int
             Index of the channel to return
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+            * If system is None, 0 <= channel < self.n_channels else 0 <= channel < self.n_channelsPerSystem[system]
         system : int, optional
             The system to obtain the channel from.
 
         """
 
         if system is None:
-            assert 0 >= channel < self.nChannels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.nChannels))
+            assert 0 >= channel < self.n_channels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.n_channels))
         else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            assert 0 >= channel < self.nChannelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.nChannelsPerSystem[system]))
+            assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
+            assert 0 >= channel < self.n_channelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.n_channelsPerSystem[system]))
             channel = self.systemOffset[system] + channel
 
         kwargs['c'] = self.predicted_dataChannel(channel)
@@ -870,17 +918,17 @@ class Data(Point):
         ----------
         channel : int
             Index of the channel to return
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+            * If system is None, 0 <= channel < self.n_channels else 0 <= channel < self.n_channelsPerSystem[system]
         system : int, optional
             The system to obtain the channel from.
 
         """
 
         if system is None:
-            assert 0 >= channel < self.nChannels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.nChannels))
+            assert 0 >= channel < self.n_channels, ValueError('Requested channel must be 0 <= channel < {}'.format(self.n_channels))
         else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            assert 0 >= channel < self.nChannelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.nChannelsPerSystem[system]))
+            assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
+            assert 0 >= channel < self.n_channelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.n_channelsPerSystem[system]))
             channel = self.systemOffset[system] + channel
 
         kwargs['c'] = self.stdChannel(channel)
@@ -890,7 +938,7 @@ class Data(Point):
         cP.title(self.channel_names[channel])
 
 
-    def plot_data(self, x='index', channels=None, system=None, **kwargs):
+    def plot_data(self, x='index', channels=None, component=..., system=..., **kwargs):
         """Plots the specifed channels as a line plot.
 
         Plots the channels along a specified co-ordinate e.g. 'x'. A legend is auto generated.
@@ -898,7 +946,7 @@ class Data(Point):
         Parameters
         ----------
         xAxis : str
-            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'index', returns numpy.arange(self.n_points)
             If xAxis is 'x', returns self.x
             If xAxis is 'y', returns self.y
             If xAxis is 'z', returns self.z
@@ -906,7 +954,7 @@ class Data(Point):
             If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
         channels : ints, optional
             Indices of the channels to plot.  All are plotted if None
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+            * If system is None, 0 <= channel < self.n_channels else 0 <= channel < self.n_channelsPerSystem[system]
         values : arraylike, optional
             Specifies values to plot against the chosen axis. Takes precedence over channels.
         system : int, optional
@@ -930,16 +978,9 @@ class Data(Point):
         ax = kwargs.get('ax', plt.gca())
         ax.set_prop_cycle(None)
 
-        if system is None:
-            rTmp = s_[:] if channels is None else s_[channels]
-        else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
-            rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
+        s = self._indices(component, system)
 
-        if size(rTmp) == 1:
-            rTmp = (rTmp)
-
-        ax = super().plot(x=x, values=self.data[:, rTmp], **kwargs)
+        ax = super().plot(x=x, values=self.data[:, s], **kwargs)
 
         if legend:
             # Put a legend to the right of the current axis
@@ -979,7 +1020,7 @@ class Data(Point):
         Parameters
         ----------
         xAxis : str
-            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'index', returns numpy.arange(self.n_points)
             If xAxis is 'x', returns self.x
             If xAxis is 'y', returns self.y
             If xAxis is 'z', returns self.z
@@ -987,7 +1028,7 @@ class Data(Point):
             If xAxis is 'r3d', returns cumulative distance along the line in 3D using x, y, and z.
         channels : ints, optional
             Indices of the channels to plot.  All are plotted if None
-            * If system is None, 0 <= channel < self.nChannels else 0 <= channel < self.nChannelsPerSystem[system]
+            * If system is None, 0 <= channel < self.n_channels else 0 <= channel < self.n_channelsPerSystem[system]
         system : int, optional
             The system to obtain the channel from.
         noLegend : bool
@@ -1015,7 +1056,7 @@ class Data(Point):
         if system is None:
             rTmp = s_[:] if channels is None else s_[channels]
         else:
-            assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+            assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
             rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
 
         ax = super().plot(values=self.predicted_data[:, rTmp], xAxis=xAxis, label=self.channel_names[rTmp], **kwargs)
@@ -1107,10 +1148,10 @@ class Data(Point):
 
         self = cls(**kwargs)
 
-        self._nPoints, iC,  = Data._csv_channels(data_filename)
+        self._n_points, iC,  = Data._csv_channels(data_filename)
 
-        assert len(iData) == self.nChannels, Exception("Number of off time columns {} in {} does not match total number of times {} in system files \n {}".format(
-            len(iData), data_filename, self.nChannels, self.fileInformation()))
+        assert len(iData) == self.n_channels, Exception("Number of off time columns {} in {} does not match total number of times {} in system files \n {}".format(
+            len(iData), data_filename, self.n_channels, self.fileInformation()))
 
         if len(iStd) > 0:
             assert len(iStd) == len(iData), Exception(

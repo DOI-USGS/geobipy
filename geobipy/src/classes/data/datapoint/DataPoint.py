@@ -2,6 +2,7 @@ from abc import abstractmethod
 from cached_property import cached_property
 from copy import copy, deepcopy
 
+import numpy as np
 from numpy import arange, argwhere, asarray, atleast_2d, diag_indices
 from numpy import dot, float64, full, hstack, isnan
 from numpy import s_, size, squeeze, sqrt, sum
@@ -28,11 +29,11 @@ class DataPoint(Point):
 
     Contains an easting, northing, height, elevation, observed and predicted data, and uncertainty estimates for the data.
 
-    DataPoint(x, y, z, elevation, nChannels, data, std, units)
+    DataPoint(x, y, z, elevation, n_channels, data, std, units)
 
     Parameters
     ----------
-    nChannelsPerSystem : int or array_like
+    n_channelsPerSystem : int or array_like
         Number of data channels in the data
         * If int, a single acquisition system is assumed.
         * If array_like, each entry is the number of channels for each system.
@@ -45,32 +46,39 @@ class DataPoint(Point):
     elevation : float, optional
         Elevation from sea level of the data point
     data : geobipy.StatArray or array_like, optional
-        Data values to assign the data of length sum(nChannelsPerSystem).
+        Data values to assign the data of length sum(n_channelsPerSystem).
         * If None, initialized with zeros.
     std : geobipy.StatArray or array_like, optional
-        Estimated uncertainty standard deviation of the data of length sum(nChannelsPerSystem).
+        Estimated uncertainty standard deviation of the data of length sum(n_channelsPerSystem).
         * If None, initialized with ones if data is None, else 0.1*data values.
     predicted_data : geobipy.StatArray or array_like, optional
-        Predicted data values to assign the data of length sum(nChannelsPerSystem).
+        Predicted data values to assign the data of length sum(n_channelsPerSystem).
         * If None, initialized with zeros.
     units : str, optional
         Units of the data.  Default is "ppm".
     channel_names : list of str, optional
-        Names of each channel of length sum(nChannelsPerSystem)
+        Names of each channel of length sum(n_channelsPerSystem)
 
     """
-    __slots__ = ('_units', '_data', '_std', '_predicted_data', '_line_number', '_fiducial', '_channel_names',
-                 '_relative_error', '_additive_error', '_sensitivity_matrix', '_components')
+    __slots__ = ('_additive_error', '_components', '_channel_names',
+                 '_data', '_fiducial', '_line_number',
+                 '_predicted_data', '_relative_error',
+                 '_sensitivity_matrix', '_std', '_total_field', '_units')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
+                       components=None,
                        data=None, std=None, predicted_data=None,
                        units=None, channel_names=None,
-                       line_number=0.0, fiducial=0.0, **kwargs):
+                       line_number=0.0, fiducial=0.0,
+                       total_field=False, **kwargs):
         """ Initialize the Data class """
+
+        self.components = components
 
         super().__init__(x, y, z, elevation=elevation, **kwargs)
 
         self.units = units
+        self.total_field = total_field
 
         # StatArray of data
         self.data = data
@@ -118,12 +126,12 @@ class DataPoint(Point):
     @additive_error.setter
     def additive_error(self, values):
         if values is None:
-            values = self.nSystems
+            values = self.n_systems
         else:
-            assert size(values) == self.nSystems, ValueError("additive_error must have size 1")
+            assert size(values) == self.n_systems, ValueError("additive_error must have size 1")
             # assert (npall(asarray(values) > 0.0)), ValueError("additiveErr must be > 0.0. Make sure the values are in linear space")
             # assert (isinstance(relativeErr[i], float) or isinstance(relativeErr[i], ndarray)), TypeError(
-            #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            #     "relativeErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.n_times[i]))
 
         self._additive_error = StatArray(values, r'$\epsilon_{Additive}$', self.units)
 
@@ -157,10 +165,33 @@ class DataPoint(Point):
     @channel_names.setter
     def channel_names(self, values):
         if values is None:
-            self._channel_names = ['Channel {}'.format(i) for i in range(self.nChannels)]
+            self._channel_names = ['Channel {}'.format(i) for i in range(self.n_channels)]
         else:
-            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            assert len(values) == self.n_channels, Exception("Length of channel_names must equal total number of channels {}".format(self.n_channels))
             self._channel_names = values
+
+    @property
+    def components(self):
+        m = ('x', 'y', 'z')
+        return [m[x] for x in self._components]
+
+    @components.setter
+    def components(self, values):
+
+        m = {'x': 0,
+             'y': 1,
+             'z': 2}
+
+        if values is None:
+            values = ['z']
+        else:
+
+            if isinstance(values, str):
+                values = [values]
+
+            assert all([isinstance(x, str) for x in values]), TypeError('components must be list of str')
+
+        self._components = asarray([m[x] for x in values], dtype=np.int32)
 
     @property
     def fiducial(self):
@@ -179,6 +210,10 @@ class DataPoint(Point):
         self._line_number = DataArray(float64(value), 'Line number')
 
     @property
+    def n_components(self):
+        return size(self.components)
+
+    @property
     def n_posteriors(self):
         return super().n_posteriors + self._n_error_posteriors
 
@@ -187,7 +222,7 @@ class DataPoint(Point):
         # if not self.errorPosterior is None:
         #     return len(self.errorPosterior)
         # else:
-        return self.nSystems * sum([x.hasPosterior for x in [self.relative_error, self.additive_error]])
+        return self.n_systems * sum([x.hasPosterior for x in [self.relative_error, self.additive_error]])
 
     @property
     def data(self):
@@ -195,6 +230,8 @@ class DataPoint(Point):
 
     @data.setter
     def data(self, values):
+        if values is None:
+            values = self.n_data_channels
         self._data = DataArray(values, "Data", self.units)
 
     @property
@@ -218,16 +255,16 @@ class DataPoint(Point):
         return self.active.sum()
 
     @property
-    def nChannels(self):
+    def n_channels(self):
         return self.data.size
 
     @property
-    def nSystems(self):
-        return 1
+    def n_data_channels(self):
+        return self.n_channels
 
     @property
     def n_systems(self):
-        return self.nSystems
+        return 1
 
     @property
     def predicted_data(self):
@@ -236,6 +273,8 @@ class DataPoint(Point):
 
     @predicted_data.setter
     def predicted_data(self, values):
+        if values is None:
+            values = self.n_data_channels
         self._predicted_data = StatArray(values, "Predicted Data", self.units)
 
     @property
@@ -246,12 +285,12 @@ class DataPoint(Point):
     def relative_error(self, values):
 
         if values is None:
-            values = full(self.nSystems, fill_value=0.01)
+            values = full(self.n_systems, fill_value=0.01)
         else:
-            assert size(values) == self.nSystems, ValueError("relative_error must be a list of size equal to the number of systems {}".format(self.nSystems))
+            assert size(values) == self.n_systems, ValueError("relative_error must be a list of size equal to the number of systems {}".format(self.n_systems))
             # assert (npall(asarray(values) > 0.0)), ValueError("relative_error must be > 0.0.")
             # assert (isinstance(additiveErr[i], float) or isinstance(additiveErr[i], ndarray)), TypeError(
-            #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.nTimes[i]))
+            #     "additiveErr for system {} must be a float or have size equal to the number of channels {}".format(i+1, self.n_times[i]))
 
         assert npall(values > 0.0), ValueError("Relative error {} must be > 0.0".format(values))
 
@@ -280,8 +319,16 @@ class DataPoint(Point):
     @std.setter
     def std(self, value):
         if value is None:
-            value = full(self.nChannels, fill_value=0.01)
+            value = self.n_data_channels
         self._std = DataArray(value, "Standard deviation", self.units)
+
+    @property
+    def total_field(self):
+        return self._total_field
+
+    @total_field.setter
+    def total_field(self, value: bool):
+        self._total_field = value
 
     @property
     def units(self):
@@ -300,8 +347,8 @@ class DataPoint(Point):
         out = super().__deepcopy__(memo)
 
         out._components = deepcopy(self._components, memo)
-        out._channels_per_system = deepcopy(self.channels_per_system, memo)
 
+        out._total_field = deepcopy(self._total_field, memo)
         out._units = deepcopy(self.units, memo)
         out._data = deepcopy(self._data, memo)
         out._relative_error = deepcopy(self._relative_error, memo)
@@ -324,17 +371,16 @@ class DataPoint(Point):
     def generate_noise(self, additive_error, relative_error):
 
         std = sqrt(additive_error**2.0 + (relative_error * self.predicted_data)**2.0)
-        return randn(self.nChannels) * std
+        return randn(self.n_channels) * std
 
     def prior_derivative(self, order):
 
         J = self.sensitivity_matrix[self.active, :]
-
         if order == 1:
-            return dot(J.T, self.predicted_data.priorDerivative(order=1, i=self.active))
+            return dot(J.T, self.predicted_data.prior_derivative(order=1, i=self.active))
 
         elif order == 2:
-            WdT_Wd = self.predicted_data.priorDerivative(order=2)
+            WdT_Wd = self.predicted_data.prior_derivative(order=2)
             return dot(J.T, dot(WdT_Wd, J))
 
     @property
@@ -419,8 +465,6 @@ class DataPoint(Point):
             axes = self._init_posterior_plots(axes)
 
 
-        assert len(axes) == 3, ValueError("Must have length 3 list of axes for the posteriors. self.init_posterior_plots can generate them")
-
         overlay = kwargs.pop('overlay', None)
         # if not overlay is None:
         #     rel_error_kwargs['overlay'] = overlay.relative_error
@@ -457,7 +501,26 @@ class DataPoint(Point):
 
     @property
     def system_indices(self):
-        return tuple([s_[self.systemOffset[system]:self.systemOffset[system+1]] for system in arange(self.nSystems)])
+        return tuple([s_[self.systemOffset[system]:self.systemOffset[system+1]] for system in arange(self.n_systems)])
+
+    @property
+    def _ravel_index(self):
+        return np.cumsum(hstack([0, np.repeat(self.channels_per_system, self.n_components)]))
+
+    def _indices(self, component=..., system=...):
+
+        if all([isinstance(x, type(Ellipsis)) for x in (component, system)]):
+            return np.s_[:]
+        component = range(self.n_components) if isinstance(component, type(Ellipsis)) else np.atleast_1d(component)
+        system = range(self.n_systems) if isinstance(system, type(Ellipsis)) else np.atleast_1d(system)
+
+        out = []
+        for sys in system:
+            for c in component:
+                i = np.ravel_multi_index((c, sys), (self.n_components, self.n_systems))
+                out.append(s_[self._ravel_index[i]:self._ravel_index[i+1]])
+
+        return np.r_[*out]
 
     def _systemIndices(self, system=0):
         """The slice indices for the requested system.
@@ -474,7 +537,7 @@ class DataPoint(Point):
 
         """
 
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+        assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
         return self.system_indices[system]
 
 
@@ -487,7 +550,12 @@ class DataPoint(Point):
             Likelihood of the data point
 
         """
-        return self.predicted_data.probability(i=self.active, log=log)
+        out = self.predicted_data.probability(i=self.active, log=log)
+        # import numpy as np
+        # if np.isneginf(out):
+        #     print("likelihood is -inf.  Your error estimates might be too small")
+
+        return out
 
     def data_misfit(self):
         r"""Compute the :math:`L_{2}` norm squared misfit between the observed and predicted data
@@ -512,11 +580,13 @@ class DataPoint(Point):
         # assert not any(self.std[self.active] <= 0.0), ValueError('Cannot compute the misfit when the data standard deviations are zero.')
         tmp2 = 1.0 / self.std[self.active]
         misfit = float64(sum((cf.Ax(tmp2, self.deltaD[self.active]))**2.0, dtype=float64))
+
         return misfit
 
     def initialize(self, **kwargs):
         self.relative_error = kwargs['initial_relative_error']
         self.additive_error = kwargs['initial_additive_error']
+        # _ = self.std
 
     def perturb(self):
         """Propose a new EM data point given the specified attached propsal distributions
@@ -578,7 +648,6 @@ class DataPoint(Point):
         # Define prior, proposal, posterior for additive error
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
-                # log = Trisinstance(self, TdemDataPoint)
                 additive_error_prior = Distribution('Uniform',
                                                     kwargs['minimum_additive_error'],
                                                     kwargs['maximum_additive_error'],
@@ -599,12 +668,12 @@ class DataPoint(Point):
 
     def set_relative_error_prior(self, prior):
         if not prior is None:
-            assert prior.ndim == self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
+            assert prior.ndim == self.n_systems, ValueError("relative_error_prior must have {} dimensions".format(self.n_systems))
             self.relative_error.prior = prior
 
     def set_additive_error_prior(self, prior):
         if not prior is None:
-            assert prior.ndim == self.nSystems, ValueError("additive_error_prior must have {} dimensions".format(self.nSystems))
+            assert prior.ndim == self.n_systems, ValueError("additive_error_prior must have {} dimensions".format(self.n_systems))
             self.additive_error.prior = prior
 
     def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
@@ -670,7 +739,7 @@ class DataPoint(Point):
         if self.relative_error.hasPrior:
             bins = DataArray(atleast_2d(self.relative_error.prior.bins()), name=self.relative_error.name, units=self.relative_error.units)
             posterior = []
-            for i in range(self.nSystems):
+            for i in range(self.n_systems):
                 b = bins[i, :]
                 mesh = RectilinearMesh1D(edges = b, relative_to=0.5*(b.max()-b.min()), log=10)
                 posterior.append(Histogram(mesh=mesh))
@@ -685,7 +754,7 @@ class DataPoint(Point):
             bins = DataArray(atleast_2d(self.additive_error.prior.bins()), name=self.additive_error.name, units=self.data.units)
 
             posterior = []
-            for i in range(self.nSystems):
+            for i in range(self.n_systems):
                 b = bins[i, :]
                 mesh = RectilinearMesh1D(edges = b, log=log, relative_to=0.5*(b.max()-b.min()))
                 posterior.append(Histogram(mesh=mesh))
@@ -740,7 +809,7 @@ class DataPoint(Point):
         """ Print a summary of the EMdataPoint """
         msg = super().summary
         names = copy(self.channel_names)
-        j = arange(5, self.nChannels, 5)
+        j = arange(5, self.n_channels, 5)
         for i in range(j.size):
             names.insert(j[i]+i, '\n')
 
@@ -775,8 +844,8 @@ class DataPoint(Point):
         # if not self.errorPosterior is None:
         #     for i, x in enumerate(self.errorPosterior):
         #         x.createHdf(grp, 'joint_error_posterior_{}'.format(i), add_axis=add_axis, fillvalue=fillvalue)
-            # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
-            # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
+            # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.n_systems)])
+            # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.n_systems)])
 
         if add_axis is not None:
             grp.attrs['repr'] = 'Data'
@@ -804,8 +873,8 @@ class DataPoint(Point):
         # if not self.errorPosterior is None:
         #     for i, x in enumerate(self.errorPosterior):
         #         x.writeHdf(grp, 'joint_error_posterior_{}'.format(i), index=index)
-            # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.nSystems)])
-            # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.nSystems)])
+            # self.relative_error.setPosterior([self.errorPosterior[i].marginalize(axis=1) for i in range(self.n_systems)])
+            # self.additive_error.setPosterior([self.errorPosterior[i].marginalize(axis=0) for i in range(self.n_systems)])
 
         self.relative_error.writeHdf(grp, 'relative_error',  withPosterior=withPosterior, index=index)
         self.additive_error.writeHdf(grp, 'additive_error',  withPosterior=withPosterior, index=index)

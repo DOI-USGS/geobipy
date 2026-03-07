@@ -54,10 +54,10 @@ class TdemSystem(TdemSystem_GAAEM):
 
     @property
     def n_channels(self):
-        return self.nTimes * self.n_components
+        return self.n_times * self.n_components
 
     @property
-    def nTimes(self):
+    def n_times(self):
         return self.off_time.size
 
     @property
@@ -68,9 +68,9 @@ class TdemSystem(TdemSystem_GAAEM):
     @off_time.setter
     def off_time(self, values):
         # if values is None:
-        #     values = self.nTimes
+        #     values = self.n_times
         # else:
-        #     assert size(values) == self.nTimes, ValueError("off_time must have size {}".format(self.nTimes))
+        #     assert size(values) == self.n_times, ValueError("off_time must have size {}".format(self.n_times))
         self._off_time = StatArray.StatArray(values, "Time", "s")
 
     @property
@@ -91,7 +91,7 @@ class TdemSystem(TdemSystem_GAAEM):
     #         self._loopOffset = StatArray.StatArray(values, "Loop Offset", "m")
 
     # @property
-    # def nTimes(self):
+    # def n_times(self):
     #     return size(self.off_times)
 
     # @property
@@ -154,4 +154,4 @@ class TdemSystem(TdemSystem_GAAEM):
 
         tmin = log10(maximum(min(self.off_time) - max(self.waveform.time-self.delayTime), 1e-10))
         tmax = log10(max(self.off_time) - min(self.waveform.time-self.delayTime))
-        return logspace(tmin, tmax, self.nTimes+2)
+        return logspace(tmin, tmax, self.n_times+2)

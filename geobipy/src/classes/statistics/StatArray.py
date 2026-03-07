@@ -364,7 +364,7 @@ class StatArray(DataArray):
         except:
             return False
 
-    def priorDerivative(self, order, i=None):
+    def prior_derivative(self, order, i=None):
         """ Get the derivative of the prior.
 
         Parameters

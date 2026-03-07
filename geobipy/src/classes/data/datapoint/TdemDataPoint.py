@@ -4,6 +4,8 @@ from copy import deepcopy
 
 from itertools import cycle
 
+import numpy as np
+
 from numpy import append, argwhere, asarray, cumsum, diag_indices, empty, exp, float64
 from numpy import hstack, int32, log, nan, ravel_multi_index, repeat, s_, size, sqrt, squeeze
 from numpy import all as npall
@@ -89,10 +91,11 @@ class TdemDataPoint(EmDataPoint):
                  line_number=0.0, fiducial=0.0, **kwargs):
 
         self.system = system
+        self.total_field = False
 
         super().__init__(x=x, y=y, z=z, elevation=elevation,
                          components=self.components,
-                         channels_per_system=self.nTimes,
+                         channels_per_system=self.n_times,
                          data=None, std=std, predicted_data=None,
                          line_number=line_number, fiducial=fiducial, **kwargs)
 
@@ -115,9 +118,9 @@ class TdemDataPoint(EmDataPoint):
     @EmDataPoint.additive_error.setter
     def additive_error(self, values):
         if values is None:
-            values = self.nSystems
+            values = self.n_systems
         else:
-            assert size(values) == self.nSystems, ValueError("additive_error must be a list of size equal to the number of systems {}".format(self.nSystems))
+            assert size(values) == self.n_systems, ValueError("additive_error must be a list of size equal to the number of systems {}".format(self.n_systems))
         self._additive_error = StatArray(values, r'$\epsilon_{Additive}$', self.units)
 
     @property
@@ -143,27 +146,18 @@ class TdemDataPoint(EmDataPoint):
             self._channel_names = []
 
             for component in self.components:
-                for i in range(self.nSystems):
+                for i in range(self.n_systems):
                     for t in self.off_time(i):
                         self._channel_names.append('Time {:.3e} s {}'.format(t, component))
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            assert len(values) == self.n_channels, Exception("Length of channel_names must equal total number of channels {}".format(self.n_channels))
             self._channel_names = values
 
     @property
     def channels(self):
-        out = DataArray(hstack([self.off_time(i) for i in range(self.nSystems)]), name='time', units='s')
+        out = DataArray(hstack([self.off_time(i) for i in range(self.n_systems)]), name='time', units='s')
         return out
-
-    @property
-    def channels_per_system(self):
-        return self.n_components * self.nTimes
-
-    @EmDataPoint.data.getter
-    def data(self):
-        self._data[:] = self.secondary_field
-        return self._data
 
     @property
     def loop_pair(self):
@@ -174,11 +168,6 @@ class TdemDataPoint(EmDataPoint):
         assert isinstance(value, Loop_pair), TypeError("loop_pair must be a Loop_pair")
         self._loop_pair = value
 
-    @EmDataPoint.predicted_data.getter
-    def predicted_data(self):
-        self._predicted_data = self._predicted_secondary_field
-        return self._predicted_data
-
     @property
     def predicted_primary_field(self):
         return self._predicted_primary_field
@@ -187,9 +176,9 @@ class TdemDataPoint(EmDataPoint):
     def predicted_primary_field(self, values):
 
         if values is None:
-            values = self.n_components
+            values = self.n_components * self.n_systems
         else:
-            assert size(values) == self.n_components*self.n_systems, ValueError("predicted primary field must have size {}".format(self.n_components*self.n_systems))
+            assert size(values) == self.n_components * self.n_systems, ValueError("predicted primary field must have size {}".format(self.n_components*self.n_systems))
 
         self._predicted_primary_field = StatArray(values, "Predicted primary field", self.units)
 
@@ -200,9 +189,9 @@ class TdemDataPoint(EmDataPoint):
     @predicted_secondary_field.setter
     def predicted_secondary_field(self, values):
         if values is None:
-            values = self.nChannels
+            values = self.n_channels
         else:
-            assert size(values) == self.nChannels, ValueError("predicted secondary field must have size {}".format(self.nChannels))
+            assert size(values) == self.n_channels, ValueError("predicted secondary field must have size {}".format(self.n_channels))
 
         self._predicted_secondary_field = StatArray(values, "Predicted secondary field", self.units)
 
@@ -216,7 +205,7 @@ class TdemDataPoint(EmDataPoint):
         if values is None:
             values = self.n_components
         else:
-            assert size(values) == self.n_components * self.nSystems, ValueError("primary field must have size {}".format(self.n_components*self.nSystems))
+            assert size(values) == self.n_components * self.n_systems, ValueError("primary field must have size {}".format(self.n_components*self.n_systems))
 
         self._primary_field = DataArray(values, "Primary field", self.units)
 
@@ -239,9 +228,9 @@ class TdemDataPoint(EmDataPoint):
     def secondary_field(self, values):
 
         if values is None:
-            values = self.nChannels
+            values = self.n_channels
         else:
-            assert size(values) == self.nChannels, ValueError("Secondary field must have size {}".format(self.nChannels))
+            assert size(values) == self.n_channels, ValueError("Secondary field must have size {}".format(self.n_channels))
 
         self._secondary_field = DataArray(values, "Secondary field", self.units)
 
@@ -278,16 +267,12 @@ class TdemDataPoint(EmDataPoint):
     #         self._transmitter = value
 
     @property
-    def n_components(self):
-        return size(self.components)
-
-    @property
-    def nTimes(self):
-        return asarray([x.nTimes for x in self.system])
+    def n_times(self):
+        return asarray([x.n_times for x in self.system])
 
     @property
     def nWindows(self):
-        return self.nChannels
+        return self.n_channels
 
     @EmDataPoint.units.setter
     def units(self, value):
@@ -304,19 +289,19 @@ class TdemDataPoint(EmDataPoint):
 
     @property
     def _ravel_index(self):
-        return cumsum(hstack([0, repeat(self.nTimes, self.n_components)]))
+        return cumsum(hstack([0, repeat(self.n_times, self.n_components)]))
 
     def _component_indices(self, component=0, system=0):
-        i = ravel_multi_index((component, system), (self.n_components, self.nSystems))
+        i = ravel_multi_index((component, system), (self.n_components, self.n_systems))
         return s_[self._ravel_index[i]:self._ravel_index[i+1]]
 
     @property
     def component_indices(self):
-        return [self._component_indices(comp, sys) for comp in range(self.n_components) for sys in range(self.nSystems)]
+        return [self._component_indices(comp, sys) for comp in range(self.n_components) for sys in range(self.n_systems)]
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out.system = self._system
+
         out._loop_pair = deepcopy(self.loop_pair, memo=memo)
         out._primary_field = deepcopy(self.primary_field, memo=memo)
         out._secondary_field = deepcopy(self.secondary_field, memo=memo)
@@ -354,22 +339,16 @@ class TdemDataPoint(EmDataPoint):
         assert npall(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
 
         # For each system assign error levels using the user inputs
-        for i in range(self.nSystems):
+        for i in range(self.n_systems):
             off_times = self.off_time(i)
             for j in range(self.n_components):
                 ic = self._component_indices(j, i)
                 relative_error = self.relative_error[(i*self.n_components)+j] * self.secondary_field[ic]
-                additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
+                additive_error = self.additive_error[i]
+                if additive_error > 0.0:
+                    additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
                 variance = relative_error**2.0 + additive_error**2.0
                 self._std[ic] = sqrt(variance)
-
-            # # Compute the relative error
-            # rErr = self.relative_error[i] * self.secondary_field[iSys]
-            # # aErr = exp(log(self.additive_error[i]) - 0.5 * log(self.off_time(i)) + t0)
-            # # self._std[iSys] = sqrt((rErr**2.0) + (aErr[i]**2.0))
-
-            # self._std[iSys] = sqrt((rErr**2.0) + (self.additive_error[i]**2.0))
-
 
         # Update the variance of the predicted data prior
         if self.predicted_data.hasPrior:
@@ -380,16 +359,16 @@ class TdemDataPoint(EmDataPoint):
     @property
     def system_indices(self):
         tmp = hstack([0, cumsum(self.channels_per_system)])
-        return [s_[tmp[i]:tmp[i+1]] for i in range(self.nSystems)]
+        return [s_[tmp[i]:tmp[i+1]] for i in range(self.n_systems)]
 
     @property
     def iplotActive(self):
         """ Get the active data indices per system.  Used for plotting. """
-        return [cf.findNotNans(self.data[self.system_indices[i]]) for i in range(self.nSystems)]
+        return [cf.findNotNans(self.data[self.system_indices[i]]) for i in range(self.n_systems)]
         # self.iplotActive = []
         # i0 = 0
-        # for i in range(self.nSystems):
-        #     i1 = i0 + self.nTimes[i]
+        # for i in range(self.n_systems):
+        #     i1 = i0 + self.n_times[i]
         #     self.iplotActive.append(cf.findNotNans(self._data[i0:i1]))
         #     i0 = i1
 
@@ -607,8 +586,8 @@ class TdemDataPoint(EmDataPoint):
 
         grp = super().createHdf(parent, name, withPosterior, add_axis, fillvalue)
 
-        grp.create_dataset('nSystems', data=self.nSystems)
-        for i in range(self.nSystems):
+        grp.create_dataset('n_systems', data=self.n_systems)
+        for i in range(self.n_systems):
             self.system[i].toHdf(grp, 'System{}'.format(i))
 
         grp.create_dataset('components', data=self._components)
@@ -646,7 +625,7 @@ class TdemDataPoint(EmDataPoint):
     def fromHdf(cls, grp, **kwargs):
         """ Reads the object from a HDF group """
 
-        nSystems = int32(asarray(grp['nSystems']))
+        n_systems = int32(asarray(grp['n_systems']))
 
         systems = TdemDataPoint.read_systems_from_h5(grp, **kwargs)
 
@@ -663,13 +642,13 @@ class TdemDataPoint(EmDataPoint):
 
     @staticmethod
     def read_systems_from_h5(grp, **kwargs):
-        nSystems = int32(asarray(grp.get('nSystems')))
+        n_systems = int32(asarray(grp.get('n_systems')))
         if 'system_filename' in kwargs:
             system_filename = kwargs['system_filename']
             if not isinstance(system_filename, list): system_filename = [system_filename]
 
-        systems = [None]*nSystems
-        for i in range(nSystems):
+        systems = [None]*n_systems
+        for i in range(n_systems):
             if 'system_filename' in kwargs:
                 systems[i] = TdemSystem(system_filename=system_filename[i])
             else:
@@ -742,7 +721,7 @@ class TdemDataPoint(EmDataPoint):
                 tmp = []
                 tmp = self.additive_error._init_posterior_plots(splt_bottom[i])
                 if tmp is not None:
-                    for j in range(self.nSystems):
+                    for j in range(self.n_systems):
                         others = s_[(j * self.n_components):(j * self.n_components)+self.n_components]
                         tmp[1].get_shared_y_axes().joined(tmp[1], *tmp[others])
                 ax['additive_error'] = tmp
@@ -805,8 +784,8 @@ class TdemDataPoint(EmDataPoint):
             self.loop_pair.overlay_on_posteriors(overlay=overlay.loop_pair, axes = axes['loop_pair'], **kwargs)
 
     def plotWaveform(self, **kwargs):
-        for i in range(self.nSystems):
-            if (self.nSystems > 1):
+        for i in range(self.n_systems):
+            if (self.n_systems > 1):
                 plt.subplot(2, 1, i + 1)
             plt.plot(self.system[i].waveform.time,
                      self.system[i].waveform.current, **kwargs)
@@ -822,10 +801,10 @@ class TdemDataPoint(EmDataPoint):
 
         markers = tuple(kwargs.pop('marker', ('o', 'x', 'v')))
         kwargs['markersize'] = kwargs.pop('markersize', 3)
-        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
-        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
+        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
+        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
+        assert len(c) == self.n_systems, ValueError("color must be a list of length {}".format(self.n_systems))
+        assert len(mfc) == self.n_systems, ValueError("markerfacecolor must be a list of length {}".format(self.n_systems))
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['alpha'] = kwargs.pop('alpha', 0.8)
@@ -840,7 +819,7 @@ class TdemDataPoint(EmDataPoint):
 
         marker = cycle(markers)
 
-        for j in range(self.nSystems):
+        for j in range(self.n_systems):
             system_times = self.off_time(j)
 
             for k in range(self.n_components):
@@ -849,6 +828,7 @@ class TdemDataPoint(EmDataPoint):
                 kwargs['marker'] = next(marker)
 
                 icomp = self._component_indices(k, j)
+
                 d = self.data[icomp]
 
                 if (with_error_bars):
@@ -870,7 +850,7 @@ class TdemDataPoint(EmDataPoint):
         ax.set_ylabel(cf.getNameUnits(self.data))
         ax.set_title(title)
 
-        if self.nSystems > 1 or self.n_components > 1:
+        if self.n_systems > 1 or self.n_components > 1:
             ax.legend()
 
         return ax
@@ -896,7 +876,7 @@ class TdemDataPoint(EmDataPoint):
         kwargs.pop('logX', None)
         kwargs.pop('logY', None)
 
-        for j in range(self.nSystems):
+        for j in range(self.n_systems):
             system_times = self.off_time(j)
 
             for k in range(self.n_components):
@@ -921,7 +901,7 @@ class TdemDataPoint(EmDataPoint):
         cp.pretty(ax)
 
         dD = self.deltaD
-        for j in range(self.nSystems):
+        for j in range(self.n_systems):
             system_times, _ = cf._log(self.off_time(j), kwargs.get('logX', None))
 
             for k in range(self.n_components):
@@ -949,6 +929,10 @@ class TdemDataPoint(EmDataPoint):
 
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
+
+                assert ((np.all(self.additive_error > kwargs['minimum_additive_error'])) &
+                        (np.all(self.additive_error < kwargs['maximum_additive_error']))), ValueError(f"Current additive error {self.additive_error} is outside of the prior")
+
                 additive_error_prior = Distribution('Uniform',
                                                     kwargs['minimum_additive_error'],
                                                     kwargs['maximum_additive_error'],
@@ -991,7 +975,7 @@ class TdemDataPoint(EmDataPoint):
             "Invalid model class {} for forward modeling [1D]".format(type(model)))
         fm = tdem1dfwd(self, model)
 
-        for i in range(self.nSystems):
+        for i in range(self.n_systems):
             iSys = self._systemIndices(i)
             primary = []
             secondary = []
@@ -1011,11 +995,14 @@ class TdemDataPoint(EmDataPoint):
 
             self.predicted_primary_field[s] = hstack(primary)
 
-    def sensitivity(self, model, ix=None, model_changed=False):
+
+    def sensitivity(self, model, ix=None, model_changed=True, inplace=True):
         """ Compute the sensitivty matrix for the given model """
         assert isinstance(model, Model), TypeError("Invalid model class for sensitivity matrix [1D]")
-        self._sensitivity_matrix = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
-        return self.sensitivity_matrix
+        sensitivity_matrix = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
+        if inplace:
+            self._sensitivity_matrix = sensitivity_matrix
+        return sensitivity_matrix
 
     def fm_dlogc(self, model):
         values, J = ga_fm_dlogc(self, model)
@@ -1088,7 +1075,7 @@ class TdemDataPoint(EmDataPoint):
     def Isend(self, dest, world, **kwargs):
 
         if not 'system' in kwargs:
-            # for i in range(self.nSystems):
+            # for i in range(self.n_systems):
             system = [sys.filename for sys in self.system]
             world.isend(system, dest=dest).wait()
 

@@ -85,17 +85,17 @@ class Point(myObject):
         The 3D point cloud
 
     """
-    __slots__ = ('_nPoints', '_x', '_y', '_z', '_elevation', '_kdtree')
+    __slots__ = ('_n_points', '_x', '_y', '_z', '_elevation', '_kdtree')
 
     def __init__(self, x=None, y=None, z=None, elevation=None, **kwargs):
         """ Initialize the class """
 
         # # Number of points in the cloud
-        self._nPoints = 0
-        self._x = StatArray(self._nPoints, "Easting", "m")
-        self._y = StatArray(self._nPoints, "Northing", "m")
-        self._z = StatArray(self._nPoints, "Height", "m")
-        self._elevation = StatArray(self._nPoints, "Elevation", "m")
+        self._n_points = 0
+        self._x = StatArray(self._n_points, "Easting", "m")
+        self._y = StatArray(self._n_points, "Northing", "m")
+        self._z = StatArray(self._n_points, "Height", "m")
+        self._elevation = StatArray(self._n_points, "Elevation", "m")
 
         self.x = x
         self.y = y
@@ -116,7 +116,7 @@ class Point(myObject):
     def __deepcopy__(self, memo={}):
         out = type(self).__new__(type(self))
 
-        out._nPoints = self.nPoints
+        out._n_points = self.n_points
         out._x = deepcopy(self.x, memo=memo)
         out._y = deepcopy(self.y, memo=memo)
         out._z = deepcopy(self.z, memo=memo)
@@ -238,14 +238,14 @@ class Point(myObject):
     @property
     def x(self):
         if self._x.size == 0:
-            self._x = StatArray(self._nPoints, "Easting", "m")
+            self._x = StatArray(self._n_points, "Easting", "m")
         return self._x
 
     @x.setter
     def x(self, values):
         if values is not None: # Set a default array
-            self.nPoints = size(values)
-            if (self._x.size != self._nPoints):
+            self.n_points = size(values)
+            if (self._x.size != self._n_points):
                 self._x = StatArray(values, "Easting", "m")
                 return
 
@@ -254,14 +254,14 @@ class Point(myObject):
     @property
     def y(self):
         if self._y.size == 0:
-            self._y = StatArray(self._nPoints, "Northing", "m")
+            self._y = StatArray(self._n_points, "Northing", "m")
         return self._y
 
     @y.setter
     def y(self, values):
         if values is not None:
-            self.nPoints = size(values)
-            if (self._y.size != self._nPoints):
+            self.n_points = size(values)
+            if (self._y.size != self._n_points):
                 self._y = StatArray(values, "Northing", "m")
                 return
             self._y[:] = values
@@ -269,14 +269,14 @@ class Point(myObject):
     @property
     def z(self):
         if self._z.size == 0:
-            self._z = StatArray(self._nPoints, "Height", "m")
+            self._z = StatArray(self._n_points, "Height", "m")
         return self._z
 
     @z.setter
     def z(self, values):
         if values is not None: # Set a default array
-            self.nPoints = size(values)
-            if (self._z.size != self._nPoints):
+            self.n_points = size(values)
+            if (self._z.size != self._n_points):
                 self._z = StatArray(values, "Height", "m")
                 return
             self._z[:] = values
@@ -284,31 +284,31 @@ class Point(myObject):
     @property
     def elevation(self):
         if self._elevation.size == 0:
-            self._elevation = StatArray(self._nPoints, "Elevation", "m")
+            self._elevation = StatArray(self._n_points, "Elevation", "m")
         return self._elevation
 
     @elevation.setter
     def elevation(self, values):
         if values is not None: # Set a default array
-            self.nPoints = size(values)
-            if (self._elevation.size != self._nPoints):
+            self.n_points = size(values)
+            if (self._elevation.size != self._n_points):
                 self._elevation = StatArray(values, "Elevation", "m", dtype=float64)
                 return
             self._elevation[:] = values
 
     @property
     def ndim(self):
-        return sum([size(t) == self._nPoints for t in (self.x, self.y, self.z)])
+        return sum([size(t) == self._n_points for t in (self.x, self.y, self.z)])
 
     @property
-    def nPoints(self):
+    def n_points(self):
         """Get the number of points"""
-        return self._nPoints
+        return self._n_points
 
-    @nPoints.setter
-    def nPoints(self, value):
-        if self._nPoints == 0 and value > 0:
-            self._nPoints = int32(value)
+    @n_points.setter
+    def n_points(self, value):
+        if self._n_points == 0 and value > 0:
+            self._n_points = int32(value)
 
     @property
     def n_posteriors(self):
@@ -340,23 +340,23 @@ class Point(myObject):
 
         Returns
         -------
-        nPoints : int
+        n_points : int
             Number of observations.
 
         """
         # if isinstance(filename, str):
         #     filename = [filename]
 
-        # nPoints = asarray([fIO.getNlines(df, 1) for df in filename])
+        # n_points = asarray([fIO.getNlines(df, 1) for df in filename])
 
-        # if nPoints.size > 1:
-        #     assert all(diff(nPoints) == 0), Exception('Number of data points must match in all data files')
-        # return nPoints[0]
-        nPoints = fIO.getNlines(filename, 1)
+        # if n_points.size > 1:
+        #     assert all(diff(n_points) == 0), Exception('Number of data points must match in all data files')
+        # return n_points[0]
+        n_points = fIO.getNlines(filename, 1)
 
-        # if nPoints.size > 1:
-            # assert all(diff(nPoints) == 0), Exception('Number of data points must match in all data files')
-        return nPoints
+        # if n_points.size > 1:
+            # assert all(diff(n_points) == 0), Exception('Number of data points must match in all data files')
+        return n_points
 
     @staticmethod
     def _csv_channels(filename):
@@ -369,7 +369,7 @@ class Point(myObject):
 
         Returns
         -------
-        nPoints : int
+        n_points : int
             Number of measurements.
         columnIndex : ints
             The column indices for line, id, x, y, z, elevation, data, uncertainties.
@@ -380,7 +380,7 @@ class Point(myObject):
 
         # Get the column headers of the data file
         channels = fIO.get_column_name(filename)
-        nChannels = len(channels)
+        n_channels = len(channels)
 
         x_names = ('e', 'x','easting')
         y_names = ('n', 'y', 'northing')
@@ -423,7 +423,7 @@ class Point(myObject):
         self._y = self.y.append(other.y)
         self._z = self.z.append(other.z)
         self._elevation = self.elevation.append(other.elevation)
-        self._nPoints = self.nPoints + other.nPoints
+        self._n_points = self.n_points + other.n_points
 
         return self
 
@@ -433,7 +433,7 @@ class Point(myObject):
         Parameters
         ----------
         axis : str
-            If axis is 'index', returns numpy.arange(self.nPoints)
+            If axis is 'index', returns numpy.arange(self.n_points)
             If axis is 'x', returns self.x
             If axis is 'y', returns self.y
             If axis is 'z', returns self.z
@@ -666,7 +666,7 @@ class Point(myObject):
 
     #     """
     #     assert size(index) == 1, ValueError("i must be a single integer")
-    #     assert 0 <= index <= self.nPoints, ValueError("Must have 0 <= i <= {}".format(self.nPoints))
+    #     assert 0 <= index <= self.n_points, ValueError("Must have 0 <= i <= {}".format(self.n_points))
     #     return Point(self.x[index], self.y[index], self.z[index], self.elevation[index])
 
     def x_axis(self, xAxis='x'):
@@ -675,7 +675,7 @@ class Point(myObject):
         Parameters
         ----------
         xAxis : str
-            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'index', returns numpy.arange(self.n_points)
             If xAxis is 'x', returns self.x
             If xAxis is 'y', returns self.y
             If xAxis is 'z', returns self.z
@@ -715,7 +715,7 @@ class Point(myObject):
         dy : float
             Grid spacing in y.
         values : array_like, optional
-            Values to interpolate.  Must have size self.nPoints.
+            Values to interpolate.  Must have size self.n_points.
             Defaults to None.
         method : str, optional
             * 'ct' uses Clough Tocher interpolation. Default
@@ -935,7 +935,7 @@ class Point(myObject):
 
         assert (not self.kdtree is None), TypeError('kdtree has not been set, use self.setKdTree()')
 
-        k = minimum(self.nPoints, k)
+        k = minimum(self.n_points, k)
 
         return self.kdtree.query(x, k, eps, p, distance_upper_bound=radius)
 
@@ -948,7 +948,7 @@ class Point(myObject):
         values : array_like
             Values to plot against a co-ordinate
         xAxis : str
-            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'index', returns numpy.arange(self.n_points)
             If xAxis is 'x', returns self.x
             If xAxis is 'y', returns self.y
             If xAxis is 'z', returns self.z
@@ -1159,19 +1159,19 @@ class Point(myObject):
 
         Returns
         -------
-        nPoints : int
+        n_points : int
             Number of observations.
 
         """
         if isinstance(filename, str):
             filename = (filename)
-        nSystems = len(filename)
-        nPoints = empty(nSystems, dtype=int64)
-        for i in range(nSystems):
-            nPoints[i] = fIO.getNlines(filename[i], 1)
-        for i in range(1, nSystems):
-            assert nPoints[i] == nPoints[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(nPoints[i], filename[i], nPoints[0], filename[0]))
-        return nPoints[0]
+        n_systems = len(filename)
+        n_points = empty(n_systems, dtype=int64)
+        for i in range(n_systems):
+            n_points[i] = fIO.getNlines(filename[i], 1)
+        for i in range(1, n_systems):
+            assert n_points[i] == n_points[0], Exception('Number of data points {} in file {} does not match {} in file {}'.format(n_points[i], filename[i], n_points[0], filename[0]))
+        return n_points[0]
 
     @staticmethod
     def _csv_n_points(filename):
@@ -1184,23 +1184,23 @@ class Point(myObject):
 
         Returns
         -------
-        nPoints : int
+        n_points : int
             Number of observations.
 
         """
         # if isinstance(filename, str):
         #     filename = [filename]
 
-        # nPoints = asarray([fIO.getNlines(df, 1) for df in filename])
+        # n_points = asarray([fIO.getNlines(df, 1) for df in filename])
 
-        # if nPoints.size > 1:
-        #     assert all(diff(nPoints) == 0), Exception('Number of data points must match in all data files')
-        # return nPoints[0]
-        nPoints = fIO.getNlines(filename, 1)
+        # if n_points.size > 1:
+        #     assert all(diff(n_points) == 0), Exception('Number of data points must match in all data files')
+        # return n_points[0]
+        n_points = fIO.getNlines(filename, 1)
 
-        # if nPoints.size > 1:
-            # assert all(diff(nPoints) == 0), Exception('Number of data points must match in all data files')
-        return nPoints
+        # if n_points.size > 1:
+            # assert all(diff(n_points) == 0), Exception('Number of data points must match in all data files')
+        return n_points
 
     @staticmethod
     def _csv_channels(filename):
@@ -1213,7 +1213,7 @@ class Point(myObject):
 
         Returns
         -------
-        nPoints : int
+        n_points : int
             Number of measurements.
         columnIndex : ints
             The column indices for line, id, x, y, z, elevation, data, uncertainties.
@@ -1224,7 +1224,7 @@ class Point(myObject):
 
         # Get the column headers of the data file
         channels = fIO.get_column_name(filename)
-        nChannels = len(channels)
+        n_channels = len(channels)
 
         x_names = ('e', 'x','easting')
         y_names = ('n', 'y', 'northing')
@@ -1262,12 +1262,12 @@ class Point(myObject):
             Path to the file to read from.
 
         """
-        nPoints, channels = Point._csv_channels(filename)
+        n_points, channels = Point._csv_channels(filename)
 
         try:
             df = read_csv(filename, index_col=False, usecols=channels, skipinitialspace = True)
         except:
-            df = read_csv(filename, index_col=False, usecols=channels, delim_whitespace=True, skipinitialspace = True)
+            df = read_csv(filename, index_col=False, usecols=channels, sep=r'\s+', skipinitialspace = True)
         df = df.replace('NaN',nan)
 
         self = cls(**kwargs)
@@ -1379,7 +1379,7 @@ class Point(myObject):
 
         nodes = vstack([self.x, self.y, self.z]).T
 
-        vtk = VtkData(UnstructuredGrid(nodes, vertex=arange(self._nPoints)))
+        vtk = VtkData(UnstructuredGrid(nodes, vertex=arange(self._n_points)))
         vtk.point_data.append(Scalars(self.z, self.z.getNameUnits()))
         return vtk
 
@@ -1415,11 +1415,11 @@ class Point(myObject):
             if isinstance(pointData, list):
                 for p in pointData:
                     assert isinstance(p, DataArray), TypeError("pointData entries must be a geobipy.StatArray")
-                    assert size(p) == self.nPoints, ValueError("pointData entries must have size {}".format(self.nPoints))
+                    assert size(p) == self.n_points, ValueError("pointData entries must have size {}".format(self.n_points))
                     assert p.hasLabels(), ValueError("StatArray needs a name")
                     vtk.point_data.append(Scalars(p, p.getNameUnits()))
             else:
-                assert pointData.size == self.nPoints, ValueError("pointData entries must have sizd {}".format(self.nPoints))
+                assert pointData.size == self.n_points, ValueError("pointData entries must have sizd {}".format(self.n_points))
                 assert pointData.hasLabels(), ValueError("StatArray needs a name")
                 vtk.point_data.append(Scalars(pointData, pointData.getNameUnits()))
 

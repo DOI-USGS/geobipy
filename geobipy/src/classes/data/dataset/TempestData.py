@@ -29,14 +29,14 @@ class TempestData(TdemData):
 
     A time domain data set with easting, northing, height, and elevation values. Each sounding in the data set can be given a receiver and transmitter loop.
 
-    TdemData(nPoints=1, nTimes=[1], nSxfystems=1)
+    TdemData(n_points=1, n_times=[1], nSystems=1)
 
     Parameters
     ----------
-    nPoints : int, optional
+    n_points : int, optional
         Number of soundings in the data file
-    nTimes : array of ints, optional
-        Array of size nSystemsx1 containing the number of time gates in each system
+    n_times : array of ints, optional
+        Array of size n_systemsx1 containing the number of time gates in each system
     nSystem : int, optional
         Number of measurement systems
 
@@ -57,17 +57,18 @@ class TempestData(TdemData):
     __slots__ = ('_additive_error_multiplier')
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
-        self._additive_error = DataArray((self.nPoints, self.n_data_channels), "Additive error", "%")
-        self._relative_error = DataArray((self.nPoints, self.nSystems), "Relative error", "%")
+        super().__init__(*args, total_field=True, **kwargs)
 
-        self._additive_error_multiplier = DataArray(ones((self.nPoints, self.nSystems)), "multiplier")
+        self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", "%")
+        self._relative_error = DataArray((self.n_points, self.n_systems), "Relative error", "%")
+
+        self._additive_error_multiplier = DataArray(ones((self.n_points, self.n_systems)), "multiplier")
 
     @property
     def additive_error(self):
         if size(self._additive_error, 0) == 0:
-            self._additive_error = DataArray((self.nPoints, self.n_data_channels), "Additive error", "%")
+            self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", "%")
         return self._additive_error
 
     @additive_error.setter
@@ -75,8 +76,8 @@ class TempestData(TdemData):
         if values is not None:
             values = atleast_2d(values)
 
-            self.nPoints, n_data_channels = size(values, 0), size(values, 1)
-            shp = (self.nPoints, n_data_channels)
+            self.n_points, n_data_channels = size(values, 0), size(values, 1)
+            shp = (self.n_points, n_data_channels)
             if not allclose(self._additive_error.shape, shp):
                 self._additive_error = DataArray(values, "Additive error", self.units)
                 return
@@ -87,83 +88,55 @@ class TempestData(TdemData):
     def additive_error_multiplier(self):
         """ """
         if size(self._additive_error_multiplier, 0) == 0:
-            self._additive_error_multiplier = DataArray((self.nPoints, self.nSystems), "multiplier")
+            self._additive_error_multiplier = DataArray((self.n_points, self.n_systems), "multiplier")
         return self._additive_error_multiplier
 
     @additive_error_multiplier.setter
     def additive_error_multiplier(self, values):
         if values is not None:
-            self.nPoints = size(values, 0)
-            shp = (self.nPoints, self.nSystems)
+            self.n_points = size(values, 0)
+            shp = (self.n_points, self.n_systems)
             if not allclose(self._additive_error_multiplier.shape, shp):
                 self._additive_error_multiplier = DataArray(values, "multiplier")
                 return
 
             self._additive_error_multiplier[:, :] = values
 
-    @TdemData.data.getter
-    def data(self):
-        if size(self._data, 0) == 0 or (self._data.shape[0] != self.nPoints):
-            self._data = DataArray((self.nPoints, self.n_data_channels), "Data", self.units)
-
-        self._data[:] = 0.0
-        for j in range(self.nSystems):
-            for i in range(self.n_components):
-                ic = self._component_indices(component=i, system=j)
-                self._data[:, :] += (self.primary_field[:, i][:, None]) + self.secondary_field[:, ic]
-
-        return self._data
 
     @TdemData.std.getter
     def std(self):
-        if (size(self._std, 0) == 0) or (self._std.shape[0] != self.nPoints):
-            self._std = DataArray((self.nPoints, self.n_data_channels), "Standard deviation", self.units)
+        if (size(self._std, 0) == 0) or (self._std.shape[0] != self.n_points):
+            self._std = DataArray((self.n_points, self.n_data_channels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
-            for i in range(self.nSystems):
+            for i in range(self.n_systems):
                 j = self._systemIndices(i)
-                self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
+                self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2)[:, None])
 
         return self._std
 
-    @TdemData.predicted_data.getter
-    def predicted_data(self):
-        if size(self._predicted_data, 0) == 0 or (self._predicted_data.shape[0] != self.nPoints):
-            self._predicted_data = DataArray((self.nPoints, self.n_data_channels), "Predicted Data", self.units)
-
-        self._predicted_data[:] = 0.0
-        for j in range(self.nSystems):
-            for i in range(self.n_components):
-                ic = self._component_indices(i, j)
-                self._predicted_data[:, :] += self.predicted_primary_field[:, i][:, None] + self.predicted_secondary_field[:, ic]
-
-        return self._predicted_data
 
     @property
     def file(self):
         return self._file
 
-    @property
-    def n_data_channels(self):
-        return sum(self.nTimes)
+    # @property
+    # def relative_error(self):
+    #     """The data. """
+    #     if size(self._relative_error, 0) == 0:
+    #         self._relative_error = DataArray((self.n_points, self.n_systems), "Relative error", "%")
+    #     return self._relative_error
 
-    @property
-    def relative_error(self):
-        """The data. """
-        if size(self._relative_error, 0) == 0:
-            self._relative_error = DataArray((self.nPoints, self.nSystems), "Relative error", "%")
-        return self._relative_error
+    # @relative_error.setter
+    # def relative_error(self, values):
+    #     if values is not None:
+    #         self.n_points = size(values, 0)
+    #         shp = (self.n_points, self.n_systems)
+    #         if not allclose(self._relative_error.shape, shp):
+    #             self._relative_error = DataArray(values, "Relative error", "%")
+    #             return
 
-    @relative_error.setter
-    def relative_error(self, values):
-        if values is not None:
-            self.nPoints = size(values, 0)
-            shp = (self.nPoints, self.nSystems)
-            if not allclose(self._relative_error.shape, shp):
-                self._relative_error = DataArray(values, "Relative error", "%")
-                return
-
-            self._relative_error[:, :] = values
+    #         self._relative_error[:, :] = values
 
     def _as_dict(self):
         out, order = super()._as_dict()
@@ -179,7 +152,7 @@ class TempestData(TdemData):
         return out, order
 
     @classmethod
-    def read_csv(cls, data_filename, system_filename):
+    def read_csv(cls, data_filename, system):
         """Reads the data and system parameters from file
 
         Parameters
@@ -249,19 +222,23 @@ class TempestData(TdemData):
 
 
         """
-
         # Get the number of systems to use
-        if (isinstance(system_filename, str)):
-            system_filename = [system_filename]
+        if (isinstance(system, str)):
+            system = [system]
 
-        nSystems = len(system_filename)
+        n_systems = len(system)
 
-        self = cls(system=system_filename)
+        self = cls(system=system)
 
-        self._nPoints, iC, iR, iT, iOffset, iSecondary, iStd, iPrimary = TempestData._csv_channels(data_filename)
+        print(f"{self.total_field=}")
+        print(f"{self.channels_per_system=}")
+        print(f"{self.components=}")
+        print(f"{self.n_channels=}")
+        print(f"{self.n_data_channels=}")
 
-        assert len(iSecondary) == self.nChannels, Exception("Number of off time columns {} in {} does not match total number of times {} in system files \n {}".format(
-            len(iSecondary), data_filename, self.nChannels, self.fileInformation()))
+        self._n_points, iC, iR, iT, iOffset, iSecondary, iStd, iPrimary = TempestData._csv_channels(data_filename)
+
+        # assert len(iSecondary) == self.n_data_channels, Exception(f"Number of off time columns {len(iSecondary)} in {data_filename} \ndoes not match total number of times {self.n_data_channels} in system files \n {self.fileInformation()}")
 
         if len(iStd) > 0:
             assert len(iStd) == len(iSecondary), Exception("Number of Off time standard deviation estimates does not match number of Off time data columns in file {}. \n {}".format(data_filename, self.fileInformation()))
@@ -290,7 +267,7 @@ class TempestData(TdemData):
                                          y=self.y,
                                          z=self.z,
                                          pitch=df[iT[0]].values, roll=df[iT[1]].values, yaw=df[iT[2]].values,
-                                         radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                         radius=full(self.n_points, fill_value=self.system[0].loopRadius()))
 
         loopOffset = df[iOffset].values
 
@@ -299,8 +276,7 @@ class TempestData(TdemData):
                                       y = self.transmitter.y + loopOffset[:, 1],
                                       z = self.transmitter.z + loopOffset[:, 2],
                                       pitch=df[iR[0]].values, roll=df[iR[1]].values, yaw=df[iR[2]].values,
-                                      radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
-
+                                      radius=full(self.n_points, fill_value=self.system[0].loopRadius()))
 
         self.primary_field[:, :] = df[iPrimary].values
         self.secondary_field[:, :] = df[iSecondary].values
@@ -318,41 +294,41 @@ class TempestData(TdemData):
         kwargs['yscale'] = kwargs.get('yscale' ,'linear')
         super().plotLine(line, xAxis, **kwargs)
 
-    def plot_data(self, system=0, channels=None, x='index', **kwargs):
-        """ Plots the data
+    # def plot_data(self, system=0, channels=None, x='index', **kwargs):
+    #     """ Plots the data
 
-        Parameters
-        ----------
-        system : int
-            System to plot
-        channels : sequence of ints
-            Channels to plot
+    #     Parameters
+    #     ----------
+    #     system : int
+    #         System to plot
+    #     channels : sequence of ints
+    #         Channels to plot
 
-        """
+    #     """
 
-        legend = kwargs.pop('legend', True)
-        kwargs['yscale'] = kwargs.get('yscale', 'linear')
+    #     legend = kwargs.pop('legend', True)
+    #     kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
-        x = self.axis(x)
+    #     x = self.axis(x)
 
-        if channels is None:
-            i = self._systemIndices(system)
-            ax = cP.plot(x, self.data[:, i],
-                         label=self.channel_names[i], **kwargs)
-        else:
-            channels = atleast_1d(channels)
-            for j, i in enumerate(channels):
-                ax = cP.plot(x, self.data[:, i],
-                             label=self.channel_names[i], **kwargs)
+    #     if channels is None:
+    #         i = self._systemIndices(system)
+    #         ax = cP.plot(x, self.data[:, i],
+    #                      label=self.channel_names[i], **kwargs)
+    #     else:
+    #         channels = atleast_1d(channels)
+    #         for j, i in enumerate(channels):
+    #             ax = cP.plot(x, self.data[:, i],
+    #                          label=self.channel_names[i], **kwargs)
 
-        plt.xlabel(utilities.getNameUnits(x))
+    #     plt.xlabel(utilities.getNameUnits(x))
 
-        # Put a legend to the right of the current axis
-        if legend:
-            leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
-            leg.set_title(self.data.getNameUnits())
+    #     # Put a legend to the right of the current axis
+    #     if legend:
+    #         leg = ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), fancybox=True)
+    #         leg.set_title(self.data.getNameUnits())
 
-        return ax
+    #     return ax
 
 
     def plot_predicted(self, system=0, channels=None, xAxis='index', **kwargs):
@@ -413,10 +389,10 @@ class TempestData(TdemData):
         # Data axis
         ax.append(plt.subplot(splt[0, 1], sharex=sharex))
 
-        splt2 = splt[1, :].subgridspec(self.nSystems * self.n_components, 2, wspace=0.2)
+        splt2 = splt[1, :].subgridspec(self.n_systems * self.n_components, 2, wspace=0.2)
         # Relative error axes
         ax_rel = [plt.subplot(splt2[0, 0], sharex=sharex)]
-        ax_rel += [plt.subplot(splt2[i, 0], sharex=ax_rel[0], sharey=ax_rel[0]) for i in range(1, self.n_components * self.nSystems)]
+        ax_rel += [plt.subplot(splt2[i, 0], sharex=ax_rel[0], sharey=ax_rel[0]) for i in range(1, self.n_components * self.n_systems)]
         ax.append(ax_rel)
         # # Additive Error axes
         ax.append(plt.subplot(splt2[0, 1], sharex=sharex))
@@ -447,7 +423,7 @@ class TempestData(TdemData):
 
     # def csv_channels(self, data_filename):
 
-    #     self._nPoints, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
+    #     self._n_points, self._iC, self._iR, self._iT, self._iOffset, self._iData, self._iStd, self._iPrimary = TdemData._csv_channels(data_filename)
 
     #     self._channels = self._iC + self._iR + self._iT + self._iOffset + self._iData
     #     if len(self._iStd) > 0:
@@ -568,7 +544,7 @@ class TempestData(TdemData):
 
             self.transmitter = CircularLoop(x=self.x, y=self.y, z=self.z,
                                              pitch=pitch, roll=roll, yaw=yaw,
-                                             radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                             radius=full(self.n_points, fill_value=self.system[0].loopRadius()))
 
             pitch = asarray(gdf['Rx_Pitch'][indices])
             roll = asarray(gdf['Rx_Roll'][indices])
@@ -580,7 +556,7 @@ class TempestData(TdemData):
                                           y=self.transmitter.y + loopOffset[:, 1],
                                           z=self.transmitter.z + loopOffset[:, 2],
                                           pitch=pitch, roll=roll, yaw=yaw,
-                                          radius=full(self.nPoints, fill_value=self.system[0].loopRadius()))
+                                          radius=full(self.n_points, fill_value=self.system[0].loopRadius()))
 
             self.primary_field = vstack([asarray(gdf['X_PrimaryField'][indices]), asarray(gdf['Z_PrimaryField'][indices])]).T
             self.secondary_field = hstack([asarray(gdf['EMX_NonHPRG'][:, indices]).T, asarray(gdf['EMZ_NonHPRG'][:, indices]).T])

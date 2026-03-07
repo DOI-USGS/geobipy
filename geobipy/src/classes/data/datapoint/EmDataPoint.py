@@ -1,3 +1,4 @@
+import numpy as np
 from numpy import argmin, asarray, atleast_1d, cumsum
 from numpy import hstack, inf, int32, isnan, log10, logspace, nan
 from numpy import r_, size, sum, zeros
@@ -29,17 +30,31 @@ class EmDataPoint(DataPoint):
     geobipy.src.classes.data.datapoint.TdemDataPoint
 
     """
-    __slots__ = ('_channels_per_system', '_system')
+    __slots__ = ('_channels_per_system', '_system', '_has_primary_field')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
                        components=None, channels_per_system=None,
                        data=None, std=None, predicted_data=None,
                        channel_names=None,
-                       line_number=0.0, fiducial=0.0, **kwargs):
+                       line_number=0.0, fiducial=0.0, has_primary_field=False, **kwargs):
+
+        self.channels_per_system = channels_per_system
+        self.has_primary_field = has_primary_field
 
         super().__init__(x = x, y = y, z = z, elevation = elevation,
+                         components=components,
                          data = data, std = std, predicted_data = predicted_data,
                          channel_names=channel_names, line_number=line_number, fiducial=fiducial, **kwargs)
+
+    def __deepcopy__(self, memo={}):
+
+        out = super().__deepcopy__(memo)
+
+        out._channels_per_system = deepcopy(self.channels_per_system, memo)
+        out._has_primary_field = deepcopy(self._has_primary_field, memo)
+        out.system = self._system
+
+        return out
 
     @property
     def active(self):
@@ -69,51 +84,53 @@ class EmDataPoint(DataPoint):
         self._channels_per_system = values
 
     @property
+    def has_primary_field(self) -> bool:
+        return self._has_primary_field
+
+    @has_primary_field.setter
+    def has_primary_field(self, value: bool):
+        self._has_primary_field = value
+
+    @property
+    def n_channels(self):
+        return sum(self.n_components * self.channels_per_system)
+
+    @property
+    def data_channels_per_system(self):
+        out = self.channels_per_system
+        if not self.total_field:
+            out *= self.n_components
+        return out
+
+    @property
     def n_data_channels(self):
-        return self.nChannels
+        return sum(self.data_channels_per_system)
 
     @property
-    def components(self):
-        m = ('x', 'y', 'z')
-        return [m[x] for x in self._components]
-
-    @components.setter
-    def components(self, values):
-
-        m = {'x': 0,
-             'y': 1,
-             'z': 2}
-
-        if values is None:
-            values = ['z']
-        else:
-
-            if isinstance(values, str):
-                values = [values]
-
-            assert all([isinstance(x, str) for x in values]), TypeError('components must be list of str')
-
-        self._components = asarray([m[x] for x in values], dtype=int32)
-
-    @DataPoint.data.setter
-    def data(self, values):
-        if values is None:
-            values = self.n_data_channels
-        else:
-            assert size(values) == self.n_data_channels, ValueError(f"data must have size {self.n_data_channels} not {size(values)}")
-        self._data = DataArray(values, "Data", self.units)
-
-    @property
-    def n_components(self):
-        return size(self.components)
-
-    @property
-    def nChannels(self):
-        return sum(self.channels_per_system)
-
-    @property
-    def nSystems(self):
+    def n_systems(self):
         return size(self.channels_per_system)
+
+    @DataPoint.data.getter
+    def data(self):
+        if self.total_field:
+            self._data[:] = 0.0
+            for i in range(self.n_components):
+                ic = self._component_indices(i, 0)
+                # Compute Sum(Pc + Sc) for c in x, y, z
+                tmp = self.secondary_field[ic]
+                if self.has_primary_field:
+                    tmp += self.primary_field[i]
+                self._data[:] += tmp**2.0
+            self._data[:] = np.sqrt(self._data)
+        else:
+            for j in range(self.n_systems):
+                for i in range(self.n_components):
+                    ic = self._component_indices(i, j)
+                    self._data[ic] = self.secondary_field[ic]
+                    if self.has_primary_field:
+                        self._data[ic] += self.primary_field[i]
+
+        return self._data
 
     @DataPoint.predicted_data.setter
     def predicted_data(self, values):
@@ -123,13 +140,35 @@ class EmDataPoint(DataPoint):
             assert size(values) == self.n_data_channels, ValueError("Size of predicted_data must equal total number of time channels {}".format(self.n_data_channels))
         self._predicted_data = StatArray(values, "Predicted Data", self.units)
 
-    @DataPoint.std.setter
-    def std(self, values):
-        if values is None:
-            values = self.n_data_channels
+    @DataPoint.predicted_data.getter
+    def predicted_data(self):
+        if self.total_field:
+            self._predicted_data[:] = 0.0
+            for i in range(self.n_components):
+                ic = self._component_indices(i, 0)
+                # Compute Sum(Pc + Sc) for c in x, y, z
+                tmp = self.predicted_secondary_field[ic]
+                if self.has_primary_field:
+                    tmp += self.predicted_primary_field[i]
+                self._predicted_data[:] += tmp**2.0
+            self._predicted_data[:] = np.sqrt(self._predicted_data)
         else:
-            assert size(values) == self.n_data_channels, ValueError(f"data must have size {self.n_data_channels} not {size(values)}")
-        self._std = DataArray(values, "Data", self.units)
+            for j in range(self.n_systems):
+                for i in range(self.n_components):
+                    ic = self._component_indices(i, j)
+                    self._predicted_data[ic] = self.predicted_secondary_field[ic]
+                    if self.has_primary_field:
+                        self._predicted_data[ic] += self.predicted_primary_field[i]
+        return self._predicted_data
+
+    @DataPoint.std.getter
+    def std(self):
+        assert np.min(self.relative_error) > 0.0, ValueError("relative_error must be > 0.0")
+        for i in range(self.n_systems):
+            j = self._systemIndices(i)
+            self._std[:, j] = np.sqrt((self.relative_error[i] * self.data[j])**2 + (self.additive_error[i]**2))
+
+        return self._std
 
     @property
     def system(self):
@@ -140,15 +179,13 @@ class EmDataPoint(DataPoint):
         return hstack([0, cumsum(self.channels_per_system)])
 
     @property
-    def new_model(self):
+    def empty_halfspace(self):
         mesh = RectilinearMesh1D(edges=DataArray(asarray([0.0, inf]), 'Depth', 'm'))
         conductivity = DataArray(mesh.nCells.item(), 'Conductivity', r'$\frac{S}{m}$')
         magnetic_susceptibility = DataArray(mesh.nCells.item(), "Magnetic Susceptibility", r"$\kappa$")
         magnetic_permeability = DataArray(mesh.nCells.item(), "Magnetic Permeability", "$\frac{H}{m}$")
 
         out = Model(mesh=mesh, values=conductivity)
-        # out.setattr('magnetic_susceptibility', magnetic_susceptibility)
-        # out.setattr('magnetic_permeability', magnetic_permeability)
 
         return out
 
@@ -181,7 +218,7 @@ class EmDataPoint(DataPoint):
 
         PhiD = zeros(nSamples)
 
-        model = self.new_model
+        model = self.empty_halfspace
 
         for i in range(nSamples):
             model.values[0] = c[i]
@@ -215,10 +252,10 @@ class EmDataPoint(DataPoint):
         """
 
         # tmp = deepcopy(self)
-        c = DataArray(logspace(min, max, nSamples), 'Conductivity', '$S/m$')
+        c = DataArray(logspace(minConductivity, maxConductivity, nSamples), 'Conductivity', '$S/m$')
         PhiD = DataArray(size(c), 'Normalized Data Misfit', '')
 
-        model = self.new_model
+        model = self.empty_halfspace
 
         for i in range(size(c)):
             model.values[0] = c[i]

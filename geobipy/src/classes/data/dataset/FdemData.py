@@ -32,11 +32,11 @@ except:
 class FdemData(Data):
     """Class extension to geobipy.Data defining a Fourier domain electro magnetic data set
 
-    FdemData(nPoints, nFrequencies, system)
+    FdemData(n_points, nFrequencies, system)
 
     Parameters
     ----------
-    nPoints : int, optional
+    n_points : int, optional
         Number of observations in the data set
     nFrequencies : int, optional
         Number of measurement frequencies
@@ -89,8 +89,8 @@ class FdemData(Data):
         # Data Class containing xyz and channel values
         super().__init__(**kwargs)
 
-        self._powerline = DataArray(self._nPoints, "Powerline")
-        self._magnetic = DataArray(self._nPoints, "Magnetic")
+        self._powerline = DataArray(self._n_points, "Powerline")
+        self._magnetic = DataArray(self._n_points, "Magnetic")
 
         # self.channel_names = kwargs.get('channel_names', None)
 
@@ -107,20 +107,20 @@ class FdemData(Data):
         return 2 * self.nFrequencies
 
     @property
-    def nSystems(self):
+    def n_systems(self):
         return size(self.channels_per_system)
 
     @property
     def magnetic(self):
         if self._magnetic.size == 0:
-            self._magnetic = DataArray(self._nPoints, "Magnetic", "nT")
+            self._magnetic = DataArray(self._n_points, "Magnetic", "nT")
         return self._magnetic
 
     @magnetic.setter
     def magnetic(self, values):
         if values is not None: # Set a default array
-            if self._nPoints == 0: self.nPoints = size(values)
-            if (self._magnetic.size != self._nPoints):
+            if self._n_points == 0: self.n_points = size(values)
+            if (self._magnetic.size != self._n_points):
                 self._magnetic = DataArray(values, "Magnetic", "nT")
                 return
 
@@ -129,14 +129,14 @@ class FdemData(Data):
     @property
     def powerline(self):
         if self._powerline.size == 0:
-            self._powerline = DataArray(self._nPoints, "Powerline")
+            self._powerline = DataArray(self._n_points, "Powerline")
         return self._powerline
 
     @powerline.setter
     def powerline(self, values):
         if values is not None: # Set a default array
-            if self._nPoints == 0: self.nPoints = size(values)
-            if (self._powerline.size != self._nPoints):
+            if self._n_points == 0: self.n_points = size(values)
+            if (self._powerline.size != self._n_points):
                 self._powerline = DataArray(values, "Powerline")
                 return
 
@@ -146,7 +146,7 @@ class FdemData(Data):
     @Data.std.getter
     def std(self):
         if size(self._std, 0) == 0:
-            self._std = DataArray((self.nPoints, self.nChannels), "Standard deviation", self.units)
+            self._std = DataArray((self.n_points, self.n_channels), "Standard deviation", self.units)
 
         if self.relative_error.max() > 0.0:
             self._std[:, :] = sqrt((self.relative_error * self.data)**2 + (self.additive_error**2.0))
@@ -168,11 +168,11 @@ class FdemData(Data):
 
         if isinstance(values, (str, FdemSystem)):
             values = [values]
-        nSystems = len(values)
+        n_systems = len(values)
         # Make sure that list contains strings or TdemSystem classes
         assert all([isinstance(x, (str, FdemSystem)) for x in values]), TypeError("system must be str or list of either str or geobipy.FdemSystem")
 
-        self._system = [None] * nSystems
+        self._system = [None] * n_systems
 
         for i, s in enumerate(values):
             if isinstance(s, str):
@@ -186,14 +186,14 @@ class FdemData(Data):
     def channel_names(self, values):
         if values is None:
             self._channel_names = []
-            for i in range(self.nSystems):
+            for i in range(self.n_systems):
                 # Set the channel names
                 for ic in range(self.n_components):
                     for iFrequency in range(2*self.nFrequencies[i]):
                         self._channel_names.append('{} {}'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            assert len(values) == self.n_channels, Exception("Length of channel_names must equal total number of channels {}".format(self.n_channels))
             self._channel_names = values
 
     def check(self):
@@ -438,7 +438,7 @@ class FdemData(Data):
         Parameters
         ----------
         xAxis : str
-            If xAxis is 'index', returns numpy.arange(self.nPoints)
+            If xAxis is 'index', returns numpy.arange(self.n_points)
             If xAxis is 'x', returns self.x
             If xAxis is 'y', returns self.y
             If xAxis is 'z', returns self.z
@@ -544,8 +544,8 @@ class FdemData(Data):
         # Initialize the EMData Class
         self = cls(system=system)
 
-        # assert nDatafiles == self.nSystems, Exception("Number of data files must match number of system files.")
-        nPoints, iC, iData, iStd, powerline, magnetic = FdemData._csv_channels(dataFilename)
+        # assert nDatafiles == self.n_systems, Exception("Number of data files must match number of system files.")
+        n_points, iC, iData, iStd, powerline, magnetic = FdemData._csv_channels(dataFilename)
 
         channels = iC + iData
         if len(iStd) > 0:
@@ -608,7 +608,7 @@ class FdemData(Data):
     #     return channels
 
     def csv_channels(self, filename):
-        self.nPoints, self._iC, self._iData, self._iStd, iP, iM = self._csv_channels(filename)
+        self.n_points, self._iC, self._iData, self._iStd, iP, iM = self._csv_channels(filename)
 
         self._channels = self._iC + self._iData
         if len(self._iStd) > 0:
@@ -627,7 +627,7 @@ class FdemData(Data):
 
         Returns
         -------
-        nPoints : int
+        n_points : int
             Number of measurements.
         columnIndex : ints
             The column indices for line, id, x, y, z, elevation, data, uncertainties.
@@ -639,11 +639,11 @@ class FdemData(Data):
         powerline = None
         magnetic = None
 
-        nPoints, location_channels = Data._csv_channels(data_filename)
+        n_points, location_channels = Data._csv_channels(data_filename)
 
         # Get the column headers of the data file
         channels = fIO.get_column_name(data_filename)
-        nChannels = len(channels)
+        n_channels = len(channels)
 
         # To grab the EM data, skip the following header names. (More can be added to this)
         # Initialize a column identifier for x y z
@@ -679,7 +679,7 @@ class FdemData(Data):
 
         error_channels = in_err + quad_err #if hasErrors else None
 
-        return nPoints, location_channels, data_channels, error_channels, powerline, magnetic
+        return n_points, location_channels, data_channels, error_channels, powerline, magnetic
 
     @classmethod
     def _initialize_sequential_reading(cls, data_filename, system_filename):
@@ -786,11 +786,11 @@ class FdemData(Data):
             dataFilename = [dataFilename]
 
         nDatafiles = len(dataFilename)
-        nSystems = nDatafiles
+        n_systems = nDatafiles
 
-        system, nPoints, iC, iD, nHeaderLines, iP, iM = self._readAarhusHeader(dataFilename[0])
+        system, n_points, iC, iD, nHeaderLines, iP, iM = self._readAarhusHeader(dataFilename[0])
 
-        # nPoints, iC, iD, iS = self.__readColumnIndices(dataFilename, self.system)
+        # n_points, iC, iD, iS = self.__readColumnIndices(dataFilename, self.system)
 
         # Get all readable column indices for the first file.
         tmp = [iC]
@@ -807,9 +807,9 @@ class FdemData(Data):
 
 
         # Initialize the EMData Class
-        FdemData.__init__(self, nPoints, systems=system)
+        FdemData.__init__(self, n_points, systems=system)
 
-        values = fIO.read_columns(dataFilename[0], indicesForFile, nHeaderLines, nPoints)
+        values = fIO.read_columns(dataFilename[0], indicesForFile, nHeaderLines, n_points)
 
         # Assign columns to variables
         self._line_number[:] = values[:, 0]
@@ -910,9 +910,9 @@ class FdemData(Data):
                 _magnetic = j
 
 
-        nPoints = self._readNpoints([dataFilename]) - nHeaderLines + 1
+        n_points = self._readNpoints([dataFilename]) - nHeaderLines + 1
 
-        return system, nPoints, _columnIndex, _dataIndices, nHeaderLines, _powerline, _magnetic
+        return system, n_points, _columnIndex, _dataIndices, nHeaderLines, _powerline, _magnetic
 
     def createHdf(self, parent, myName, withPosterior=True, fillvalue=None):
         """ Create the hdf group metadata in file
@@ -969,7 +969,7 @@ class FdemData(Data):
         out = super().Bcast(world, root=root)
 
         n_frequencies = myMPI.Bcast(self.nFrequencies, world, root=root)
-        n_systems = myMPI.Bcast(self.nSystems, world, root=root)
+        n_systems = myMPI.Bcast(self.n_systems, world, root=root)
 
         if world.rank == root:
             systems_null = self.system
@@ -1024,9 +1024,9 @@ class FdemData(Data):
 
         out = super().Scatterv(starts, chunks, world, root=root)
 
-        # npoints = myMPI.Bcast(self.nPoints, world, root=root)
+        # npoints = myMPI.Bcast(self.n_points, world, root=root)
         n_frequencies = myMPI.Bcast(self.nFrequencies, world, root=root)
-        n_systems = myMPI.Bcast(self.nSystems, world, root=root)
+        n_systems = myMPI.Bcast(self.n_systems, world, root=root)
 
         if world.rank == root:
             systems_null = self.system
@@ -1045,7 +1045,7 @@ class FdemData(Data):
         if isinstance(fileNames, str):
             fileNames = [fileNames]
 
-        assert len(fileNames) == self.nSystems, ValueError("fileNames must have length equal to the number of systems {}".format(self.nSystems))
+        assert len(fileNames) == self.n_systems, ValueError("fileNames must have length equal to the number of systems {}".format(self.n_systems))
 
         import pandas as pd
 
@@ -1074,7 +1074,7 @@ class FdemData(Data):
         #     with open(fileNames[i], 'w') as f:
         #         f.write(header+"\n")
         #         with printoptions(formatter={'float': '{: 0.15g}'.format}, suppress=True):
-        #             for j in range(self.nPoints):
+        #             for j in range(self.n_points):
 
         #                 x = asarray([self.line_number[j], self.fiducial[j], self.x[j], self.y[j], self.elevation[j], self.z[j]])
 

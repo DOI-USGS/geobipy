@@ -11,6 +11,7 @@ from matplotlib.pyplot import figure, subplot, gcf, gca, sca, cla, plot, margins
 
 from ...core.DataArray import DataArray
 from ...statistics.StatArray import StatArray
+from .EmDataPoint import EmDataPoint
 from .TdemDataPoint import TdemDataPoint
 from ...forwardmodelling.Electromagnetic.TD.tdem1d import (
     tdem1dfwd, tdem1dsen, ga_fm_dlogc)
@@ -71,10 +72,10 @@ class Tempest_datapoint(TdemDataPoint):
 
     """
     __slots__ = ('_additive_error_multiplier', '_reference_additive_error')
-    _total_field = None
 
     def __init__(self, *args, additive_error_multiplier=None, total_field=True, **kwargs):
-        super().__init__(*args, **kwargs)
+
+        super().__init__(*args, total_field=total_field, has_primary_field=True, **kwargs)
 
         self.reference_additive_error = None
         self.additive_error_multiplier = additive_error_multiplier
@@ -84,10 +85,6 @@ class Tempest_datapoint(TdemDataPoint):
         out._reference_additive_error = deepcopy(self._reference_additive_error)
         out._additive_error_multiplier = deepcopy(self.additive_error_multiplier, memo=memo)
         return out
-
-    @property
-    def n_data_channels(self):
-        return sum(self.nTimes)
 
     @property
     def reference_additive_error(self):
@@ -109,10 +106,11 @@ class Tempest_datapoint(TdemDataPoint):
 
     @additive_error.setter
     def additive_error(self, values):
+
         if values is None:
             values = self.n_data_channels
         else:
-            assert size(values) == self.n_data_channels, ValueError(("additive_error must have size {}").format(self.n_data_channels))
+            assert size(values) == self.n_data_channels, ValueError((f"additive_error must have size {self.n_data_channels} but has size {size(values)}"))
 
         self._additive_error = StatArray(values, r'$epsilon_{additive}$', self.units)
 
@@ -123,50 +121,30 @@ class Tempest_datapoint(TdemDataPoint):
     @additive_error_multiplier.setter
     def additive_error_multiplier(self, values):
         if values is None:
-            self._additive_error_multiplier = StatArray(ones(self.nSystems), 'Multiplier')
+            self._additive_error_multiplier = StatArray(ones(self.n_systems), 'Multiplier')
         else:
-            assert size(values) == self.nSystems, ValueError(f'additive_error_multiplier must have size {self.nSystems} but has size {size(values)}')
+            assert size(values) == self.n_systems, ValueError(f'additive_error_multiplier must have size {self.n_systems} but has size {size(values)}')
             self._additive_error_multiplier = StatArray(values, 'Multiplier')
 
-    @TdemDataPoint.data.getter
-    def data(self):
-        self._data[:] = 0.0
-        for i in range(self.n_components):
-            ic = self._component_indices(i, 0)
-            # Compute Sum(Pc + Sc) for c in x, y, z
-            self._data[:] += (self.primary_field[i] + self.secondary_field[ic])**2.0
-        self._data[:] = sqrt(self._data)
-        return self._data
+    # @TdemDataPoint.predicted_data.setter
+    # def predicted_data(self, values):
+    #     if values is None:
+    #         values = self.n_data_channels
+    #     else:
+    #         assert size(values) == self.n_data_channels, ValueError(f"data must have size {self.n_data_channels} not {size(values)}")
 
-    @TdemDataPoint.predicted_data.setter
-    def predicted_data(self, values):
-        if values is None:
-            values = self.n_data_channels
-        else:
-            assert size(values) == self.n_data_channels, ValueError(f"data must have size {self.n_data_channels} not {size(values)}")
+    #     self._predicted_data = DataArray(values, "Predicted total field", self.units)
 
-        self._predicted_data = DataArray(values, "Predicted total field", self.units)
+    # @TdemDataPoint.predicted_data.getter
+    # def predicted_data(self):
+    #     self._predicted_data[:] = 0.0
+    #     for i in range(self.n_components):
+    #         ic = self._component_indices(i, 0)
+    #         dic = s_[:]
+    #         self._predicted_data[dic] += (self.predicted_primary_field[i] + self.predicted_secondary_field[ic])**2.0
+    #     self._predicted_data[:] = sqrt(self._predicted_data)
+    #     return self._predicted_data
 
-    @TdemDataPoint.predicted_data.getter
-    def predicted_data(self):
-        self._predicted_data[:] = 0.0
-        for i in range(self.n_components):
-            ic = self._component_indices(i, 0)
-            dic = s_[:]
-            self._predicted_data[dic] += (self.predicted_primary_field[i] + self.predicted_secondary_field[ic])**2.0
-        self._predicted_data[:] = sqrt(self._predicted_data)
-        return self._predicted_data
-
-    @TdemDataPoint.relative_error.setter
-    def relative_error(self, values):
-        if values is None:
-            values = full(self.nSystems, fill_value=0.01)
-        else:
-            assert size(values) == self.nSystems, ValueError((f"relative_error must have size {self.nSystems}"))
-
-        assert npall(values > 0.0), ValueError(f"Relative error {values} must be > 0.0")
-
-        self._relative_error = StatArray(values, r'$\epsilon_{Relative}$', '%')
 
     @TdemDataPoint.std.getter
     def std(self):
@@ -193,7 +171,6 @@ class Tempest_datapoint(TdemDataPoint):
         ValueError
             If any relative or additive errors are <= 0.0
         """
-
         assert npall(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
         # For each system assign error levels using the user inputs
         relative_error = self.relative_error * self.data
@@ -205,15 +182,6 @@ class Tempest_datapoint(TdemDataPoint):
             self.predicted_data.prior.variance = self._std[self.active]**2.0
 
         return self._std
-
-    @property
-    def total_field(self):
-        return self._total_field
-
-    @total_field.setter
-    def total_field(self, value):
-        assert isinstance(value, bool), ValueError("total_field must have type bool")
-        self._total_field = value
 
     @TdemDataPoint.units.setter
     def units(self, value):
@@ -230,7 +198,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         if pitch_range is None:
             misfit = Model(mesh=conductivity)
-            model = self.new_model
+            model = self.empty_halfspace
 
             for i in range(conductivity.nCells):
                 model.values[0] = conductivity.centres_absolute[i]
@@ -241,7 +209,7 @@ class Tempest_datapoint(TdemDataPoint):
             pitch = RectilinearMesh1D(centres = linspace(*pitch_range, n_samples))
             misfit = Model(mesh = RectilinearMesh2D(x=conductivity, y=pitch))
 
-            model = self.new_model
+            model = self.empty_halfspace
             for i in range(conductivity.nCells):
                 model.values[0] = conductivity.centres_absolute[i]
                 for j in range(pitch.nCells):
@@ -279,7 +247,7 @@ class Tempest_datapoint(TdemDataPoint):
     #     # dp.relative_error[:] = 0.01
     #     # dp.additive_error[:] = 0.0
 
-    #     model = dp.new_model
+    #     model = dp.empty_halfspace
 
     #     def minimize_me(x):
     #         model.values[0] = x[0]
@@ -381,8 +349,8 @@ class Tempest_datapoint(TdemDataPoint):
             self.additive_error_multiplier.perturb()
 
     def plotWaveform(self,**kwargs):
-        for i in range(self.nSystems):
-            if (self.nSystems > 1):
+        for i in range(self.n_systems):
+            if (self.n_systems > 1):
                 subplot(2, 1, i + 1)
             plot(self.system[i].waveform.time, self.system[i].waveform.current, **kwargs)
             cp.xlabel('Time (s)')
@@ -397,10 +365,10 @@ class Tempest_datapoint(TdemDataPoint):
 
         markers = tuple(kwargs.pop('marker', ('o', 'x', 'v')))
         kwargs['markersize'] = kwargs.pop('markersize', 3)
-        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
-        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
+        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
+        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
+        assert len(c) == self.n_systems, ValueError("color must be a list of length {}".format(self.n_systems))
+        assert len(mfc) == self.n_systems, ValueError("markerfacecolor must be a list of length {}".format(self.n_systems))
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['alpha'] = kwargs.pop('alpha', 0.8)
@@ -414,7 +382,7 @@ class Tempest_datapoint(TdemDataPoint):
 
         marker = cycle(markers)
 
-        for j in range(self.nSystems):
+        for j in range(self.n_systems):
             system_times = self.off_time(j)
 
             # kwargs['marker'] = markers[self._components[k]]
@@ -436,7 +404,7 @@ class Tempest_datapoint(TdemDataPoint):
         ax.set_ylabel(cf.getNameUnits(self.data))
         ax.set_title(title)
 
-        if self.nSystems > 1:
+        if self.n_systems > 1:
             ax.legend()
 
         return ax
@@ -503,7 +471,7 @@ class Tempest_datapoint(TdemDataPoint):
         kwargs.pop('logX', None)
         kwargs.pop('logY', None)
 
-        for j in range(self.nSystems):
+        for j in range(self.n_systems):
             system_times = self.off_time(j)
 
             if npall(self.data <= 0.0):
@@ -525,10 +493,10 @@ class Tempest_datapoint(TdemDataPoint):
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)
-        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.nSystems)])
-        assert len(c) == self.nSystems, ValueError("color must be a list of length {}".format(self.nSystems))
-        assert len(mfc) == self.nSystems, ValueError("markerfacecolor must be a list of length {}".format(self.nSystems))
+        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
+        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
+        assert len(c) == self.n_systems, ValueError("color must be a list of length {}".format(self.n_systems))
+        assert len(mfc) == self.n_systems, ValueError("markerfacecolor must be a list of length {}".format(self.n_systems))
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['alpha'] = kwargs.pop('alpha', 0.8)
@@ -541,7 +509,7 @@ class Tempest_datapoint(TdemDataPoint):
         logx = kwargs.pop('logX', None)
         logy = kwargs.pop('logY', None)
 
-        for i in range(self.nSystems):
+        for i in range(self.n_systems):
             system_times, _ = cf._log(self.off_time(i), logx)
             for j in range(self.n_components):
                 ic = self._component_indices(j, i)
@@ -567,7 +535,7 @@ class Tempest_datapoint(TdemDataPoint):
         logx = kwargs.pop('logX', None)
         logy = kwargs.pop('logY', None)
 
-        # for i in range(self.nSystems):
+        # for i in range(self.n_systems):
         system_times, _ = cf._log(self.off_time(0), logx)
         for j in range(self.n_components):
             ic = self._component_indices(j, 0)
@@ -578,10 +546,10 @@ class Tempest_datapoint(TdemDataPoint):
         J = self.sensitivity_matrix[self.active, :]
 
         if order == 1:
-            return dot(J.T, self.predicted_data.priorDerivative(order=1, i=self.active))
+            return dot(J.T, self.predicted_data.prior_derivative(order=1, i=self.active))
 
         elif order == 2:
-            WdT_Wd = self.predicted_data.priorDerivative(order=2)
+            WdT_Wd = self.predicted_data.prior_derivative(order=2)
             return dot(J.T, dot(WdT_Wd, J))
 
 
@@ -598,12 +566,12 @@ class Tempest_datapoint(TdemDataPoint):
 
     # def set_relative_error_prior(self, prior):
     #     if not prior is None:
-    #         assert prior.ndim == self.nSystems, ValueError("relative_error_prior must have {} dimensions".format(self.nSystems))
+    #         assert prior.ndim == self.n_systems, ValueError("relative_error_prior must have {} dimensions".format(self.n_systems))
     #         self.relative_error.prior = prior
 
     # def set_additive_error_prior(self, prior):
     #     if not prior is None:
-    #         assert prior.ndim == self.nChannels, ValueError("additive_error_prior must have {} dimensions".format(self.nChannels))
+    #         assert prior.ndim == self.n_channels, ValueError("additive_error_prior must have {} dimensions".format(self.n_channels))
     #         self.additive_error.prior = prior
 
     # def set_proposals(self, relative_error_proposal=None, additive_error_proposal=None, **kwargs):
@@ -625,7 +593,7 @@ class Tempest_datapoint(TdemDataPoint):
     # def update_additive_error_posterior(self):
     #     if self.additive_error.hasPosterior:
     #         i = 0
-    #         # for j in range(self.nSystems):
+    #         # for j in range(self.n_systems):
     #         system_times = self.off_time(0)
     #         for k in range(self.n_components):
     #             icomp = self._component_indices(k, 0)
@@ -636,7 +604,7 @@ class Tempest_datapoint(TdemDataPoint):
         self.additive_error_multiplier.update_posterior(active=self.active_system_indices)
 
     def _empymodForward(self, mod):
-        print('stuff')
+        _ = None
 
     def sensitivity(self, model, ix=None, model_changed=False):
         """ Compute the sensitivty matrix for the given model """

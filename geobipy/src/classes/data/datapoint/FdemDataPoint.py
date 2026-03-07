@@ -76,7 +76,7 @@ class FdemDataPoint(EmDataPoint):
 
         # StatArray of calibration parameters
         # The four columns are Bias,Variance,InphaseBias,QuadratureBias.
-        # self.calibration = DataArray([self.nChannels * 2], 'Calibration Parameters')
+        # self.calibration = DataArray([self.n_channels * 2], 'Calibration Parameters')
 
         self.channel_names = None
 
@@ -135,14 +135,14 @@ class FdemDataPoint(EmDataPoint):
                 self._channel_names = ['None']
                 return
             self._channel_names = []
-            for i in range(self.nSystems):
+            for i in range(self.n_systems):
                 # Set the channel names
                 if not self.system[i] is None:
                     for iFrequency in range(2*self.nFrequencies[i]):
                         self._channel_names.append('{} {} (Hz)'.format(self.getMeasurementType(iFrequency, i), self.getFrequency(iFrequency, i)))
         else:
             assert all((isinstance(x, str) for x in values))
-            assert len(values) == self.nChannels, Exception("Length of channel_names must equal total number of channels {}".format(self.nChannels))
+            assert len(values) == self.n_channels, Exception("Length of channel_names must equal total number of channels {}".format(self.n_channels))
             self._channel_names = values
 
     @property
@@ -151,7 +151,7 @@ class FdemDataPoint(EmDataPoint):
 
     @property
     def channels(self):
-        return squeeze(asarray([tile(self.frequencies(i), 2) for i in range(self.nSystems)]))
+        return squeeze(asarray([tile(self.frequencies(i), 2) for i in range(self.n_systems)]))
 
 
     def _inphaseIndices(self, system=0):
@@ -169,7 +169,7 @@ class FdemDataPoint(EmDataPoint):
 
         """
 
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+        assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
 
         return s_[self.systemOffset[system]:self.systemOffset[system] + self.nFrequencies[system]]
 
@@ -189,7 +189,7 @@ class FdemDataPoint(EmDataPoint):
 
         """
 
-        assert system < self.nSystems, ValueError("system must be < nSystems {}".format(self.nSystems))
+        assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
 
         return s_[self.systemOffset[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
 
@@ -208,7 +208,7 @@ class FdemDataPoint(EmDataPoint):
 
     # @property
     # def nFrequencies(self):
-    #     return int32(0.5*self.nChannelsPerSystem)
+    #     return int32(0.5*self.n_channelsPerSystem)
 
     def predictedInphase(self, system=0):
         return self.predicted_data[self._inphaseIndices(system)]
@@ -494,7 +494,7 @@ class FdemDataPoint(EmDataPoint):
         """ Compute the sensitivty matrix for a 1D layered earth model """
         # Re-arrange the sensitivity matrix to Real:Imaginary vertical
         # concatenation
-        self._sensitivity_matrix = DataArray((self.nChannels, mod.mesh.nCells.item()), 'Sensitivity', r'$\frac{ppm.m}{S}$')
+        self._sensitivity_matrix = DataArray((self.n_channels, mod.mesh.nCells.item()), 'Sensitivity', r'$\frac{ppm.m}{S}$')
 
         for j, s in enumerate(self.system):
             Jtmp = fdem1dsen(s, mod, self.z.item())
@@ -507,8 +507,8 @@ class FdemDataPoint(EmDataPoint):
     def Isend(self, dest, world, **kwargs):
 
         if not 'system' in kwargs:
-            myMPI.Isend(self.nSystems, dest=dest, world=world)
-            for i in range(self.nSystems):
+            myMPI.Isend(self.n_systems, dest=dest, world=world)
+            for i in range(self.n_systems):
                 self.system[i].Isend(dest=dest, world=world)
 
         super().Isend(dest, world)
@@ -520,8 +520,8 @@ class FdemDataPoint(EmDataPoint):
     def Irecv(cls, source, world, **kwargs):
 
         if not 'system' in kwargs:
-            nSystems = myMPI.Irecv(source=source, world=world)
-            kwargs['system'] = [FdemSystem.Irecv(source=source, world=world) for i in range(nSystems)]
+            n_systems = myMPI.Irecv(source=source, world=world)
+            kwargs['system'] = [FdemSystem.Irecv(source=source, world=world) for i in range(n_systems)]
 
         out = super(FdemDataPoint, cls).Irecv(source, world, **kwargs)
 
