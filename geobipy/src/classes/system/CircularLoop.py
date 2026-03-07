@@ -44,6 +44,26 @@ class CircularLoop(EmLoop):
         # Radius of the loop
         self.radius = radius
 
+    def __getitem__(self, i):
+        """Define get item
+
+        Parameters
+        ----------
+        i : ints or slice
+            The indices of the points in the pointcloud to return
+
+        out : geobipy.PointCloud3D
+            The potentially smaller point cloud
+
+        """
+        out = super().__getitem__(i)
+
+        # if not isinstance(i, slice):
+        #     i = unique(i)
+
+        out.radius = self.radius[i]
+        return out
+
     @property
     def area(self):
         return pi * self.radius * self.radius

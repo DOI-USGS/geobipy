@@ -61,11 +61,12 @@ class EmLoop(Point, ABC):
         #     i = unique(i)
 
         _ = self.orientation
-        out._orientation = self._orientation[i]
+        out.orientation = self.orientation[i]
         out.moment = self.moment[i]
         out.pitch = self.pitch[i]
         out.roll = self.roll[i]
         out.yaw = self.yaw[i]
+
         return out
 
     @property
