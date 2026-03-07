@@ -87,6 +87,27 @@ class FdemDataPoint(EmDataPoint):
         return out
 
     @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, values):
+        if values is None:
+            values = self.n_data_channels
+        self._data = DataArray(values, "Data", self.units)
+
+    @property
+    def predicted_data(self):
+        """The predicted data. """
+        return self._predicted_data
+
+    @predicted_data.setter
+    def predicted_data(self, values):
+        if values is None:
+            values = self.n_data_channels
+        self._predicted_data = StatArray(values, "Predicted Data", self.units)
+
+    @property
     def units(self):
         return self._units
 
@@ -171,7 +192,7 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
 
-        return s_[self.systemOffset[system]:self.systemOffset[system] + self.nFrequencies[system]]
+        return s_[self.system_offset[system]:self.system_offset[system] + self.nFrequencies[system]]
 
 
     def _quadratureIndices(self, system=0):
@@ -191,24 +212,18 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
 
-        return s_[self.systemOffset[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
+        return s_[self.system_offset[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
 
 
     def frequencies(self, system=0):
         """ Return the frequencies in an StatArray """
         return DataArray(self.system[system].frequencies, name='Frequency', units='Hz')
 
-
     def inphase(self, system=0):
         return self.data[self._inphaseIndices(system)]
 
-
     def inphaseStd(self, system=0):
         return self.std[self._inphaseIndices(system)]
-
-    # @property
-    # def nFrequencies(self):
-    #     return int32(0.5*self.n_channelsPerSystem)
 
     def predictedInphase(self, system=0):
         return self.predicted_data[self._inphaseIndices(system)]

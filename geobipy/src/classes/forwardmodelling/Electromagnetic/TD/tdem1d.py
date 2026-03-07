@@ -55,7 +55,7 @@ def tdem1dsen(datapoint, model1d, ix=None, model_changed=True):
 # def empymod_tdem1dfwd(datapoint, model1d):
 
 #     for i in range(datapoint.n_systems):
-#         iSys = datapoint._systemIndices(i)
+#         iSys = datapoint._system_indices(i)
 #         fm = empymod_walktem(datapoint.system[i], model1d)
 #         datapoint._predictedData[iSys] = fm
 
@@ -69,7 +69,7 @@ def tdem1dsen(datapoint, model1d, ix=None, model_changed=True):
 #         J = zeros((datapoint.nWindows, size(ix)))
 
 #     for j in range(datapoint.n_systems):  # For each system
-#         iSys = datapoint._systemIndices(j)
+#         iSys = datapoint._system_indices(j)
 
 #         d0 = empymod_walktem(datapoint.system[j], model1d)
 #         m1 = deepcopy(model1d)
@@ -110,7 +110,7 @@ def ga_fm_dlogc(datapoint, model1d):
     # J = zeros((datapoint.n_channels, model1d.mesh.nCells.item()))
     comps = []
     for i in range(datapoint.n_systems):  # For each system
-        iSys = datapoint._systemIndices(i)
+        iSys = datapoint.system_indices[i]
         # Store the necessary component
         if 'x' in datapoint.components:
             comps.append(values[i][1].T)
@@ -138,7 +138,7 @@ def gaTdem1dsen(datapoint, model1d, ix=None, model_changed=True):
         J = zeros((datapoint.n_channels, size(ix)))
 
     for j in range(datapoint.n_systems):  # For each system
-        iSys = datapoint._systemIndices(j)
+        iSys = datapoint.system_indices[j]
         for i in range(size(ix)):  # For the specified layers
             tmp = datapoint.system[j].derivative(datapoint.system[j].CONDUCTIVITYDERIVATIVE, ix[i] + 1)
 

@@ -299,7 +299,7 @@ class TdemData(Data):
 
     #     if self.relative_error.max() > 0.0:
     #         for i in range(self.n_systems):
-    #             j = self._systemIndices(i)
+    #             j = self._system_indices(i)
     #             self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
 
     #     return self._std
@@ -493,7 +493,7 @@ class TdemData(Data):
 
         self.loop_pair = Loop_pair(transmitter, receiver)
         # Get the data values
-        # iSys = self._systemIndices(0)
+        # iSys = self._system_indices(0)
 
         self.secondary_field[:, :] = df[iData].values
         # If the data error columns are given, assign them
@@ -525,7 +525,7 @@ class TdemData(Data):
         #     df = df.replace('NaN',nan)
 
         #     # Assign the data
-        #     iSys = self._systemIndices(i)
+        #     iSys = self._system_indices(i)
 
         #     self.secondary_field[:, iSys] = df[iData].values
 
@@ -554,7 +554,7 @@ class TdemData(Data):
     #     # self.n_systems = nSys
     #     self.n_channelsPerSystem = asarray([int32(x.nwindows()) for x in self.system])
 
-    #     self._systemOffset = append(0, cumsum(self.n_channelsPerSystem))
+    #     self._system_offset = append(0, cumsum(self.n_channelsPerSystem))
 
     def csv_channels(self, data_filename):
 
@@ -756,7 +756,7 @@ class TdemData(Data):
         """ Uses the late times after 1ms to estimate the additive errors and error bounds in the data. """
         for i in range(self.n_systems):
             h = 'System {} \n'.format(i)
-            iS = self._systemIndices(i)
+            iS = self.system_indices[i]
             D = self._data[:, iS]
             t = self.times(i)
             i1ms = t.searchsorted(1e-3)
@@ -948,7 +948,7 @@ class TdemData(Data):
         # x = self.getXAxis(xAxis)
 
         # if channels is None:
-        #     i = self._systemIndices(system)
+        #     i = self._system_indices(system)
         #     ax = cP.plot(x, self.data[:, i],
         #                  label=self.channel_names[i], **kwargs)
         # else:
@@ -974,7 +974,7 @@ class TdemData(Data):
 
         for i in range(self.n_systems):
             plt.subplot(self.n_systems, 1, i + 1)
-            j = self._systemIndices(i)
+            j = self.system_indices[i]
             kwargs['labels'] = line.channel_names[j]
             line.data[:, j].plot(x=x, **kwargs)
 
@@ -1186,7 +1186,7 @@ class TdemData(Data):
 
     #     for i in range(self.n_systems):
 
-    #         iSys = self._systemIndices(i)
+    #         iSys = self._system_indices(i)
     #         # Create the header
     #         header = "Line Fid Easting Northing Elevation Height txrx_dx txrx_dy txrx_dz TxPitch TxRoll TxYaw RxPitch RxRoll RxYaw "
 

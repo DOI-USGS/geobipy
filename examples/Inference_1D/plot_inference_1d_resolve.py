@@ -53,7 +53,7 @@ output_directory = file_path
 
 data_filename = data_type + '_' + model_type
 
-supplementary = "..//..//supplementary//"
+supplementary = "..//data//"
 
 parameter_file = supplementary + "//options_files//{}_options".format(data_type)
 inputFile = pathlib.Path(parameter_file)
@@ -67,7 +67,7 @@ print('Output files will be produced at {}'.format(output_directory))
 
 kwargs = user_parameters.read(inputFile)
 
-kwargs['n_markov_chains'] = 5000
+# kwargs['n_markov_chains'] = 5000
 
 kwargs['data_filename'] = supplementary + '//data//' + data_filename + '.csv'
 kwargs['system_filename'] = supplementary + "//data//" + kwargs['system_filename']

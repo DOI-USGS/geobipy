@@ -357,11 +357,6 @@ class TdemDataPoint(EmDataPoint):
         return self._std
 
     @property
-    def system_indices(self):
-        tmp = hstack([0, cumsum(self.channels_per_system)])
-        return [s_[tmp[i]:tmp[i+1]] for i in range(self.n_systems)]
-
-    @property
     def iplotActive(self):
         """ Get the active data indices per system.  Used for plotting. """
         return [cf.findNotNans(self.data[self.system_indices[i]]) for i in range(self.n_systems)]
@@ -976,7 +971,7 @@ class TdemDataPoint(EmDataPoint):
         fm = tdem1dfwd(self, model)
 
         for i in range(self.n_systems):
-            iSys = self._systemIndices(i)
+            iSys = self.system_indices[i]
             primary = []
             secondary = []
             if 'x' in self.components:

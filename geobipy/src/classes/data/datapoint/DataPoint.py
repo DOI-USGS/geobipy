@@ -500,10 +500,6 @@ class DataPoint(Point):
             self.additive_error.overlay_on_posteriors(overlay=overlay.additive_error, ax=axes['additive_error'], **kwargs)
 
     @property
-    def system_indices(self):
-        return tuple([s_[self.systemOffset[system]:self.systemOffset[system+1]] for system in arange(self.n_systems)])
-
-    @property
     def _ravel_index(self):
         return np.cumsum(hstack([0, np.repeat(self.channels_per_system, self.n_components)]))
 
@@ -522,24 +518,13 @@ class DataPoint(Point):
 
         return np.r_[*out]
 
-    def _systemIndices(self, system=0):
-        """The slice indices for the requested system.
+    @property
+    def system_indices(self):
+        return tuple([s_[self.system_offset[system]:self.system_offset[system+1]] for system in arange(self.n_systems)])
 
-        Parameters
-        ----------
-        system : int
-            Requested system index.
-
-        Returns
-        -------
-        out : numpy.slice
-            The slice pertaining to the requested system.
-
-        """
-
-        assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
-        return self.system_indices[system]
-
+    @property
+    def system_offset(self):
+        return hstack([0, np.cumsum(self.n_components * self.channels_per_system)])
 
     def likelihood(self, log):
         """Compute the likelihood of the current predicted data given the observed data and assigned errors

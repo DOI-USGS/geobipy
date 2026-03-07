@@ -110,7 +110,7 @@ class TempestData(TdemData):
 
         if self.relative_error.max() > 0.0:
             for i in range(self.n_systems):
-                j = self._systemIndices(i)
+                j = self.system_indices[i]
                 self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2)[:, None])
 
         return self._std
@@ -312,7 +312,7 @@ class TempestData(TdemData):
     #     x = self.axis(x)
 
     #     if channels is None:
-    #         i = self._systemIndices(system)
+    #         i = self._system_indices(system)
     #         ax = cP.plot(x, self.data[:, i],
     #                      label=self.channel_names[i], **kwargs)
     #     else:
@@ -350,7 +350,7 @@ class TempestData(TdemData):
         x = self.getXAxis(xAxis)
 
         if channels is None:
-            i = self._systemIndices(system)
+            i = self.system_indices[system]
             ax = cP.plot(x, self.predicted_data[:, i],
                          label=self.channel_names[i], **kwargs)
         else:

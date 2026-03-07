@@ -234,7 +234,7 @@ class Data(Point):
         """
         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
         assert npall(channel < self.channels_per_system[system]), ValueError("channel must be < {} for system {}".format(self.channels_per_system[system], system))
-        return self.systemOffset[system] + channel
+        return self.system_offset[system] + channel
 
     # @property
     # def channels_per_system(self):
@@ -425,7 +425,7 @@ class Data(Point):
 
         if self.relative_error.max() > 0.0:
             for i in range(self.n_systems):
-                j = self._systemIndices(i)
+                j = self.system_indices[i]
                 self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
 
         return self._std
@@ -466,8 +466,8 @@ class Data(Point):
         return msg
 
     @property
-    def systemOffset(self):
-        return r_[0, cumsum(self.channels_per_system)]
+    def system_offset(self):
+        return r_[0, cumsum(self.n_components * self.channels_per_system)]
 
     @property
     def total_field(self):
@@ -537,7 +537,7 @@ class Data(Point):
                 r = range(self.n_channels)
             else:
                 assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
-                r = range(self.systemOffset[system], self.systemOffset[system+1])
+                r = range(self.system_offset[system], self.system_offset[system+1])
 
             for i in r:
                 vtk.point_data.append(Scalars(tmp[:, i], "{} {}".format(self.channel_names[i], tmp.getNameUnits())))
@@ -634,7 +634,8 @@ class Data(Point):
 
         return np.r_[*out]
 
-    def _systemIndices(self, system=None):
+    @property
+    def system_indices(self):
         """The slice indices for the requested system.
 
         Parameters
@@ -649,11 +650,7 @@ class Data(Point):
 
         """
 
-        if system is None:
-            return [s_[self.systemOffset[x]:self.systemOffset[x+1]] for x in range(self.n_systems)]
-
-        assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
-        return s_[self.systemOffset[system]:self.systemOffset[system+1]]
+        return [s_[self.system_offset[x]:self.system_offset[x+1]] for x in range(self.n_systems)]
 
     def append(self, other):
 
@@ -812,7 +809,7 @@ class Data(Point):
     #         return DataArray(self.predicted_data[:, channel], "Predicted data {}".format(self.channel_names[channel]), self.predicted_data.units)
     #     else:
     #         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
-    #         return DataArray(self.predicted_data[:, self.systemOffset[system] + channel], "Predicted data {}".format(self.channel_names[self.systemOffset[system] + channel]), self.predicted_data.units)
+    #         return DataArray(self.predicted_data[:, self.system_offset[system] + channel], "Predicted data {}".format(self.channel_names[self.system_offset[system] + channel]), self.predicted_data.units)
 
 
     # def stdChannel(self, channel, system=None):
@@ -837,7 +834,7 @@ class Data(Point):
     #         return DataArray(self.std[:, channel], "Std {}".format(self.channel_names[channel]), self.std.units)
     #     else:
     #         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
-    #         return DataArray(self.std[:, self.systemOffset[system] + channel], "Std {}".format(self.channel_names[self.systemOffset[system] + channel]), self.std.units)
+    #         return DataArray(self.std[:, self.system_offset[system] + channel], "Std {}".format(self.channel_names[self.system_offset[system] + channel]), self.std.units)
 
 
     # def maketest(self, n_points, n_channels):
@@ -873,7 +870,7 @@ class Data(Point):
         else:
             assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
             assert 0 <= channel < self.channels_per_system[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.channels_per_system[system]))
-            channel = self.systemOffset[system] + channel
+            channel = self.system_offset[system] + channel
 
         kwargs['values'] = self.data[:, channel]
 
@@ -902,7 +899,7 @@ class Data(Point):
         else:
             assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
             assert 0 >= channel < self.n_channelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.n_channelsPerSystem[system]))
-            channel = self.systemOffset[system] + channel
+            channel = self.system_offset[system] + channel
 
         kwargs['c'] = self.predicted_dataChannel(channel)
 
@@ -929,7 +926,7 @@ class Data(Point):
         else:
             assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
             assert 0 >= channel < self.n_channelsPerSystem[system], ValueError('Requested channel must be 0 <= channel {}'.format(self.n_channelsPerSystem[system]))
-            channel = self.systemOffset[system] + channel
+            channel = self.system_offset[system] + channel
 
         kwargs['c'] = self.stdChannel(channel)
 
@@ -1057,7 +1054,7 @@ class Data(Point):
             rTmp = s_[:] if channels is None else s_[channels]
         else:
             assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
-            rTmp = self._systemIndices(system) if channels is None else channels + self._systemIndices(system).start
+            rTmp = self.system_indices[system] if channels is None else channels + self.system_indices[system].start
 
         ax = super().plot(values=self.predicted_data[:, rTmp], xAxis=xAxis, label=self.channel_names[rTmp], **kwargs)
 

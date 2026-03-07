@@ -113,19 +113,21 @@ class EmDataPoint(DataPoint):
     @DataPoint.data.getter
     def data(self):
         if self.total_field:
-            self._data[:] = 0.0
-            for i in range(self.n_components):
-                ic = self._component_indices(i, 0)
-                # Compute Sum(Pc + Sc) for c in x, y, z
-                tmp = self.secondary_field[ic]
-                if self.has_primary_field:
-                    tmp += self.primary_field[i]
-                self._data[:] += tmp**2.0
-            self._data[:] = np.sqrt(self._data)
+            self._data[...] = 0.0
+            for j in range(self.n_systems):
+                isys = self._indices(0, j)
+                for i in range(self.n_components):
+                    ic = self._indices(i, j)
+                    # Compute Sum(Pc + Sc) for c in x, y, z
+                    tmp = self.secondary_field[ic]
+                    if self.has_primary_field:
+                        tmp += self.primary_field[i]
+                    self._data[isys] += tmp**2.0
+            self._data[...] = np.sqrt(self._data)
         else:
             for j in range(self.n_systems):
                 for i in range(self.n_components):
-                    ic = self._component_indices(i, j)
+                    ic = self._indices(i, j)
                     self._data[ic] = self.secondary_field[ic]
                     if self.has_primary_field:
                         self._data[ic] += self.primary_field[i]
@@ -143,19 +145,21 @@ class EmDataPoint(DataPoint):
     @DataPoint.predicted_data.getter
     def predicted_data(self):
         if self.total_field:
-            self._predicted_data[:] = 0.0
-            for i in range(self.n_components):
-                ic = self._component_indices(i, 0)
-                # Compute Sum(Pc + Sc) for c in x, y, z
-                tmp = self.predicted_secondary_field[ic]
-                if self.has_primary_field:
-                    tmp += self.predicted_primary_field[i]
-                self._predicted_data[:] += tmp**2.0
-            self._predicted_data[:] = np.sqrt(self._predicted_data)
+            self._predicted_data[...] = 0.0
+            for j in range(self.n_systems):
+                isys = self._indices(0, j)
+                for i in range(self.n_components):
+                    ic = self._indices(i, j)
+                    # Compute Sum(Pc + Sc) for c in x, y, z
+                    tmp = self.predicted_secondary_field[ic]
+                    if self.has_primary_field:
+                        tmp += self.predicted_primary_field[i]
+                    self._predicted_data[isys] += tmp**2.0
+            self._predicted_data[...] = np.sqrt(self._predicted_data)
         else:
             for j in range(self.n_systems):
                 for i in range(self.n_components):
-                    ic = self._component_indices(i, j)
+                    ic = self._indices(i, j)
                     self._predicted_data[ic] = self.predicted_secondary_field[ic]
                     if self.has_primary_field:
                         self._predicted_data[ic] += self.predicted_primary_field[i]
@@ -165,18 +169,14 @@ class EmDataPoint(DataPoint):
     def std(self):
         assert np.min(self.relative_error) > 0.0, ValueError("relative_error must be > 0.0")
         for i in range(self.n_systems):
-            j = self._systemIndices(i)
-            self._std[:, j] = np.sqrt((self.relative_error[i] * self.data[j])**2 + (self.additive_error[i]**2))
+            j = self.system_indices[i]
+            self._std[j] = np.sqrt((self.relative_error[i] * self.data[j])**2 + (self.additive_error[i]**2))
 
         return self._std
 
     @property
     def system(self):
         return self._system
-
-    @property
-    def systemOffset(self):
-        return hstack([0, cumsum(self.channels_per_system)])
 
     @property
     def empty_halfspace(self):
