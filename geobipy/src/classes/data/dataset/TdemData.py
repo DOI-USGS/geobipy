@@ -356,10 +356,27 @@ class TdemData(Data):
         return self.loop_pair.transmitter
 
     def _as_dict(self):
-        out, order = super()._as_dict()
-        tmp, o = self.loop_pair._as_dict()
-        order = [*order[:6], *o, *order[6:]]
-        return out | tmp, order
+        from collections import OrderedDict
+
+        out = Point._as_dict(self)
+
+        tmp = OrderedDict()
+        tmp[self.fiducial.name.replace(' ', '_')] = self.fiducial
+        tmp[self.line_number.name.replace(' ', '_')] = self.line_number
+
+        out = tmp | out
+
+        tmp = self.loop_pair._as_dict()
+        out = out | tmp
+
+        if self.has_primary_field:
+            for i, c in enumerate(self.components):
+                out['P{}'.format(c.upper())] = self.primary_field[:, i]
+
+        for i, name in enumerate(self.channel_names):
+            out[name.replace(' ', '_')] = self.secondary_field[:, i]
+
+        return out
 
     def append(self, other):
 

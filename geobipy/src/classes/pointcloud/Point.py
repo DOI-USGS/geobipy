@@ -153,14 +153,14 @@ class Point(myObject):
         return out
 
     def _as_dict(self):
-        return {self.x.name.replace(' ', '_'): self.x,
-                self.y.name.replace(' ', '_'): self.y,
-                self.z.name.replace(' ', '_'): self.z,
-                self.elevation.name.replace(' ', '_'): self.elevation}, \
-                [self.x.name.replace(' ', '_'),
-                 self.y.name.replace(' ', '_'),
-                 self.z.name.replace(' ', '_'),
-                 self.elevation.name.replace(' ', '_')]
+        from collections import OrderedDict
+        out = OrderedDict()
+        out[self.x.name.replace(' ', '_')] = self.x
+        out[self.y.name.replace(' ', '_')] = self.y
+        out[self.z.name.replace(' ', '_')] = self.z
+        out[self.elevation.name.replace(' ', '_')] = self.elevation
+
+        return out
 
     @property
     def addressof(self):

@@ -170,19 +170,6 @@ class TempestData(TdemData):
 
     #         self._relative_error[:, :] = values
 
-    def _as_dict(self):
-        out, order = super()._as_dict()
-
-        for i, name in enumerate(self.channel_names):
-            out[name.replace(' ', '_')] = self.secondary_field[:, i]
-
-        for i, c in enumerate(self.components):
-            out['P{}'.format(c.upper())] = self.primary_field[:, i]
-
-        order = [*order[:15], *['P{}'.format(c.upper()) for c in self.components], *order[15:]]
-
-        return out, order
-
     @classmethod
     def read_csv(cls, data_filename, system):
         """Reads the data and system parameters from file
@@ -721,8 +708,6 @@ class TempestData(TdemData):
         # add_error = (add_error**2.0).sum(axis=0)**0.5  # Convert to RMS error
         # add_error = r_[0.0136441 , 0.01401807, 0.00995895, 0.00632076, 0.00585013, 0.00541495, 0.00519146, 0.00480287, 0.00435161, 0.00415024, 0.00400544, 0.00380665, 0.00312555, 0.00247537, 0.00254764]
         # ds.additive_error = repeat(add_error[None, :], model.x.nCells, 0)
-
-        print(ds.additive_error.shape)
 
         ds.primary_field; ds.secondary_field; ds.data
         ds.std

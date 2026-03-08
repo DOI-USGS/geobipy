@@ -150,15 +150,19 @@ class Data(Point):
 
         return channels
 
-    def _as_dict(self):
-        out, order = super()._as_dict()
-        out[self.fiducial.name.replace(' ', '_')] = self.fiducial
-        out[self.line_number.name.replace(' ', '_')] = self.line_number
-        # for i, name in enumerate(self.channel_names):
-        #     out[name.replace(' ', '_')] = self.data[:, i]
+    def _as_dict(self, with_data=True):
+        from collections import OrderedDict
+        out= super()._as_dict()
+        tmp = OrderedDict()
+        tmp[self.fiducial.name.replace(' ', '_')] = self.fiducial
+        tmp[self.line_number.name.replace(' ', '_')] = self.line_number
 
-        return out, [self.line_number.name.replace(' ', '_'),
-                     self.fiducial.name.replace(' ', '_'), *order, *[x.replace(' ', '_') for x in self.channel_names]]
+        out = tmp | out
+
+        for i, name in enumerate(self.channel_names):
+            out[name.replace(' ', '_')] = self.data[:, i]
+
+        return out
 
     @property
     def active(self):
@@ -1262,9 +1266,8 @@ class Data(Point):
         kwargs['na_rep'] = 'nan'
         kwargs['index'] = False
 
-        d, order = self._as_dict()
+        d = self._as_dict()
 
-        kwargs['columns'] = order
         df = DataFrame(data=d)
 
         df.to_csv(filename, **kwargs)
