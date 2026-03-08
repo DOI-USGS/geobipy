@@ -88,5 +88,5 @@ if __name__ == '__main__':
 
     for model in models:
         create_resolve(model)
-        # create_skytem(model)
-        # create_tempest(model)
+        create_skytem(model)
+        create_tempest(model)
