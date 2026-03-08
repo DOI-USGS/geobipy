@@ -785,8 +785,7 @@ def mergeComplex(this):
     out = this[:n2] + 1j * this[n2:]
     return out
 
-
-def expReal(this):
+def expReal(this, quad=False):
     """Custom exponential of a number to allow a large negative exponent, overflow truncates without warning message.
 
     Parameters
@@ -801,18 +800,20 @@ def expReal(this):
 
     """
     # np.float64 = 709.0
-    # np.longdouble = 11356.0
+    # np.float128 = 11356.0
 
-    tol = 11356.0
+    tol = 11356.0 if quad else 709.0
 
     if np.size(this) == 1:
         if this > tol:
             return np.inf
-        return np.exp(npq.QuadPrecision(this))
+
+        return np.exp(npq.QuadPrecision(this)) if quad else np.exp(this)
 
     out = np.full(np.size(this), fill_value=np.inf, dtype=npq.QuadPrecision)
     i = squeeze(np.argwhere(this <= tol))
-    out[i] = np.exp(this[i])
+
+    out[i] = np.exp(npq.QuadPrecision(this[i])) if quad else np.exp(this[i])
     return out
 
 def tanh(this):

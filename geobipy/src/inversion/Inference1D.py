@@ -670,7 +670,7 @@ class Inference1D(myObject):
         dprint(f"{proposal_ratio=}")
 
         log_acceptance_ratio = prior_ratio + likelihood_ratio + proposal_ratio
-        acceptance_probability = expReal(log_acceptance_ratio)
+        acceptance_probability = expReal(log_acceptance_ratio, quad=True)
 
         dprint(f"{acceptance_probability=}")
 
