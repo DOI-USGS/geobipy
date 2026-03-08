@@ -1,5 +1,5 @@
-# General information about specifying parameters.
-# The following list of parameters can be given either a single value or a list of values
+# General information about specifying values.
+# The following list of values can be given either a single value or a list of values
 # of length equal to the number of systems in the data. If one value is specified and there
 # are multiple systems, that value is used for all of them.
 # initialRelativeError
@@ -15,11 +15,11 @@
 # General file structure information.
 # -------------------------------------------------------
 # Data folder
-data_directory = "..//data"
+data_directory = "..//data//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name. If there are multiple, encompass them with [ ].
-data_filename = "resolve_saline_clay.csv"
+data_filename = "resolve_resistive_basement.csv"
 # System File Name. If there are multiple, encompass them with [ ].
 system_filename = "FdemSystem2.stm"
 
@@ -42,18 +42,18 @@ save_png = False
 save_hdf5 = True
 
 # -------------------------------------------------------
-# Turning on or off different solvable parameters.
+# Turning on or off different solvable values.
 # -------------------------------------------------------
-# Parameter Priors
-# solveParameter will prevent parameters from exploding to very large or very small numbers.
-# solveGradient prevents large changes in parameters value from occurring.
+# value Priors
+# solvevalue will prevent values from exploding to very large or very small numbers.
+# solveGradient prevents large changes in values value from occurring.
 # If both of these are active, the recovered earth models generally contain
 # less layers due to an implicit constraint.
 # If you feel that your recovered models are too conservative, try turning one of these off.
 # It is highly recommended to have at least one of these options turned on!
-# Use a prior on the parameter magnitude.
-solve_parameter = False
-# Use the Prior on the difference in log parameter diff(log(X))
+# Use a prior on the value magnitude.
+solve_value = False
+# Use the Prior on the difference in log value diff(log(X))
 solve_gradient = True
 
 # Use the prior on the relative data errors
@@ -62,7 +62,7 @@ solve_relative_error = True
 solve_additive_error = True
 # Use the prior on the data height
 solve_height = False
-# Use the prior on the calibration parameters for the data
+# Use the prior on the calibration values for the data
 solve_calibration = False
 
 # -------------------------------------------------------
@@ -142,7 +142,7 @@ probability_of_perturb = 1.0/6.0
 probability_of_no_change = 0.5
 
 # -------------------------------------------------------
-# Typically Defaulted parameters
+# Typically Defaulted values
 # -------------------------------------------------------
 # Standard Deviation of log(rho): log(1 + factor)
 # Default is 10.0
@@ -159,12 +159,12 @@ clip_ratio = None
 # Only sample the prior
 ignore_likelihood = False
 
-# Impose bounds on the parameter value
+# Impose bounds on the value value
 # None, or a length 2 list i.e. [a, b]
-parameter_limits = None
+value_limits = None
 
 # Display the resistivity?
-reciprocate_parameters = True
+reciprocate_values = True
 
 verbose = False
 
