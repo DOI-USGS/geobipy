@@ -69,11 +69,11 @@ class Inference2D(myObject):
         #     self.hdf_file = hdf5_file
         # self._indices = None
 
-    @cached_property
+    @property
     def acceptance(self):
         return StatArray.fromHdf(self.hdf_file['acceptance_rate'])
 
-    @cached_property
+    @property
     def additiveError(self):
         """ Get the Additive error of the best data points """
         return StatArray.fromHdf(self.hdf_file['data/additive_error'])
@@ -82,13 +82,13 @@ class Inference2D(myObject):
     def additiveErrorPosteriors(self):
         return self.data.additive_error.posterior
 
-    @cached_property
+    @property
     def best_halfspace(self, log=None):
         a = log10(asarray(self.hdf_file['model/values/posterior/x/x/data'][:, 0]))
         b = log10(asarray(self.hdf_file['model/values/posterior/x/x/data'][:, -1]))
         return 0.5 * (b + a)
 
-    @cached_property
+    @property
     def burned_in(self):
         if 'burned_in' in self.hdf_file:
             key = 'burned_in'
@@ -127,7 +127,7 @@ class Inference2D(myObject):
     def depth(self):
         return self.mesh.z.centres
 
-    @cached_property
+    @property
     def elevation(self):
         """ Get the elevation of the data points """
         return StatArray.fromHdf(self.hdf_file['data/elevation'])
@@ -136,12 +136,12 @@ class Inference2D(myObject):
     def entropy(self):
         return self.parameter_posterior().entropy(axis=1)
 
-    @cached_property
+    @property
     def fiducials(self):
         """ Get the id numbers of the data points in the line results file """
         return StatArray.fromHdf(self.hdf_file['data/fiducial'])
 
-    @cached_property
+    @property
     def halfspace(self):
         return StatArray.fromHdf(self.hdf_file['halfspace'])
 
@@ -154,12 +154,12 @@ class Inference2D(myObject):
         assert isinstance(value, (h5py.File, h5py.Group)), TypeError("hdf_file must have type h5py.File")
         self._hdf_file = value
 
-    @cached_property
+    @property
     def height(self):
         """Get the height of the observations. """
         return StatArray.fromHdf(self.hdf_file['data/z'])
 
-    @cached_property
+    @property
     def heightPosterior(self):
         zPosterior = self.getAttribute('height posterior')
         zPosterior.bins.name = 'Relative ' + zPosterior.bins.name
@@ -185,11 +185,11 @@ class Inference2D(myObject):
 
         return out
 
-    @cached_property
+    @property
     def labels(self):
         return self.getAttribute('labels')
 
-    @cached_property
+    @property
     def line_number(self):
         return self.data.line_number[0]
 
@@ -199,7 +199,7 @@ class Inference2D(myObject):
         #     return sqrt(self.data.x**2.0 + self.data.y**2.0)
         return self.data.x if self.data.x.range > self.data.y.range else self.data.y
 
-    @cached_property
+    @property
     def mesh(self):
         """Get the 2D topo fitting rectilinear mesh. """
         # if self._mesh is None:
@@ -217,7 +217,7 @@ class Inference2D(myObject):
         """ Get the mean model of the parameters """
         return min(asarray(self.hdf_file["model/values/posterior/x/x/data"][:, 0]))
 
-    @cached_property
+    @property
     def model(self):
         out = Model.fromHdf(self.hdf_file['/model'], skip_posterior=False)
 
@@ -226,7 +226,7 @@ class Inference2D(myObject):
         out.mesh.x.centres = self.longest_coordinate
         return out
 
-    @cached_property
+    @property
     def nLayers(self):
         """ Get the number of layers in the best model for each data point """
         return StatArray.fromHdf(self.hdf_file['model/nCells'])
@@ -235,7 +235,7 @@ class Inference2D(myObject):
     def n_points(self):
         return self.fiducials.size
 
-    @cached_property
+    @property
     def n_systems(self):
         """ Get the number of systems """
         return self.getAttribute('# of systems')
@@ -267,7 +267,7 @@ class Inference2D(myObject):
 
         self._prng = value
 
-    @cached_property
+    @property
     def relativeError(self):
         """ Get the Relative error of the best data points """
         return StatArray.fromHdf(self.hdf_file['data/relative_error'])
@@ -277,17 +277,17 @@ class Inference2D(myObject):
         """ Get the Relative error of the best data points """
         return self.data.relative_error.posterior
 
-    @cached_property
+    @property
     def totalError(self):
         """ Get the total error of the best data points """
         return self.getAttribute('Total Error')
 
-    @cached_property
+    @property
     def x(self):
         """ Get the X co-ordinates (Easting) """
         return StatArray.fromHdf(self.hdf_file['data/x'])
 
-    @cached_property
+    @property
     def y(self):
         """ Get the Y co-ordinates (Easting) """
         return StatArray.fromHdf(self.hdf_file['data/y'])
@@ -415,7 +415,7 @@ class Inference2D(myObject):
     #     opacity = opacity.normalize()
     #     return 1.0 - opacity
 
-    # @cached_property
+    # @property
     # def bestData(self):
     #     """ Get the best data """
     #     dtype = self.hdf_file['data'].attrs['repr']

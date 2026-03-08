@@ -98,7 +98,7 @@ class DataPoint(Point):
 
         self._sensitivity_matrix = None
 
-    @cached_property
+    @property
     def active(self):
         """Gets the indices to the observed data values that are not NaN
 
@@ -110,7 +110,7 @@ class DataPoint(Point):
         """
         return ~isnan(self.data)
 
-    @cached_property
+    @property
     def active_system_indices(self):
         out =  squeeze(argwhere([any(self.active[i]) for i in self.system_indices]))
         return out

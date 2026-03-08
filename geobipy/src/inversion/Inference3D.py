@@ -182,7 +182,7 @@ class Inference3D(myObject):
     def parallel_access(self):
         return not self.world is None
 
-    @cached_property
+    @property
     def point_chunks(self):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         if self.parallel_access:
@@ -196,7 +196,7 @@ class Inference3D(myObject):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         return self.point_starts + self.point_chunks
 
-    @cached_property
+    @property
     def point_starts(self):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         if self.parallel_access:
@@ -228,7 +228,7 @@ class Inference3D(myObject):
     def seed(self, value):
         self._seed = value
 
-    @cached_property
+    @property
     def line_chunks(self):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         if self.parallel_access:
@@ -242,7 +242,7 @@ class Inference3D(myObject):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         return self.line_starts + self.line_chunks
 
-    @cached_property
+    @property
     def line_starts(self):
         # assert self.parallel_access, Exception("Parallel access not enabled.  Pass an MPI communicator when instantiating Inference3D.")
         if self.parallel_access:
@@ -379,7 +379,7 @@ class Inference3D(myObject):
         else:
             return self._lines
 
-    @cached_property
+    @property
     def line_number(self):
         return unique(self.data.line_number)
 
@@ -619,7 +619,7 @@ class Inference3D(myObject):
             else:
                 Go = False
 
-    # @cached_property
+    # @property
     # def additiveError(self):
 
     #     additiveError = StatArray((self.n_systems, self.n_points), name=self.lines[0].additiveError.name, units=self.lines[0].additiveError.units, order = 'F')
@@ -634,7 +634,7 @@ class Inference3D(myObject):
     #     return additiveError
 
 
-    @cached_property
+    @property
     def bestData(self):
 
         bestData = self.lines[0].bestData
@@ -666,7 +666,7 @@ class Inference3D(myObject):
         # self.uncache('highest_marginal')
         # return self.marginalProbability
 
-    @cached_property
+    @property
     def marginalProbability(self):
 
         mp = self.lines[0].marginal_probability()
@@ -920,11 +920,11 @@ class Inference3D(myObject):
 
     #     return model
 
-    @cached_property
+    @property
     def data_misfit(self):
         return self.bestData.data_misfit()
 
-    @cached_property
+    @property
     def doi(self):
         return hstack([line.doi for line in self.lines])
 
@@ -1012,7 +1012,7 @@ class Inference3D(myObject):
 
         return out
 
-    @cached_property
+    @property
     def interface_probability(self):
         interfaces = StatArray((self.n_points, self.zGrid.nCells.item()), name='P(interface)')
 
@@ -1062,7 +1062,7 @@ class Inference3D(myObject):
         height, dum = self.pointcloud.interpolate(mesh=mesh, values=self.pointcloud.elevation, block=True, **kwargs)
         return RectilinearMesh3D(x_edges=height.x.edges, y_edges=height.y.edges, z_edges=self.zGrid.edges, height=height.values)
 
-    @cached_property
+    @property
     def nActive(self):
         nActive = empty(self.nPoint, dtype=int32)
         Bar = progressbar.ProgressBar()
@@ -1084,7 +1084,7 @@ class Inference3D(myObject):
         """ Get the number of systems """
         return self.lines[0].n_systems
 
-    @cached_property
+    @property
     def opacity(self):
 
         opacity = StatArray((self.zGrid.nCells.item(), self.n_points), order = 'F')
@@ -1110,7 +1110,7 @@ class Inference3D(myObject):
         return out
 
 
-    @cached_property
+    @property
     def pointcloud(self):
 
         x = StatArray(self.n_points, name=self.lines[0].x.name, units=self.lines[0].x.units)
@@ -1559,7 +1559,7 @@ class Inference3D(myObject):
 
     #     print('rank {} finished in {} h:m:s'.format(world.rank, str(timedelta(seconds=MPI.Wtime()-tBase))))
 
-    @cached_property
+    @property
     def highest_marginal(self):
         return StatArray(argmax(self.marginalProbability, axis=-1), name='Highest marginal').T
 
@@ -2039,7 +2039,7 @@ class Inference3D(myObject):
 
         return self.scatter2D(c=x, **kwargs)
 
-    # @cached_property
+    # @property
     # def interface_probability_3D(self, dx, dy, lowerThreshold=0.0, **kwargs):
 
 

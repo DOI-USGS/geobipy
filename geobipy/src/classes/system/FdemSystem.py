@@ -64,7 +64,7 @@ class FdemSystem(myObject):
     def nFrequencies(self):
         return self.frequencies.size
 
-    @cached_property
+    @property
     def lamda0(self):
         a0 = float64(-8.3885)
         s0 = float64(9.04226468670e-2)
@@ -82,7 +82,7 @@ class FdemSystem(myObject):
 
         return lamda0
 
-    @cached_property
+    @property
     def lamda1(self):
         a1 = float64(-7.91001919)
         s1 = float64(8.7967143957e-2)
@@ -100,11 +100,11 @@ class FdemSystem(myObject):
 
         return lamda1
 
-    @cached_property
+    @property
     def lamda02(self):
         return self.lamda0**2.0
 
-    @cached_property
+    @property
     def lamda12(self):
         return self.lamda1**2.0
 
@@ -276,7 +276,7 @@ class FdemSystem(myObject):
 
         return cls(frequencies, transmitter, receiver)
 
-    @cached_property
+    @property
     def w0(self):
         return asarray([
         9.62801364263e-07, -5.02069203805e-06, 1.25268783953e-05, -1.99324417376e-05, 2.29149033546e-05,
@@ -304,7 +304,7 @@ class FdemSystem(myObject):
         -4.69798719697e-03, 2.12587632706e-03, -9.81986734159e-04, 4.44992546836e-04, -1.89983519162e-04,
         7.31024164292e-05, -2.40057837293e-05, 6.23096824846e-06, -1.12363896552e-06, 1.04470606055e-07], dtype=float64)
 
-    @cached_property
+    @property
     def w1(self):
         return asarray([
         -6.76671159511e-14, 3.39808396836e-13, -7.43411889153e-13, 8.93613024469e-13, -5.47341591896e-13,

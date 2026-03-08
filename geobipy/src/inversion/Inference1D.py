@@ -172,7 +172,7 @@ class Inference1D(myObject):
     def high_variance(self, value):
         self.options['high_variance'] = np.float64(value)
 
-    @cached_property
+    @property
     def iz(self):
         return np.arange(self.model.values.posterior.y.nCells.item())
 
@@ -764,12 +764,12 @@ class Inference1D(myObject):
     def hitmap(self):
         return self.model.values.posterior
 
-    # @cached_property
+    # @property
     @property
     def chisquare_pdf(self):
         return self.data_misfit_v.prior.probability(self.data_misfit_v.posterior.mesh.centres, log=False)
 
-    # @cached_property
+    # @property
     @property
     def norm_chisquare(self):
         return norm(self.chisquare_pdf)
