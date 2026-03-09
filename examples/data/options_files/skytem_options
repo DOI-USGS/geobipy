@@ -28,7 +28,7 @@ system_filename = ['SkytemHM.stm', 'SkytemLM.stm']
 data_type = TdemData
 
 # Maximum number of Markov Chains per data point.
-n_markov_chains = 5000
+n_markov_chains = 100000
 
 # -------------------------------------------------------
 # General GeoBIPy options.
@@ -36,7 +36,7 @@ n_markov_chains = 5000
 # Interactively plot a single data point as it progresses
 interactive_plot = True
 # How often to update the plot. (lower is generally slower)
-update_plot_every = 1000
+update_plot_every = 5000
 # Save a PNG of the final results for each data point.
 save_png = False
 # Save the results of the McMC inversion to HDF5 files. (Generally always True)
@@ -157,7 +157,7 @@ factor = None
 # Default is 1.5
 gradient_standard_deviation = None
 # Initial scaling factor for proposal covariance
-covariance_scaling = 0.1
+covariance_scaling = None
 # Scaling factor for data misfit
 multiplier = None
 # Clipping Ratio for interface contrasts
