@@ -566,8 +566,8 @@ class Model(myObject):
         # Check that the parameters are within the limits if they are bound
         if not self.value_bounds is None:
             pInBounds = sum(self.value_bounds.probability(x=self.values, log=True))
-            if any(isinf(pInBounds)):
-                return -inf
+            if np.any(np.isinf(pInBounds)):
+                return -np.inf
 
         # Get the structural prior probability
         probability = self.mesh.probability
@@ -644,8 +644,8 @@ class Model(myObject):
             log_values = nplog(self.values) - alpha * (pk)
             mean = expReal(log_values)
 
-            if any(mean == inf) or any(mean == 0.0):
-                return -inf, -inf
+            if np.any(np.isinf(mean)) or np.any(mean == 0.0):
+                return -np.inf, -np.inf
 
             prng = self.values.proposal.prng
             # # Create a multivariate normal distribution centered on the shifted parameter values, and with variance computed from the forward step.
