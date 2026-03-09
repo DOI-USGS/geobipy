@@ -799,21 +799,30 @@ def expReal(this, quad=False):
         exp(this).
 
     """
-    # np.float64 = 709.0
-    # np.float128 = 11356.0
+    # np.float64 = 709.782
+    # np.float128 = 11356.5234062941
 
-    tol = 11356.0 if quad else 709.0
+    # import warnings
+    # warnings.filterwarnings('error')
+
+
+    if quad:
+        if np.size(this) == 1:
+            return np.exp(npq.QuadPrecision(this))
+
+        this = this.astype(npq.QuadPrecision)
+        return np.exp(this)
+
+    tol = 709.782
 
     if np.size(this) == 1:
         if this > tol:
             return np.inf
+        return np.exp(this)
 
-        return np.exp(npq.QuadPrecision(this)) if quad else np.exp(this)
-
-    out = np.full(np.size(this), fill_value=np.inf, dtype=npq.QuadPrecision)
+    out = np.full_like(this, fill_value=np.inf)
     i = squeeze(np.argwhere(this <= tol))
-
-    out[i] = np.exp(npq.QuadPrecision(this[i])) if quad else np.exp(this[i])
+    out[i] = np.exp(this[i])
     return out
 
 def tanh(this):
