@@ -607,13 +607,13 @@ class Inference1D(myObject):
         # except Exception:
         #     # print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
         #     print(traceback.format_exc())
-        #     return True
+        #     return True # We failed due to singularity
 
         dprint(f"{test_model.values=}")
 
         if remapped_model is None:
             self.accepted = False
-            return
+            return False
 
         # Propose a new data point, using assigned proposal distributions
         test_datapoint.perturb()
@@ -630,18 +630,18 @@ class Inference1D(myObject):
         # Evaluate the prior for the current data
         test_prior = test_datapoint.probability
         # Test for early rejection
-        if (test_prior == -np.inf):
+        if np.isinf(test_prior):
             self.accepted = False
-            return
+            return False
         dprint(f"data - {test_prior=}")
 
         # Evaluate the prior for the current model
         test_prior += test_model.probability(solve_value=self.solve_value,
                                              solve_gradient=self.solve_gradient)
         # Test for early rejection
-        if (test_prior == -np.inf):
+        if np.isinf(test_prior):
             self.accepted = False
-            return
+            return False
         dprint(f"model - {test_prior=}")
 
         # Compute the components of each acceptance ratio
@@ -654,6 +654,9 @@ class Inference1D(myObject):
         dprint(f"{test_likelihood=}")
 
         proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation, alpha = self.covariance_scaling)
+        if np.isinf(proposal) or np.isinf(test_proposal):
+            self.accepted = False
+            return False
         dprint(f"{proposal=} {test_proposal=}")
 
         test_posterior = test_prior + test_likelihood
@@ -670,6 +673,9 @@ class Inference1D(myObject):
         dprint(f"{proposal_ratio=}")
 
         log_acceptance_ratio = prior_ratio + likelihood_ratio + proposal_ratio
+
+        dprint(f"{log_acceptance_ratio=}")
+
         acceptance_probability = expReal(log_acceptance_ratio, quad=True)
 
         dprint(f"{acceptance_probability=}")
