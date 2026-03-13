@@ -805,6 +805,8 @@ def expReal(this, quad=False):
     # import warnings
     # warnings.filterwarnings('error')
 
+    if np.any(np.isnan(this)):
+        return 0.0
 
     if quad:
         if np.size(this) == 1:
