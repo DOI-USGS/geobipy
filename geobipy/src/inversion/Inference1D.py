@@ -94,6 +94,7 @@ class Inference1D(myObject):
                  solve_value:bool = False,
                  update_plot_every:int = 5000,
                  minimum_burn_in:int = 5000,
+                 constrain_data_misfit=False,
                  world = None,
                  **kwargs):
         """ Initialize the results of the inversion """
@@ -119,6 +120,7 @@ class Inference1D(myObject):
         self.high_variance = high_variance
         self.covariance_scaling = covariance_scaling
         self.minimum_burn_in = minimum_burn_in
+        self.constrain_data_misfit = constrain_data_misfit
 
         assert self.interactive_plot or self.save_hdf5, Exception('You have chosen to neither view or save the inversion results!')
 
@@ -135,6 +137,17 @@ class Inference1D(myObject):
         else:
             s = np.sum(self.acceptance_v[:self.iteration]) / np.float64(self.iteration)
         return 100.0 * s
+
+    @property
+    def constrain_data_misfit(self):
+        return self.options['constrain_data_misfit']
+
+
+    @constrain_data_misfit.setter
+    def constrain_data_misfit(self, value):
+        if value is None:
+            value = False
+        self.options['constrain_data_misfit'] = value
 
     @property
     def covariance_scaling(self):
@@ -440,6 +453,9 @@ class Inference1D(myObject):
 
         self.prior += self.datapoint.probability
 
+        if self.constrain_data_misfit:
+            self.prior += self.data_misfit_v.prior.probability(self.data_misfit, log=True).item()
+
         # Initialize the burned in state
         self.burned_in_iteration = self.n_markov_chains
         self.burned_in = True
@@ -635,6 +651,9 @@ class Inference1D(myObject):
             return False
         dprint(f"data - {test_prior=}")
 
+        if self.constrain_data_misfit:
+            test_prior += self.data_misfit_v.prior.probability(test_data_misfit, log=True).item()
+
         # Evaluate the prior for the current model
         test_prior += test_model.probability(solve_value=self.solve_value,
                                              solve_gradient=self.solve_gradient)
@@ -676,12 +695,16 @@ class Inference1D(myObject):
 
         dprint(f"{log_acceptance_ratio=}")
 
-        acceptance_probability = expReal(log_acceptance_ratio, quad=True)
+        acceptance_ratio = expReal(log_acceptance_ratio, quad=False)
 
-        dprint(f"{acceptance_probability=}")
+        # If the acceptance probability comes back as inf because of overflow, just accept.
+        self.accepted = np.isinf(acceptance_ratio)
 
-        # If we accept the model
-        self.accepted = acceptance_probability > self.prng.uniform()
+        dprint(f"{acceptance_ratio=}")
+
+        # Metropolis-Hastings
+        if not self.accepted:
+            self.accepted = self.prng.uniform() <= acceptance_ratio
 
         if (self.accepted):
             # Compute the data misfit
