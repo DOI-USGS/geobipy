@@ -198,7 +198,13 @@ class Model(myObject):
     def cellIndices(self, values, clip=True):
         return self.mesh.cellIndices(values, clip=clip)
 
-    def local_inverse_hessian(self, observation=None):
+    def local_derivatives(self, observation=None, beta=1.0):
+
+        H = self.local_inverse_hessian(observation=observation, beta=beta)
+        dfk = self.local_gradient(observation=observation, beta=beta)
+        return dfk, H
+
+    def local_inverse_hessian(self, observation=None, beta=1.0):
         """Generate a localized Hessian matrix using
         a dataPoint and the current realization of the Model1D.
 
@@ -215,7 +221,7 @@ class Model(myObject):
 
         """
         # Compute a new parameter variance matrix if the structure of the model changed.
-        return self.local_variance(observation)
+        return self.local_variance(observation, beta=beta)
 
     def delete_edge(self, i):
         out, values = self.mesh.delete_edge(i, values=self.values)
@@ -264,7 +270,7 @@ class Model(myObject):
     def fill_nans_with_extrapolation(self, **kwargs):
         return self.mesh.fill_nans_with_extrapolation(self.values, **kwargs)
 
-    def local_precision(self, observation=None):
+    def local_precision(self, observation=None, beta=1.0):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
 
         Parameters
@@ -281,14 +287,14 @@ class Model(myObject):
         """
         assert self.values.hasPrior or self.gradient.hasPrior, Exception("Model must have either a parameter prior or gradient prior, use self.set_priors()")
 
-        hessian = self.prior_derivative(order=2)
+        hessian = beta * self.prior_derivative(order=2)
 
         if not observation is None:
             hessian += observation.prior_derivative(order=2)
 
         return hessian
 
-    def local_variance(self, observation=None):
+    def local_variance(self, observation=None, beta=1.0):
         """Generate a localized inverse Hessian matrix using a dataPoint and the current realization of the Model1D.
 
         Parameters
@@ -303,7 +309,7 @@ class Model(myObject):
             Inverse Hessian matrix
 
         """
-        return inv(self.local_precision(observation))
+        return inv(self.local_precision(observation, beta=beta))
         # tries = 0
         # while tries < 10:
         #     # Try to invert the local Hessian using data.
@@ -373,10 +379,10 @@ class Model(myObject):
         """
         return self.stochastic_newton_perturbation(*args, **kwargs)
 
-    def local_gradient(self, observation=None):
+    def local_gradient(self, observation=None, beta=1.0):
         # Compute the gradient according to the perturbed parameters and data residual
         # This is Wm'Wm(sigma - sigma_ref)
-        gradient = self.prior_derivative(order=1)
+        gradient = beta * self.prior_derivative(order=1)
 
         if not observation is None:
             # The prior derivative is now J'Wd'(dPredicted - dObserved) + Wm'Wm(sigma - sigma_ref)
@@ -384,17 +390,28 @@ class Model(myObject):
 
         return gradient
 
-    def objective(self, observation=None):
+    def objective(self, observation=None, beta=1.0):
         # fk = self.values.prior.mahalanobis(self.values)
         m_mref = self.values.prior.deviation(self.values)
-        fk = dot(m_mref.T, dot(self.prior_derivative(order=2), m_mref))
+        fk = beta * dot(m_mref.T, dot(self.prior_derivative(order=2), m_mref))
 
         if observation is not None:
             fk += observation.predictedData.prior.mahalanobis(observation.predictedData[observation.active])**2.0
 
         return fk
 
-    def stochastic_newton_perturbation(self, observation=None, alpha=1.0):
+    def stochastic_newton_perturbation(self, observation=None, alpha=0.5, beta=1.0):
+        """Compute the stochastic newton step direction
+
+        Parameters
+        ----------
+        observation : geobipy.Datapoint
+            Guide the proposal variance using the data
+        alpha : float
+            Step length
+        beta : float
+            Regularization parameter to weight the model covariance.
+        """
 
         # repeat = True
         # n_tries = 0
@@ -413,18 +430,20 @@ class Model(myObject):
                 observation.sensitivity(remapped_model, model_changed=True)
 
         # Update the local Hessian around the current model.
-        # B^-1 = H = inv(J'Wd'WdJ + Wm'Wm)
-        H = remapped_model.local_inverse_hessian(observation)
-        # Gradient
-        # dfk = (J'Wd'(f(remapped) - dObserved) + Wm'Wm(sigma - sigma_ref))
-        dfk = remapped_model.local_gradient(observation=observation)
+        dfk, H = remapped_model.local_derivatives(observation=observation, beta=beta)
+        # # B^-1 = H = inv(J'Wd'WdJ + Wm'Wm)
+        # H = remapped_model.local_inverse_hessian(observation, beta=beta)
+        # # Gradient
+        # # dfk = (J'Wd'(f(remapped) - dObserved) + Wm'Wm(sigma - sigma_ref))
+        # dfk = remapped_model.local_gradient(observation=observation, beta=beta)
 
         pk = -dot(H, dfk)
 
         # Compute the Model perturbation
         # This is the equivalent to the full newton gradient of the deterministic objective function.
-        # delta sigma = inv(J'Wd'WdJ + Wm'Wm)(J'Wd'(f(remapped) - dObserved) + Wm'Wm(sigma - sigma_ref))
+        # delta sigma = inv(J'Wd'WdJ + beta * Wm'Wm)(J'Wd'(f(remapped) - dObserved) + beta * Wm'Wm(sigma - sigma_ref))
         # This could be replaced with a CG solver for bigger problems like deterministic algorithms.
+        # alpha is the step length
         mean = expReal(nplog(remapped_model.values) + (alpha * pk))
 
         perturbed_model = deepcopy(remapped_model)
@@ -586,7 +605,7 @@ class Model(myObject):
 
         return probability
 
-    def proposal_probabilities(self, remapped_model, observation=None, structure_only=False, alpha=1.0):
+    def proposal_probabilities(self, remapped_model, observation=None, structure_only=False, alpha=0.5, beta=1.0):
         r"""Return the forward and reverse proposal probabilities for the model
 
         Returns the denominator and numerator for the model's components of the proposal ratio.
@@ -632,16 +651,17 @@ class Model(myObject):
 
             # Compute the gradient according to the perturbed parameters and data residual
             # observation fm is at candidate
-            dfk = self.local_gradient(observation=observation)
-
             # inv(J'Wd'WdJ + Wm'Wm)
-            H = self.local_inverse_hessian(observation)
+            dfk, H = self.local_derivatives(observation=observation, beta=beta)
+
             # H = self.values.proposal.variance
+
+            # dfk = self.local_gradient(observation=observation, beta=beta)
 
             # Compute the stochastic newton offset at the new location.
             pk = -dot(H, dfk)
 
-            log_values = nplog(self.values) - alpha * (pk)
+            log_values = nplog(self.values) - alpha * pk
             mean = expReal(log_values)
 
             if np.any(np.isinf(mean)) or np.any(mean == 0.0):
