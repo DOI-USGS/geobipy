@@ -61,14 +61,15 @@ class TempestData(TdemData):
 
         super().__init__(*args, total_field=True, **kwargs)
 
-        self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", "%")
-        self._relative_error = DataArray((self.n_points, self.n_systems), "Relative error", "%")
-
         self._reference_additive_error = DataArray((self.n_points, self.n_channels), r"Referece $\epsilon_{additive}$", "%")
         self._additive_error_multiplier = DataArray(ones((self.n_points, self.n_systems)), "multiplier")
 
+        self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", "%")
+        self._relative_error = DataArray((self.n_points, self.n_systems), "Relative error", "%")
+
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
+        out._additive_error_multiplier = deepcopy(self._additive_error_multiplier, memo)
         out._reference_additive_error = deepcopy(self._reference_additive_error, memo)
         return out
 
