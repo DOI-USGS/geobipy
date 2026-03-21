@@ -77,7 +77,9 @@ class Inference1D(myObject):
     """
 
     def __init__(self,
-                 covariance_scaling:float = 1.0,
+                 step_length:float = None,
+                 regularization_parameter = None,
+                 adaptive_regularization_parameter = False,
                  high_variance:float = np.inf,
                  ignore_likelihood:bool = False,
                  interactive_plot:bool = True,
@@ -118,7 +120,9 @@ class Inference1D(myObject):
         self.reset_limit = reset_limit
         self.low_variance = low_variance
         self.high_variance = high_variance
-        self.covariance_scaling = covariance_scaling
+        self.step_length = step_length
+        self.regularization_parameter = regularization_parameter
+        self.adaptive_regularization_parameter = adaptive_regularization_parameter
         self.minimum_burn_in = minimum_burn_in
         self.constrain_data_misfit = constrain_data_misfit
 
@@ -131,17 +135,18 @@ class Inference1D(myObject):
         self.posterior_ax = None
 
     @property
-    def acceptance_percent(self):
-        if self.iteration > self.update_plot_every:
-            s = np.sum(self.acceptance_v[self.iteration-self.update_plot_every:self.iteration]) / np.float64(self.update_plot_every)
-        else:
-            s = np.sum(self.acceptance_v[:self.iteration]) / np.float64(self.iteration)
-        return 100.0 * s
+    def adaptive_regularization_parameter(self):
+        return self.options['adaptive_regularization_parameter']
+
+    @adaptive_regularization_parameter.setter
+    def adaptive_regularization_parameter(self, value):
+        if value is None:
+            value = False
+        self.options['adaptive_regularization_parameter'] = value
 
     @property
     def constrain_data_misfit(self):
         return self.options['constrain_data_misfit']
-
 
     @constrain_data_misfit.setter
     def constrain_data_misfit(self, value):
@@ -150,14 +155,24 @@ class Inference1D(myObject):
         self.options['constrain_data_misfit'] = value
 
     @property
-    def covariance_scaling(self):
-        return self.options['covariance_scaling']
+    def step_length(self):
+        return self.options['step_length']
 
-    @covariance_scaling.setter
-    def covariance_scaling(self, value):
+    @step_length.setter
+    def step_length(self, value):
         if value is None:
             value = 0.5
-        self.options['covariance_scaling'] = np.float64(value)
+        self.options['step_length'] = np.float64(value)
+
+    @property
+    def regularization_parameter(self):
+        return self.options['regularization_parameter']
+
+    @regularization_parameter.setter
+    def regularization_parameter(self, value):
+        if value is None:
+            value = 1.0
+        self.options['regularization_parameter'] = np.float64(value)
 
     @property
     def observed_datapoint(self):
@@ -293,7 +308,7 @@ class Inference1D(myObject):
         # kwargs = self.assign_default('gradient_standard_deviation', float64(1.5), **kwargs)
         # kwargs = self.assign_default('multiplier', float64(1.0), **kwargs)
         # kwargs = self.assign_default('factor', float64(10.0), **kwargs)
-        # kwargs = self.assign_default('covariance_scaling', float64(1.0), **kwargs)
+        # kwargs = self.assign_default('step_length', float64(1.0), **kwargs)
         # kwargs = self.assign_default('value_weight', float64(1.0), **kwargs)
         # kwargs = assign_default('gradient_weight', float64(0.0), **kwargs)
         # kwargs = self.assign_default('minimum_burn_in', float64(5000.0), **kwargs)
@@ -412,6 +427,24 @@ class Inference1D(myObject):
     def world(self, value):
         self._world = value
 
+    def acceptance_percent(self, n_iterations=np.inf):
+        """Percentage of accepted models
+
+        Parameters
+        ----------
+        n_iterations : int
+            Compute only for this many iterations prior to the current iterations
+
+        Returns
+        -------
+        out : float
+            percentage
+        """
+        if self.iteration > n_iterations:
+            s = np.sum(self.acceptance_v[self.iteration-n_iterations:self.iteration]) / np.float64(n_iterations)
+        else:
+            s = np.sum(self.acceptance_v[:self.iteration]) / np.float64(self.iteration)
+        return 100.0 * s
 
     def initialize(self, datapoint):
         # Get the initial best fitting halfspace and set up
@@ -619,7 +652,7 @@ class Inference1D(myObject):
             observation = test_datapoint
 
         # try:
-        remapped_model, test_model = self.model.perturb(observation, alpha = self.covariance_scaling)
+        remapped_model, test_model = self.model.perturb(observation, alpha = self.step_length, beta=self.regularization_parameter)
         # except Exception:
         #     # print(f'singularity --line={observation.line_number.item()} --fiducial={observation.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
         #     print(traceback.format_exc())
@@ -672,7 +705,7 @@ class Inference1D(myObject):
 
         dprint(f"{test_likelihood=}")
 
-        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation, alpha = self.covariance_scaling)
+        proposal, test_proposal = test_model.proposal_probabilities(remapped_model, observation, alpha = self.step_length, beta=self.regularization_parameter)
         if np.isinf(proposal) or np.isinf(test_proposal):
             self.accepted = False
             return False
@@ -739,12 +772,12 @@ class Inference1D(myObject):
         failed = not Go
         while (Go):
             # Accept or reject the new model
-            try:
-                failed = self.accept_reject()
-            except Exception as e:
-                print(f'singularity --line={self.datapoint.line_number.item()} --fiducial={self.datapoint.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
-                print(traceback.format_exc())
-                failed = True
+            # try:
+            failed = self.accept_reject()
+            # except Exception as e:
+            #     print(f'singularity --line={self.datapoint.line_number.item()} --fiducial={self.datapoint.fiducial.item()} --jump={self.rank} iteration={self.iteration}', flush=True)
+            #     print(traceback.format_exc())
+            #     failed = True
 
             self.update()
 
@@ -813,6 +846,14 @@ class Inference1D(myObject):
         # Check the fit of the chi square distribution with theoretical
         self.relative_chi_squared_fit = norm(self.data_misfit_v.posterior.pdf.values - self.chisquare_pdf) / self.norm_chisquare
 
+        if self.adaptive_regularization_parameter:
+            recent_acceptance = self.acceptance_percent(1000)
+            f = 1.001
+            if recent_acceptance < 23.0:
+                self.regularization_parameter *= f # Regularize more
+            elif recent_acceptance > 40.0:
+                self.regularization_parameter *= (1.0/f) # Regularize less
+
         # Determine if we are burning in
         if (not self.burned_in):
             target_misfit = np.sum(self.datapoint.active)
@@ -847,7 +888,7 @@ class Inference1D(myObject):
         self.acceptance_v[self.iteration.item()] = self.accepted
 
         if ((self.iteration > 0) and (np.mod(self.iteration, self.update_plot_every) == 0)):
-            self.acceptance_rate[np.int32(self.iteration / self.update_plot_every)-1] = self.acceptance_percent
+            self.acceptance_rate[np.int32(self.iteration / self.update_plot_every)-1] = self.acceptance_percent(self.update_plot_every)
 
         if (np.mod(self.iteration, self.update_plot_every) == 0):
             time_per_model = self.clk.lap() / self.update_plot_every
@@ -858,7 +899,7 @@ class Inference1D(myObject):
             if self.burned_in:
                 eta = str(timedelta(seconds=int(time_per_model * (self.n_markov_chains + self.burned_in_iteration - self.iteration))))
 
-            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed, eta=%s h:m:s\n" % (self.iteration, np.float64(self.model.nCells[0]), burned_in, self.acceptance_percent, time_per_model, elapsed, eta)
+            tmp = "i=%i, k=%i, acc=%s%4.3f, %4.3f s/Model, %0.3f s Elapsed, eta=%s h:m:s\n" % (self.iteration, np.float64(self.model.nCells[0]), burned_in, self.acceptance_percent(self.update_plot_every), time_per_model, elapsed, eta)
             if (self.rank == 1):
                 print(tmp, flush=True)
 
