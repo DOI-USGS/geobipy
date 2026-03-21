@@ -581,7 +581,7 @@ class TempestData(TdemData):
         return self
 
     @classmethod
-    def _initialize_sequential_reading(cls, data_filename, system_filename):
+    def _initialize_sequential_reading(cls, data_filename, system_filename, **kwargs):
         """Special function to initialize a file for reading data points one at a time.
 
         Parameters
@@ -593,7 +593,7 @@ class TempestData(TdemData):
 
         """
 
-        self = cls(system_filename)
+        self = cls(system_filename, **kwargs)
         # self._data_filename = data_filename
         self._open_data_files(data_filename)
         return self

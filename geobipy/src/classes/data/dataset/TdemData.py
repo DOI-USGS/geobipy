@@ -690,7 +690,7 @@ class TdemData(Data):
         return n_points, location_channels, rLoop_channels, tLoop_channels, offset_channels, off_channels, off_error_channels, primary_channels
 
     @classmethod
-    def _initialize_sequential_reading(cls, data_filename, system_filename):
+    def _initialize_sequential_reading(cls, data_filename, system_filename, **kwargs):
         """Special function to initialize a file for reading data points one at a time.
 
         Parameters
@@ -702,7 +702,7 @@ class TdemData(Data):
 
         """
         # Read in the EM System file
-        self = cls(system_filename)
+        self = cls(system_filename, **kwargs)
         self._data_filename = data_filename
         self._open_csv_files(data_filename)
 
