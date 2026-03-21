@@ -969,25 +969,24 @@ class Model(myObject):
 
 
     @classmethod
-    def create_synthetic_model(cls, model_type, n_points=79):
+    def create_synthetic_model(cls, model_type, n_points=79, left_thickness=np.r_[50.0, 25.0], right_thickness=np.r_[1.0, 499.0]):
 
         from ..mesh.RectilinearMesh1D import RectilinearMesh1D
         from ..mesh.RectilinearMesh2D_stitched import RectilinearMesh2D_stitched
 
         n_points = 79
 
+
         if model_type == 'water_into_basalt':
-            zwedge = np.linspace(1.0, 100.0, n_points)
-            zdeep = np.linspace(150.0, 102.0, n_points)
-        else:
-            zwedge = np.linspace(50.0, 1.0, n_points)
-            zdeep = np.linspace(75.0, 500.0, n_points)
+            left_thickness = np.r_[1.0, 149.0]
+            right_thickness = np.r_[100.0, 2.0]
+
+        depth = -np.linspace(*(np.cumsum(np.c_[left_thickness, right_thickness], axis=0)).T, n_points)
 
         x = RectilinearMesh1D(centres=DataArray(np.arange(n_points, dtype=np.float64), name='x'))
         mesh = RectilinearMesh2D_stitched(3, x=x)
         mesh.nCells[:] = 3
-        mesh.y_edges[:, 1] = -zwedge
-        mesh.y_edges[:, 2] = -zdeep
+        mesh.y_edges[:, 1:3] = depth
         mesh.y_edges[:, 3] = -np.inf
         mesh.y_edges.name, mesh.y_edges.units = 'Height', 'm'
 
@@ -997,6 +996,7 @@ class Model(myObject):
                         'resistive_dolomites' : np.r_[5e1, 5e2, 5e1],   # Glacial sediments, resistive dolomites, marine shale.
                         'resistive_basement' : np.r_[1e2, 1e1, 1e4],# Resistive Basement
                         'coastal_salt_water' : np.r_[1e0, 1e2, 2e1],    # Coastal salt water upper layer
+                        'offshore_fresh_discharge' : np.r_[1e0, 1e1, 1e0],    # Coastal salt water upper layer
                         'ice_over_salt_water' : np.r_[1e4, 1e2, 1e0], # Antarctica glacier ice over salt water
                         'water_into_basalt' : np.r_[1e3, 1e0, 1e3]
         }
@@ -1005,6 +1005,7 @@ class Model(myObject):
                         'resistive_dolomites' : np.r_[2e-2, 2e-3, 2e-2],   # Glacial sediments, resistive dolomites, marine shale.
                         'resistive_basement' : np.r_[1e-2, 1e-1, 1e-4],# Resistive Basement
                         'coastal_salt_water' : np.r_[1e0, 1e-2, 5e-2],    # Coastal salt water upper layer
+                        'offshore_fresh_discharge' : np.r_[1e0, 1e-1, 1e0],    # Coastal salt water upper layer
                         'ice_over_salt_water' : np.r_[1e-4, 1e-2, 1e0], # Antarctica glacier ice over salt water
                         'water_into_basalt' : np.r_[1e-3, 1e0, 1e-3]
         }
