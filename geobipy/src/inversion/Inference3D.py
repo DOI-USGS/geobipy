@@ -430,17 +430,17 @@ class Inference3D(myObject):
             line.uncache('additiveError')
         return out
 
-    def infer(self, index=None, fiducial=None, line_number=None, **options):
+    def infer(self, index=None, fiducial=None, line_number=None, **kwargs):
 
         if self.parallel_access:
-            self.infer_mpi(**options)
+            self.infer_mpi(**kwargs)
         else:
-            self.infer_serial(index=index, fiducial=fiducial, line_number=line_number, **options)
+            self.infer_serial(index=index, fiducial=fiducial, line_number=line_number, **kwargs)
 
-    def infer_serial(self, index=None, fiducial=None, line_number=None, **options):
+    def infer_serial(self, index=None, fiducial=None, line_number=None, **kwargs):
 
         t0 = time.time()
-        self.data = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+        self.data = self.data._initialize_sequential_reading(**kwargs)
 
         n_points = self.data.n_points
         r = range(n_points)
@@ -467,12 +467,12 @@ class Inference3D(myObject):
             # Pass through the line results file object if a parallel file system is in use.
             iLine = self.line_number.searchsorted(datapoint.line_number)[0]
 
-            inference = Inference1D(prng=self.prng, **options)
+            inference = Inference1D(prng=self.prng, **kwargs)
 
             inference.initialize(datapoint)
 
             file_handle = None
-            if options['save_hdf5']:
+            if kwargs['save_hdf5']:
                 file_handle = self.lines[iLine].hdf_file
             inference.infer(hdf_file_handle=file_handle)
 
@@ -485,7 +485,7 @@ class Inference3D(myObject):
         self.data.close()
 
 
-    def infer_mpi(self, **options):
+    def infer_mpi(self, **kwargs):
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
@@ -496,18 +496,18 @@ class Inference3D(myObject):
 
         # Carryout the head-worker tasks
         if (world.rank == 0):
-            self._infer_mpi_master_task(**options)
+            self._infer_mpi_master_task(**kwargs)
         else:
-            self._infer_mpi_worker_task(**options)
+            self._infer_mpi_worker_task(**kwargs)
 
-    def _infer_mpi_master_task(self, **options):
+    def _infer_mpi_master_task(self, **kwargs):
         """ Define a Send Recv Send procedure on the head rank """
 
         from mpi4py import MPI
         from ..base import MPI as myMPI
 
         # Prep the data for point by point reading
-        self.data = self.data._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+        self.data = self.data._initialize_sequential_reading(**kwargs)
 
         # Set the total number of data points
         n_points = self.data.n_points
