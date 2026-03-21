@@ -14,6 +14,7 @@ system_filename = 'tempest.stm'
 
 # Define the data type to invert
 data_type = TempestData
+amplitude_data = True
 
 # Maximum number of Markov Chains per data point.
 n_markov_chains = 100000
@@ -191,7 +192,8 @@ factor = None
 # Default is 1.5
 gradient_standard_deviation = None
 # Initial scaling factor for proposal covariance
-covariance_scaling = None
+step_length = None
+adaptive_regularization_parameter = True
 # Scaling factor for data misfit
 multiplier = None
 # Clipping Ratio for interface contrasts

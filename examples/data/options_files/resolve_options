@@ -19,7 +19,7 @@ data_directory = "..//data"
 # The data_filename and system_filename options are single strings for single system dataset,
 # or a list of str for multi-system datasets like Skytem.
 # Data File Name. If there are multiple, encompass them with [ ].
-data_filename = "resolve_resistive_dolomites.csv"
+data_filename = "resolve_glacial.csv"
 # System File Name. If there are multiple, encompass them with [ ].
 system_filename = "FdemSystem2.stm"
 
@@ -122,9 +122,9 @@ maximum_height_change = 1.0
 # normal distributions with a mean equal to its value in the current model (of the Markov chain)
 # These variances are used when we randomly choose a new value for that given variable.
 # Proposal variance for the relative error
-relative_error_proposal_variance = 1e-5
+relative_error_proposal_variance = 1e-7
 # Proposal variance for the additive error
-additive_error_proposal_variance = 1e-5
+additive_error_proposal_variance = 1e-7
 # Proposal variance of the elevation
 height_proposal_variance = 0.01
 
@@ -146,12 +146,13 @@ probability_of_no_change = 0.5
 # -------------------------------------------------------
 # Standard Deviation of log(rho): log(1 + factor)
 # Default is 10.0
-factor = None
+# value_standard_deviation = None
 # Standard Deviation for the difference in layer resistivity
 # Default is 1.5
 gradient_standard_deviation = None
 # Initial scaling factor for proposal covariance
-covariance_scaling = None
+step_length = None
+adaptive_regularization_parameter = False
 # Scaling factor for data misfit
 multiplier = None
 # Clipping Ratio for interface contrasts

@@ -157,13 +157,14 @@ factor = None
 # Default is 1.5
 gradient_standard_deviation = None
 # Initial scaling factor for proposal covariance
-covariance_scaling = None
+step_length = None
 # Scaling factor for data misfit
 multiplier = None
 # Clipping Ratio for interface contrasts
 clip_ratio = None
 # Only sample the prior
 ignore_likelihood = False
+
 
 # gradient_weight = 1.0
 
