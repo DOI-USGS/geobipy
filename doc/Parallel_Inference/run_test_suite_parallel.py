@@ -37,7 +37,7 @@ def parallel_mpi(data_type, model_type, output_directory):
         # elif data_type == 'tempest':
         #     create_tempest(wedge_model, model_type)
 
-    parameter_file = "../source/supplementary/options_files/{}_options".format(data_type)
+    parameter_file = "../../examples/data/options_files/{}_options".format(data_type)
     inputFile = pathlib.Path(parameter_file)
     assert inputFile.exists(), Exception("Cannot find input file {}".format(inputFile))
 
@@ -50,7 +50,7 @@ def parallel_mpi(data_type, model_type, output_directory):
 
     kwargs = user_parameters.read(inputFile, n_markov_chains = 100000,
                                              update_plot_every = 5000,
-                                             data_directory = "..//source//supplementary//data",
+                                             data_directory = "..//../examples/data//data",
                                              data_filename = data_type + '_' + model_type + '.csv'
                                              )
 
