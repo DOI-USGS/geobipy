@@ -10,21 +10,26 @@ from geobipy import StatArray
 
 data_path = '..//..//examples//data//data'
 
-def make_figure(ds, model, title):
+def make_figure(ds, ds_noisy, model, title):
     from pathlib import Path
-    fig = plt.figure();
+    fig = plt.figure(figsize=(20, 12));
     plt.suptitle(title)
+
     splt = fig.add_gridspec(2, 3, width_ratios=[1, 3, 1], wspace=0.3);
-    d = ds.datapoint(0); plt.subplot(splt[0, 0]); d.plot();
+    ax = plt.subplot(splt[0, 0])
+    dn = ds_noisy.datapoint(0); dn.plot()
+    d = ds.datapoint(0); d.plot(with_error_bars=False, linestyle='solid', marker=None);
 
-    ax = plt.subplot(splt[0, 1]);
-    ds.plot_data();
-    ax.get_legend().remove();
-    ax1 = plt.subplot(splt[1, 1], sharex=ax);
+    ax1 = plt.subplot(splt[0, 1], sharey=ax);
+    ds_noisy.plot_data();
+    ax1.get_legend().remove();
+    ax2 = plt.subplot(splt[1, 1], sharex=ax1);
     model.pcolor(log=10);
-    ax1.sharex(ax)
+    ax2.sharex(ax1)
 
-    d = ds.datapoint(69); plt.subplot(splt[0, 2]); d.plot();
+    plt.subplot(splt[0, 2], sharey=ax);
+    dn = ds_noisy.datapoint(69); dn.plot()
+    d = ds.datapoint(69); d.plot(with_error_bars=False, linestyle='solid', marker=None);
 
     Path(data_path+'//figures').mkdir(parents=True, exist_ok=True)
     plt.savefig(data_path+'//figures//'+title+'.png');
@@ -33,19 +38,16 @@ def create_resolve(model):
     from geobipy import FdemData
 
     title = 'resolve_'+ model
-    model = Model.create_synthetic_model(model)
+    model = Model.create_synthetic_model(model, left_thickness=np.r_[25.0, 5.0], right_thickness=np.r_[1.0, 69])
 
     prng = get_prng(seed=0)
-
-    model.mesh.y_edges[:, 1] = -np.linspace(25.0, 1.0, model.mesh.x.nCells)
-    model.mesh.y_edges[:, 2] = -np.linspace(30.0, 200.0, model.mesh.x.nCells)
 
     ds = FdemData(system=data_path+'//resolve.stm')
     ds, ds_noisy = ds.create_synthetic_data(model, prng)
     ds.write_csv(data_path+'//{}_clean.csv'.format(title))
     ds_noisy.write_csv(data_path+'//{}.csv'.format(title))
 
-    make_figure(ds, model, title)
+    make_figure(ds, ds_noisy, model, title)
 
 def create_skytem(model):
     from geobipy import TdemData
@@ -62,7 +64,7 @@ def create_skytem(model):
     ds.write_csv(data_path+'//{}_clean.csv'.format(title))
     ds_noisy.write_csv(data_path+'//{}.csv'.format(title))
 
-    make_figure(ds, model, title)
+    make_figure(ds, ds_noisy, model, title)
 
 #%%
 def create_tempest(model):
@@ -74,17 +76,24 @@ def create_tempest(model):
 
     prng = get_prng(seed=0)
 
-    ds = TempestData(system=[data_path+'//Tempest.stm'])
+    ds = TempestData(system=[data_path+'//tempest.stm'])
 
     ds, ds_noisy = ds.create_synthetic_data(model, prng)
 
     ds.write_csv(data_path+'//{}_clean.csv'.format(title))
     ds_noisy.write_csv(data_path+'//{}.csv'.format(title))
 
-    make_figure(ds, model, title)
+    make_figure(ds, ds_noisy, model, title)
 
 if __name__ == '__main__':
-    models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water', 'water_into_basalt']
+    models = ['glacial',
+              'saline_clay',
+              'resistive_dolomites',
+              'resistive_basement',
+              'coastal_salt_water',
+              'offshore_fresh_discharge',
+              'ice_over_salt_water',
+              'water_into_basalt']
 
     for model in models:
         create_resolve(model)
