@@ -3,6 +3,7 @@ Module describing a frequency domain EMData Point that contains a single measure
 """
 from copy import copy, deepcopy
 
+import numpy as np
 from numpy import asarray, exp
 from numpy import int32, isinf, log10, logspace, s_, squeeze, tile
 from numpy import all as npall
@@ -195,8 +196,8 @@ class FdemDataPoint(EmDataPoint):
         """
 
         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
-
-        return s_[self.system_offset[system]:self.system_offset[system] + self.nFrequencies[system]]
+        tmp = np.hstack([0, np.cumsum(self.n_components * self.channels_per_system)])
+        return s_[tmp[system]:tmp[system] + self.nFrequencies[system]]
 
 
     def _quadratureIndices(self, system=0):
@@ -216,7 +217,8 @@ class FdemDataPoint(EmDataPoint):
 
         assert system < self.n_systems, ValueError("system must be < n_systems {}".format(self.n_systems))
 
-        return s_[self.system_offset[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
+        tmp =np. hstack([0, np.cumsum(self.n_components * self.channels_per_system)])
+        return s_[tmp[system] + self.nFrequencies[system]: 2*self.nFrequencies[system]]
 
 
     def frequencies(self, system=0):
@@ -478,13 +480,6 @@ class FdemDataPoint(EmDataPoint):
     #         self.predicted_data.posterior.update_with_line(x, self.predictedQuadrature())
 
 
-    def updateSensitivity(self, model):
-        """ Compute an updated sensitivity matrix based on the one already containined in the FdemDataPoint object  """
-        self.J = self.sensitivity(model)
-
-
-
-
     def forward(self, mod):
         """ Forward model the data from the given model """
         assert isinstance(mod, Model), TypeError("Invalid model class for forward modeling [1D]")
@@ -504,7 +499,7 @@ class FdemDataPoint(EmDataPoint):
         """ Forward model the data from a 1D layered earth model """
         assert isinf(mod.mesh.edges[-1]), ValueError('mod.edges must have last entry be infinity for forward modelling.')
         for i, s in enumerate(self.system):
-            tmp = fdem1dfwd(s, mod, self.z[0])
+            tmp = fdem1dfwd(s, mod, self.z.item())
             self._predicted_data[:self.nFrequencies[i]] = tmp.real
             self._predicted_data[self.nFrequencies[i]:] = tmp.imag
 
