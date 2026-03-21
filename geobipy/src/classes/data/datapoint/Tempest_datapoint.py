@@ -372,54 +372,13 @@ class Tempest_datapoint(TdemDataPoint):
     def plot(self, title='Tempest data', with_error_bars=True, **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         """
-        ax = kwargs.pop('ax', None)
-        ax = plt.gca() if ax is None else ax
+        kwargs['xscale'] = kwargs.get('xscale', 'log')
+        kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
-        markers = tuple(kwargs.pop('marker', ('o', 'x', 'v')))
-        kwargs['markersize'] = kwargs.pop('markersize', 3)
-        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
-        mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
-        assert len(c) == self.n_systems, ValueError("color must be a list of length {}".format(self.n_systems))
-        assert len(mfc) == self.n_systems, ValueError("markerfacecolor must be a list of length {}".format(self.n_systems))
-        kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
-        kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
-        kwargs['alpha'] = kwargs.pop('alpha', 0.8)
-        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
-        kwargs['linewidth'] = kwargs.pop('linewidth', 1)
+        return super().plot(title=title, with_error_bars=with_error_bars, **kwargs)
 
-        kwargs.pop('logX', None)
-        kwargs.pop('logY', None)
-        xscale = kwargs.get('xscale', 'log')
-        yscale = kwargs.get('yscale', 'linear')
-
-        marker = cycle(markers)
-
-        for j in range(self.n_systems):
-            system_times = self.off_time(j)
-
-            # kwargs['marker'] = markers[self._components[k]]
-            kwargs['marker'] = next(marker)
-
-            if (with_error_bars):
-                ax.errorbar(system_times, self.data, yerr=self.std,
-                                color=c[j],
-                                markerfacecolor=mfc[j],
-                                **kwargs)
-            else:
-                ax.plot(system_times, self.data,
-                            markerfacecolor=mfc[j],
-                            **kwargs)
-
-        ax.set_xscale(xscale)
-        ax.set_yscale(yscale)
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel(cf.getNameUnits(self.data))
-        ax.set_title(title)
-
-        if self.n_systems > 1:
-            ax.legend()
-
-        return ax
+        # if self.n_systems > 1:
+        #     ax.legend()
 
     def plot_posteriors(self, axes=None, **kwargs):
 
@@ -464,44 +423,10 @@ class Tempest_datapoint(TdemDataPoint):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
         kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
-        ax = kwargs.get('ax', None)
-        ax = plt.gca() if ax is None else ax
+        return super().plot_predicted(title, **kwargs)
 
-        labels = kwargs.pop('labels', True)
-
-        if (labels):
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel(cf.getNameUnits(self.predicted_data))
-            ax.set_title(title)
-
-        kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
-        kwargs['linewidth'] = kwargs.pop('linewidth', 1)
-        kwargs['alpha'] = kwargs.pop('alpha', 0.7)
-        xscale = kwargs.pop('xscale', 'log')
-        yscale = kwargs.pop('yscale', 'log')
-
-        kwargs.pop('logX', None)
-        kwargs.pop('logY', None)
-
-        for j in range(self.n_systems):
-            system_times = self.off_time(j)
-
-            if npall(self.data <= 0.0):
-                active = (self.predicted_data > 0.0)
-            else:
-                active = self.active
-
-            p = self.predicted_data[active]
-            p.plot(x=system_times[active], **kwargs)
-
-        ax.set_xscale(xscale)
-        ax.set_yscale(yscale)
 
     def plot_secondary_field(self, title='Secondary field', **kwargs):
-
-        # ax = kwargs.get('ax', None)
-        # ax = gca() if ax is None else sca(ax)
-        # cla()
 
         kwargs['marker'] = kwargs.pop('marker', 'v')
         kwargs['markersize'] = kwargs.pop('markersize', 7)

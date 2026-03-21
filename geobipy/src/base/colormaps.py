@@ -55,7 +55,7 @@ def white_to_colour(rgba, N=256):
 # Define our own colour maps in hex. Gets better range and nicer visuals.
 wellSeparated = [
 "#3F5D7D",'#881d67','#2e8bac','#ffcf4d','#1d3915',
-'#1a8bff','#00fcfd','#0f061f','#fa249d','#00198f','#c7fe1c']
+'#1a8bff','#00fcfd','#0f061f','#fa249d','#00198f',"#3efe1c"]
 
 make_colourmap(wellSeparated, 'wellseparated')
 

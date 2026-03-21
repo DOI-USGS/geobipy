@@ -272,6 +272,9 @@ def bar(values, edges, line=None, **kwargs):
     kwargs['linewidth'] = kwargs.get('linewidth', 0.5)
     kwargs['edgecolor'] = kwargs.get('edgecolor', 'k')
 
+    kwargs.pop('linecolor', None)
+
+
     ax = geobipy_kwargs.pop('ax', plt.gca())
 
     pretty(ax)
@@ -654,6 +657,9 @@ def _pcolormesh(X, Y, values, **kwargs):
     if geobipy_kwargs['grid']:
         kwargs['edgecolor'] = kwargs.pop('edgecolor', 'k')
         kwargs['linewidth'] = kwargs.pop('linewidth', 2)
+
+    kwargs.pop('linecolor', None)
+
 
     values = values.astype('float64')
 
@@ -1055,8 +1061,7 @@ def hlines(*args, **kwargs):
 
     kwargs['linestyles'] = kwargs.pop('linestyle', 'solid')
 
-    if 'linecolor' in kwargs:
-        kwargs['color'] = kwargs.pop('linecolor')
+    kwargs['color'] = kwargs.pop('linecolor', kwargs.get('color', wellSeparated[3]))
 
     return ax.hlines(*args, **kwargs)
 
@@ -1101,8 +1106,7 @@ def vlines(*args, **kwargs):
 
     ax = geobipy_kwargs['ax']
 
-    if 'linecolor' in kwargs:
-        kwargs['color'] = kwargs.pop('linecolor')
+    kwargs['color'] = kwargs.pop('linecolor', kwargs.get('color', wellSeparated[3]))
 
     return ax.vlines(*args, **kwargs)
 
@@ -1462,7 +1466,7 @@ def step(x, y, **kwargs):
     geobipy_kwargs, kwargs = filter_plotting_kwargs(kwargs)
     color_kwargs, kwargs = filter_color_kwargs(kwargs)
 
-    color_kwargs['color'] = color_kwargs.pop('color', wellSeparated[3])
+    kwargs['color'] = kwargs.pop('linecolor', kwargs.get('color', wellSeparated[3]))
 
     ax = geobipy_kwargs.pop('ax', None)
 
