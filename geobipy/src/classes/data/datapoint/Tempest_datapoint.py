@@ -74,9 +74,9 @@ class Tempest_datapoint(TdemDataPoint):
     """
     __slots__ = ('_additive_error_multiplier', '_reference_additive_error')
 
-    def __init__(self, *args, additive_error_multiplier=None, total_field=True, **kwargs):
+    def __init__(self, *args, additive_error_multiplier=None, amplitude_data=False, total_field=True, **kwargs):
 
-        super().__init__(*args, total_field=total_field, has_primary_field=True, **kwargs)
+        super().__init__(*args, amplitude_data=amplitude_data, total_field=total_field, **kwargs)
 
         self.reference_additive_error = None
         self.additive_error_multiplier = additive_error_multiplier
@@ -103,18 +103,22 @@ class Tempest_datapoint(TdemDataPoint):
     @property
     def additive_error(self):
         self._additive_error[...] = 0.0
-        for j in range(self.n_systems):
-            isys = self.system_indices[j]
-            for i in range(self.n_components):
-                ic = self._indices(i, j)
-                self._additive_error[isys] += self.reference_additive_error[ic]**2.0
-            self._additive_error[isys] = self.additive_error_multiplier[j] * np.sqrt(self._additive_error[isys])
+        if self.amplitude_data:
+            for j in range(self.n_systems):
+                isys = self.data_system_indices[j]
+                for i in range(self.n_components):
+                    ic = self._indices(i, j)
+                    self._additive_error[isys] += self.reference_additive_error[ic]**2.0
+                self._additive_error[isys] = self.additive_error_multiplier[j] * np.sqrt(self._additive_error[isys])
+        else:
+            for j in range(self.n_systems):
+                isys = self.system_indices[j]
+                self._additive_error[isys] = self.additive_error_multiplier[j] * np.sqrt(self.reference_additive_error[isys])
 
         return self._additive_error
 
     @additive_error.setter
     def additive_error(self, values):
-
         if values is None:
             values = self.n_data_channels
         else:
@@ -621,15 +625,18 @@ class Tempest_datapoint(TdemDataPoint):
 
         J = DataArray(tdem1dsen(self, model, ix, model_changed), 'Sensitivity', r'$\frac{V}{SAm^{3}}$')
 
-        self._sensitivity_matrix = DataArray(zeros((self.n_data_channels, model.nCells.item())))
-        dp = 1.0 / self.predicted_data
-        for i in range(self.n_components):
-            ic = self._component_indices(i, 0)
-            # Compute Sum(Pc + Sc) for c in x, y, z
-            # self._sensitivity_matrix += J[ic, :]
+        if self.amplitude_data:
+            self._sensitivity_matrix = DataArray(zeros((self.n_data_channels, model.nCells.item())))
+            dp = 1.0 / self.predicted_data
+            for i in range(self.n_components):
+                ic = self._component_indices(i, 0)
+                # Compute Sum(Pc + Sc) for c in x, y, z
+                # self._sensitivity_matrix += J[ic, :]
 
-            dc = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
-            self._sensitivity_matrix += dot(diag(dc * dp), J[ic, :])
+                dc = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
+                self._sensitivity_matrix += dot(diag(dc * dp), J[ic, :])
+        else:
+            self._sensitivity_matrix = J
 
         return self.sensitivity_matrix
 

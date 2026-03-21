@@ -72,14 +72,14 @@ class Data(Point):
     """
     __slots__ = ('_components', '_channel_names', '_channels', '_channels_per_system',
                  '_fiducial','_line_number', '_data', '_predicted_data',
-                 '_relative_error', '_additive_error', '_std', '_total_field',
+                 '_relative_error', '_additive_error', '_std', '_amplitude_data',
                  '_system',
                  '_data_filename', '_file', '_iC', '_iR', '_iT', '_iOffset', '_iData', '_iStd', '_iPrimary', '_units')
 
     def __init__(self, components=None, channels_per_system=0, x=None, y=None, z=None, elevation=None,
                  data=None, std=None, predicted_data=None,
                  fiducial=None, line_number=None, units=None, channel_names=None,
-                 total_field=False, **kwargs):
+                 amplitude_data=False, **kwargs):
         """ Initialize the Data class """
 
         # Number of Channels
@@ -89,7 +89,7 @@ class Data(Point):
 
         super().__init__(x, y, z, elevation)
 
-        self.total_field = total_field
+        self.amplitude_data = amplitude_data
 
         self._fiducial = DataArray(arange(self.n_points, dtype=float64), "Fiducial")
         self._line_number = DataArray(self.n_points, "Line number")
@@ -125,7 +125,7 @@ class Data(Point):
     @property
     def data_channels_per_system(self):
         out = self.channels_per_system
-        if not self.total_field:
+        if not self.amplitude_data:
             out *= self.n_components
         return out
 
@@ -475,18 +475,18 @@ class Data(Point):
 
     @property
     def system_offset(self):
-        if self.total_field:
+        if self.amplitude_data:
             return r_[0, cumsum(self.channels_per_system)]
         else:
             return r_[0, cumsum(self.n_components * self.channels_per_system)]
 
     @property
-    def total_field(self):
-        return self._total_field
+    def amplitude_data(self):
+        return self._amplitude_data
 
-    @total_field.setter
-    def total_field(self, value: bool):
-        self._total_field = value
+    @amplitude_data.setter
+    def amplitude_data(self, value: bool):
+        self._amplitude_data = value
 
     @property
     def units(self):
@@ -506,7 +506,7 @@ class Data(Point):
 
     def __deepcopy__(self, memo={}):
         out = super().__deepcopy__(memo)
-        out._total_field = deepcopy(self.total_field, memo)
+        out._amplitude_data = deepcopy(self.amplitude_data, memo)
         out._fiducial = deepcopy(self.fiducial, memo)
         out._line_number = deepcopy(self.line_number, memo)
         out._channel_names = deepcopy(self.channel_names, memo)

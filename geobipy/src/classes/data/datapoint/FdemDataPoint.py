@@ -57,7 +57,11 @@ class FdemDataPoint(EmDataPoint):
 
     """
 
-    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0, data=None, std=None, predicted_data=None, system=None, line_number=0.0, fiducial=0.0):
+    def __init__(self, x=0.0, y=0.0, z=0.0, elevation=0.0,
+                       data=None, std=None, predicted_data=None,
+                       system=None,
+                       line_number=0.0, fiducial=0.0,
+                       total_field=False, amplitude_data=False):
         """Define initializer. """
 
         # self._system = None

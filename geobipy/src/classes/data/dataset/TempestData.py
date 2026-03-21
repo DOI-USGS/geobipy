@@ -59,7 +59,7 @@ class TempestData(TdemData):
 
     def __init__(self, *args, **kwargs):
 
-        super().__init__(*args, total_field=True, has_primary_field=True, **kwargs)
+        super().__init__(*args, total_field=True, **kwargs)
 
         self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", "%")
         self._relative_error = DataArray((self.n_points, self.n_systems), "Relative error", "%")
@@ -641,10 +641,12 @@ class TempestData(TdemData):
                 y = y,
                 z = z,
                 elevation = float64(gdf['dtm'][record]),
-                transmitter = transmitter,
+                transmitter_loop = transmitter_loop,
                 receiver_loop = receiver_loop,
                 primary_field = primary_field,
                 secondary_field = secondary_field,
+                total_field = self.total_field,
+                amplitude_data = self.amplitude_data,
                 system = self.system)
 
         return out

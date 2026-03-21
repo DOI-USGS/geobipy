@@ -59,9 +59,9 @@ class TdemData(Data):
 
     single = TdemDataPoint
 
-    __slots__ = ('_loop_pair', '_primary_field', '_predicted_primary_field', '_secondary_field', '_predicted_secondary_field', '_has_primary_field')
+    __slots__ = ('_loop_pair', '_primary_field', '_predicted_primary_field', '_secondary_field', '_predicted_secondary_field', '_total_field')
 
-    def __init__(self, system=None, has_primary_field=False, **kwargs):
+    def __init__(self, system=None, total_field=False, **kwargs):
         """ Initialize the TDEM data """
 
         # if not systems is None:
@@ -75,7 +75,7 @@ class TdemData(Data):
         kwargs['units'] = r"$\frac{V}{m^{2}}$"
 
         self.loop_pair = Loop_pair(kwargs.get('transmitter'), kwargs.get('receiver'))
-        self.has_primary_field = has_primary_field
+        self.total_field = total_field
 
         # Data Class containing xyz and channel values
         super().__init__(**kwargs)
@@ -106,7 +106,7 @@ class TdemData(Data):
         out = super().__deepcopy__(memo)
         out.system = self._system
         out._loop_pair = deepcopy(self.loop_pair, memo)
-        out._has_primary_field = deepcopy(self._has_primary_field, memo)
+        out._total_field = deepcopy(self._total_field, memo)
         out._secondary_field = deepcopy(self.secondary_field, memo)
         out._primary_field = deepcopy(self.primary_field, memo)
 
@@ -134,16 +134,17 @@ class TdemData(Data):
         if size(self._data, 0) == 0 or (self._data.shape[0] != self.n_points):
             self._data = DataArray((self.n_points, self.n_data_channels), "Data", self.units)
 
-        if self.total_field:
+        if self.amplitude_data:
             self._data[...] = 0.0
             for j in range(self.n_systems):
                 isys = self.system_indices[j]
                 for i in range(self.n_components):
                     ic = self._indices(i, j)
                     # Compute Sum(Pc + Sc) for c in x, y, z
-                    tmp = self.secondary_field[:, ic]
-                    if self.has_primary_field:
-                        tmp += self.primary_field[:, i][:, None]
+                    if self.total_field:
+                        tmp = self.primary_field[:, i][:, None] + self.secondary_field[:, ic]
+                    else:
+                        tmp = self.secondary_field[:, ic]
                     self._data[:, isys] += tmp**2.0
             self._data[...] = sqrt(self._data)
         else:
@@ -151,17 +152,17 @@ class TdemData(Data):
                 for i in range(self.n_components):
                     ic = self._component_indices(i, j)
                     self._data[:, ic] = self.secondary_field[:, ic]
-                    if self.has_primary_field:
+                    if self.total_field:
                         self._data[:, ic] += self.primary_field[:, i][:, None]
         return self._data
 
     @property
-    def has_primary_field(self) -> bool:
-        return self._has_primary_field
+    def total_field(self) -> bool:
+        return self._total_field
 
-    @has_primary_field.setter
-    def has_primary_field(self, value: bool):
-        self._has_primary_field = value
+    @total_field.setter
+    def total_field(self, value: bool):
+        self._total_field = value
 
     @property
     def loop_pair(self):
@@ -203,7 +204,7 @@ class TdemData(Data):
         if size(self._predicted_data, 0) == 0 or (self._predicted_data.shape[0] != self.n_points):
             self._predicted_data = DataArray((self.n_points, self.n_data_channels), "Predicted Data", self.units)
 
-        if self.total_field:
+        if self.amplitude_data:
             self._predicted_data[...] = 0.0
             for i in range(self.n_components):
                 ic = self._component_indices(i, 0)
@@ -369,7 +370,7 @@ class TdemData(Data):
         tmp = self.loop_pair._as_dict()
         out = out | tmp
 
-        if self.has_primary_field:
+        if self.total_field:
             for i, c in enumerate(self.components):
                 out['P{}'.format(c.upper())] = self.primary_field[:, i]
 
@@ -780,7 +781,10 @@ class TdemData(Data):
                         primary_field=primary_field,
                         system=self.system,
                         transmitter=T, receiver=R,
-                        line_number=data[0], fiducial=data[1])
+                        line_number=data[0], fiducial=data[1],
+                        total_field = self.total_field,
+                        amplitude_data = self.amplitude_data
+                        )
         return out
 
     def check(self):

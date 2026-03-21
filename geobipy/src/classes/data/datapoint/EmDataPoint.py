@@ -30,16 +30,16 @@ class EmDataPoint(DataPoint):
     geobipy.src.classes.data.datapoint.TdemDataPoint
 
     """
-    __slots__ = ('_channels_per_system', '_system', '_has_primary_field')
+    __slots__ = ('_channels_per_system', '_system', '_total_field')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
                        components=None, channels_per_system=None,
                        data=None, std=None, predicted_data=None,
                        channel_names=None,
-                       line_number=0.0, fiducial=0.0, has_primary_field=False, **kwargs):
+                       line_number=0.0, fiducial=0.0, total_field=False, **kwargs):
 
         self.channels_per_system = channels_per_system
-        self.has_primary_field = has_primary_field
+        self.total_field = total_field
 
         super().__init__(x = x, y = y, z = z, elevation = elevation,
                          components=components,
@@ -51,7 +51,7 @@ class EmDataPoint(DataPoint):
         out = super().__deepcopy__(memo)
 
         out._channels_per_system = deepcopy(self.channels_per_system, memo)
-        out._has_primary_field = deepcopy(self._has_primary_field, memo)
+        out._total_field = deepcopy(self._total_field, memo)
         out.system = self._system
 
         return out
@@ -84,12 +84,12 @@ class EmDataPoint(DataPoint):
         self._channels_per_system = values
 
     @property
-    def has_primary_field(self) -> bool:
-        return self._has_primary_field
+    def total_field(self) -> bool:
+        return self._total_field
 
-    @has_primary_field.setter
-    def has_primary_field(self, value: bool):
-        self._has_primary_field = value
+    @total_field.setter
+    def total_field(self, value: bool):
+        self._total_field = value
 
     @property
     def n_channels(self):
@@ -97,8 +97,8 @@ class EmDataPoint(DataPoint):
 
     @property
     def data_channels_per_system(self):
-        out = self.channels_per_system
-        if not self.total_field:
+        out = self.channels_per_system.copy()
+        if not self.amplitude_data:
             out *= self.n_components
         return out
 
@@ -112,16 +112,17 @@ class EmDataPoint(DataPoint):
 
     @DataPoint.data.getter
     def data(self):
-        if self.total_field:
+        if self.amplitude_data:
             self._data[...] = 0.0
             for j in range(self.n_systems):
                 isys = self._indices(0, j)
                 for i in range(self.n_components):
                     ic = self._indices(i, j)
                     # Compute Sum(Pc + Sc) for c in x, y, z
-                    tmp = self.secondary_field[ic]
-                    if self.has_primary_field:
-                        tmp += self.primary_field[i]
+                    if self.total_field:
+                        tmp = self.primary_field[i] + self.secondary_field[ic]
+                    else:
+                        tmp = self.secondary_field[ic]
                     self._data[isys] += tmp**2.0
             self._data[...] = np.sqrt(self._data)
         else:
@@ -129,7 +130,7 @@ class EmDataPoint(DataPoint):
                 for i in range(self.n_components):
                     ic = self._indices(i, j)
                     self._data[ic] = self.secondary_field[ic]
-                    if self.has_primary_field:
+                    if self.total_field:
                         self._data[ic] += self.primary_field[i]
 
         return self._data
@@ -144,16 +145,17 @@ class EmDataPoint(DataPoint):
 
     @DataPoint.predicted_data.getter
     def predicted_data(self):
-        if self.total_field:
+        if self.amplitude_data:
             self._predicted_data[...] = 0.0
             for j in range(self.n_systems):
                 isys = self._indices(0, j)
                 for i in range(self.n_components):
                     ic = self._indices(i, j)
                     # Compute Sum(Pc + Sc) for c in x, y, z
-                    tmp = self.predicted_secondary_field[ic]
-                    if self.has_primary_field:
-                        tmp += self.predicted_primary_field[i]
+                    if self.total_field:
+                        tmp = self.predicted_primary_field[i] + self.predicted_secondary_field[ic]
+                    else:
+                        tmp = self.predicted_secondary_field[ic]
                     self._predicted_data[isys] += tmp**2.0
             self._predicted_data[...] = np.sqrt(self._predicted_data)
         else:
@@ -161,7 +163,7 @@ class EmDataPoint(DataPoint):
                 for i in range(self.n_components):
                     ic = self._indices(i, j)
                     self._predicted_data[ic] = self.predicted_secondary_field[ic]
-                    if self.has_primary_field:
+                    if self.total_field:
                         self._predicted_data[ic] += self.predicted_primary_field[i]
         return self._predicted_data
 
@@ -265,3 +267,19 @@ class EmDataPoint(DataPoint):
         plt.loglog(c, PhiD, **kwargs)
         plt.xlabel(c.getNameUnits())
         plt.ylabel('Data misfit')
+
+
+    def Isend(self, dest, world, **kwargs):
+
+        world.isend(self.total_field, dest=dest).wait()
+
+        super().Isend(dest, world)
+
+    @classmethod
+    def Irecv(cls, source, world, **kwargs):
+
+        kwargs['total_field'] = world.irecv(source=source).wait()
+
+        out = super(EmDataPoint, cls).Irecv(source, world, **kwargs)
+
+        return out

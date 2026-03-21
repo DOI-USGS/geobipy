@@ -91,7 +91,6 @@ class TdemDataPoint(EmDataPoint):
                  line_number=0.0, fiducial=0.0, **kwargs):
 
         self.system = system
-        self.total_field = False
 
         super().__init__(x=x, y=y, z=z, elevation=elevation,
                          components=self.components,
@@ -814,30 +813,48 @@ class TdemDataPoint(EmDataPoint):
 
         marker = cycle(markers)
 
-        for j in range(self.n_systems):
-            system_times = self.off_time(j)
-
-            for k in range(self.n_components):
-
-                # kwargs['marker'] = markers[self._components[k]]
+        if self.amplitude_data:
+            for j in range(self.n_systems):
+                system_times = self.off_time(j)
+                isys = self.data_system_indices[j]
+                options = dict(markerfacecolor = mfc[j],
+                               label = f'System: {j+1}')
                 kwargs['marker'] = next(marker)
 
-                icomp = self._component_indices(k, j)
-
-                d = self.data[icomp]
+                d = self.data[isys]
+                s = self.std[isys]
 
                 if (with_error_bars):
-                    s = self.std[icomp]
-                    ax.errorbar(system_times, d, yerr=s,
-                                 color=c[j],
-                                 markerfacecolor=mfc[j],
-                                 label='System: {}{}'.format(j+1, self.components[k]),
-                                 **kwargs)
+                    options['yerr'] = s
+                    options['color'] = c[j]
+                    ax.errorbar(system_times, d, **options, **kwargs)
                 else:
-                    ax.plot(system_times, d,
-                             markerfacecolor=mfc[j],
-                             label='System: {}{}'.format(j+1, self.components[k]),
-                             **kwargs)
+                    ax.plot(system_times, d, **options, **kwargs)
+
+        else:
+            for j in range(self.n_systems):
+                system_times = self.off_time(j)
+
+                options = dict(markerfacecolor = mfc[j])
+
+                for k in range(self.n_components):
+
+                    options['label'] = f'System: {j+1}{self.components[k]}'
+
+                    # kwargs['marker'] = markers[self._components[k]]
+                    kwargs['marker'] = next(marker)
+
+                    icomp = self._component_indices(k, j)
+
+                    d = self.data[icomp]
+                    s = self.std[icomp]
+
+                    if (with_error_bars):
+                        options['yerr'] = s
+                        options['color'] = c[j]
+                        ax.errorbar(system_times, d, **options, **kwargs)
+                    else:
+                        ax.plot(system_times, d, **options, **kwargs)
 
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)

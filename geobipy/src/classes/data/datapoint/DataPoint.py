@@ -63,22 +63,23 @@ class DataPoint(Point):
     __slots__ = ('_additive_error', '_components', '_channel_names',
                  '_data', '_fiducial', '_line_number',
                  '_predicted_data', '_relative_error',
-                 '_sensitivity_matrix', '_std', '_total_field', '_units')
+                 '_sensitivity_matrix', '_std', '_amplitude_data', '_units')
 
     def __init__(self, x=0.0, y=0.0, z=0.0, elevation=None,
                        components=None,
                        data=None, std=None, predicted_data=None,
                        units=None, channel_names=None,
                        line_number=0.0, fiducial=0.0,
-                       total_field=False, **kwargs):
+                       amplitude_data=False,
+                        **kwargs):
         """ Initialize the Data class """
 
         self.components = components
+        self.amplitude_data = amplitude_data
 
         super().__init__(x, y, z, elevation=elevation, **kwargs)
 
         self.units = units
-        self.total_field = total_field
 
         # StatArray of data
         self.data = data
@@ -323,12 +324,12 @@ class DataPoint(Point):
         self._std = DataArray(value, "Standard deviation", self.units)
 
     @property
-    def total_field(self):
-        return self._total_field
+    def amplitude_data(self):
+        return self._amplitude_data
 
-    @total_field.setter
-    def total_field(self, value: bool):
-        self._total_field = value
+    @amplitude_data.setter
+    def amplitude_data(self, value: bool):
+        self._amplitude_data = value
 
     @property
     def units(self):
@@ -348,7 +349,7 @@ class DataPoint(Point):
 
         out._components = deepcopy(self._components, memo)
 
-        out._total_field = deepcopy(self._total_field, memo)
+        out._amplitude_data = deepcopy(self._amplitude_data, memo)
         out._units = deepcopy(self.units, memo)
         out._data = deepcopy(self._data, memo)
         out._relative_error = deepcopy(self._relative_error, memo)
@@ -519,12 +520,18 @@ class DataPoint(Point):
         return np.r_[*out]
 
     @property
-    def system_indices(self):
-        return tuple([s_[self.system_offset[system]:self.system_offset[system+1]] for system in arange(self.n_systems)])
+    def data_system_indices(self):
+        if self.amplitude_data:
+            tmp = hstack([0, np.cumsum(self.channels_per_system)])
+        else:
+            tmp = hstack([0, np.cumsum(self.n_components * self.channels_per_system)])
+        return tuple([s_[tmp[system]:tmp[system+1]] for system in arange(self.n_systems)])
 
     @property
-    def system_offset(self):
-        return hstack([0, np.cumsum(self.n_components * self.channels_per_system)])
+    def system_indices(self):
+        tmp = hstack([0, np.cumsum(self.n_components * self.channels_per_system)])
+        return tuple([s_[tmp[system]:tmp[system+1]] for system in arange(self.n_systems)])
+
 
     def likelihood(self, log):
         """Compute the likelihood of the current predicted data given the observed data and assigned errors
@@ -890,6 +897,8 @@ class DataPoint(Point):
 
     def Isend(self, dest, world):
 
+        world.isend(self.amplitude_data, dest=dest).wait()
+
         super().Isend(dest, world)
 
         self.line_number.Isend(dest, world)
@@ -900,6 +909,8 @@ class DataPoint(Point):
 
     @classmethod
     def Irecv(cls, source, world, **kwargs):
+
+        kwargs['amplitude_data'] = world.irecv(source=source).wait()
 
         out = super(DataPoint, cls).Irecv(source, world, **kwargs)
 
