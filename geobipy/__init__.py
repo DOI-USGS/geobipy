@@ -156,7 +156,7 @@ def serial_geobipy(input_file, output_directory, **kwargs):
 
     options = user_parameters.read(input_file, **kwargs)
 
-    data = options['data_type']._initialize_sequential_reading(options['data_filename'], options['system_filename'])
+    data = options['data_type']._initialize_sequential_reading(**options)
     # data.close()
 
     prng = get_prng(seed=options.get('seed', None), jump=options.get('jump', None))
