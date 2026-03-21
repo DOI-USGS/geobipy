@@ -614,13 +614,13 @@ class DataPoint(Point):
 
         if self.relative_error.hasProposal:
             # Generate a new error
-            self.relative_error.perturb(imposePrior=True, log=True, i=self.active_system_indices)
+            self.relative_error.perturb(imposePrior=True, log=True)#, i=self.active_system_indices)
             # Update the mean of the proposed errors
             self.relative_error.proposal.mean = self.relative_error
 
         if self.additive_error.hasProposal:
             # Generate a new error
-            self.additive_error.perturb(imposePrior=True, log=True, i=self.active_system_indices)
+            self.additive_error.perturb(imposePrior=True, log=True)#, i=self.active_system_indices)
             # Update the mean of the proposed errors
             self.additive_error.proposal.mean = self.additive_error
 
