@@ -212,13 +212,6 @@ class TdemDataPoint(EmDataPoint):
     def receiver(self):
         return self.loop_pair.receiver
 
-    # @receiver.setter
-    # def receiver(self, value):
-    #     if not value is None:
-    #         assert isinstance(value, EmLoop), TypeError(
-    #             "receiver must be of type EmLoop")
-    #         self._receiver = value
-
     @property
     def secondary_field(self):
         return self._secondary_field
@@ -258,12 +251,6 @@ class TdemDataPoint(EmDataPoint):
     @property
     def transmitter(self):
         return self.loop_pair.transmitter
-
-    # @transmitter.setter
-    # def transmitter(self, value):
-    #     if not value is None:
-    #         assert isinstance(value, EmLoop), TypeError("transmitter must be of type EmLoop")
-    #         self._transmitter = value
 
     @property
     def n_times(self):
@@ -906,6 +893,9 @@ class TdemDataPoint(EmDataPoint):
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)
 
+        return ax
+
+
     def plotDataResidual(self, title='', **kwargs):
 
         ax = kwargs.get('ax', None)
@@ -924,6 +914,8 @@ class TdemDataPoint(EmDataPoint):
         ax.set_ylabel("|{}| ({})".format(dD.name, dD.units))
 
         ax.set_title(title)
+
+        return ax
 
     @property
     def probability(self):
