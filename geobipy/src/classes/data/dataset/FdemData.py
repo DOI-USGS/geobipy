@@ -162,7 +162,6 @@ class FdemData(Data):
     def system(self):
         return self._system
 
-
     @system.setter
     def system(self, values):
 
@@ -407,15 +406,17 @@ class FdemData(Data):
             index = self.fiducial.searchsorted(fiducial)
 
         return self.single(self.x[index],
-                             self.y[index],
-                             self.z[index],
-                             self.elevation[index],
-                             self.data[index, :],
-                             self.std[index, :],
-                             self.predicted_data[index, :],
-                             system=self.system,
-                             line_number=self.line_number[index],
-                             fiducial=self.fiducial[index])
+                           self.y[index],
+                           self.z[index],
+                           self.elevation[index],
+                           self.data[index, :],
+                           self.std[index, :],
+                           self.predicted_data[index, :],
+                           relative_error=self.relative_error[index, :],
+                           additive_error=self.additive_error[index, :],
+                           line_number=self.line_number[index],
+                           fiducial=self.fiducial[index],
+                           system=self.system)
 
 
     # def mapChannel(self, channel, *args, system=0, **kwargs):
