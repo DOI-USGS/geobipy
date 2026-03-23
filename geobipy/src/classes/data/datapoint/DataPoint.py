@@ -71,7 +71,9 @@ class DataPoint(Point):
                        units=None, channel_names=None,
                        line_number=0.0, fiducial=0.0,
                        amplitude_data=False,
-                        **kwargs):
+                       relative_error=None,
+                       additive_error=None,
+                       **kwargs):
         """ Initialize the Data class """
 
         self.components = components
@@ -83,19 +85,16 @@ class DataPoint(Point):
 
         # StatArray of data
         self.data = data
-
         self.std = std
-
         self.predicted_data = predicted_data
 
         self.line_number = line_number
-
         self.fiducial = fiducial
 
         self.channel_names = channel_names
 
-        self.relative_error = None
-        self.additive_error = None
+        self.relative_error = relative_error
+        self.additive_error = additive_error
 
         self._sensitivity_matrix = None
 
@@ -313,7 +312,7 @@ class DataPoint(Point):
 
         # Update the variance of the predicted data prior
         if self.predicted_data.hasPrior:
-            self.predicted_data.prior.variance[diag_indices(sum(self.active))] = variance[self.active]
+            self.predicted_data.prior.variance = variance[self.active]
 
         return self._std
 
