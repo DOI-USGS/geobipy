@@ -62,7 +62,7 @@ class FdemDataPoint(EmDataPoint):
                        data=None, std=None, predicted_data=None,
                        system=None,
                        line_number=0.0, fiducial=0.0,
-                       total_field=False, amplitude_data=False):
+                       **kwargs):
         """Define initializer. """
 
         # self._system = None
@@ -75,7 +75,7 @@ class FdemDataPoint(EmDataPoint):
                          components=self.components,
                          channels_per_system=2*self.nFrequencies,
                          data=data, std=std, predicted_data=predicted_data,
-                         line_number=line_number, fiducial=fiducial)
+                         line_number=line_number, fiducial=fiducial, **kwargs)
 
         self._data.name = 'Frequency domain data'
 
