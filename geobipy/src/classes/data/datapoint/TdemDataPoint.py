@@ -329,10 +329,10 @@ class TdemDataPoint(EmDataPoint):
             off_times = self.off_time(i)
             for j in range(self.n_components):
                 ic = self._component_indices(j, i)
-                relative_error = self.relative_error[(i*self.n_components)+j] * self.secondary_field[ic]
+                relative_error = self.relative_error[i] * self.secondary_field[ic]
                 additive_error = self.additive_error[i]
                 if additive_error > 0.0:
-                    additive_error = exp(log(self.additive_error[i]) - 0.5 * (log(off_times) - log(1e-3)))
+                    additive_error = exp(log(additive_error) - 0.5 * (log(off_times) - log(1e-3)))
                 variance = relative_error**2.0 + additive_error**2.0
                 self._std[ic] = sqrt(variance)
 

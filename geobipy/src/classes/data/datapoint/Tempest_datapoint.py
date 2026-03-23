@@ -113,7 +113,7 @@ class Tempest_datapoint(TdemDataPoint):
         else:
             for j in range(self.n_systems):
                 isys = self.system_indices[j]
-                self._additive_error[isys] = self.additive_error_multiplier[j] * np.sqrt(self.reference_additive_error[isys])
+                self._additive_error[isys] = self.additive_error_multiplier[j] * self.reference_additive_error[isys]
 
         return self._additive_error
 
@@ -160,30 +160,7 @@ class Tempest_datapoint(TdemDataPoint):
 
     @TdemDataPoint.std.getter
     def std(self):
-        """ Updates the data errors
 
-        Assumes a t^-0.5 behaviour e.g. logarithmic gate averaging
-        V0 is assumed to be ln(Error @ 1ms)
-
-        Parameters
-        ----------
-        relativeErr : list of scalars or list of array_like
-            A fraction percentage that is multiplied by the observed data. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
-        additiveErr : list of scalars or list of array_like
-            An absolute value of additive error. The list should have length equal to the number of systems. The entries in each item can be scalar or array_like.
-
-        Raises
-        ------
-        TypeError
-            If relativeErr or additiveErr is not a list
-        TypeError
-            If the length of relativeErr or additiveErr is not equal to the number of systems
-        TypeError
-            If any item in the relativeErr or additiveErr lists is not a scalar or array_like of length equal to the number of time channels
-        ValueError
-            If any relative or additive errors are <= 0.0
-        """
-        assert npall(self.relative_error > 0.0), ValueError('relative_error must be > 0.0')
         # For each system assign error levels using the user inputs
         relative_error = self.relative_error * self.data
         variance = relative_error**2.0 + self.additive_error**2.0

@@ -170,9 +170,19 @@ class EmDataPoint(DataPoint):
     @DataPoint.std.getter
     def std(self):
         assert np.min(self.relative_error) > 0.0, ValueError("relative_error must be > 0.0")
-        for i in range(self.n_systems):
-            j = self.system_indices[i]
-            self._std[j] = np.sqrt((self.relative_error[i] * self.data[j])**2 + (self.additive_error[i]**2))
+
+        if self.amplitude_data:
+            self._std[...] = 0.0
+            for j in range(self.n_systems):
+                isys = self.data_system_indices[i]
+                for i in range(self.n_components):
+                    ic = self._indices(i, j)
+                    self._std[isys] = ((self.relative_error[j] * self.data[ic])**2 + (self.additive_error[j]**2))
+            self._std[...] = np.sqrt(self._std)
+        else:
+            for i in range(self.n_systems):
+                isys = self.system_indices[i]
+                self._std[isys] = np.sqrt((self.relative_error[i] * self.data[isys])**2 + (self.additive_error[i]**2))
 
         return self._std
 
