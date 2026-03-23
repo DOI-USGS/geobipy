@@ -97,6 +97,11 @@ class FdemData(Data):
         self.powerline = kwargs.get('powerline', None)
         self.magnetic = kwargs.get('magnetic', None)
 
+    def __deepcopy__(self, memo={}):
+        out = super().__deepcopy__(memo)
+        out.system = self._system
+
+        return out
 
     @property
     def nFrequencies(self):
