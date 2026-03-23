@@ -392,8 +392,9 @@ class FdemDataPoint(EmDataPoint):
 
         inColor = kwargs.pop('incolor', cp.wellSeparated[0])
         quadColor = kwargs.pop('quadcolor', cp.wellSeparated[1])
-        im = kwargs.pop('inmarker', 'v')
-        qm = kwargs.pop('quadmarker', 'o')
+        im = kwargs.pop('inmarker', kwargs.get('marker', 'v'))
+        qm = kwargs.pop('quadmarker', kwargs.pop('marker', 'o'))
+
         kwargs['markersize'] = kwargs.pop('markersize', 7)
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)

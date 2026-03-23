@@ -777,19 +777,42 @@ class TdemDataPoint(EmDataPoint):
     def plot(self, title='Time Domain EM Data', with_error_bars=True, **kwargs):
         """ Plot the Inphase and Quadrature Data for an EM measurement
         """
+        kwargs['color'] = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
+        kwargs['marker'] = kwargs.pop('marker', ('o', 'x', 'v'))
+        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
+        kwargs['legend'] = kwargs.get('legend', self.n_systems > 1 or self.n_components > 1)
+
+        return self.__plot(title, with_error_bars=with_error_bars, **kwargs)
+
+    def plot_predicted(self, **kwargs):
+        kwargs['color'] = kwargs.pop('color', [cp.wellSeparated[3] for _ in range(self.n_systems)])
+        kwargs['marker'] = (None, None, None)
+        kwargs['linestyle'] = kwargs.pop('linestyle', '-')
+        kwargs['labels'] = kwargs.get('labels', False)
+        kwargs['legend'] = kwargs.get('legend', False)
+
+        return self.__plot(predicted=True, with_error_bars=False, **kwargs)
+
+    def __plot(self, title='Time Domain EM Data', predicted=False, with_error_bars=True, **kwargs):
+        """ Plot the Inphase and Quadrature Data for an EM measurement
+        """
         ax = kwargs.pop('ax', None)
         ax = plt.gca() if ax is None else ax
 
-        markers = tuple(kwargs.pop('marker', ('o', 'x', 'v')))
+        labels = kwargs.pop('labels', True)
+        legend = kwargs.pop('legend', True)
+
         kwargs['markersize'] = kwargs.pop('markersize', 3)
-        c = kwargs.pop('color', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
         mfc = kwargs.pop('markerfacecolor', [cp.wellSeparated[i+1] for i in range(self.n_systems)])
-        assert len(c) == self.n_systems, ValueError("color must be a list of length {}".format(self.n_systems))
-        assert len(mfc) == self.n_systems, ValueError("markerfacecolor must be a list of length {}".format(self.n_systems))
+
         kwargs['markeredgecolor'] = kwargs.pop('markeredgecolor', 'k')
         kwargs['markeredgewidth'] = kwargs.pop('markeredgewidth', 1.0)
         kwargs['alpha'] = kwargs.pop('alpha', 0.8)
-        kwargs['linestyle'] = kwargs.pop('linestyle', 'none')
+
+        linecolor = kwargs.pop('linecolor', kwargs.get('color', cp.wellSeparated[3]))
+        if isinstance(linecolor, str):
+            linecolor = [linecolor for _ in range(self.n_systems)]
+
         kwargs['linewidth'] = kwargs.pop('linewidth', 1)
 
         xscale = kwargs.pop('xscale', 'log')
@@ -798,103 +821,69 @@ class TdemDataPoint(EmDataPoint):
         kwargs.pop('logX', None)
         kwargs.pop('logY', None)
 
-        marker = cycle(markers)
+        markers = kwargs.pop('marker', None)
+        if not isinstance(markers, (list, tuple)):
+            markers = tuple(markers for i in range(self.n_components))
+
+        with_error_bars &= (not predicted)
 
         if self.amplitude_data:
             for j in range(self.n_systems):
                 system_times = self.off_time(j)
-                isys = self.data_system_indices[j]
-                options = dict(markerfacecolor = mfc[j],
-                               label = f'System: {j+1}')
-                kwargs['marker'] = next(marker)
+                isys = self.system_indices[j]
 
-                d = self.data[isys]
-                s = self.std[isys]
+                kwargs['marker'] = markers[j]
+
+                args = (system_times, self.predicted_data[isys] if predicted else self.data[isys])
+                options = kwargs | dict(color=linecolor[j],
+                                        markerfacecolor=mfc[j],
+                                        label=f'System: {j+1}')
 
                 if (with_error_bars):
-                    options['yerr'] = s
-                    options['color'] = c[j]
-                    ax.errorbar(system_times, d, **options, **kwargs)
+                    method = ax.errorbar
+                    s = self.std[isys]
+                    options = options | dict(yerr=s)
                 else:
-                    ax.plot(system_times, d, **options, **kwargs)
+                    method = ax.plot
+
+                method(*args, **options)
 
         else:
             for j in range(self.n_systems):
                 system_times = self.off_time(j)
 
-                options = dict(markerfacecolor = mfc[j])
-
                 for k in range(self.n_components):
+                    kwargs['marker'] = markers[k]
 
-                    options['label'] = f'System: {j+1}{self.components[k]}'
+                    ic = self._component_indices(k, j)
 
-                    # kwargs['marker'] = markers[self._components[k]]
-                    kwargs['marker'] = next(marker)
+                    args = (system_times, self.predicted_data[ic] if predicted else self.data[ic])
 
-                    icomp = self._component_indices(k, j)
-
-                    d = self.data[icomp]
-                    s = self.std[icomp]
+                    options = kwargs | dict(color=linecolor[j],
+                                            markerfacecolor=mfc[j],
+                                            label=f'System: {j+1}{self.components[k]}')
 
                     if (with_error_bars):
-                        options['yerr'] = s
-                        options['color'] = c[j]
-                        ax.errorbar(system_times, d, **options, **kwargs)
+                        method = ax.errorbar
+                        s = self.std[ic]
+                        options = options | dict(yerr=s)
                     else:
-                        ax.plot(system_times, d, **options, **kwargs)
+                        method = ax.plot
+
+                    method(*args, **options)
 
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel(cf.getNameUnits(self.data))
-        ax.set_title(title)
 
-        if self.n_systems > 1 or self.n_components > 1:
+        if labels:
+            ax.set_xlabel('Time (s)')
+            ax.set_ylabel((self.predicted_data if predicted else self.data).label)
+            ax.set_title(title)
+
+        if legend:
             ax.legend()
 
         return ax
-
-    def plot_predicted(self, title='Time Domain EM Data', **kwargs):
-
-        ax = kwargs.get('ax', None)
-        ax = plt.gca() if ax is None else ax
-
-        labels = kwargs.pop('labels', True)
-
-        if (labels):
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel(cf.getNameUnits(self.predicted_data))
-            ax.set_title(title)
-
-        kwargs['color'] = kwargs.pop('color', cp.wellSeparated[3])
-        kwargs['linewidth'] = kwargs.pop('linewidth', 1)
-        kwargs['alpha'] = kwargs.pop('alpha', 0.7)
-        xscale = kwargs.pop('xscale', 'log')
-        yscale = kwargs.pop('yscale', 'log')
-
-        kwargs.pop('logX', None)
-        kwargs.pop('logY', None)
-
-        for j in range(self.n_systems):
-            system_times = self.off_time(j)
-
-            for k in range(self.n_components):
-                iS = self._component_indices(k, j)
-
-                if npall(self.data <= 0.0):
-                    active = (self.predicted_data[iS] > 0.0)
-
-                else:
-                    active = self.active[iS]
-
-                p = self.predicted_data[iS][active]
-                p.plot(x=system_times[active], **kwargs)
-
-        ax.set_xscale(xscale)
-        ax.set_yscale(yscale)
-
-        return ax
-
 
     def plotDataResidual(self, title='', **kwargs):
 

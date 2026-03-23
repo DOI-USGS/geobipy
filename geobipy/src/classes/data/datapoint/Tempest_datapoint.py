@@ -377,9 +377,6 @@ class Tempest_datapoint(TdemDataPoint):
 
         return super().plot(title=title, with_error_bars=with_error_bars, **kwargs)
 
-        # if self.n_systems > 1:
-        #     ax.legend()
-
     def plot_posteriors(self, axes=None, **kwargs):
 
         if axes is None:
@@ -423,7 +420,7 @@ class Tempest_datapoint(TdemDataPoint):
         kwargs['xscale'] = kwargs.get('xscale', 'log')
         kwargs['yscale'] = kwargs.get('yscale', 'linear')
 
-        return super().plot_predicted(title, **kwargs)
+        return super().plot_predicted(title=title, **kwargs)
 
 
     def plot_secondary_field(self, title='Secondary field', **kwargs):
