@@ -138,25 +138,6 @@ class Tempest_datapoint(TdemDataPoint):
             assert size(values) == self.n_systems, ValueError(f'additive_error_multiplier must have size {self.n_systems} but has size {size(values)}')
             self._additive_error_multiplier = StatArray(values, 'Multiplier')
 
-    # @TdemDataPoint.predicted_data.setter
-    # def predicted_data(self, values):
-    #     if values is None:
-    #         values = self.n_data_channels
-    #     else:
-    #         assert size(values) == self.n_data_channels, ValueError(f"data must have size {self.n_data_channels} not {size(values)}")
-
-    #     self._predicted_data = DataArray(values, "Predicted total field", self.units)
-
-    # @TdemDataPoint.predicted_data.getter
-    # def predicted_data(self):
-    #     self._predicted_data[:] = 0.0
-    #     for i in range(self.n_components):
-    #         ic = self._component_indices(i, 0)
-    #         dic = s_[:]
-    #         self._predicted_data[dic] += (self.predicted_primary_field[i] + self.predicted_secondary_field[ic])**2.0
-    #     self._predicted_data[:] = sqrt(self._predicted_data)
-    #     return self._predicted_data
-
 
     @TdemDataPoint.std.getter
     def std(self):
