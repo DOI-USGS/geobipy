@@ -414,10 +414,10 @@ class FdemDataPoint(EmDataPoint):
             ax.errorbar(f, self.quadrature(system), yerr=self.quadratureStd(system),
                 marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
         else:
-            ax.plot(f, log10(self.inphase(system)),
+            ax.semilogx(f, self.inphase(system),
                 marker=im, color=inColor, markerfacecolor=inColor, label='In-Phase', **kwargs)
 
-            ax.plot(f, log10(self.quadrature(system)),
+            ax.semilogx(f, self.quadrature(system),
                 marker=qm, color=quadColor, markerfacecolor=quadColor, label='Quadrature', **kwargs)
 
         ax.set_xscale(xscale)
