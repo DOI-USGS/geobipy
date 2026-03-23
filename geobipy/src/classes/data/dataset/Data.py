@@ -647,6 +647,14 @@ class Data(Point):
         return np.r_[*out]
 
     @property
+    def data_system_indices(self):
+        if self.amplitude_data:
+            tmp = hstack([0, np.cumsum(self.channels_per_system)])
+        else:
+            tmp = hstack([0, np.cumsum(self.n_components * self.channels_per_system)])
+        return tuple([s_[tmp[system]:tmp[system+1]] for system in arange(self.n_systems)])
+
+    @property
     def system_indices(self):
         """The slice indices for the requested system.
 

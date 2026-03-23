@@ -79,12 +79,17 @@ class TempestData(TdemData):
             self._additive_error = DataArray((self.n_points, self.n_data_channels), "Additive error", self.units)
 
         self._additive_error[...] = 0.0
-        for j in range(self.n_systems):
-            isys = self.system_indices[j]
-            for i in range(self.n_components):
-                ic = self._indices(i, j)
-                self._additive_error[:, isys] += self.reference_additive_error[:, ic]**2.0
-            self._additive_error[isys] = self.additive_error_multiplier[j] * np.sqrt(self._additive_error[isys])
+        if self.amplitude_data:
+            for j in range(self.n_systems):
+                isys = self.data_system_indices[j]
+                for i in range(self.n_components):
+                    ic = self._indices(i, j)
+                    self._additive_error[:, isys] += self.reference_additive_error[:, ic]**2.0
+                self._additive_error[:, isys] = self.additive_error_multiplier[j] * np.sqrt(self._additive_error[:, isys])
+        else:
+            for j in range(self.n_systems):
+                isys = self.system_indices[j]
+                self._additive_error[:, isys] = self.additive_error_multiplier[j] * self.reference_additive_error[:, isys]
 
         return self._additive_error
 
@@ -144,7 +149,7 @@ class TempestData(TdemData):
         if self.relative_error.max() > 0.0:
             for i in range(self.n_systems):
                 j = self.system_indices[i]
-                self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2)[:, None])
+                self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, j]**2))
 
         return self._std
 
