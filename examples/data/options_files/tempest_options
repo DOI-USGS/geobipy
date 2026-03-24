@@ -193,7 +193,8 @@ factor = None
 gradient_standard_deviation = None
 # Initial scaling factor for proposal covariance
 step_length = None
-adaptive_regularization_parameter = True
+regularization_parameter = None
+adaptive_regularization_parameter = False
 # Scaling factor for data misfit
 multiplier = None
 # Clipping Ratio for interface contrasts
