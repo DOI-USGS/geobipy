@@ -108,8 +108,8 @@ class Tempest_datapoint(TdemDataPoint):
                 isys = self.data_system_indices[j]
                 for i in range(self.n_components):
                     ic = self._indices(i, j)
-                    self._additive_error[isys] += self.reference_additive_error[ic]**2.0
-                self._additive_error[isys] = self.additive_error_multiplier[j] * np.sqrt(self._additive_error[isys])
+                    self._additive_error[isys] += (self.additive_error_multiplier[j] * self.reference_additive_error[ic])**2.0
+                self._additive_error[isys] = np.sqrt(self._additive_error[isys])
         else:
             for j in range(self.n_systems):
                 isys = self.system_indices[j]
@@ -143,9 +143,11 @@ class Tempest_datapoint(TdemDataPoint):
     def std(self):
 
         # For each system assign error levels using the user inputs
-        relative_error = self.relative_error * self.data
-        variance = relative_error**2.0 + self.additive_error**2.0
-        self._std[:] = sqrt(variance)
+        for j in range(self.n_systems):
+            isys = self.data_system_indices[j]
+            relative_error = self.relative_error * self.data[isys]
+            variance = relative_error**2.0 + self.additive_error[isys]**2.0
+            self._std[:] = sqrt(variance)
 
         # Update the variance of the predicted data prior
         if self.predicted_data.hasPrior:

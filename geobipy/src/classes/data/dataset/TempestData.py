@@ -98,7 +98,7 @@ class TempestData(TdemData):
         if values is not None:
             values = atleast_2d(values)
 
-            shp = (self.n_points, self.n_data_channels)
+            shp = (self.n_points, self.n_channels)
             if not allclose(self._additive_error.shape, shp):
                 self._additive_error = DataArray(values, "Additive error", self.units)
                 return
@@ -146,10 +146,8 @@ class TempestData(TdemData):
         if (size(self._std, 0) == 0) or (self._std.shape[0] != self.n_points):
             self._std = DataArray((self.n_points, self.n_data_channels), "Standard deviation", self.units)
 
-        if self.relative_error.max() > 0.0:
-            for i in range(self.n_systems):
-                j = self.system_indices[i]
-                self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, j]**2))
+        # For each system assign error levels using the user inputs
+        self._std[...] = sqrt((self.relative_error * self.data)**2.0 + self.additive_error**2.0)
 
         return self._std
 
@@ -737,12 +735,12 @@ class TempestData(TdemData):
 
         # Add noise to various solvable parameters
 
-        # ds.z += np.random.uniform(low=-5.0, high=5.0, size=model.x.nCells)
-        # ds.receiver.x += np.random.normal(loc=0.0, scale=0.25**2.0, size=model.x.nCells)
-        # ds.receiver.z += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
-        # ds.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
-        # ds.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
-        # ds.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
+        # ds_noisy.z += np.random.uniform(low=-5.0, high=5.0, size=model.x.nCells)
+        # ds_noisy.receiver.x += np.random.normal(loc=0.0, scale=0.25**2.0, size=model.x.nCells)
+        # ds_noisy.receiver.z += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+        # ds_noisy.receiver.pitch += np.random.normal(loc = 0.0, scale = 0.25**2.0, size=model.x.nCells)
+        # ds_noisy.receiver.roll += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
+        # ds_noisy.receiver.yaw += np.random.normal(loc = 0.0, scale = 0.5**2.0, size=model.x.nCells)
 
         # ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.n_data_channels))
         ds_noisy.add_noise_to_secondary_field(prng, predicted=False)
@@ -757,7 +755,7 @@ class TempestData(TdemData):
         for j in range(self.n_systems):
             for i in range(self.n_components):
                 ic = self._indices(i, j)
-                std[:, ic] = sqrt((self.relative_error[:, j][:, None] * data[:, ic])**2 + (self.reference_additive_error[:, ic]**2))
+                std[:, ic] = sqrt((self.relative_error[:, j][:, None] * data[:, ic])**2 + (self.additive_error[:, ic]**2))
 
         data += prng.normal(scale=std, size=(self.n_points, self.n_channels))
 

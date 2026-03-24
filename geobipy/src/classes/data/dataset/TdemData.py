@@ -2,6 +2,7 @@
 """
 from copy import deepcopy
 
+import numpy as np
 from numpy import allclose, any, asarray, atleast_2d, cumsum, empty, float64, full
 from numpy import hstack, int32, int64, isnan, nan, nanmax, nanmean, nanmedian, nanmin, nanstd
 from numpy import ravel_multi_index, repeat, s_, shape, size, sqrt, squeeze, unique, vstack, zeros
@@ -311,17 +312,19 @@ class TdemData(Data):
 
             self._secondary_field[:, :] = values
 
-    # @Data.std.getter
-    # def std(self):
-    #     if (size(self._std, 0) == 0) or (self._std.shape[0] != self.n_points):
-    #         self._std = DataArray((self.n_points, self.n_data_channels), "Standard deviation", self.units)
+    @Data.std.getter
+    def std(self):
+        if (size(self._std, 0) == 0) or (self._std.shape[0] != self.n_points):
+            self._std = DataArray((self.n_points, self.n_data_channels), "Standard deviation", self.units)
 
-    #     if self.relative_error.max() > 0.0:
-    #         for i in range(self.n_systems):
-    #             j = self._system_indices(i)
-    #             self._std[:, j] = sqrt((self.relative_error[:, i][:, None] * self.data[:, j])**2 + (self.additive_error[:, i]**2.0)[:, None])
-
-    #     return self._std
+        # For each system assign error levels using the user inputs
+        for i in range(self.n_systems):
+            off_times = self.off_time(i)
+            isys = self.system_indices[i]
+            relative_error = (self.relative_error[:, i][:, None] * self.secondary_field[:, isys])
+            additive_error = np.exp(np.log(self.additive_error[:, i])[:, None] - np.repeat((0.5 * (np.log(off_times) - np.log(1e-3)))[None, :], self.n_points, axis=0))
+            self._std[:, isys] = sqrt(relative_error**2.0 + additive_error**2.0)
+        return self._std
 
     @property
     def system(self):
@@ -1299,6 +1302,19 @@ class TdemData(Data):
 
         ds_noisy = deepcopy(ds)
 
-        ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.n_channels))
+        # ds_noisy.secondary_field += prng.normal(scale=ds.std, size=(model.x.nCells, ds.n_channels))
+        ds_noisy.add_noise_to_secondary_field(prng=prng)
 
         return ds, ds_noisy
+
+    def add_noise_to_secondary_field(self, prng, predicted=False):
+
+        data = self.predicted_secondary_field if predicted else self.secondary_field
+        # std = DataArray((self.n_points, self.n_channels))
+
+        # for j in range(self.n_systems):
+        #     for i in range(self.n_components):
+        #         ic = self._indices(i, j)
+        #         std[:, ic] = sqrt((self.relative_error[:, j][:, None] * data[:, ic])**2 + (self.additive_error[:, j][:, None]**2))
+
+        data += prng.normal(scale=self.std, size=(self.n_points, self.n_channels))
