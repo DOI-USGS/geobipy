@@ -1310,11 +1310,4 @@ class TdemData(Data):
     def add_noise_to_secondary_field(self, prng, predicted=False):
 
         data = self.predicted_secondary_field if predicted else self.secondary_field
-        # std = DataArray((self.n_points, self.n_channels))
-
-        # for j in range(self.n_systems):
-        #     for i in range(self.n_components):
-        #         ic = self._indices(i, j)
-        #         std[:, ic] = sqrt((self.relative_error[:, j][:, None] * data[:, ic])**2 + (self.additive_error[:, j][:, None]**2))
-
         data += prng.normal(scale=self.std, size=(self.n_points, self.n_channels))
