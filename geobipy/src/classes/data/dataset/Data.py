@@ -414,18 +414,6 @@ class Data(Point):
 
             self._relative_error[:, :] = values
 
-    # @property
-    # def std(self):
-    #     shp = (self.n_points, self.n_data_channels)
-
-    #     if not allclose(self._std.shape, shp):
-    #         self._std = DataArray(shp, "Standard deviation", self.units)
-
-    #     relative_error = self.relative_error * self.data
-    #     self._std[:, :] = sqrt((relative_error**2.0) + (self.additive_error**2.0))
-
-    #     return self._std
-
     @property
     def std(self):
         if (size(self._std, 0) == 0) or (self._std.shape[0] != self.n_points):
@@ -443,7 +431,6 @@ class Data(Point):
     def std(self, values):
         if values is not None:
             values = atleast_2d(values)
-            # self.n_points, self.n_data_channels = size(values, 0), size(values, 1)
 
             shp = (self.n_points, self.n_data_channels)
             if not allclose(self._std.shape, shp):
