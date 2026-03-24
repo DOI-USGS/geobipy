@@ -104,7 +104,7 @@ if __name__ == '__main__':
     sys.path.append(os.getcwd())
 
     datas = ['tempest', 'skytem', 'resolve']
-    models = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
+    models = ['glacial', 'offshore_fresh_discharge', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
     tmp = np.unravel_index(index, (3, 6))
 
