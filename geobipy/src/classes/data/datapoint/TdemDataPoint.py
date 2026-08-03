@@ -923,14 +923,15 @@ class TdemDataPoint(EmDataPoint):
         if additive_error_prior is None:
             if kwargs.get('solve_additive_error', False):
 
-                assert ((np.all(self.additive_error > kwargs['minimum_additive_error'])) &
-                        (np.all(self.additive_error < kwargs['maximum_additive_error']))), ValueError(f"Current additive error {self.additive_error} is outside of the prior")
 
                 additive_error_prior = Distribution('Uniform',
-                                                    kwargs['minimum_additive_error'],
-                                                    kwargs['maximum_additive_error'],
+                                                    asarray(kwargs['minimum_additive_error'], dtype=float64),
+                                                    asarray(kwargs['maximum_additive_error'], dtype=float64),
                                                     log=True,
                                                     prng=kwargs.get('prng'))
+
+                assert ((np.all(self.additive_error > additive_error_prior.min)) &
+                        (np.all(self.additive_error < additive_error_prior.max))), ValueError(f"Current additive error {self.additive_error} is outside of the prior")
 
         if data_prior is None:
             data_prior = Distribution('MvNormal', self.data[self.active], self.std[self.active]**2.0, prng=kwargs.get('prng'))

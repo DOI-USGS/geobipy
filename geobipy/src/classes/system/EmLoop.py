@@ -167,7 +167,7 @@ class EmLoop(Point, ABC):
             self._orientation = StatArray.StatArray(self.n_points, "Orientation", "", dtype=int32)
 
         tmp = ('x', 'y', 'z')
-        return StatArray.StatArray([tmp[i] for i in self._orientation], "Orientation", "")
+        return StatArray.StatArray([tmp[i] for i in self._orientation], "Orientation", "", dtype=str)
 
     @orientation.setter
     def orientation(self, values):
@@ -265,24 +265,24 @@ class EmLoop(Point, ABC):
         if pitch_prior is None:
             if kwargs.get('solve_pitch', False):
                 pitch_prior = Distribution('Uniform',
-                                            self.pitch - kwargs['maximum_pitch_change'],
-                                            self.pitch + kwargs['maximum_pitch_change'],
+                                            self.pitch - np.asarray(kwargs['maximum_pitch_change'], dtype=float64),
+                                            self.pitch + np.asarray(kwargs['maximum_pitch_change'], dtype=float64),
                                             prng=kwargs.get('prng'))
         self.pitch.prior = pitch_prior
 
         if roll_prior is None:
             if kwargs.get('solve_roll', False):
                 roll_prior = Distribution('Uniform',
-                                            self.roll - kwargs['maximum_roll_change'],
-                                            self.roll + kwargs['maximum_roll_change'],
+                                            self.roll - np.asarray(kwargs['maximum_roll_change'], dtype=float64),
+                                            self.roll + np.asarray(kwargs['maximum_roll_change'], dtype=float64),
                                             prng=kwargs.get('prng'))
         self.roll.prior = roll_prior
 
         if yaw_prior is None:
             if kwargs.get('solve_yaw', False):
                 yaw_prior = Distribution('Uniform',
-                                            self.yaw - kwargs['maximum_yaw_change'],
-                                            self.yaw + kwargs['maximum_yaw_change'],
+                                            self.yaw - np.asarray(kwargs['maximum_yaw_change'], dtype= float64),
+                                            self.yaw + np.asarray(kwargs['maximum_yaw_change'], dtype= float64),
                                             prng=kwargs.get('prng'))
         self.yaw.prior = yaw_prior
 
@@ -292,19 +292,19 @@ class EmLoop(Point, ABC):
 
         if pitch_proposal is None:
             if kwargs.get('solve_pitch', False):
-                pitch_proposal = Distribution('Normal', self.pitch.item(), kwargs['pitch_proposal_variance'], prng=kwargs.get('prng'))
+                pitch_proposal = Distribution('Normal', self.pitch.item(), np.asarray(kwargs['pitch_proposal_variance'], dtype=np.float64), prng=kwargs.get('prng'))
 
         self.pitch.proposal = pitch_proposal
 
         if roll_proposal is None:
             if kwargs.get('solve_roll', False):
-                roll_proposal = Distribution('Normal', self.roll.item(), kwargs['roll_proposal_variance'], prng=kwargs.get('prng'))
+                roll_proposal = Distribution('Normal', self.roll.item(), np.asarray(kwargs['roll_proposal_variance'], dtype=float64), prng=kwargs.get('prng'))
 
         self.roll.proposal = roll_proposal
 
         if yaw_proposal is None:
             if kwargs.get('solve_yaw', False):
-                yaw_proposal = Distribution('Normal', self.yaw.item(), kwargs['yaw_proposal_variance'], prng=kwargs.get('prng'))
+                yaw_proposal = Distribution('Normal', self.yaw.item(), np.asarray(kwargs['yaw_proposal_variance'], dtype=float64), prng=kwargs.get('prng'))
 
         self.yaw.proposal = yaw_proposal
 

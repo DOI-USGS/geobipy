@@ -228,7 +228,7 @@ def read_item(h5obj, index=None, **kwargs):
         if 'CircularLoops' in s:
             s = s.replace('CircularLoops', 'CircularLoop')
 
-        item = eval(cf.safeEval(s))
+        item = cf.str_to_class(s)
         tmp = item.fromHdf(h5obj, index=index, **kwargs)
         return tmp
     try:

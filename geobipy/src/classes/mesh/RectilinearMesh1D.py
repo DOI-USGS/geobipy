@@ -1579,7 +1579,7 @@ class RectilinearMesh1D(Mesh):
         if prior is not None:
             self.edges.prior = prior
 
-    def set_proposals(self, probabilities, **kwargs):
+    def set_proposals(self, probabilities=np.r_[1.0/6.0, 1.0/6.0, 1.0/6.0, 0.5], **kwargs):
         """Setup the proposal distibution.
 
         Parameters

@@ -1135,41 +1135,62 @@ def _power(values, exponent=None):
         return power(exponent, values)
 
 
-def safeEval(string):
+def str_to_class(string):
 
-    # Backwards compatibility
-    # if ('NdArray' in string):
-    #     string = string.replace('NdArray', 'StatArray')
-    #     return string
-    # if ('StatArray' in string):
-        # string = string.replace('StatArray', 'StatArray.StatArray')
-        # return string
-    # if ('EmLoop' in string):
-    #     string = string.replace('EmLoop', 'CircularLoop')
-    #     return string
+    match string:
+        case 'DataArray':
+            from ..classes.core import DataArray
+            out = DataArray.DataArray
+        case 'StatArray':
+            from ..classes.statistics import StatArray
+            out = StatArray.StatArray
+        case 'Histogram':
+            from ..classes.statistics import Histogram
+            out = Histogram.Histogram
+        case 'Model':
+            from ..classes.model import Model
+            out = Model.Model
+        case 'TempestData':
+            from ..classes.data.dataset import TempestData
+            out = TempestData.TempestData
+        case 'TdemData':
+            from ..classes.data.dataset import TdemData
+            out = TdemData.TdemData
+        case 'FdemData':
+            from ..classes.data.dataset import FdemData
+            out = FdemData.FdemData
+        case 'TdemDataPoint':
+            from ..classes.data.datapoint import TdemDataPoint
+            out = TdemDataPoint.TdemDataPoint
+        case 'Tempest_datapoint':
+            from ..classes.data.datapoint import Tempest_datapoint
+            out = Tempest_datapoint.Tempest_datapoint
+        case 'FdemDataPoint':
+            from ..classes.data.datapoint import FdemDataPoint
+            out = FdemDataPoint.FdemDataPoint
+        case 'TdemSystem':
+            from ..classes.system import TdemSystem
+            out = TdemSystem.TdemSystem
+        case 'FdemSystem':
+            from ..classes.system import FdemSystem
+            out = FdemSystem.FdemSystem
+        case 'CircularLoop':
+            from ..classes.system import CircularLoop
+            out = CircularLoop.CircularLoop
+        case 'RectilinearMesh1D':
+            from ..classes.mesh import RectilinearMesh1D
+            out = RectilinearMesh1D.RectilinearMesh1D
+        case 'RectilinearMesh2D':
+            from ..classes.mesh import RectilinearMesh2D
+            out = RectilinearMesh2D.RectilinearMesh2D
+        case 'RectilinearMesh3D':
+            from ..classes.mesh import RectilinearMesh3D
+            out = RectilinearMesh3D.RectilinearMesh3D
+        case _:
+            raise  ValueError("Problem evaluating string "+string)
 
-    allowed = (
-    'DataArray',
-    'StatArray',
-    'Histogram',
-    'Model',
-    # 'Model1D',
-    'TempestData',
-    'TdemData',
-    'FdemData',
-    'TdemDataPoint',
-    'Tempest_datapoint',
-    'FdemDataPoint',
-    'TdemSystem',
-    'FdemSystem',
-    'CircularLoop',
-    'CircularLoops',
-    'RectilinearMesh')
+    return out
 
-    if (any(x in string for x in allowed)):
-        return string
-
-    raise  ValueError("Problem evaluating string "+string)
 
 def save_gmm(gmm, filename):
     with h5py.File(filename, 'w') as f:

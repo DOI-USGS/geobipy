@@ -4,27 +4,29 @@ This provides a bit more robust checking when the user is new to the codes, and 
 """
 from os.path import join
 from numpy import float64, asarray
+import yaml
 
-from ..classes.core.myObject import myObject
+# from ..classes.core.myObject import myObject
 from copy import deepcopy
-from ..classes.statistics import StatArray
-from ..classes.data.dataset.FdemData import FdemData
-from ..classes.data.dataset.TdemData import TdemData
-from ..classes.data.dataset.TempestData import TempestData
-from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
-from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
-from ..classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
+from ..base.utilities import str_to_class
+# from ..classes.statistics import StatArray
+# from ..classes.data.dataset.FdemData import FdemData
+# from ..classes.data.dataset.TdemData import TdemData
+# from ..classes.data.dataset.TempestData import TempestData
+# from ..classes.data.datapoint.FdemDataPoint import FdemDataPoint
+# from ..classes.data.datapoint.TdemDataPoint import TdemDataPoint
+# from ..classes.data.datapoint.Tempest_datapoint import Tempest_datapoint
 
 import numpy as np
 from pprint import pprint
 
 
-global_dict = {'FdemData': FdemData,
-               'TdemData': TdemData,
-               'TempestData':TempestData,
-               'FdemDataPoint':FdemDataPoint,
-               'TdemDataPoint':TdemDataPoint,
-               'TempestDataPoint':Tempest_datapoint}
+# global_dict = {'FdemData': FdemData,
+#                'TdemData': TdemData,
+#                'TempestData':TempestData,
+#                'FdemDataPoint':FdemDataPoint,
+#                'TdemDataPoint':TdemDataPoint,
+#                'TempestDataPoint':Tempest_datapoint}
 
 
 class user_parameters(dict):
@@ -82,9 +84,10 @@ class user_parameters(dict):
     def read(cls, filename, **kwargs):
         options = {}
         # Load user parameters
-        with open(filename, 'r') as f:
-            f = '\n'.join(f.readlines())
-            exec(f, global_dict, options)
+        with open(filename, 'r') as file:
+            options = yaml.safe_load(file)
+
+        options['data_type'] = str_to_class(options.get('data_type', None))
 
         for key, value in options.items():
             if isinstance(value, list):

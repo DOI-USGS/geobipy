@@ -4,7 +4,7 @@
 Module defining a categorical distribution with statistical procedures
 """
 #from copy import deepcopy
-from numpy import cumsum, empty, searchsorted, size, sum
+from numpy import asarray, cumsum, empty, float64, searchsorted, size, sum
 from .baseDistribution import baseDistribution
 from scipy.stats import norm
 from ...base import plotting as cP
@@ -27,7 +27,7 @@ class Categorical(baseDistribution):
         assert size(probabilities) == len(events), ValueError("Number of probabilities must equal number of events {}".format(len(events)))
 
         baseDistribution.__init__(self, prng)
-        self._probabilities = probabilities/sum(probabilities)
+        self.probabilities = probabilities
         self._probabilityMassFunction = cumsum(self._probabilities)
         self._events = events
 
@@ -35,6 +35,11 @@ class Categorical(baseDistribution):
     @property
     def probabilities(self):
         return self._probabilities
+
+    @probabilities.setter
+    def probabilities(self, values):
+        values = asarray(values, dtype=float64)
+        self._probabilities = values/sum(values)
 
     @property
     def events(self):

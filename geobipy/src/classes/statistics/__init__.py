@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import pickle
+import json
 from numpy.random import Generator, PCG64DXSM
 
 
@@ -24,15 +24,15 @@ def get_prng(generator=PCG64DXSM, seed=None, jump=None, world=None):
     if rank == 0:
         if seed is not None: # Seed is a file.
             if isinstance(seed, str):
-                with open(seed, 'rb') as f:
-                    seed = pickle.load(f)
+                with open(seed, "r") as f:
+                    seed = json.load(f)
             assert isinstance(seed, int), TypeError("Seed {} must have type python int (not numpy)".format(seed))
 
         else: # No seed, generate one
             bit_generator = generator()
             seed = bit_generator._seed_seq.entropy
-            with open('seed.pkl', 'wb') as f:
-                pickle.dump(seed, f)
+            with open("seed.json", "w") as f:
+                json.dump(seed, f)
             print('Seed: {}'.format(seed), flush=True)
 
     if world is not None:

@@ -1,5 +1,4 @@
 """ Module containing custom MPI functions """
-import pickle
 from os import getpid
 from time import time
 import sys

@@ -125,7 +125,8 @@ class DataArray(ndarray, myObject):
             shape = 0
 
         if isinstance(shape, list):
-            shape = asarray(shape)
+            kwargs['dtype'] = kwargs.get('dtype', float64)
+            shape = asarray(shape, **kwargs)
 
         # Copies a StatArray but can reassign the name and units
         if isinstance(shape, DataArray):

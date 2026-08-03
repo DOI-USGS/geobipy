@@ -52,7 +52,7 @@ class MvNormal(baseDistribution):
         super().__init__(prng)
 
         if ndim is None:
-            self._mean = atleast_1d(mean).copy()
+            self._mean = atleast_1d(mean).copy().astype(float64)
 
             self.variance = variance
 
@@ -127,7 +127,7 @@ class MvNormal(baseDistribution):
         if self.ndim > 1:
             if size(values) == 1:
                 values = full(self.ndim, fill_value =values)
-        self._variance = atleast_1d(values).copy()
+        self._variance = atleast_1d(values).copy().astype(float64)
 
     @property
     def precision(self):

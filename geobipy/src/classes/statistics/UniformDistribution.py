@@ -3,7 +3,7 @@ Module defining a uniform distribution with statistical procedures
 """
 from copy import deepcopy
 
-from numpy import asarray, empty, exp, linspace, prod, s_, size, squeeze, sum, hstack
+from numpy import asarray, empty, exp, float64, linspace, prod, s_, size, squeeze, sum, hstack
 from numpy import log as nplog
 from numpy import all as npall
 
