@@ -12,7 +12,7 @@ from numpy import s_, shape, size, vstack, zeros
 from pandas import read_csv
 from matplotlib.figure import Figure
 
-from geobipy.src.base import utilities
+from ....base import utilities
 from .TdemData import TdemData
 from ..datapoint.Tempest_datapoint import Tempest_datapoint
 from ...core.DataArray import DataArray
