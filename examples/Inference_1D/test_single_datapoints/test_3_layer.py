@@ -117,7 +117,7 @@ kwargs['solve_gradient'] = True
 kwargs['gradient_standard_deviation'] = None
 
 
-kwargs['covariance_scaling'] = None
+kwargs['step_length'] = None
 kwargs['multiplier'] = None
 
 

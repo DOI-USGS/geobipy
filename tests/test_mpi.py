@@ -239,7 +239,7 @@ fd1 = fd.Bcast(world)
 assert np.allclose(fd1.data, fdSave.data, equal_nan=True), Exception("Could not use FdemData.Bcast. Rank {}".format(rank))
 
 # Scatterv
-starts, chunks = myMPI.loadBalance1D_shrinkingArrays(fd1.nPoints, size)
+starts, chunks = myMPI.loadBalance1D_shrinkingArrays(fd1.n_points, size)
 i0 = starts[rank]
 i1 = i0 + chunks[rank]
 
@@ -295,7 +295,7 @@ td1 = td.Bcast(world)
 assert np.allclose(td1.data, tdSave.data, equal_nan=True), Exception("Could not use TdemData.Bcast. Rank {}".format(rank))
 
 # # Scatterv
-starts, chunks = myMPI.loadBalance1D_shrinkingArrays(tdSave.nPoints, size)
+starts, chunks = myMPI.loadBalance1D_shrinkingArrays(tdSave.n_points, size)
 i0 = starts[rank]
 i1 = i0 + chunks[rank]
 
@@ -350,7 +350,7 @@ td1 = td.Bcast(world)
 assert np.allclose(td1.data, tdSave.data, equal_nan=True), Exception("Could not use TempestData.Bcast. Rank {}".format(rank))
 
 # # Scatterv
-starts, chunks = myMPI.loadBalance1D_shrinkingArrays(tdSave.nPoints, size)
+starts, chunks = myMPI.loadBalance1D_shrinkingArrays(tdSave.n_points, size)
 i0 = starts[rank]
 i1 = i0 + chunks[rank]
 

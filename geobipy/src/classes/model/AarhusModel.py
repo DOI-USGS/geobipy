@@ -123,7 +123,7 @@ class AarhusModel(Model):
                     nLayers = np.int(f.readline().split('/')[-1])
                     nHeader += 1
 
-            nPoints = nLines - nHeader
+            n_points = nLines - nHeader
 
             header = line.split()[1:]
 
@@ -161,12 +161,12 @@ class AarhusModel(Model):
             rhoIndex = np.asarray(rhoIndex, dtype=np.int)
             topIndex = np.asarray(topIndex, dtype=np.int)
 
-            x = StatArray(nPoints, 'Easting', 'm')
-            y = StatArray(nPoints, 'Northing', 'm')
-            z = StatArray(nPoints, 'Elevation', 'm')
-            fid = StatArray(nPoints, 'Fiducial')
-            doi = StatArray(nPoints, 'Depth of investigation', 'm')
-            rho = np.zeros([nLayers, nPoints])
+            x = StatArray(n_points, 'Easting', 'm')
+            y = StatArray(n_points, 'Northing', 'm')
+            z = StatArray(n_points, 'Elevation', 'm')
+            fid = StatArray(n_points, 'Fiducial')
+            doi = StatArray(n_points, 'Depth of investigation', 'm')
+            rho = np.zeros([nLayers, n_points])
             depthEdges = StatArray(nLayers+1, 'Depth', 'm')
 
             # Skip the first data points that are not the line we need
@@ -177,21 +177,21 @@ class AarhusModel(Model):
 
             # Read in the data points for the requested line,
             # assumes the data points for the given line are contiguous.
-            nPoints = 0
+            n_points = 0
             first = True
             while line[lineIndex] == line_number:
                 if first:
                      depthEdges[:-1] = line[topIndex]
 
-                x[nPoints] = line[xIndex]
-                y[nPoints] = line[yIndex]
-                z[nPoints] = line[zIndex]
-                fid[nPoints] = line[fidIndex]
-                rho[:, nPoints] = line[rhoIndex]
-                doi[nPoints] = line[doiIndex]
+                x[n_points] = line[xIndex]
+                y[n_points] = line[yIndex]
+                z[n_points] = line[zIndex]
+                fid[n_points] = line[fidIndex]
+                rho[:, n_points] = line[rhoIndex]
+                doi[n_points] = line[doiIndex]
 
 
-                nPoints += 1
+                n_points += 1
                 first = False
                 line = fio.getRealNumbersfromLine(f.readline())
 
@@ -199,10 +199,10 @@ class AarhusModel(Model):
         depthEdges[-1] = 1.5 * depthEdges[-2]
 
 
-        self.mesh = TopoRectilinearMesh2D(x_centres=x[:nPoints], y_centres=y[:nPoints], z_edges=depthEdges, heightCentres=z[:nPoints])
-        self.fid = StatArray(fid[:nPoints], 'Fiducial')
-        self.rho = StatArray(rho[:, :nPoints], 'Resistivity', '$\Omega m$')
-        self.doi = StatArray(doi[:nPoints], 'Depth of investigation', 'm')
+        self.mesh = TopoRectilinearMesh2D(x_centres=x[:n_points], y_centres=y[:n_points], z_edges=depthEdges, heightCentres=z[:n_points])
+        self.fid = StatArray(fid[:n_points], 'Fiducial')
+        self.rho = StatArray(rho[:, :n_points], 'Resistivity', '$\Omega m$')
+        self.doi = StatArray(doi[:n_points], 'Depth of investigation', 'm')
 
 
 

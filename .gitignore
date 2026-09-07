@@ -19,3 +19,5 @@ build
 *.egg
 *.out
 _version.py
+examples/data/data
+.vscode

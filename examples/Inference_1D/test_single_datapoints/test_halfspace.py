@@ -118,7 +118,7 @@ kwargs['stochastic_newton'] = True
 kwargs['parameter_mean'] = None
 
 kwargs['factor'] = None
-kwargs['covariance_scaling'] = None
+kwargs['step_length'] = None
 kwargs['multiplier'] = None
 kwargs['clip_ratio'] = None
 kwargs['ignore_likelihood'] = False

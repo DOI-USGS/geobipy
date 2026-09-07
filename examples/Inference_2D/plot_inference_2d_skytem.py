@@ -141,7 +141,7 @@ def plot_2d_summary(folder, data_type, model_type):
 
 
 if __name__ == '__main__':
-   types = ['glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
+   types = ['offshore_fresh_discharge','glacial', 'saline_clay', 'resistive_dolomites', 'resistive_basement', 'coastal_salt_water', 'ice_over_salt_water']
 
    for model in types:
       # try:

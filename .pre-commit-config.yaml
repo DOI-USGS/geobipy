@@ -1,0 +1,23 @@
+# Run once to enable:  pre-commit install
+# Thereafter mypy runs on staged files at every `git commit` and blocks on
+# type errors. Config for mypy itself lives in pyproject.toml ([tool.mypy]).
+repos:
+  - repo: local
+    hooks:
+      - id: no-absolute-paths
+        name: Block absolute paths, leaked identities and credentials
+        description: >-
+          Reject /Users/<name>, /home/<name>/, and Windows <drive>:\Users\
+          paths that Sphinx bakes into generated docs, plus personal free-mail
+          addresses (gmail/yahoo/...), internal DOI hostnames (*.gs.doi.net,
+          igsk* build machines) and hard-coded credentials (quoted
+          password/token/api_key literals, credentials in URLs, PEM private
+          keys, AWS/GitHub keys). Official *.usgs.gov / doi.gov addresses and
+          placeholder or environment-sourced values pass.
+        entry: python scripts/hygiene.py
+        # `language: python` lets pre-commit provide the interpreter, so the
+        # `python` executable exists on every OS (macOS/Linux often lack a bare
+        # `python`; Windows lacks `python3`). No third-party deps are needed.
+        language: python
+        # Skip binary artifacts the scanner would ignore anyway.
+        exclude: '\.(zip|h5|hdf5|nc|nc4|netcdf|png|jpe?g|gif|pdf|tiff?|ico|woff2?|ttf|eot|las|laz|shp|shx|dbf|npy|npz|so|nbi|nbc)$'
